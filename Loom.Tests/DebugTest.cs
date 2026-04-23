@@ -1,6 +1,8 @@
 ﻿using Loom.Analyser;
+using Loom.Analyser.Symbols;
 using Loom.Common;
 using Loom.Parser;
+using Loom.Parser.AST;
 using Loom.Parser.Rules.Default;
 
 namespace Loom.Tests;
@@ -33,9 +35,11 @@ module Test2
         foreach (var error in context.Exceptions)
             throw error;
 
+
         ProgramNode? root = context.RootNode;
 
         Assert.NotNull(root);
+
         Assert.True(root.Imports.Count == 1);
         Assert.Equal("Test2", root.Imports.First().ModuleName);
 
@@ -43,5 +47,11 @@ module Test2
         Assert.Equal("Test", root.Modules.First().Name);
 
         Assert.True(root.Modules.First().Body.Contents.First() is UnsafeNode);
+
+        Dictionary<ASTNode, SymbolTable>? symbolMap = context.SymbolMap;
+
+        Assert.NotNull(symbolMap);
+
+        Assert.NotNull(symbolMap[root.Modules.First()].Resolve("Test"));
     }
 }

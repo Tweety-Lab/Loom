@@ -9,7 +9,7 @@ public class LoomAnalyser : ASTWalker
     /// <summary> Maps <see cref="ASTNode"/>s to their corresponding <see cref="SymbolTable"/>. </summary>
     public Dictionary<ASTNode, SymbolTable> SymbolTables { get; } = new();
 
-    private SymbolTable? current;
+    private SymbolTable current = null!;
 
     /// <summary> Runs the given <see cref="ProgramNode"/> through the Semantic Analyser. </summary>
     public void Analyse(ProgramNode root)
@@ -23,6 +23,14 @@ public class LoomAnalyser : ASTWalker
     /// <inheritdoc/>
     public override void Visit(ModuleNode node)
     {
+        SymbolTables[node] = current!;
+        current.Define(node.Name, new ModuleSymbol(node.Name));
+
+        var parent = current;
+        current = new SymbolTable(current);
+
         base.Visit(node);
+
+        current = parent;
     }
 }
