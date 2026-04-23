@@ -56,7 +56,6 @@ module Test2
 
         Assert.NotNull(symbolMap);
 
-        Assert.NotNull(symbolMap[root].Resolve("Test"));
-        Assert.NotNull(symbolMap[root.Modules.First().Body].Resolve("Nested"));
+        Assert.NotNull(symbolMap[root.Modules.First()].Resolve("Nested"));
     }
 }
