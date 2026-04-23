@@ -16,6 +16,7 @@ public class ImportRule : ParserRule<ImportNode>
         Parser.Reader.Expect(TokenType.Import); // import
         var moduleName = Parser.Reader.Expect(TokenType.Identifier).Value; // name
         Parser.Reader.Expect(TokenType.Semicolon); // ;
+
         return new ImportNode(moduleName);
     }
 }

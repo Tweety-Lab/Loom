@@ -9,11 +9,11 @@ public class IdentifierRule : ITokenizerRule
     public bool CanHandle(char current) => char.IsLetter(current) || current == '_';
 
     /// <inheritdoc />
-    public Token Read(StringReader reader)
+    public Token Read(LoomStringReader reader)
     {
         var sb = new StringBuilder();
 
-        while (reader.Peek() != -1 && (char.IsLetterOrDigit((char)reader.Peek()) || (char)reader.Peek() == '_'))
+        while (reader.Peek() != -1 && (char.IsLetterOrDigit(reader.PeekChar()) || reader.PeekChar() == '_'))
             sb.Append((char)reader.Read());
 
         var value = sb.ToString();

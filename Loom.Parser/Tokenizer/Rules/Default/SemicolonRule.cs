@@ -7,7 +7,7 @@ public class SemicolonRule : ITokenizerRule
     public bool CanHandle(char current) => current == ';';
 
     /// <inheritdoc />
-    public Token Read(StringReader reader)
+    public Token Read(LoomStringReader reader)
     {
         reader.Read();
         return new Token(Token.TokenType.Semicolon, ";");

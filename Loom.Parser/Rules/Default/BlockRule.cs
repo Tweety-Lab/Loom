@@ -27,6 +27,7 @@ public class BlockRule : ParserRule<BlockNode>
         }
 
         Parser.Reader.Expect(TokenType.RBrace); // }
+
         return new BlockNode(body);
     }
 }

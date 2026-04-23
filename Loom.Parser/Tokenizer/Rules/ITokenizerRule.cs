@@ -7,5 +7,5 @@ public interface ITokenizerRule
     bool CanHandle(char current);
 
     /// <summary> Reads the token from the tokenizer. </summary>
-    Token Read(StringReader reader);
+    Token Read(LoomStringReader reader);
 }

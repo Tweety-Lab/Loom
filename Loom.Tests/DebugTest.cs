@@ -11,6 +11,7 @@ import Test2;
 
 module Test
 {
+    // Test
     unsafe
     {
 
