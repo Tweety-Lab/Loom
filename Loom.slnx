@@ -1,5 +1,5 @@
 <Solution>
-  <Project Path="Loom.Analyser/Loom.Analyser.csproj" Id="68bd67b2-4319-4aa5-9caa-07cc9737ab1f" />
+  <Project Path="Loom.Analyzer/Loom.Analyzer.csproj" Id="68bd67b2-4319-4aa5-9caa-07cc9737ab1f" />
   <Project Path="Loom.Common/Loom.Common.csproj" />
   <Project Path="Loom.Parser/Loom.Parser.csproj" />
   <Project Path="Loom.Tests/Loom.Tests.csproj" />

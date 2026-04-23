@@ -1,17 +1,17 @@
-﻿using Loom.Analyser.Symbols;
+﻿using Loom.Analyzer.Symbols;
 using Loom.Parser.AST;
 using Loom.Parser.Rules.Default;
 
-namespace Loom.Analyser;
+namespace Loom.Analyzer;
 
-public class LoomAnalyser : ASTWalker
+public class LoomAnalyzer : ASTWalker
 {
     /// <summary> Maps <see cref="ASTNode"/>s to their corresponding <see cref="SymbolTable"/>. </summary>
     public Dictionary<ASTNode, SymbolTable> SymbolTables { get; } = new();
 
     private SymbolTable current = null!;
 
-    /// <summary> Runs the given <see cref="ProgramNode"/> through the Semantic Analyser. </summary>
+    /// <summary> Runs the given <see cref="ProgramNode"/> through the Semantic Analyzer. </summary>
     public void Analyse(ProgramNode root)
     {
         var rootTable = new SymbolTable();

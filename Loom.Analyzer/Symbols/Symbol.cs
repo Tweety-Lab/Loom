@@ -1,4 +1,4 @@
 ﻿
-namespace Loom.Analyser.Symbols;
+namespace Loom.Analyzer.Symbols;
 
 public abstract record Symbol(string Name);

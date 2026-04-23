@@ -1,4 +1,4 @@
-﻿namespace Loom.Analyser.Symbols;
+﻿namespace Loom.Analyzer.Symbols;
 
 public class SymbolTable
 {

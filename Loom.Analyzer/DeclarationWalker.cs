@@ -1,8 +1,8 @@
-﻿using Loom.Analyser.Symbols;
+﻿using Loom.Analyzer.Symbols;
 using Loom.Parser.AST;
 using Loom.Parser.Rules.Default;
 
-namespace Loom.Analyser;
+namespace Loom.Analyzer;
 
 internal class DeclarationWalker : ASTWalker
 {

@@ -1,5 +1,5 @@
-﻿using Loom.Analyser;
-using Loom.Analyser.Symbols;
+﻿using Loom.Analyzer;
+using Loom.Analyzer.Symbols;
 using Loom.Common;
 using Loom.Parser;
 using Loom.Parser.AST;
