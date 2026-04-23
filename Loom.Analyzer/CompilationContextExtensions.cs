@@ -19,7 +19,7 @@ public static class CompilationContextExtensions
         public Dictionary<ASTNode, SymbolTable>? SymbolMap => ctx.ExtendedProperties.TryGetValue(SYMBOL_DICT_KEY, out object? obj) ? (Dictionary<ASTNode, SymbolTable>)obj : null;
 
         /// <summary> Runs the <see cref="CompilationContext"/> through the Semantic Analyzer. </summary>
-        public CompilationContext Analyse()
+        public CompilationContext Analyze()
         {
             AnalysisContext Analyzer = new();
             Analyzer.Analyse(ctx.RootNode ?? throw new InvalidOperationException("CompilationContext.RootNode is null, has parsing been run?"));

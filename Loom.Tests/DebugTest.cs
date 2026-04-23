@@ -36,7 +36,7 @@ module Test2
     public void SweepTest()
     {
         CompilationContext context = new CompilationContext();
-        context.Parse(TEST_SOURCE).Analyse();
+        context.Parse(TEST_SOURCE).Analyze();
 
         foreach (var error in context.Exceptions)
             throw error;
