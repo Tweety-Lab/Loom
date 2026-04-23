@@ -13,7 +13,7 @@ module Test
 {
     unsafe
     {
-
+        
     }
 }
 
@@ -32,9 +32,9 @@ module Test2
 
         Assert.NotNull(root);
         Assert.True(root.Modules.Count == 2);
-        Assert.Equal(root.Modules.First().Name, "Test");
+        Assert.Equal("Test", root.Modules.First().Name);
 
-        Assert.Equal(root.Imports.First().ModuleName, "Test2");
+        Assert.Equal("Test2", root.Imports.First().ModuleName);
         Assert.NotNull(root.Modules.First().Body.Contents.Find(x => x is UnsafeNode));
     }
 }
