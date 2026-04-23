@@ -19,6 +19,11 @@ module Test
     {
 
     }
+
+    module Nested
+    {
+
+    }
 }
 
 module Test2
@@ -27,14 +32,13 @@ module Test2
 ";
 
     [Fact]
-    public void Test1()
+    public void SweepTest()
     {
         CompilationContext context = new CompilationContext();
         context.Parse(TEST_SOURCE).Analyse();
 
         foreach (var error in context.Exceptions)
             throw error;
-
 
         ProgramNode? root = context.RootNode;
 
@@ -52,6 +56,7 @@ module Test2
 
         Assert.NotNull(symbolMap);
 
-        Assert.NotNull(symbolMap[root.Modules.First()].Resolve("Test"));
+        Assert.NotNull(symbolMap[root].Resolve("Test"));
+        Assert.NotNull(symbolMap[root.Modules.First().Body].Resolve("Nested"));
     }
 }

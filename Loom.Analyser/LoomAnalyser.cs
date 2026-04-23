@@ -23,11 +23,18 @@ public class LoomAnalyser : ASTWalker
     /// <inheritdoc/>
     public override void Visit(ModuleNode node)
     {
-        SymbolTables[node] = current!;
+        SymbolTables[node] = current;
         current.Define(node.Name, new ModuleSymbol(node.Name));
 
+        base.Visit(node);
+    }
+
+    /// <inheritdoc/>
+    public override void Visit(BlockNode node)
+    {
         var parent = current;
         current = new SymbolTable(current);
+        SymbolTables[node] = current;
 
         base.Visit(node);
 
