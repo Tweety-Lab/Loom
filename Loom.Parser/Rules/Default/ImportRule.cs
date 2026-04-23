@@ -4,7 +4,15 @@ using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.Rules.Default;
 
-public record ImportNode(string ModuleName) : ASTNode;
+public record ImportNode(string ModuleName) : ASTNode
+{
+    /// <inheritdoc/>
+    public override void Accept(ASTVisitor visitor) => visitor.Visit(this);
+
+
+    /// <inheritdoc/>
+    public override IEnumerable<ASTNode> Children => Enumerable.Empty<ASTNode>();
+}
 
 [ParserRule]
 public class ImportRule : ParserRule<ImportNode>
