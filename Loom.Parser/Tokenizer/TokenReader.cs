@@ -1,9 +1,8 @@
 ﻿using Loom.Common.Exceptions;
-using Loom.Parser.Tokenizer;
 
 using static Loom.Parser.Tokenizer.Token;
 
-namespace Loom.Parser;
+namespace Loom.Parser.Tokenizer;
 
 public class TokenReader
 {

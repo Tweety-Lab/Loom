@@ -1,0 +1,21 @@
+﻿using Loom.Parser.AST;
+
+using static Loom.Parser.Tokenizer.Token;
+
+namespace Loom.Parser.Rules.Default;
+
+[ParserRule]
+public class ModuleRule : ParserRule<ModuleNode>
+{
+    /// <inheritdoc/>
+    public ModuleRule(LoomParser parser) : base(parser) { }
+    
+    /// <inheritdoc/>
+    public override ModuleNode Parse()
+    {
+        Parser.Reader.Expect(TokenType.Module); // module
+        string name = Parser.Reader.Expect(TokenType.Identifier).Value; // name
+
+        return new ModuleNode(name, Parser.GetRule<BlockRule>().Parse());
+    }
+}

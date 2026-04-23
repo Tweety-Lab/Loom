@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace Loom.Parser.Tokenizer.Rules;
+namespace Loom.Parser.Tokenizer.Rules.Default;
 
 [TokenizerRule]
 public class IdentifierRule : ITokenizerRule

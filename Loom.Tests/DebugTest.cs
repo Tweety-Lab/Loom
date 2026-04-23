@@ -13,7 +13,7 @@ module Test
 {
     unsafe
     {
-        
+
     }
 }
 
@@ -28,13 +28,18 @@ module Test2
         CompilationContext context = new CompilationContext();
         context.Parse(TEST_SOURCE);
 
+        foreach (var error in context.Exceptions)
+            throw error;
+
         ProgramNode? root = context.RootNode;
 
         Assert.NotNull(root);
+        Assert.True(root.Imports.Count == 1);
+        Assert.Equal("Test2", root.Imports.First().ModuleName);
+
         Assert.True(root.Modules.Count == 2);
         Assert.Equal("Test", root.Modules.First().Name);
 
-        Assert.Equal("Test2", root.Imports.First().ModuleName);
-        Assert.NotNull(root.Modules.First().Body.Contents.Find(x => x is UnsafeNode));
+        Assert.True(root.Modules.First().Body.Contents.First() is UnsafeNode);
     }
 }
