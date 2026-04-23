@@ -21,7 +21,7 @@ public static class CompilationContextExtensions
         /// <summary> Runs the <see cref="CompilationContext"/> through the Semantic Analyzer. </summary>
         public CompilationContext Analyse()
         {
-            LoomAnalyzer Analyzer = new();
+            AnalysisContext Analyzer = new();
             Analyzer.Analyse(ctx.RootNode ?? throw new InvalidOperationException("CompilationContext.RootNode is null, has parsing been run?"));
 
             ctx.ExtendedProperties[SYMBOL_DICT_KEY] = Analyzer.SymbolTables;
