@@ -1,4 +1,5 @@
-﻿using Loom.Common;
+﻿using Loom.Analyser;
+using Loom.Common;
 using Loom.Parser;
 using Loom.Parser.Rules.Default;
 
@@ -11,7 +12,7 @@ import Test2;
 
 module Test
 {
-    // Test
+    // Yapyapyapyap
     unsafe
     {
 
@@ -27,7 +28,7 @@ module Test2
     public void Test1()
     {
         CompilationContext context = new CompilationContext();
-        context.Parse(TEST_SOURCE);
+        context.Parse(TEST_SOURCE).Analyse();
 
         foreach (var error in context.Exceptions)
             throw error;
