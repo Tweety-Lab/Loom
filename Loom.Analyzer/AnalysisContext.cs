@@ -2,13 +2,12 @@
 using Loom.Analyzer.Symbols;
 using Loom.Common.Reflection;
 using Loom.Parser.AST;
-using Loom.Parser.Rules;
 using Loom.Parser.Rules.Default;
 using System.Reflection;
 
 namespace Loom.Analyzer;
 
-public class AnalysisContext : ASTWalker
+public class AnalysisContext
 {
     /// <summary> Maps <see cref="ASTNode"/>s to their corresponding <see cref="SymbolTable"/>. </summary>
     public Dictionary<ASTNode, SymbolTable> SymbolTables { get; } = new();
@@ -27,8 +26,6 @@ public class AnalysisContext : ASTWalker
         }
     }
 
-    private SymbolTable current = null!;
-
     /// <summary> Runs the given <see cref="ProgramNode"/> through the Semantic Analyzer. </summary>
     public void Analyse(ProgramNode root)
     {
@@ -38,24 +35,14 @@ public class AnalysisContext : ASTWalker
         var declWalker = new DeclarationWalker(SymbolTables, rootTable);
         declWalker.Visit(root);
 
-        current = rootTable;
-        root.Accept(this);
+        var semWalker = new SemanticWalker(SymbolTables);
+        semWalker.SetRootTable(rootTable);
+        semWalker.Visit(root);
 
         foreach (var analyzer in Analyzers)
         {
             analyzer.Context = this;
             root.Accept(analyzer);
         }
-    }
-
-    /// <inheritdoc/>
-    public override void Visit(ModuleNode node)
-    {
-        var parentTable = current;
-        current = SymbolTables[node];
-
-        WalkChildren(node);
-
-        current = parentTable;
     }
 }

@@ -11,6 +11,7 @@ public class DebugTest
 {
     public const string TEST_SOURCE = @"
 import Test2;
+import gabagoop;
 
 module Test
 {

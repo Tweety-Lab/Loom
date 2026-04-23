@@ -1,4 +1,5 @@
-﻿using Loom.Parser.AST;
+﻿using Loom.Common.Exceptions;
+using Loom.Parser.AST;
 
 namespace Loom.Analyzer.Analyzers;
 
@@ -11,8 +12,8 @@ public abstract class Analyzer : ASTWalker
     public AnalysisContext Context { get; set; } = null!;
 
     /// <summary> Throws an exception with the given message. </summary>
-    protected void ReportException(string message) => throw new Exception(message);
+    protected void ReportException(string message) => throw new LoomException(message);
 
     /// <summary> Throws an exception with the given message. </summary>
-    protected void ReportWarning(string message) => throw new Exception($"Warning: {message}");
+    protected void ReportWarning(string message) => throw new LoomException($"Warning: {message}");
 }
