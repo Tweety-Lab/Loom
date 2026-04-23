@@ -21,13 +21,7 @@ public class LoomTokenizer
             if (field != null)
                 return field;
 
-            field = new List<ITokenizerRule>();
-            List<Type> types = LoomReflection.GetTypesWithAttribute<TokenizerRuleAttribute>(Assembly.GetExecutingAssembly()).ToList();
-            foreach (var type in types)
-            {
-                var rule = (ITokenizerRule)Activator.CreateInstance(type)!;
-                field.Add(rule);
-            }
+            field = LoomReflection.InstansiateAllWithAttribute<TokenizerRuleAttribute>(Assembly.GetExecutingAssembly()).Cast<ITokenizerRule>().ToList();
 
             return field;
         }

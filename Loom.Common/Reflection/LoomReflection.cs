@@ -10,4 +10,7 @@ public static class LoomReflection
 {
     /// <summary> Gets all types with the given attribute. </summary>
     public static IEnumerable<Type> GetTypesWithAttribute<T>(Assembly assembly) => assembly.GetTypes().Where(t => t.IsDefined(typeof(T), true));
+
+    /// <summary> Gets all instances of types with the given attribute. </summary>
+    public static IEnumerable<object> InstansiateAllWithAttribute<T>(Assembly assembly) => GetTypesWithAttribute<T>(assembly).Select(t => Activator.CreateInstance(t)).Select(t => t!);
 }
