@@ -1,9 +1,10 @@
-﻿using Loom.Common.Exceptions;
-using Loom.Parser.AST;
+﻿using Loom.Parser.AST;
 
 using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.Rules.Default;
+
+public record ProgramNode(List<ImportNode> Imports, List<ModuleNode> Modules) : ASTNode;
 
 public class ProgramRule : ParserRule<ProgramNode>
 {

@@ -4,6 +4,8 @@ using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.Rules.Default;
 
+public record ModuleNode(string Name, BlockNode Body) : ASTNode;
+
 [ParserRule]
 public class ModuleRule : ParserRule<ModuleNode>
 {
