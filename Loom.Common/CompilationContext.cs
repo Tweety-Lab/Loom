@@ -8,11 +8,11 @@ namespace Loom.Common;
 /// </summary>
 public class CompilationContext
 {
-    /// <summary> All <see cref="LoomException"/>s that have occured during the compilation. </summary>
-    public IReadOnlyList<LoomException> Exceptions => exceptions;
-
     /// <summary> Properties set by extensinos of <see cref="CompilationContext"/>. </summary>
     public Dictionary<string, object> ExtendedProperties { get; set; } = new();
+
+    /// <summary> All <see cref="LoomException"/>s that have occured during the compilation. </summary>
+    public IReadOnlyList<LoomException> Exceptions => exceptions;
 
     private List<LoomException> exceptions = new();
 

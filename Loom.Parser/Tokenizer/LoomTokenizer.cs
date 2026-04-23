@@ -1,13 +1,12 @@
-﻿
-using Loom.Common.Reflection;
+﻿using Loom.Common.Reflection;
 using Loom.Parser.Tokenizer.Rules;
 using System.Reflection;
-using System.Text.RegularExpressions;
 
 namespace Loom.Parser.Tokenizer;
 
 public class LoomTokenizer
 {
+    /// <summary> The <see cref="LoomStringReader"/> used to read the source code. </summary>
     public LoomStringReader Reader { get; set; }
 
     /// <summary> The currently parsed Tokens. </summary>
@@ -33,7 +32,7 @@ public class LoomTokenizer
     /// <summary> Tokenizes the given source code. </summary>
     public List<Token> Tokenize()
     {
-        while (Reader.Peek() != -1)
+        while (!Reader.IsEnd)
         {
             var current = Reader.PeekChar();
 

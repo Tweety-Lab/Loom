@@ -1,6 +1,5 @@
 ﻿using Loom.Common.Exceptions;
 using Loom.Parser.AST;
-using Loom.Parser.Tokenizer;
 
 using static Loom.Parser.Tokenizer.Token;
 
@@ -17,15 +16,11 @@ public class ProgramRule : ParserRule<ProgramNode>
         var imports = new List<ImportNode>();
         var modules = new List<ModuleNode>();
 
-        while (!Parser.Reader.Check(TokenType.EOF))
+        ParseUntil(TokenType.EOF, new()
         {
-            if (Parser.Reader.Check(TokenType.Import))
-                imports.Add(RunRule<ImportRule, ImportNode>()); // imports
-            else if (Parser.Reader.Check(TokenType.Module))
-                modules.Add(RunRule<ModuleRule, ModuleNode>()); // modules
-            else
-                throw new LoomException($"Unexpected token: {Parser.Reader.Peek().Value}");
-        }
+            [TokenType.Import] = () => imports.Add(RunRule<ImportRule, ImportNode>()), // Imports
+            [TokenType.Module] = () => modules.Add(RunRule<ModuleRule, ModuleNode>()), // Modules
+        });
 
         return new ProgramNode(imports, modules);
     }

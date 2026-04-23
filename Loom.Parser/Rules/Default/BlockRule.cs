@@ -16,15 +16,11 @@ public class BlockRule : ParserRule<BlockNode>
         var body = new List<ASTNode>();
         Parser.Reader.Expect(TokenType.LBrace); // {
 
-        while (!Parser.Reader.Check(TokenType.RBrace))
+        ParseUntil(TokenType.RBrace, new()
         {
-            if (Parser.Reader.Check(TokenType.Module))
-                body.Add(Parser.GetRule<ModuleRule>().Parse()); // nested modules
-            else if (Parser.Reader.Check(TokenType.Unsafe))
-                body.Add(Parser.GetRule<UnsafeRule>().Parse()); // unsafe
-            else
-                break;
-        }
+            [TokenType.Module] = () => body.Add(RunRule<ModuleRule, ModuleNode>()), // Nested Modules
+            [TokenType.Unsafe] = () => body.Add(RunRule<UnsafeRule, UnsafeNode>()), // Unsafe
+        });
 
         Parser.Reader.Expect(TokenType.RBrace); // }
 
