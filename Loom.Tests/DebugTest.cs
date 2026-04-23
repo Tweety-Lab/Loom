@@ -11,7 +11,7 @@ public class DebugTest
 {
     public const string TEST_SOURCE = @"
 import Test2;
-import gabagoop;
+import Test;
 
 module Test
 {
@@ -45,7 +45,7 @@ module Test2
 
         Assert.NotNull(root);
 
-        Assert.True(root.Imports.Count == 1);
+        Assert.True(root.Imports.Count == 2);
         Assert.Equal("Test2", root.Imports.First().ModuleName);
 
         Assert.True(root.Modules.Count == 2);

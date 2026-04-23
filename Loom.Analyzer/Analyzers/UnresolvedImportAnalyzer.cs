@@ -12,11 +12,10 @@ public class UnresolvedImportAnalyzer : Analyzer
     /// <inheritdoc />
     public override void Visit(ImportNode node)
     {
-        string module = node.ModuleName;
-        ModuleSymbol? symbol = Context.SymbolTables.First().Value.Resolve(module) as ModuleSymbol;
+        ModuleSymbol? symbol = Context.ResolveSymbol(node.ModuleName) as ModuleSymbol;
 
-        if (symbol is null)
-            ReportException($"Unresolved import: {module}");
+        if (symbol == null)
+            ReportException($"Unresolved import: {node.ModuleName}");
 
         base.Visit(node);
     }
