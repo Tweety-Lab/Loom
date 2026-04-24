@@ -31,6 +31,15 @@ internal class DeclarationWalker : ASTWalker
         WithScope(node, () => WalkChildren(node), symbol);
     }
 
+    /// <inheritdoc/>
+    public override void Visit(MethodDefinitionNode node)
+    {
+        var symbol = new MethodDefinitionSymbol(node.MethodName);
+        CurrentTable.Define(node.MethodName, symbol);
+
+        WithScope(node, () => WalkChildren(node), symbol);
+    }
+
     private void WithScope(ASTNode node, Action body, Symbol? symbol = null)
     {
         var parentTable = CurrentTable;

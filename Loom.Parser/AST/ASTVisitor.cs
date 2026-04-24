@@ -12,6 +12,7 @@ namespace Loom.Parser.AST;
 /// </remarks>
 public abstract class ASTVisitor
 {
+    public virtual void Visit(MethodDefinitionNode node) { }
     public virtual void Visit(BlockNode node) { }
     public virtual void Visit(ImportNode node) { }
     public virtual void Visit(ModuleNode node) { }

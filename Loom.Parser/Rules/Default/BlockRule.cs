@@ -27,6 +27,7 @@ public class BlockRule : ParserRule<BlockNode>
 
         ParseUntil(TokenType.RBrace, new()
         {
+            [TokenType.Void] = () => body.Add(RunRule<MethodDefinitionRule, MethodDefinitionNode>()), // Method Definitions
             [TokenType.Module] = () => body.Add(RunRule<ModuleRule, ModuleNode>()), // Nested Modules
             [TokenType.Unsafe] = () => body.Add(RunRule<UnsafeRule, UnsafeNode>()), // Unsafe
         });

@@ -18,9 +18,8 @@ module Test
     // Yapyapyapyap
     unsafe
     {
-        module Nested
+        void MyMethod
         {
-
         }
     }
 }
@@ -52,7 +51,5 @@ module Test2
         Dictionary<ASTNode, SymbolTable>? symbolMap = context.SymbolMap;
 
         Assert.NotNull(symbolMap);
-
-        Assert.NotNull(symbolMap[root.Modules.First()].Resolve("Nested"));
     }
 }

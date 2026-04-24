@@ -11,7 +11,9 @@ public static class KeywordRegistry
     {
         { "module", Token.TokenType.Module },
         { "import", Token.TokenType.Import },
-        { "unsafe", Token.TokenType.Unsafe }
+        { "unsafe", Token.TokenType.Unsafe },
+
+        { "void", Token.TokenType.Void },
     };
 
     /// <summary> Registers a new keyword with its associated token type. </summary>

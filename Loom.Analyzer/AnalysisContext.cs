@@ -47,5 +47,11 @@ public class AnalysisContext
     }
 
     /// <summary> Resolves a <see cref="Symbol"/> by name or null if not found. </summary>
-    public Symbol? ResolveSymbol(ASTNode node, string name) => SymbolTables[node].Resolve(name);
+    public Symbol? ResolveSymbol(ASTNode node, string name)
+    {
+        if (!SymbolTables.TryGetValue(node, out var table))
+            return null;
+
+        return table.Resolve(name);
+    }
 }

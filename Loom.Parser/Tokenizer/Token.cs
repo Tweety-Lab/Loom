@@ -16,6 +16,8 @@ public class Token
         Import,
         Unsafe,
 
+        Void,
+
         EOF
     }
 

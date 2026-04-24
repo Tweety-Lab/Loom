@@ -13,6 +13,7 @@ public class ASTWalker : ASTVisitor
             child.Accept(this);
     }
 
+    public override void Visit(MethodDefinitionNode node) => WalkChildren(node);
     public override void Visit(BlockNode node) => WalkChildren(node);
     public override void Visit(ImportNode node) => WalkChildren(node);
     public override void Visit(ModuleNode node) => WalkChildren(node);
