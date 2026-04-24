@@ -33,11 +33,11 @@ public class AnalysisContext
         SymbolTables[root] = rootTable;
 
         var declWalker = new DeclarationWalker(SymbolTables, rootTable);
-        declWalker.Dispatch(root);
+        declWalker.WalkChildren(root);
 
         var semWalker = new SemanticWalker(SymbolTables);
         semWalker.SetRootTable(rootTable);
-        semWalker.Dispatch(root);
+        semWalker.WalkChildren(root);
 
         foreach (var analyzer in Analyzers)
         {

@@ -22,7 +22,7 @@ internal class DeclarationWalker : ASTWalker
         CurrentTable = currentTable;
     }
 
-    /// <inheritdoc/>
+    [Visitor]
     public void Visit(ModuleNode node)
     {
         var symbol = new ModuleSymbol(node.Name);
@@ -31,7 +31,7 @@ internal class DeclarationWalker : ASTWalker
         WithScope(node, () => WalkChildren(node), symbol);
     }
 
-    /// <inheritdoc/>
+    [Visitor]
     public void Visit(MethodDefinitionNode node)
     {
         var symbol = new MethodDefinitionSymbol(node.MethodName);

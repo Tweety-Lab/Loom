@@ -1,4 +1,5 @@
 ﻿using Loom.Analyzer.Symbols;
+using Loom.Parser.AST;
 using Loom.Parser.Rules.Default;
 
 namespace Loom.Analyzer.Analyzers;
@@ -9,7 +10,7 @@ namespace Loom.Analyzer.Analyzers;
 [LoomAnalyzer]
 public class UnresolvedImportAnalyzer : Analyzer
 {
-    /// <inheritdoc />
+    [Visitor]
     public void Visit(ImportNode node)
     {
         ModuleSymbol? symbol = Context.ResolveSymbol(Context.SymbolTables.First().Key, node.ModuleName) as ModuleSymbol;

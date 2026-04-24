@@ -15,12 +15,8 @@ import Test2;
 
 module Test
 {
-    // Yapyapyapyap
-    unsafe
+    void MyMethod
     {
-        void MyMethod
-        {
-        }
     }
 }
 
@@ -51,5 +47,9 @@ module Test2
         Dictionary<ASTNode, SymbolTable>? symbolMap = context.SymbolMap;
 
         Assert.NotNull(symbolMap);
+
+        Assert.Single(symbolMap[root.Modules.First()].Symbols);
+
+        Assert.True(symbolMap[root.Modules.First()].Resolve("MyMethod") is MethodDefinitionSymbol);
     }
 }

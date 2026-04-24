@@ -5,7 +5,7 @@ namespace Loom.Parser.Tokenizer;
 /// Marks a <see cref="Token.TokenType"/> as a keyword.
 /// </summary>
 [AttributeUsage(AttributeTargets.Field)]
-public class KeywordAttribute : Attribute
+public sealed class KeywordAttribute : Attribute
 {
     /// <summary> The associated string keyword. </summary>
     public string Keyword { get; }

@@ -5,4 +5,4 @@ namespace Loom.Parser.Rules;
 /// Registers a <see cref="ParserRule{T}"/> into the <see cref="LoomParser"/> as a parser rule.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
-public class ParserRuleAttribute : Attribute { }
+public sealed class ParserRuleAttribute : Attribute { }

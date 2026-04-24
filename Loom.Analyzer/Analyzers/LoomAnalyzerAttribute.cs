@@ -5,4 +5,4 @@ namespace Loom.Analyzer.Analyzers;
 /// Registers a <see cref="Analyzer"/> into the analyzer pipeline.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
-public class LoomAnalyzerAttribute : Attribute { }
+public sealed class LoomAnalyzerAttribute : Attribute { }

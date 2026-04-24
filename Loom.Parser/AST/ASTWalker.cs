@@ -7,9 +7,12 @@ namespace Loom.Parser.AST;
 /// </summary>
 public class ASTWalker : ASTVisitor
 {
-    protected void WalkChildren(ASTNode node)
+    public void WalkChildren(ASTNode node)
     {
         foreach (var child in node.Children)
             Dispatch(child);
     }
+
+    /// <inheritdoc/>
+    protected override void OnUnhandled(ASTNode node) => WalkChildren(node);
 }

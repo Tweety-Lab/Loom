@@ -5,6 +5,9 @@ public class SymbolTable
     /// <summary> The owning <see cref="SymbolTable"/> or null if root. </summary>
     public SymbolTable? Parent { get; }
 
+    /// <summary> All symbols in the table. </summary>
+    public IReadOnlyDictionary<string, Symbol> Symbols => symbols;
+
     private Dictionary<string, Symbol> symbols = new();
 
     /// <summary> Initializes a new instance of the <see cref="SymbolTable"/> class. </summary>
