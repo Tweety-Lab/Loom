@@ -23,6 +23,9 @@ public class MethodDefinitionRule : ParserRule<MethodDefinitionNode>
         Parser.Reader.Expect(TokenType.Void); // void
         var methodName = Parser.Reader.Expect(TokenType.Identifier).Value; // name
 
+        Parser.Reader.Expect(TokenType.LParen); // (
+        Parser.Reader.Expect(TokenType.RParen); // )
+
         return new MethodDefinitionNode(methodName, Parser.GetRule<BlockRule>().Parse());
     }
 }

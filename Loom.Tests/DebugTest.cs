@@ -15,7 +15,7 @@ import Test2;
 
 module Test
 {
-    void MyMethod
+    void MyMethod()
     {
     }
 }
@@ -35,7 +35,7 @@ module Test2
             throw error;
 
         ProgramNode? root = context.RootNode;
-
+        
         Assert.NotNull(root);
 
         Assert.True(root.Imports.Count == 2);

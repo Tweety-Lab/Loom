@@ -36,6 +36,9 @@ public class Token
         [Character('{')] LBrace,
         [Character('}')] RBrace,
 
+        [Character('(')] LParen,
+        [Character(')')] RParen,
+
         [Character(';')] Semicolon,
 
         [Keyword("module")] Module,
