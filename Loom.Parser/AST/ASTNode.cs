@@ -7,7 +7,7 @@ namespace Loom.Parser.AST;
 public abstract record ASTNode
 {
     /// <summary> Accepts a visitor. </summary>
-    public abstract void Accept(ASTVisitor visitor);
+    public void Accept(ASTVisitor visitor) => visitor.Dispatch(this);
 
     /// <summary> The children of this node. </summary>
     public abstract IEnumerable<ASTNode> Children { get; }

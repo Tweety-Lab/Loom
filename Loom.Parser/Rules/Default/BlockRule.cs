@@ -7,9 +7,6 @@ namespace Loom.Parser.Rules.Default;
 public record BlockNode(List<ASTNode> Contents) : ASTNode
 {
     /// <inheritdoc/>
-    public override void Accept(ASTVisitor visitor) => visitor.Dispatch(this);
-
-    /// <inheritdoc/>
     public override IEnumerable<ASTNode> Children => Contents;
 }
 
