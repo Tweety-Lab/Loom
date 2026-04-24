@@ -4,7 +4,7 @@ using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.Rules.Default;
 
-public record MethodDefinitionNode(string MethodName, BlockNode Body) : ASTNode
+public record MethodDefinitionNode(string MethodName, BlockNode Body, List<Token> Modifiers) : ASTNode
 {
     /// <inheritdoc/>
     public override IEnumerable<ASTNode> Children => new[] { Body };
@@ -20,9 +20,9 @@ public class MethodDefinitionRule : ParserRule<MethodDefinitionNode>
     /// <inheritdoc/>
     public override MethodDefinitionNode Parse()
     {
-        var modifiers = new List<TokenType>();
+        var modifiers = new List<Token>();
         while (ModifierRegistry.IsModifier(Parser.Reader.Current.Type))
-            modifiers.Add(Parser.Reader.Advance().Type);
+            modifiers.Add(Parser.Reader.Advance());
 
         Parser.Reader.Expect(TokenType.Void); // void
         var methodName = Parser.Reader.Expect(TokenType.Identifier).Value; // name
@@ -30,6 +30,6 @@ public class MethodDefinitionRule : ParserRule<MethodDefinitionNode>
         Parser.Reader.Expect(TokenType.LParen); // (
         Parser.Reader.Expect(TokenType.RParen); // )
 
-        return new MethodDefinitionNode(methodName, Parser.GetRule<BlockRule>().Parse());
+        return new MethodDefinitionNode(methodName, Parser.GetRule<BlockRule>().Parse(), modifiers);
     }
 }

@@ -4,6 +4,7 @@ using Loom.Common;
 using Loom.Parser;
 using Loom.Parser.AST;
 using Loom.Parser.Rules.Default;
+using Loom.Parser.Tokenizer;
 
 namespace Loom.Tests;
 
@@ -45,6 +46,8 @@ module Test2
 
         Assert.True(root.Modules.Count == 2);
         Assert.Equal("Test", root.Modules.First().Name);
+
+        Assert.True(((MethodDefinitionNode)root.Modules.First().Body.Contents.First()).Modifiers.Any(m => m.Type == Token.TokenType.Export));
 
         Dictionary<ASTNode, SymbolTable>? symbolMap = context.SymbolMap;
 
