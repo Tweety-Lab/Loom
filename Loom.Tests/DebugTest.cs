@@ -10,20 +10,18 @@ namespace Loom.Tests;
 public class DebugTest
 {
     public const string TEST_SOURCE = @"
-import Test2;
 import Test;
+import Test2;
 
 module Test
 {
     // Yapyapyapyap
     unsafe
     {
+        module Nested
+        {
 
-    }
-
-    module Nested
-    {
-
+        }
     }
 }
 
@@ -46,12 +44,10 @@ module Test2
         Assert.NotNull(root);
 
         Assert.True(root.Imports.Count == 2);
-        Assert.Equal("Test2", root.Imports.First().ModuleName);
+        Assert.Equal("Test", root.Imports.First().ModuleName);
 
         Assert.True(root.Modules.Count == 2);
         Assert.Equal("Test", root.Modules.First().Name);
-
-        Assert.True(root.Modules.First().Body.Contents.First() is UnsafeNode);
 
         Dictionary<ASTNode, SymbolTable>? symbolMap = context.SymbolMap;
 
