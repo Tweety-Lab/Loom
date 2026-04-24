@@ -17,6 +17,8 @@ public sealed class VisitorAttribute : Attribute { }
 /// An Abstract Syntax Tree visitor.
 /// </summary>
 /// <remarks>
+/// To visit an AST node from a clas that inhe
+/// 
 /// This visitor requires manual visiting of children nodes. For automatic visiting, see <see cref="ASTWalker"/>.
 /// </remarks>
 public abstract class ASTVisitor

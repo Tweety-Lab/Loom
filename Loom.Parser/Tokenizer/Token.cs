@@ -14,16 +14,29 @@ public sealed class KeywordAttribute : Attribute
     public KeywordAttribute(string keyword) => Keyword = keyword;
 }
 
+/// <summary>
+/// Marks a <see cref="Token.TokenType"/> as a single character.
+/// </summary>
+[AttributeUsage(AttributeTargets.Field)]
+public sealed class CharacterAttribute : Attribute
+{
+    /// <summary> The associated character. </summary>
+    public char Character { get; }
+
+    /// <summary> Initializes a new instance of the <see cref="CharacterAttribute"/> class. </summary>
+    public CharacterAttribute(char character) => Character = character;
+}
+
 public class Token
 {
     public enum TokenType
     {
         Identifier,
 
-        LBrace,
-        RBrace,
+        [Character('{')] LBrace,
+        [Character('}')] RBrace,
 
-        Semicolon,
+        [Character(';')] Semicolon,
 
         [Keyword("module")] Module,
         [Keyword("import")] Import,
