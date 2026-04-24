@@ -39,6 +39,24 @@ public class TokenReader
         return Advance();
     }
 
+    public Token ExpectAny(params TokenType[] types)
+    {
+        if (!types.Contains(Current.Type))
+            throw new LoomException($"Expected one of: {string.Join(", ", types)}, got {Current.Type}");
+
+        return Advance();
+    }
+
+    public List<Token> ExpectMany(Func<Token, bool> predicate)
+    {
+        var result = new List<Token>();
+
+        while (predicate(Current))
+            result.Add(Advance());
+
+        return result;
+    }
+
     public bool Match(TokenType type)
     {
         if (Current.Type == type)

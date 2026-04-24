@@ -20,11 +20,9 @@ public class MethodDefinitionRule : ParserRule<MethodDefinitionNode>
     /// <inheritdoc/>
     public override MethodDefinitionNode Parse()
     {
-        var modifiers = new List<Token>();
-        while (TokenRegistry.IsModifier(Parser.Reader.Current.Type))
-            modifiers.Add(Parser.Reader.Advance());
+        var modifiers = Parser.Reader.ExpectMany(t => TokenRegistry.IsModifier(t.Type));
 
-        Parser.Reader.Expect(TokenType.Void); // void
+        Parser.Reader.ExpectAny(TokenType.Void, TokenType.I32, TokenType.Identifier); // return type
         var methodName = Parser.Reader.Expect(TokenType.Identifier).Value; // name
 
         Parser.Reader.Expect(TokenType.LParen); // (
