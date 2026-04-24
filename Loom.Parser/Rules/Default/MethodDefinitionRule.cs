@@ -1,5 +1,5 @@
 ﻿using Loom.Parser.AST;
-
+using Loom.Parser.Tokenizer;
 using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.Rules.Default;
@@ -20,6 +20,10 @@ public class MethodDefinitionRule : ParserRule<MethodDefinitionNode>
     /// <inheritdoc/>
     public override MethodDefinitionNode Parse()
     {
+        var modifiers = new List<TokenType>();
+        while (ModifierRegistry.IsModifier(Parser.Reader.Current.Type))
+            modifiers.Add(Parser.Reader.Advance().Type);
+
         Parser.Reader.Expect(TokenType.Void); // void
         var methodName = Parser.Reader.Expect(TokenType.Identifier).Value; // name
 

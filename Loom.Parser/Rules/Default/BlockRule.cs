@@ -1,5 +1,5 @@
 ﻿using Loom.Parser.AST;
-
+using Loom.Parser.Tokenizer;
 using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.Rules.Default;
@@ -22,12 +22,17 @@ public class BlockRule : ParserRule<BlockNode>
         var body = new List<ASTNode>();
         Parser.Reader.Expect(TokenType.LBrace); // {
 
-        ParseUntil(TokenType.RBrace, new()
+        var dispatch = new Dictionary<TokenType, Action>
         {
-            [TokenType.Void] = () => body.Add(RunRule<MethodDefinitionRule, MethodDefinitionNode>()), // Method Definitions
+            [TokenType.Void] = () => body.Add(RunRule<MethodDefinitionRule, MethodDefinitionNode>()), // Method Definitions 
             [TokenType.Module] = () => body.Add(RunRule<ModuleRule, ModuleNode>()), // Nested Modules
             [TokenType.Unsafe] = () => body.Add(RunRule<UnsafeRule, UnsafeNode>()), // Unsafe
-        });
+        };
+
+        foreach (var modifier in ModifierRegistry.Modifiers)
+            dispatch[modifier] = () => body.Add(RunRule<MethodDefinitionRule, MethodDefinitionNode>()); // Keywords
+
+        ParseUntil(TokenType.RBrace, dispatch);
 
         Parser.Reader.Expect(TokenType.RBrace); // }
 

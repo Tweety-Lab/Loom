@@ -15,7 +15,7 @@ import Test2;
 
 module Test
 {
-    void MyMethod()
+    export void MyMethod()
     {
     }
 }
@@ -29,10 +29,12 @@ module Test2
     public void SweepTest()
     {
         CompilationContext context = new CompilationContext();
-        context.Parse(TEST_SOURCE).Analyze();
+        context.Parse(TEST_SOURCE);
 
         foreach (var error in context.Exceptions)
             throw error;
+
+        context.Analyze();
 
         ProgramNode? root = context.RootNode;
         

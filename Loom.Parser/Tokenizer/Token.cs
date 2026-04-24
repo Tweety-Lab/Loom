@@ -2,6 +2,12 @@
 namespace Loom.Parser.Tokenizer;
 
 /// <summary>
+/// Marks a <see cref="Token.TokenType"/> as a modifier.
+/// </summary>
+[AttributeUsage(AttributeTargets.Field)]
+public sealed class ModifierAttribute : Attribute { }
+
+/// <summary>
 /// Marks a <see cref="Token.TokenType"/> as a keyword.
 /// </summary>
 [AttributeUsage(AttributeTargets.Field)]
@@ -44,6 +50,8 @@ public class Token
         [Keyword("module")] Module,
         [Keyword("import")] Import,
         [Keyword("unsafe")] Unsafe,
+
+        [Keyword("export"), Modifier] Export,
 
         [Keyword("void")] Void,
 
