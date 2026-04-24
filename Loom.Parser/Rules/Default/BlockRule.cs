@@ -29,7 +29,7 @@ public class BlockRule : ParserRule<BlockNode>
             [TokenType.Unsafe] = () => body.Add(RunRule<UnsafeRule, UnsafeNode>()), // Unsafe
         };
 
-        foreach (var modifier in ModifierRegistry.Modifiers)
+        foreach (var modifier in TokenRegistry.Modifiers)
             dispatch[modifier] = () => body.Add(RunRule<MethodDefinitionRule, MethodDefinitionNode>()); // Keywords
 
         ParseUntil(TokenType.RBrace, dispatch);

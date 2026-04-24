@@ -54,7 +54,7 @@ public class Token
         [Keyword("export"), Modifier] Export,
 
         [Keyword("void")] Void,
-
+        [Keyword("i32")] I32,
 
         EOF
     }

@@ -21,7 +21,7 @@ public class MethodDefinitionRule : ParserRule<MethodDefinitionNode>
     public override MethodDefinitionNode Parse()
     {
         var modifiers = new List<Token>();
-        while (ModifierRegistry.IsModifier(Parser.Reader.Current.Type))
+        while (TokenRegistry.IsModifier(Parser.Reader.Current.Type))
             modifiers.Add(Parser.Reader.Advance());
 
         Parser.Reader.Expect(TokenType.Void); // void

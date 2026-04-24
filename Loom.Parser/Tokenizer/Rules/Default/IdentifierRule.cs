@@ -17,7 +17,7 @@ public class IdentifierRule : ITokenizerRule
             sb.Append((char)reader.Read());
 
         var value = sb.ToString();
-        var type = KeywordRegistry.TryGetKeywordType(value, out var keywordType) ? keywordType : Token.TokenType.Identifier;
+        var type = TokenRegistry.TryGetKeywordType(value, out var keywordType) ? keywordType : Token.TokenType.Identifier;
 
         return new Token(type, value);
     }

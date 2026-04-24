@@ -5,13 +5,13 @@ namespace Loom.Parser.Tokenizer.Rules.Default;
 public class CharacterRule : ITokenizerRule
 {
     /// <inheritdoc />
-    public bool CanHandle(char current) => CharacterRegistry.Characters.ContainsKey(current);
+    public bool CanHandle(char current) => TokenRegistry.Characters.ContainsKey(current);
 
     /// <inheritdoc />
     public Token Read(LoomStringReader reader)
     {
         var c = (char)reader.Read();
-        CharacterRegistry.TryGetCharacterType(c, out var type);
+        TokenRegistry.TryGetCharacterType(c, out var type);
         return new Token(type, c.ToString());
     }
 }
