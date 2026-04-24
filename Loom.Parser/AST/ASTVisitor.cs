@@ -1,4 +1,6 @@
 ﻿using Loom.Parser.Rules.Default;
+using System.Collections.Concurrent;
+using System.Reflection;
 
 namespace Loom.Parser.AST;
 
@@ -12,10 +14,19 @@ namespace Loom.Parser.AST;
 /// </remarks>
 public abstract class ASTVisitor
 {
-    public virtual void Visit(MethodDefinitionNode node) { }
-    public virtual void Visit(BlockNode node) { }
-    public virtual void Visit(ImportNode node) { }
-    public virtual void Visit(ModuleNode node) { }
-    public virtual void Visit(ProgramNode node) { }
-    public virtual void Visit(UnsafeNode node) { }
+    private static readonly ConcurrentDictionary<(Type visitor, Type node), MethodInfo?> cache = new();
+
+    /// <summary> Dispatches the node to the correct Visit method via reflection. </summary>
+    public void Dispatch(ASTNode node)
+    {
+        var method = cache.GetOrAdd((GetType(), node.GetType()), key =>
+            key.Item1.GetMethods()
+                .FirstOrDefault(m =>
+                    m.Name == "Visit" &&
+                    !m.IsAbstract &&
+                    m.GetParameters() is [var p] &&
+                    p.ParameterType == key.Item2));
+
+        method?.Invoke(this, [node]);
+    }
 }

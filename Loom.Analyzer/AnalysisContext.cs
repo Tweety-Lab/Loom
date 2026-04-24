@@ -27,17 +27,17 @@ public class AnalysisContext
     }
 
     /// <summary> Runs the given <see cref="ProgramNode"/> through the Semantic Analyzer. </summary>
-    public void Analyse(ProgramNode root)
+    public void Analyze(ProgramNode root)
     {
         var rootTable = new SymbolTable();
         SymbolTables[root] = rootTable;
 
         var declWalker = new DeclarationWalker(SymbolTables, rootTable);
-        declWalker.Visit(root);
+        declWalker.Dispatch(root);
 
         var semWalker = new SemanticWalker(SymbolTables);
         semWalker.SetRootTable(rootTable);
-        semWalker.Visit(root);
+        semWalker.Dispatch(root);
 
         foreach (var analyzer in Analyzers)
         {

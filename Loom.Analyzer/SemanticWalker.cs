@@ -18,7 +18,7 @@ internal class SemanticWalker : ASTWalker
     public void SetRootTable(SymbolTable table) => CurrentTable = table;
 
     /// <inheritdoc/>
-    public override void Visit(ModuleNode node)
+    public void Visit(ModuleNode node)
     {
         var parent = CurrentTable;
         CurrentTable = SymbolTables[node];

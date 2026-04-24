@@ -7,7 +7,7 @@ namespace Loom.Parser.Rules.Default;
 public record ModuleNode(string Name, BlockNode Body) : ASTNode
 {
     /// <inheritdoc/>
-    public override void Accept(ASTVisitor visitor) => visitor.Visit(this);
+    public override void Accept(ASTVisitor visitor) => visitor.Dispatch(this);
 
     /// <inheritdoc/>
     public override IEnumerable<ASTNode> Children => new[] { Body };

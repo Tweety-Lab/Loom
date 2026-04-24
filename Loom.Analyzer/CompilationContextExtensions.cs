@@ -22,7 +22,7 @@ public static class CompilationContextExtensions
         public CompilationContext Analyze()
         {
             AnalysisContext Analyzer = new();
-            Analyzer.Analyse(ctx.RootNode ?? throw new InvalidOperationException("CompilationContext.RootNode is null, has parsing been run?"));
+            Analyzer.Analyze(ctx.RootNode ?? throw new InvalidOperationException("CompilationContext.RootNode is null, has parsing been run?"));
 
             ctx.ExtendedProperties[SYMBOL_DICT_KEY] = Analyzer.SymbolTables;
 

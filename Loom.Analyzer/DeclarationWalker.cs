@@ -23,7 +23,7 @@ internal class DeclarationWalker : ASTWalker
     }
 
     /// <inheritdoc/>
-    public override void Visit(ModuleNode node)
+    public void Visit(ModuleNode node)
     {
         var symbol = new ModuleSymbol(node.Name);
         CurrentTable.Define(node.Name, symbol);
@@ -32,7 +32,7 @@ internal class DeclarationWalker : ASTWalker
     }
 
     /// <inheritdoc/>
-    public override void Visit(MethodDefinitionNode node)
+    public void Visit(MethodDefinitionNode node)
     {
         var symbol = new MethodDefinitionSymbol(node.MethodName);
         CurrentTable.Define(node.MethodName, symbol);
