@@ -1,6 +1,19 @@
 ﻿
 namespace Loom.Parser.Tokenizer;
 
+/// <summary>
+/// Marks a <see cref="Token.TokenType"/> as a keyword.
+/// </summary>
+[AttributeUsage(AttributeTargets.Field)]
+public class KeywordAttribute : Attribute
+{
+    /// <summary> The associated string keyword. </summary>
+    public string Keyword { get; }
+
+    /// <summary> Initializes a new instance of the <see cref="KeywordAttribute"/> class. </summary>
+    public KeywordAttribute(string keyword) => Keyword = keyword;
+}
+
 public class Token
 {
     public enum TokenType
@@ -12,11 +25,11 @@ public class Token
 
         Semicolon,
 
-        Module,
-        Import,
-        Unsafe,
+        [Keyword("module")] Module,
+        [Keyword("import")] Import,
+        [Keyword("unsafe")] Unsafe,
 
-        Void,
+        [Keyword("void")] Void,
 
         EOF
     }
