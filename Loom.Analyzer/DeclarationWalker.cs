@@ -34,7 +34,8 @@ internal class DeclarationWalker : ASTWalker
     [Visitor]
     public void Visit(MethodDefinitionNode node)
     {
-        var symbol = new MethodDefinitionSymbol(node.MethodName);
+        var returnType = new TypeSymbol("void", TypeSymbol.Type.Void);
+        var symbol = new MethodDefinitionSymbol(node.MethodName, returnType);
         CurrentTable.Define(node.MethodName, symbol);
 
         WithScope(node, () => WalkChildren(node), symbol);

@@ -47,6 +47,7 @@ public class Token
 
         [Keyword("void")] Void,
 
+
         EOF
     }
 

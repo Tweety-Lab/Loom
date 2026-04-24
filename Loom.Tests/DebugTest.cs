@@ -51,5 +51,6 @@ module Test2
         Assert.Single(symbolMap[root.Modules.First()].Symbols);
 
         Assert.True(symbolMap[root.Modules.First()].Resolve("MyMethod") is MethodDefinitionSymbol);
+        Assert.Equal(TypeSymbol.Type.Void, ((MethodDefinitionSymbol)symbolMap[root.Modules.First()].Resolve("MyMethod")).ReturnType.KnownType);
     }
 }
