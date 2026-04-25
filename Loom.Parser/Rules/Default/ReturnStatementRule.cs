@@ -1,5 +1,4 @@
-﻿using Loom.Common.Exceptions;
-using Loom.Parser.AST;
+﻿using Loom.Parser.AST;
 
 using static Loom.Parser.Tokenizer.Token;
 

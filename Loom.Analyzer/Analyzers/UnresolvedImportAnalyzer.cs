@@ -16,6 +16,6 @@ public class UnresolvedImportAnalyzer : Analyzer
         ModuleSymbol? symbol = Context.ResolveSymbol(Context.SymbolTables.First().Key, node.ModuleName) as ModuleSymbol;
 
         if (symbol == null)
-            ReportException($"Unresolved import: {node.ModuleName}");
+            Context.DiagnosticContext?.Report(new Common.Diagnostics.Diagnostic(Common.Diagnostics.Diagnostic.DiagnosticLevel.Error, $"Unresolved import: {node.ModuleName}"));
     }
 }

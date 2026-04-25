@@ -1,11 +1,14 @@
-﻿using Loom.Common.Exceptions;
-
+﻿
+using Loom.Common.Diagnostics;
 using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.Tokenizer;
 
 public class TokenReader
 {
+    /// <summary> The <see cref="Common.Diagnostics.DiagnosticContext"/> this reports to, if any. </summary>
+    public DiagnosticContext? DiagnosticContext { get; set; }
+
     /// <summary> All tokens that make up the source. </summary>
     public List<Token> Tokens { get; }
 
@@ -34,7 +37,7 @@ public class TokenReader
     public Token Expect(TokenType type)
     {
         if (Current.Type != type)
-            throw new LoomException($"Expected {type}, got {Current.Type}");
+            DiagnosticContext?.Report(new Diagnostic(Diagnostic.DiagnosticLevel.Error, $"Expected {type}, got {Current.Type}"));
 
         return Advance();
     }
@@ -42,7 +45,7 @@ public class TokenReader
     public Token ExpectAny(params TokenType[] types)
     {
         if (!types.Contains(Current.Type))
-            throw new LoomException($"Expected one of: {string.Join(", ", types)}, got {Current.Type}");
+            DiagnosticContext?.Report(new Diagnostic(Diagnostic.DiagnosticLevel.Error, $"Expected {string.Join(" or ", types)}, got {Current.Type}"));
 
         return Advance();
     }

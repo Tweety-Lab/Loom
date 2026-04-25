@@ -32,8 +32,8 @@ module Test2
         CompilationContext context = new CompilationContext();
         context.Parse(TEST_SOURCE);
 
-        foreach (var error in context.Exceptions)
-            throw error;
+        foreach (var diagnostic in context.DiagnosticContext.Diagnostics)
+            Console.WriteLine(diagnostic.Message);
 
         context.Analyze();
 

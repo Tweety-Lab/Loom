@@ -1,5 +1,4 @@
 ﻿using Loom.Common;
-using Loom.Common.Exceptions;
 using Loom.Parser.AST;
 using Loom.Parser.Rules.Default;
 using Loom.Parser.Tokenizer;
@@ -23,26 +22,12 @@ public static class CompilationContextExtensions
         {
             LoomTokenizer tokenizer = new(input);
 
-            try
-            {
-                tokenizer.Tokenize();
-            }
-            catch (LoomException le)
-            {
-                ctx.ThrowException(le);
-            }
+            tokenizer.Tokenize();
 
-            LoomParser parser = new LoomParser(tokenizer.Tokens);
+            LoomParser parser = new LoomParser(tokenizer.Tokens, ctx.DiagnosticContext);
 
-            try
-            {
-                ProgramNode root = parser.ParseProgram();
-                ctx.ExtendedProperties[ROOT_NODE_KEY] = root;
-            }
-            catch (LoomException le)
-            {
-                ctx.ThrowException(le);
-            }
+            ProgramNode root = parser.ParseProgram();
+            ctx.ExtendedProperties[ROOT_NODE_KEY] = root;
 
             return ctx;
         }

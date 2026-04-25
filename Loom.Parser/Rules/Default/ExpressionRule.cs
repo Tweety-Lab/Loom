@@ -1,5 +1,4 @@
-﻿using Loom.Common.Exceptions;
-using Loom.Parser.AST;
+﻿using Loom.Parser.AST;
 
 using static Loom.Parser.Tokenizer.Token;
 
@@ -30,7 +29,7 @@ public class ExpressionRule : ParserRule<ExpressionNode>
         return Parser.Reader.Current.Type switch
         {
             TokenType.Number => new NumberLiteralNode(Parser.Reader.Advance().Value),
-            _ => throw new LoomException($"Unexpected token: {Parser.Reader.Current.Value}")
+            _ => throw new Exception($"Unexpected token: {Parser.Reader.Current.Value}")
         };
     }
 }

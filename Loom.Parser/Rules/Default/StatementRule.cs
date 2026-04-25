@@ -1,5 +1,4 @@
-﻿using Loom.Common.Exceptions;
-using Loom.Parser.AST;
+﻿using Loom.Parser.AST;
 
 using static Loom.Parser.Tokenizer.Token;
 
@@ -19,7 +18,7 @@ public class StatementRule : ParserRule<StatementNode>
         var statement = Parser.Reader.Current.Type switch
         {
             TokenType.Return => RunRule<ReturnStatementRule, ReturnStatementNode>(),
-            _ => throw new LoomException($"Unexpected token: {Parser.Reader.Current.Value}")
+            _ => throw new Exception($"Unexpected token: {Parser.Reader.Current.Value}")
         };
 
         Parser.Reader.Expect(TokenType.Semicolon); // ;

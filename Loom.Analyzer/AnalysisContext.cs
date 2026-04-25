@@ -1,5 +1,6 @@
 ﻿using Loom.Analyzer.Analyzers;
 using Loom.Analyzer.Symbols;
+using Loom.Common.Diagnostics;
 using Loom.Common.Reflection;
 using Loom.Parser.AST;
 using Loom.Parser.Rules.Default;
@@ -9,6 +10,9 @@ namespace Loom.Analyzer;
 
 public class AnalysisContext
 {
+    /// <summary> The <see cref="Common.Diagnostics.DiagnosticContext"/> this reports to, if any. </summary>
+    public DiagnosticContext? DiagnosticContext { get; set; }
+
     /// <summary> Maps <see cref="ASTNode"/>s to their corresponding <see cref="SymbolTable"/>. </summary>
     public Dictionary<ASTNode, SymbolTable> SymbolTables { get; } = new();
 
@@ -25,6 +29,9 @@ public class AnalysisContext
             return field;
         }
     }
+
+    /// <summary> Initializes a new instance of the <see cref="AnalysisContext"/> class. </summary>
+    public AnalysisContext(DiagnosticContext? diagnosticContext = null) => DiagnosticContext = diagnosticContext;
 
     /// <summary> Runs the given <see cref="ProgramNode"/> through the Semantic Analyzer. </summary>
     public void Analyze(ProgramNode root)

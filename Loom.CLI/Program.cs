@@ -1,6 +1,7 @@
 ﻿using Loom.Analyzer;
 using Loom.Common;
 using Loom.Parser;
+using System.Diagnostics;
 
 namespace Loom.CLI;
 
@@ -9,6 +10,7 @@ public class Program
     public const string TEST_SOURCE = @"
 import Test;
 import Test2;
+import thjkgdfg;
 
 module Test
 {
@@ -26,11 +28,9 @@ module Test2
     static void Main(string[] args)
     {
         CompilationContext context = new CompilationContext();
-        context.Parse(TEST_SOURCE);
+        context.Parse(TEST_SOURCE).Analyze();
 
-        foreach (var error in context.Exceptions)
-            throw error;
-
-        context.Analyze();
+        foreach (var diagnostic in context.DiagnosticContext.Diagnostics)
+            Console.WriteLine(diagnostic.Message);
     }
 }

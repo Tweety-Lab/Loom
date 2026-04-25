@@ -1,5 +1,5 @@
 ﻿
-using Loom.Common.Exceptions;
+using Loom.Common.Diagnostics;
 
 namespace Loom.Common;
 
@@ -8,14 +8,9 @@ namespace Loom.Common;
 /// </summary>
 public class CompilationContext
 {
-    /// <summary> Properties set by extensinos of <see cref="CompilationContext"/>. </summary>
+    /// <summary> Properties set by extensions of <see cref="CompilationContext"/>. </summary>
     public Dictionary<string, object> ExtendedProperties { get; set; } = new();
 
-    /// <summary> All <see cref="LoomException"/>s that have occured during the compilation. </summary>
-    public IReadOnlyList<LoomException> Exceptions => exceptions;
-
-    private List<LoomException> exceptions = new();
-
-    /// <summary> Throws the given <see cref="LoomException"/>. </summary>
-    public void ThrowException(LoomException exception) => exceptions.Add(exception);
+    /// <summary> The diagnostic results of the compilation. </summary>
+    public DiagnosticContext DiagnosticContext { get; } = new();
 }

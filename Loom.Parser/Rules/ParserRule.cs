@@ -1,5 +1,4 @@
-﻿using Loom.Common.Exceptions;
-using Loom.Parser.AST;
+﻿using Loom.Parser.AST;
 using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.Rules;
@@ -39,7 +38,7 @@ public abstract class ParserRule<T> : IParserRule where T : ASTNode
             else if (fallback != null)
                 fallback();
             else
-                throw new LoomException($"Unexpected token: {token.Value}");
+                Parser.DiagnosticContext?.Report(new Common.Diagnostics.Diagnostic(Common.Diagnostics.Diagnostic.DiagnosticLevel.Error, $"Unexpected token: {token.Value}"));
         }
     }
 }
