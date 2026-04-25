@@ -1,6 +1,7 @@
 ﻿using Loom.Analyzer;
 using Loom.Analyzer.Symbols;
 using Loom.Common;
+using Loom.Common.Diagnostics;
 using Loom.Parser;
 using Loom.Parser.AST;
 using Loom.Parser.Rules.Default;
@@ -27,23 +28,45 @@ module Test2
 }
 ";
 
-    private ProgramNode ParseAndAnalyze()
+    public const string RETURN_TYPE_MISMATCH_SOURCE = @"
+module Test
+{
+    void MyMethod()
+    {
+        return 123;
+    }
+}
+";
+
+    public const string UNRESOLVED_IMPORT_SOURCE = @"
+import NonExistent;
+
+module Test
+{
+}
+";
+
+    public const string UNRESOLVED_TYPE_SOURCE = @"
+module Test
+{
+    FakeType MyMethod()
+    {
+        return 123;
+    }
+}
+";
+
+    private (ProgramNode root, CompilationContext context) ParseAndAnalyze(string source = TEST_SOURCE)
     {
         CompilationContext context = new CompilationContext();
-        context.Parse(TEST_SOURCE);
-
-        foreach (var diagnostic in context.DiagnosticContext.Diagnostics)
-            Console.WriteLine(diagnostic.Message);
-
-        context.Analyze();
-
-        return context.RootNode!;
+        context.Parse(source).Analyze();
+        return (context.RootNode!, context);
     }
 
     [Fact]
     public void Parse_TwoImports()
     {
-        var root = ParseAndAnalyze();
+        var (root, _) = ParseAndAnalyze();
         Assert.Equal(2, root.Imports.Count);
         Assert.Equal("Test", root.Imports[0].ModuleName);
         Assert.Equal("Test2", root.Imports[1].ModuleName);
@@ -52,7 +75,7 @@ module Test2
     [Fact]
     public void Parse_TwoModules()
     {
-        var root = ParseAndAnalyze();
+        var (root, _) = ParseAndAnalyze();
         Assert.Equal(2, root.Modules.Count);
         Assert.Equal("Test", root.Modules[0].Name);
         Assert.Equal("Test2", root.Modules[1].Name);
@@ -61,7 +84,7 @@ module Test2
     [Fact]
     public void Parse_MethodHasExportModifier()
     {
-        var root = ParseAndAnalyze();
+        var (root, _) = ParseAndAnalyze();
         var method = (MethodDefinitionNode)root.Modules[0].Body.Contents.First();
         Assert.Contains(method.Modifiers, m => m.Type == Token.TokenType.Export);
     }
@@ -69,7 +92,7 @@ module Test2
     [Fact]
     public void Parse_MethodHasReturnStatement()
     {
-        var root = ParseAndAnalyze();
+        var (root, _) = ParseAndAnalyze();
         var method = (MethodDefinitionNode)root.Modules[0].Body.Contents.First();
         Assert.Single(method.Body.Contents);
         Assert.IsType<ReturnStatementNode>(method.Body.Contents.First());
@@ -78,7 +101,7 @@ module Test2
     [Fact]
     public void Parse_ReturnStatementHasNumberLiteral()
     {
-        var root = ParseAndAnalyze();
+        var (root, _) = ParseAndAnalyze();
         var method = (MethodDefinitionNode)root.Modules[0].Body.Contents.First();
         var returnStatement = (ReturnStatementNode)method.Body.Contents.First();
         var literal = Assert.IsType<NumberLiteralNode>(returnStatement.Expression);
@@ -88,11 +111,7 @@ module Test2
     [Fact]
     public void Analyze_ModulesRegisteredInSymbolTable()
     {
-        CompilationContext context = new CompilationContext();
-        context.Parse(TEST_SOURCE);
-        context.Analyze();
-
-        var root = context.RootNode!;
+        var (root, context) = ParseAndAnalyze();
         var symbolMap = context.SymbolMap!;
 
         Assert.IsType<ModuleSymbol>(symbolMap[root].Resolve("Test"));
@@ -102,15 +121,25 @@ module Test2
     [Fact]
     public void Analyze_MethodRegisteredInSymbolTable()
     {
-        CompilationContext context = new CompilationContext();
-        context.Parse(TEST_SOURCE);
-        context.Analyze();
-
-        var root = context.RootNode!;
+        var (root, context) = ParseAndAnalyze();
         var symbolMap = context.SymbolMap!;
 
         var methodSymbol = symbolMap[root.Modules[0]].Resolve("MyMethod");
         Assert.IsType<MethodDefinitionSymbol>(methodSymbol);
-        Assert.Equal(TypeSymbol.Type.Void, ((MethodDefinitionSymbol)methodSymbol).ReturnType.KnownType);
+        Assert.Equal(TypeSymbol.Type.I32, ((MethodDefinitionSymbol)methodSymbol).ReturnType.KnownType);
+    }
+
+    [Fact]
+    public void Analyze_UnresolvedImport_ReportsDiagnostic()
+    {
+        var (_, context) = ParseAndAnalyze(UNRESOLVED_IMPORT_SOURCE);
+        Assert.Contains(context.DiagnosticContext.Diagnostics, d => d.Level == Diagnostic.DiagnosticLevel.Error);
+    }
+
+    [Fact]
+    public void Analyze_UnresolvedType_ReportsDiagnostic()
+    {
+        var (_, context) = ParseAndAnalyze(UNRESOLVED_TYPE_SOURCE);
+        Assert.Contains(context.DiagnosticContext.Diagnostics, d => d.Level == Diagnostic.DiagnosticLevel.Error);
     }
 }

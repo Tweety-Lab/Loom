@@ -16,6 +16,9 @@ public class AnalysisContext
     /// <summary> Maps <see cref="ASTNode"/>s to their corresponding <see cref="SymbolTable"/>. </summary>
     public Dictionary<ASTNode, SymbolTable> SymbolTables { get; } = new();
 
+    /// <summary> Maps <see cref="ExpressionNode"/>s to their corresponding <see cref="TypeSymbol"/>. </summary>
+    public Dictionary<ExpressionNode, TypeSymbol> ExpressionTypes { get; } = new();
+
     /// <summary> All registered analyzers the pipeline uses. </summary>
     public List<Analyzers.Analyzer> Analyzers
     {
@@ -44,8 +47,14 @@ public class AnalysisContext
 
         SymbolTables[root] = rootTable;
 
+        // Resolve Declarations
         var declWalker = new DeclarationWalker(SymbolTables, rootTable);
         declWalker.WalkChildren(root);
+
+        // Resolve Types
+        var typeWalker = new TypeWalker(ExpressionTypes, rootTable);
+        typeWalker.WalkChildren(root);
+
 
         var semWalker = new SemanticWalker(SymbolTables);
         semWalker.SetRootTable(rootTable);

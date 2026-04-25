@@ -24,7 +24,10 @@ public class BlockRule : ParserRule<BlockNode>
 
         var dispatch = new Dictionary<TokenType, Action>
         {
-            [TokenType.Void] = () => body.Add(RunRule<MethodDefinitionRule, MethodDefinitionNode>()), // Method Definitions 
+            [TokenType.Void] = () => body.Add(RunRule<MethodDefinitionRule, MethodDefinitionNode>()),
+            [TokenType.I32] = () => body.Add(RunRule<MethodDefinitionRule, MethodDefinitionNode>()),
+            [TokenType.Identifier] = () => body.Add(RunRule<MethodDefinitionRule, MethodDefinitionNode>()), // Method Definitions HACK
+
             [TokenType.Module] = () => body.Add(RunRule<ModuleRule, ModuleNode>()), // Nested Modules
             [TokenType.Unsafe] = () => body.Add(RunRule<UnsafeRule, UnsafeNode>()), // Unsafe
         };
