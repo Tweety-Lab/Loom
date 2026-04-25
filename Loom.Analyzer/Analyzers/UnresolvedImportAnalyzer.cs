@@ -1,4 +1,5 @@
 ﻿using Loom.Analyzer.Symbols;
+using Loom.Common.Diagnostics;
 using Loom.Parser.AST;
 using Loom.Parser.Rules.Default;
 
@@ -10,12 +11,14 @@ namespace Loom.Analyzer.Analyzers;
 [LoomAnalyzer]
 public class UnresolvedImportAnalyzer : Analyzer
 {
+    public static Diagnostic UnresolvedImportDiagnostic = new Diagnostic(Diagnostic.DiagnosticLevel.Error, "The module '{0}' could not be resolved.");
+
     [Visitor]
     public void Visit(ImportNode node)
     {
         ModuleSymbol? symbol = Context.ResolveSymbol(Context.SymbolTables.First().Key, node.ModuleName) as ModuleSymbol;
 
         if (symbol == null)
-            Context.DiagnosticContext?.Report(new Common.Diagnostics.Diagnostic(Common.Diagnostics.Diagnostic.DiagnosticLevel.Error, $"Unresolved import: {node.ModuleName}"));
+            Context.DiagnosticContext?.Report(UnresolvedImportDiagnostic, node.ModuleName);
     }
 }

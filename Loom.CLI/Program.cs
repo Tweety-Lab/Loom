@@ -1,5 +1,6 @@
 ﻿using Loom.Analyzer;
 using Loom.Common;
+using Loom.Common.Diagnostics;
 using Loom.Parser;
 using System.Diagnostics;
 
@@ -10,7 +11,6 @@ public class Program
     public const string TEST_SOURCE = @"
 import Test;
 import Test2;
-import thjkgdfg;
 
 module Test
 {
@@ -31,6 +31,17 @@ module Test2
         context.Parse(TEST_SOURCE).Analyze();
 
         foreach (var diagnostic in context.DiagnosticContext.Diagnostics)
+        {
+            Console.ForegroundColor = diagnostic.Level switch
+            {
+                Diagnostic.DiagnosticLevel.Error => ConsoleColor.Red,
+                Diagnostic.DiagnosticLevel.Warning => ConsoleColor.Yellow,
+                _ => ConsoleColor.White
+            };
+
             Console.WriteLine(diagnostic.Message);
+        }
+
+        Console.ResetColor();
     }
 }
