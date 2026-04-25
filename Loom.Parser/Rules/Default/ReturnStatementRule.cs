@@ -5,10 +5,10 @@ using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.Rules.Default;
 
-public record ReturnStatementNode() : StatementNode
+public record ReturnStatementNode(ExpressionNode? Expression = null) : StatementNode
 {
     /// <inheritdoc/>
-    public override IEnumerable<ASTNode> Children => Enumerable.Empty<ASTNode>();
+    public override IEnumerable<ASTNode> Children => Expression is not null ? new[] { Expression } : Enumerable.Empty<ASTNode>();
 }
 
 [ParserRule]
@@ -22,6 +22,9 @@ public class ReturnStatementRule : ParserRule<ReturnStatementNode>
     {
         Parser.Reader.Expect(TokenType.Return); // return
 
-        return new ReturnStatementNode();
+        if (Parser.Reader.Check(TokenType.Semicolon))
+            return new ReturnStatementNode();
+
+        return new ReturnStatementNode(RunRule<ExpressionRule, ExpressionNode>());
     }
 }

@@ -18,7 +18,7 @@ module Test
 {
     export void MyMethod()
     {
-        return;
+        return 123;
     }
 }
 
@@ -62,5 +62,8 @@ module Test2
         var method = (MethodDefinitionNode)root.Modules.First().Body.Contents.First();
         Assert.Single(method.Body.Contents);
         Assert.IsType<ReturnStatementNode>(method.Body.Contents.First());
+
+        var returnStatement = (ReturnStatementNode)method.Body.Contents.First();
+        Assert.Equal("123", ((NumberLiteralNode)returnStatement.Expression!).Value);
     }
 }
