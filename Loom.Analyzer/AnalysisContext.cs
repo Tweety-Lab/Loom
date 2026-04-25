@@ -37,6 +37,11 @@ public class AnalysisContext
     public void Analyze(ProgramNode root)
     {
         var rootTable = new SymbolTable();
+
+        // Built-in types
+        rootTable.Define("void", new TypeSymbol("void", TypeSymbol.Type.Void));
+        rootTable.Define("i32", new TypeSymbol("i32", TypeSymbol.Type.I32));
+
         SymbolTables[root] = rootTable;
 
         var declWalker = new DeclarationWalker(SymbolTables, rootTable);

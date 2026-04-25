@@ -6,7 +6,7 @@ using Loom.Parser.Rules.Default;
 namespace Loom.Analyzer.Analyzers;
 
 /// <summary>
-/// Debug analyzer.
+/// Checks for imports that do not exist.
 /// </summary>
 [LoomAnalyzer]
 public class UnresolvedImportAnalyzer : Analyzer

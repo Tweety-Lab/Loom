@@ -7,7 +7,8 @@ public record TypeSymbol(string Name, TypeSymbol.Type? KnownType) : Symbol(Name)
 {
     public enum Type
     {
-        Void
+        Void,
+        I32
     }
 }
 
