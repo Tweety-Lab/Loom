@@ -38,12 +38,15 @@ public class Token
     public enum TokenType
     {
         Identifier,
+        Number,
 
         [Character('{')] LBrace,
         [Character('}')] RBrace,
 
         [Character('(')] LParen,
         [Character(')')] RParen,
+
+        [Character('=')] Equals,
 
         [Character(';')] Semicolon,
 

@@ -18,6 +18,7 @@ module Test
 {
     export void MyMethod()
     {
+        i32 i = 0;
     }
 }
 
