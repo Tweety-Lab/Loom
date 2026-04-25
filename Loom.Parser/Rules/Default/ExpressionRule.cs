@@ -14,6 +14,7 @@ public abstract record ExpressionNode() : ASTNode
 
 public record NumberLiteralNode(string Value) : ExpressionNode
 {
+    /// <inheritdoc/>
     public override IEnumerable<ASTNode> Children => Enumerable.Empty<ASTNode>();
 }
 
