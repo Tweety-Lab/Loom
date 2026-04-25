@@ -28,7 +28,7 @@ public abstract class ParserRule<T> : IParserRule where T : ASTNode
 
     // TODO: Improve this design
     /// <summary> Loops until <paramref name="until"/> is matched, dispatching to handlers by token type. Throws <see cref="LoomException"/> on unregistered tokens. </summary>
-    protected void ParseUntil(TokenType until, Dictionary<TokenType, Action> handlers)
+    protected void ParseUntil(TokenType until, Dictionary<TokenType, Action> handlers, Action? fallback = null)
     {
         while (!Parser.Reader.Check(until))
         {
@@ -36,6 +36,8 @@ public abstract class ParserRule<T> : IParserRule where T : ASTNode
 
             if (handlers.TryGetValue(token.Type, out var handler))
                 handler();
+            else if (fallback != null)
+                fallback();
             else
                 throw new LoomException($"Unexpected token: {token.Value}");
         }

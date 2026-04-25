@@ -32,7 +32,7 @@ public class BlockRule : ParserRule<BlockNode>
         foreach (var modifier in TokenRegistry.Modifiers)
             dispatch[modifier] = () => body.Add(RunRule<MethodDefinitionRule, MethodDefinitionNode>()); // Keywords
 
-        ParseUntil(TokenType.RBrace, dispatch);
+        ParseUntil(TokenType.RBrace, dispatch, () => body.Add(RunRule<StatementRule, StatementNode>()));
 
         Parser.Reader.Expect(TokenType.RBrace); // }
 

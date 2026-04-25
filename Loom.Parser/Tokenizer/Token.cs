@@ -56,6 +56,8 @@ public class Token
 
         [Keyword("export"), Modifier] Export,
 
+        [Keyword("return")] Return,
+
         [Keyword("void")] Void,
         [Keyword("i32")] I32,
 

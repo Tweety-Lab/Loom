@@ -18,7 +18,7 @@ module Test
 {
     export void MyMethod()
     {
-        i32 i = 0;
+        return;
     }
 }
 
@@ -58,5 +58,9 @@ module Test2
 
         Assert.True(symbolMap[root.Modules.First()].Resolve("MyMethod") is MethodDefinitionSymbol);
         Assert.Equal(TypeSymbol.Type.Void, ((MethodDefinitionSymbol)symbolMap[root.Modules.First()].Resolve("MyMethod")).ReturnType.KnownType);
+
+        var method = (MethodDefinitionNode)root.Modules.First().Body.Contents.First();
+        Assert.Single(method.Body.Contents);
+        Assert.IsType<ReturnStatementNode>(method.Body.Contents.First());
     }
 }
