@@ -19,6 +19,24 @@ public class AnalysisContext
     /// <summary> Maps <see cref="ExpressionNode"/>s to their corresponding <see cref="TypeSymbol"/>. </summary>
     public Dictionary<ExpressionNode, TypeSymbol> ExpressionTypes { get; } = new();
 
+    /// <summary> Maps <see cref="ASTNode"/>s to their parent <see cref="ASTNode"/>. </summary>
+    public Dictionary<ASTNode, ASTNode> Parents { get; } = new();
+
+    public ASTNode? GetParent(ASTNode node) => Parents.TryGetValue(node, out var parent) ? parent : null;
+
+    public T? FirstAncestorOrSelf<T>(ASTNode node) where T : ASTNode
+    {
+        var current = node;
+        while (current != null)
+        {
+            if (current is T match)
+                return match;
+
+            current = GetParent(current);
+        }
+        return null;
+    }
+
     /// <summary> All registered analyzers the pipeline uses. </summary>
     public List<Analyzers.Analyzer> Analyzers
     {
@@ -54,6 +72,10 @@ public class AnalysisContext
         // Resolve Types
         var typeWalker = new TypeWalker(ExpressionTypes, rootTable);
         typeWalker.WalkChildren(root);
+
+        // Resolve Parents
+        var parentWalker = new ParentWalker(Parents);
+        parentWalker.WalkChildren(root);
 
 
         var semWalker = new SemanticWalker(SymbolTables);

@@ -14,7 +14,7 @@ import Test2;
 
 module Test
 {
-    export i32s MyMethod()
+    export i32 MyMethod()
     {
         return 123;
     }

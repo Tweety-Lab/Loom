@@ -11,7 +11,7 @@ namespace Loom.Analyzer.Analyzers;
 [LoomAnalyzer]
 public class UnresolvedImportAnalyzer : Analyzer
 {
-    public static Diagnostic UnresolvedImportDiagnostic = new Diagnostic(Diagnostic.DiagnosticLevel.Error, "The module '{0}' could not be resolved.");
+    public static Diagnostic UnresolvedImportDiagnostic = new(Diagnostic.DiagnosticLevel.Error, "The module '{0}' could not be resolved.");
 
     [Visitor]
     public void Visit(ImportNode node)
