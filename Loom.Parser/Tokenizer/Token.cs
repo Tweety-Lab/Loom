@@ -63,6 +63,10 @@ public class Token
         [Character(')')] RParen,
 
         [Character('=')] Equals,
+        [Character('+')] Plus,
+        [Character('-')] Minus,
+        [Character('*')] Star,
+        [Character('/')] Slash,
 
         [Character(';')] Semicolon,
 

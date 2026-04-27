@@ -10,7 +10,6 @@ public class Program
 {
     public const string TEST_SOURCE = @"
 import Test;
-import Test2sfds;
 
 module Test
 {
@@ -21,7 +20,7 @@ module Test
 
     i32 Test()
     {
-        return 1;
+        return 1 * 1 * 3 + 10;
     }
 }
 

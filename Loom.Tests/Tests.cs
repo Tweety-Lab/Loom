@@ -70,6 +70,36 @@ module Test
 }
 ";
 
+    public const string ADD_EXPRESSION_SOURCE = @"
+module Test
+{
+    i32 MyMethod()
+    {
+        return 1 + 2;
+    }
+}
+";
+
+    public const string LEFT_ASSOCIATIVE_SOURCE = @"
+module Test
+{
+    i32 MyMethod()
+    {
+        return 1 + 2 + 3;
+    }
+}
+";
+
+    public const string PRECEDENCE_SOURCE = @"
+module Test
+{
+    i32 MyMethod()
+    {
+        return 1 + 2 * 3;
+    }
+}
+";
+
     private (ProgramNode root, CompilationContext context) ParseAndAnalyze(string source = TEST_SOURCE)
     {
         CompilationContext context = new CompilationContext();
@@ -166,5 +196,65 @@ module Test
         var call = Assert.IsType<CallExpressionNode>(statement.Expression);
         Assert.Equal("MyMethod", call.MethodName);
         Assert.Empty(call.Arguments);
+    }
+
+    [Fact]
+    public void Parse_BinaryExpression_Addition()
+    {
+        var (root, _) = ParseAndAnalyze(ADD_EXPRESSION_SOURCE);
+        var method = (MethodDefinitionNode)root.Modules[0].Body.Contents.First();
+        var returnStatement = (ReturnStatementNode)method.Body.Contents.First();
+
+        var binary = Assert.IsType<BinaryExpressionNode>(returnStatement.Expression);
+
+        var left = Assert.IsType<NumberLiteralNode>(binary.Left);
+        var right = Assert.IsType<NumberLiteralNode>(binary.Right);
+
+        Assert.Equal("1", left.Value);
+        Assert.Equal("2", right.Value);
+        Assert.Equal(Token.TokenType.Plus, binary.Operator.Type);
+    }
+
+    [Fact]
+    public void Parse_BinaryExpression_LeftAssociative()
+    {
+        var (root, _) = ParseAndAnalyze(LEFT_ASSOCIATIVE_SOURCE);
+        var method = (MethodDefinitionNode)root.Modules[0].Body.Contents.First();
+        var returnStatement = (ReturnStatementNode)method.Body.Contents.First();
+
+        var outer = Assert.IsType<BinaryExpressionNode>(returnStatement.Expression);
+
+        var inner = Assert.IsType<BinaryExpressionNode>(outer.Left);
+        var right = Assert.IsType<NumberLiteralNode>(outer.Right);
+
+        Assert.Equal("3", right.Value);
+
+        var innerLeft = Assert.IsType<NumberLiteralNode>(inner.Left);
+        var innerRight = Assert.IsType<NumberLiteralNode>(inner.Right);
+
+        Assert.Equal("1", innerLeft.Value);
+        Assert.Equal("2", innerRight.Value);
+    }
+
+    [Fact]
+    public void Parse_BinaryExpression_Precedence()
+    {
+        var (root, _) = ParseAndAnalyze(PRECEDENCE_SOURCE);
+        var method = (MethodDefinitionNode)root.Modules[0].Body.Contents.First();
+        var returnStatement = (ReturnStatementNode)method.Body.Contents.First();
+
+        var add = Assert.IsType<BinaryExpressionNode>(returnStatement.Expression);
+
+        var left = Assert.IsType<NumberLiteralNode>(add.Left);
+        Assert.Equal("1", left.Value);
+
+        var mult = Assert.IsType<BinaryExpressionNode>(add.Right);
+        Assert.Equal(Token.TokenType.Star, mult.Operator.Type);
+
+        var multLeft = Assert.IsType<NumberLiteralNode>(mult.Left);
+        var multRight = Assert.IsType<NumberLiteralNode>(mult.Right);
+
+        Assert.Equal("2", multLeft.Value);
+        Assert.Equal("3", multRight.Value);
     }
 }
