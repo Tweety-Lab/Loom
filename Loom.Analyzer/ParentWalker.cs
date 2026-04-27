@@ -1,12 +1,10 @@
-﻿using Loom.Analyzer.Symbols;
-using Loom.Parser.AST;
-using Loom.Parser.Rules.Default;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Loom.Parser.AST;
 
 namespace Loom.Analyzer;
 
+/// <summary>
+/// Walks the AST and builds a map of every <see cref="ASTNode"/> to its parent, enabling ancestor traversal.
+/// </summary>
 internal class ParentWalker : ASTVisitor
 {
     /// <summary> All currently mapped <see cref="ASTNode"/> parents. </summary>

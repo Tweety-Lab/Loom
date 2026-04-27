@@ -4,6 +4,9 @@ using Loom.Parser.Rules.Default;
 
 namespace Loom.Analyzer;
 
+/// <summary>
+/// Walks the AST and resolves scopes, tracking the current <see cref="SymbolTable"/> as it enters and exits declaration boundaries.
+/// </summary>
 internal class SemanticWalker : ASTVisitor
 {
     /// <summary> Maps <see cref="ASTNode"/>s to their corresponding <see cref="SymbolTable"/>. </summary>

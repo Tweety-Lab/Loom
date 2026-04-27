@@ -1,12 +1,12 @@
 ﻿using Loom.Analyzer.Symbols;
 using Loom.Parser.AST;
 using Loom.Parser.Rules.Default;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Loom.Analyzer;
 
+/// <summary>
+/// Walks the AST and resolves the <see cref="TypeSymbol"/> for every <see cref="ExpressionNode"/>.
+/// </summary>
 internal class TypeWalker : ASTVisitor
 {
     /// <summary> All currently mapped <see cref="ExpressionNode"/>s to their <see cref="TypeSymbol"/>. </summary>

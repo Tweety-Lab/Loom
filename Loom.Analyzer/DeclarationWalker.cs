@@ -4,6 +4,9 @@ using Loom.Parser.Rules.Default;
 
 namespace Loom.Analyzer;
 
+/// <summary>
+/// Walks the AST and builds scoped <see cref="SymbolTable"/>s, defining symbols for all declarations.
+/// </summary>
 internal class DeclarationWalker : ASTVisitor
 {
     /// <summary> Maps <see cref="ASTNode"/>s to their corresponding <see cref="SymbolTable"/>. </summary>
