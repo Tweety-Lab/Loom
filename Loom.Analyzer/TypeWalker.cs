@@ -10,25 +10,19 @@ namespace Loom.Analyzer;
 /// </summary>
 internal class TypeWalker : ASTWalker
 {
-    /// <summary> All currently mapped <see cref="ExpressionNode"/>s to their <see cref="TypeSymbol"/>. </summary>
-    public Dictionary<ExpressionNode, TypeSymbol> ExpressionTypes { get; private set; }
-
+    /// <summary> The owning <see cref="AnalysisContext"/>. </summary>
     public AnalysisContext Context { get; private set; }
 
     /// <summary> Initializes a new instance of the <see cref="TypeWalker"/> class. </summary>
-    public TypeWalker(Dictionary<ExpressionNode, TypeSymbol> expressionTypes, AnalysisContext context)
-    {
-        ExpressionTypes = expressionTypes;
-        Context = context;
-    }
+    public TypeWalker(AnalysisContext context) => Context = context;
 
     [Visitor]
-    public void Visit(NumberLiteralNode node) => ExpressionTypes[node] = (TypeSymbol)Context.SymbolTables.First().Value.Resolve("i32")!;
+    public void Visit(NumberLiteralNode node) => Context.ExpressionTypes[node] = (TypeSymbol)Context.SymbolTables.First().Value.Resolve("i32")!;
 
     [Visitor]
     public void Visit(CallExpressionNode node)
     {
         if (Context.ResolveSymbol(node, node.MethodName) is MethodDefinitionSymbol methodSymbol)
-            ExpressionTypes[node] = methodSymbol.ReturnType;
+            Context.ExpressionTypes[node] = methodSymbol.ReturnType;
     }
 }

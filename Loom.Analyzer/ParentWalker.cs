@@ -7,25 +7,19 @@ namespace Loom.Analyzer;
 /// </summary>
 internal class ParentWalker : ASTVisitor
 {
-    /// <summary> All currently mapped <see cref="ASTNode"/> parents. </summary>
-    public Dictionary<ASTNode, ASTNode> Parents { get; private set; }
-
-    /// <summary> The current <see cref="ASTNode"/>. </summary>
-    public ASTNode? Current { get; private set; }
+    /// <summary> The owning <see cref="AnalysisContext"/>. </summary>
+    public AnalysisContext Context { get; private set; }
 
     /// <summary> Initializes a new instance of the <see cref="TypeWalker"/> class. </summary>
-    public ParentWalker(Dictionary<ASTNode, ASTNode> parents) => Parents = parents;
+    public ParentWalker(AnalysisContext context) => Context = context;
 
     /// <inheritdoc/>
     protected override void OnUnhandled(ASTNode node)
     {
         foreach (var child in node.Children)
         {
-            Parents[child] = node;
-            var previous = Current;
-            Current = node;
+            Context.Parents[child] = node;
             Dispatch(child);
-            Current = previous;
         }
     }
 }

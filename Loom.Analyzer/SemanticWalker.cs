@@ -9,14 +9,14 @@ namespace Loom.Analyzer;
 /// </summary>
 internal class SemanticWalker : ASTVisitor
 {
-    /// <summary> Maps <see cref="ASTNode"/>s to their corresponding <see cref="SymbolTable"/>. </summary>
-    public Dictionary<ASTNode, SymbolTable> SymbolTables { get; }
+    /// <summary> The owning <see cref="AnalysisContext"/>. </summary>
+    public AnalysisContext Context { get; private set; }
 
     /// <summary> The current <see cref="SymbolTable"/>. </summary>
     public SymbolTable CurrentTable { get; private set; } = null!;
 
     /// <summary> Initializes a new instance of the <see cref="SemanticWalker"/> class. </summary>
-    public SemanticWalker(Dictionary<ASTNode, SymbolTable> symbolTables) => SymbolTables = symbolTables;
+    public SemanticWalker(AnalysisContext context) => Context = context;
 
     public void SetRootTable(SymbolTable table) => CurrentTable = table;
 
@@ -24,7 +24,7 @@ internal class SemanticWalker : ASTVisitor
     public void Visit(ModuleNode node)
     {
         var parent = CurrentTable;
-        CurrentTable = SymbolTables[node];
+        CurrentTable = Context.SymbolTables[node];
         VisitChildren(node);
         CurrentTable = parent;
     }
@@ -33,7 +33,7 @@ internal class SemanticWalker : ASTVisitor
     public void Visit(MethodDefinitionNode node)
     {
         var parent = CurrentTable;
-        CurrentTable = SymbolTables[node];
+        CurrentTable = Context.SymbolTables[node];
         VisitChildren(node);
         CurrentTable = parent;
     }

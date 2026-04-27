@@ -9,8 +9,8 @@ namespace Loom.Analyzer;
 /// </summary>
 internal class DeclarationWalker : ASTVisitor
 {
-    /// <summary> Maps <see cref="ASTNode"/>s to their corresponding <see cref="SymbolTable"/>. </summary>
-    public Dictionary<ASTNode, SymbolTable> SymbolTables { get; }
+    /// <summary> The owning <see cref="AnalysisContext"/>. </summary>
+    public AnalysisContext Context { get; private set; }
 
     /// <summary> The current <see cref="SymbolTable"/>. </summary>
     public SymbolTable CurrentTable { get; private set; }
@@ -19,9 +19,9 @@ internal class DeclarationWalker : ASTVisitor
     public Symbol? CurrentSymbol { get; private set; }
 
     /// <summary> Initializes a new instance of the <see cref="DeclarationWalker"/> class. </summary>
-    public DeclarationWalker(Dictionary<ASTNode, SymbolTable> symbolTables, SymbolTable currentTable)
+    public DeclarationWalker(AnalysisContext context, SymbolTable currentTable)
     {
-        SymbolTables = symbolTables;
+        Context = context;
         CurrentTable = currentTable;
     }
 
@@ -51,7 +51,7 @@ internal class DeclarationWalker : ASTVisitor
         var previousSymbol = CurrentSymbol;
 
         CurrentTable = new SymbolTable(parentTable);
-        SymbolTables[node] = CurrentTable;
+        Context.SymbolTables[node] = CurrentTable;
 
         if (symbol is not null)
             CurrentSymbol = symbol;

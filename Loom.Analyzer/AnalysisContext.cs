@@ -70,21 +70,21 @@ public class AnalysisContext
         // Order here MATTERS
 
         // Resolve Declarations
-        var declWalker = new DeclarationWalker(SymbolTables, rootTable);
+        var declWalker = new DeclarationWalker(this, rootTable);
         declWalker.VisitChildren(root);
 
         // Resolve Parents
-        var parentWalker = new ParentWalker(Parents);
+        var parentWalker = new ParentWalker(this);
         parentWalker.VisitChildren(root);
 
         // Resolve Scopes
-        var semWalker = new SemanticWalker(SymbolTables);
+        var semWalker = new SemanticWalker(this);
         semWalker.SetRootTable(rootTable);
         semWalker.VisitChildren(root);
 
 
         // Resolve Types
-        var typeWalker = new TypeWalker(ExpressionTypes, this);
+        var typeWalker = new TypeWalker(this);
         typeWalker.Dispatch(root);
 
         foreach (var analyzer in Analyzers)
