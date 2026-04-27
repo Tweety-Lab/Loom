@@ -112,8 +112,8 @@ module Test
     {
         var (root, _) = ParseAndAnalyze();
         Assert.Equal(2, root.Imports.Count);
-        Assert.Equal("Test", root.Imports[0].ModuleName.Token.Value);
-        Assert.Equal("Test2", root.Imports[1].ModuleName.Token.Value);
+        Assert.Equal("Test", root.Imports[0].ModuleName.BaseName);
+        Assert.Equal("Test2", root.Imports[1].ModuleName.BaseName);
     }
 
     [Fact]
@@ -121,8 +121,8 @@ module Test
     {
         var (root, _) = ParseAndAnalyze();
         Assert.Equal(2, root.Modules.Count);
-        Assert.Equal("Test", root.Modules[0].Name.Token.Value);
-        Assert.Equal("Test2", root.Modules[1].Name.Token.Value);
+        Assert.Equal("Test", root.Modules[0].Name.BaseName);
+        Assert.Equal("Test2", root.Modules[1].Name.BaseName);
     }
 
     [Fact]
@@ -194,7 +194,7 @@ module Test
         var caller = (MethodDefinitionNode)root.Modules[0].Body.Contents.First();
         var statement = Assert.IsType<ExpressionStatementNode>(caller.Body.Contents.First());
         var call = Assert.IsType<CallExpressionNode>(statement.Expression);
-        Assert.Equal("MyMethod", call.MethodName.Token.Value);
+        Assert.Equal("MyMethod", call.MethodName.BaseName);
         Assert.Empty(call.Arguments);
     }
 

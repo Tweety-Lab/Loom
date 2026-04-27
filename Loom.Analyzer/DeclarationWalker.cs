@@ -28,8 +28,8 @@ internal class DeclarationWalker : ASTVisitor
     [Visitor]
     public void Visit(ModuleNode node)
     {
-        var symbol = new ModuleSymbol(node.Name.Token.Value);
-        CurrentTable.Define(node.Name.Token.Value, symbol);
+        var symbol = new ModuleSymbol(node.Name.BaseName);
+        CurrentTable.Define(node.Name.BaseName, symbol);
 
         WithScope(node, () => VisitChildren(node), symbol);
     }
@@ -39,8 +39,8 @@ internal class DeclarationWalker : ASTVisitor
     {
         var returnType = CurrentTable.Resolve(node.ReturnType.Value) as TypeSymbol ?? new TypeSymbol(node.ReturnType.Value, null);
 
-        var symbol = new MethodDefinitionSymbol(node.MethodName.Token.Value, returnType);
-        CurrentTable.Define(node.MethodName.Token.Value, symbol);
+        var symbol = new MethodDefinitionSymbol(node.MethodName.BaseName, returnType);
+        CurrentTable.Define(node.MethodName.BaseName, symbol);
 
         WithScope(node, () => VisitChildren(node), symbol);
     }

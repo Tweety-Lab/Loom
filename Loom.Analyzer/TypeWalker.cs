@@ -22,7 +22,7 @@ internal class TypeWalker : ASTWalker
     [Visitor]
     public void Visit(CallExpressionNode node)
     {
-        if (Context.ResolveSymbol(node, node.MethodName.Token.Value) is MethodDefinitionSymbol methodSymbol)
+        if (Context.ResolveSymbol(node, node.MethodName.BaseName) is MethodDefinitionSymbol methodSymbol)
             Context.ExpressionTypes[node] = methodSymbol.ReturnType;
     }
 }
