@@ -4,7 +4,7 @@ using Loom.Parser.Rules.Default;
 
 namespace Loom.Analyzer;
 
-internal class SemanticWalker : ASTWalker
+internal class SemanticWalker : ASTVisitor
 {
     /// <summary> Maps <see cref="ASTNode"/>s to their corresponding <see cref="SymbolTable"/>. </summary>
     public Dictionary<ASTNode, SymbolTable> SymbolTables { get; }
@@ -22,7 +22,10 @@ internal class SemanticWalker : ASTWalker
     {
         var parent = CurrentTable;
         CurrentTable = SymbolTables[node];
-        WalkChildren(node);
+        VisitChildren(node);
         CurrentTable = parent;
     }
+
+    /// <inheritdoc/>
+    protected override void OnUnhandled(ASTNode node) => VisitChildren(node);
 }

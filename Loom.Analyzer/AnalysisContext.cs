@@ -24,6 +24,7 @@ public class AnalysisContext
 
     public ASTNode? GetParent(ASTNode node) => Parents.TryGetValue(node, out var parent) ? parent : null;
 
+    /// <summary> Gets the first parent (or self) of the given type. </summary>
     public T? FirstAncestorOrSelf<T>(ASTNode node) where T : ASTNode
     {
         var current = node;
@@ -67,20 +68,20 @@ public class AnalysisContext
 
         // Resolve Declarations
         var declWalker = new DeclarationWalker(SymbolTables, rootTable);
-        declWalker.WalkChildren(root);
+        declWalker.VisitChildren(root);
 
         // Resolve Types
         var typeWalker = new TypeWalker(ExpressionTypes, rootTable);
-        typeWalker.WalkChildren(root);
+        typeWalker.VisitChildren(root);
 
         // Resolve Parents
         var parentWalker = new ParentWalker(Parents);
-        parentWalker.WalkChildren(root);
+        parentWalker.VisitChildren(root);
 
 
         var semWalker = new SemanticWalker(SymbolTables);
         semWalker.SetRootTable(rootTable);
-        semWalker.WalkChildren(root);
+        semWalker.VisitChildren(root);
 
         foreach (var analyzer in Analyzers)
         {

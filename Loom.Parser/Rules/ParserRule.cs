@@ -26,7 +26,7 @@ public abstract class ParserRule<T> : IParserRule where T : ASTNode
     protected TNode RunRule<TRule, TNode>() where TRule : ParserRule<TNode> where TNode : ASTNode => Parser.GetRule<TRule>().Parse();
 
     // TODO: Improve this design
-    /// <summary> Loops until <paramref name="until"/> is matched, dispatching to handlers by token type. Throws <see cref="LoomException"/> on unregistered tokens. </summary>
+    /// <summary> Loops until <paramref name="until"/> is matched, dispatching to handlers by token type. Throws diagnostics on unregistered tokens. </summary>
     protected void ParseUntil(TokenType until, Dictionary<TokenType, Action> handlers, Action? fallback = null)
     {
         while (!Parser.Reader.Check(until))

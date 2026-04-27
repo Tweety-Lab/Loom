@@ -4,7 +4,7 @@ using Loom.Parser.Rules.Default;
 
 namespace Loom.Analyzer;
 
-internal class DeclarationWalker : ASTWalker
+internal class DeclarationWalker : ASTVisitor
 {
     /// <summary> Maps <see cref="ASTNode"/>s to their corresponding <see cref="SymbolTable"/>. </summary>
     public Dictionary<ASTNode, SymbolTable> SymbolTables { get; }
@@ -28,7 +28,7 @@ internal class DeclarationWalker : ASTWalker
         var symbol = new ModuleSymbol(node.Name);
         CurrentTable.Define(node.Name, symbol);
 
-        WithScope(node, () => WalkChildren(node), symbol);
+        WithScope(node, () => VisitChildren(node), symbol);
     }
 
     [Visitor]
@@ -39,7 +39,7 @@ internal class DeclarationWalker : ASTWalker
         var symbol = new MethodDefinitionSymbol(node.MethodName, returnType);
         CurrentTable.Define(node.MethodName, symbol);
 
-        WithScope(node, () => WalkChildren(node), symbol);
+        WithScope(node, () => VisitChildren(node), symbol);
     }
 
     private void WithScope(ASTNode node, Action body, Symbol? symbol = null)
@@ -58,4 +58,7 @@ internal class DeclarationWalker : ASTWalker
         CurrentTable = parentTable;
         CurrentSymbol = previousSymbol;
     }
+
+    /// <inheritdoc/>
+    protected override void OnUnhandled(ASTNode node) => VisitChildren(node);
 }

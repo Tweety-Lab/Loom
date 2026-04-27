@@ -29,7 +29,7 @@ public class CallExpressionRule : ParserRule<CallExpressionNode>
 
         Parser.Reader.Expect(TokenType.RParen); // )
 
-        return new CallExpressionNode(callName, Array.Empty<ExpressionNode>().ToList());
+        return new CallExpressionNode(callName, new List<ExpressionNode>());
     }
 }
 

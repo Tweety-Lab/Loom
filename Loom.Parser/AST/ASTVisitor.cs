@@ -23,13 +23,20 @@ public sealed class VisitorAttribute : Attribute { }
 /// </remarks>
 public abstract class ASTVisitor
 {
-    private static readonly ConcurrentDictionary<(Type visitor, Type node), MethodInfo?> cache = new();
+    protected static readonly ConcurrentDictionary<(Type visitor, Type node), MethodInfo?> cache = new();
+
+    /// <summary> Visits all children of a node. </summary>
+    public void VisitChildren(ASTNode node)
+    {
+        foreach (var child in node.Children)
+            Dispatch(child);
+    }
 
     /// <summary> Called when a node is dispatched that does not have a visit method. </summary>
     protected virtual void OnUnhandled(ASTNode node) { }
 
     /// <summary> Dispatches the node to the correct Visit method via reflection. </summary>
-    public void Dispatch(ASTNode node)
+    public virtual void Dispatch(ASTNode node)
     {
         var method = cache.GetOrAdd((GetType(), node.GetType()), key => key.Item1.GetMethods().FirstOrDefault(m => m.GetCustomAttribute<VisitorAttribute>() != null && m.GetParameters() is [var p] && p.ParameterType == key.Item2));
 

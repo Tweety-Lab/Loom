@@ -14,7 +14,7 @@ import Test2;
 
 module Test
 {
-    export i32 MyMethod()
+    export void MyMethod()
     {
         Test();
     }

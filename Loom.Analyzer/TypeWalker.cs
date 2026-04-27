@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Loom.Analyzer;
 
-internal class TypeWalker : ASTWalker
+internal class TypeWalker : ASTVisitor
 {
     /// <summary> All currently mapped <see cref="ExpressionNode"/>s to their <see cref="TypeSymbol"/>. </summary>
     public Dictionary<ExpressionNode, TypeSymbol> ExpressionTypes { get; private set; }
@@ -22,6 +22,9 @@ internal class TypeWalker : ASTWalker
     public void Visit(NumberLiteralNode node)
     {
         ExpressionTypes[node] = (TypeSymbol)RootTable.Resolve("i32")!;
-        WalkChildren(node);
+        VisitChildren(node);
     }
+
+    /// <inheritdoc/>
+    protected override void OnUnhandled(ASTNode node) => VisitChildren(node);
 }

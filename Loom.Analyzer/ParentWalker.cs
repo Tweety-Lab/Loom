@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Loom.Analyzer;
 
-internal class ParentWalker : ASTWalker
+internal class ParentWalker : ASTVisitor
 {
     /// <summary> All currently mapped <see cref="ASTNode"/> parents. </summary>
     public Dictionary<ASTNode, ASTNode> Parents { get; private set; }
