@@ -6,7 +6,7 @@ using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.Rules.Default;
 
-public record CallExpressionNode(string MethodName, List<ExpressionNode> Arguments) : ExpressionNode
+public record CallExpressionNode(IdentifierNameNode MethodName, List<ExpressionNode> Arguments) : ExpressionNode
 {
     /// <inheritdoc/>
     public override IEnumerable<ASTNode> Children => Arguments;
@@ -21,7 +21,7 @@ public class CallExpressionRule : ParserRule<CallExpressionNode>
     /// <inheritdoc/>
     public override CallExpressionNode ParseNode()
     {
-        var callName = Parser.Reader.Expect(TokenType.Identifier).Value; // name
+        var callName = Parser.Reader.Expect(TokenType.Identifier); // name
 
         Parser.Reader.Expect(TokenType.LParen); // (
 
@@ -29,7 +29,7 @@ public class CallExpressionRule : ParserRule<CallExpressionNode>
 
         Parser.Reader.Expect(TokenType.RParen); // )
 
-        return new CallExpressionNode(callName, new List<ExpressionNode>());
+        return new CallExpressionNode(new IdentifierNameNode(callName), new List<ExpressionNode>());
     }
 }
 

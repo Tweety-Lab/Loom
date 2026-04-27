@@ -4,7 +4,7 @@ using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.Rules.Default;
 
-public record ModuleNode(string Name, BlockNode Body) : ASTNode
+public record ModuleNode(IdentifierNameNode Name, BlockNode Body) : ASTNode
 {
     /// <inheritdoc/>
     public override IEnumerable<ASTNode> Children => new[] { Body };
@@ -20,8 +20,8 @@ public class ModuleRule : ParserRule<ModuleNode>
     public override ModuleNode ParseNode()
     {
         Parser.Reader.Expect(TokenType.Module); // module
-        string name = Parser.Reader.Expect(TokenType.Identifier).Value; // name
+        var name = Parser.Reader.Expect(TokenType.Identifier); // name
 
-        return new ModuleNode(name, Parser.GetRule<BlockRule>().ParseNode());
+        return new ModuleNode(new IdentifierNameNode(name), Parser.GetRule<BlockRule>().ParseNode());
     }
 }

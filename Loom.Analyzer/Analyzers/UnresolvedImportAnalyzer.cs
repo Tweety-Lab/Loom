@@ -16,9 +16,9 @@ public class UnresolvedImportAnalyzer : Analyzer
     [Visitor]
     public void Visit(ImportNode node)
     {
-        ModuleSymbol? symbol = Context.ResolveSymbol(Context.SymbolTables.First().Key, node.ModuleName) as ModuleSymbol;
+        ModuleSymbol? symbol = Context.ResolveSymbol(Context.SymbolTables.First().Key, node.ModuleName.Token.Value) as ModuleSymbol;
 
         if (symbol == null)
-            Context.DiagnosticContext?.Report(UnresolvedImportDiagnostic, node.ModuleName);
+            Context.DiagnosticContext?.Report(UnresolvedImportDiagnostic, node.ModuleName.Token.Value);
     }
 }
