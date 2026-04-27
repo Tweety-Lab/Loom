@@ -3,22 +3,22 @@
 namespace Loom.Parser.Tokenizer.Rules.Default;
 
 [TokenizerRule]
-public class IdentifierRule : ITokenizerRule
+public class IdentifierRule : TokenizerRule
 {
     /// <inheritdoc />
-    public bool CanHandle(char current) => char.IsLetter(current) || current == '_';
+    public override bool CanHandle(char current) => char.IsLetter(current) || current == '_';
 
     /// <inheritdoc />
-    public Token Read(LoomStringReader reader)
+    public override Token Read()
     {
         var sb = new StringBuilder();
 
-        while (reader.Peek() != -1 && (char.IsLetterOrDigit(reader.PeekChar()) || reader.PeekChar() == '_'))
-            sb.Append((char)reader.Read());
+        while (Reader.Peek() != -1 && (char.IsLetterOrDigit(Reader.PeekChar()) || Reader.PeekChar() == '_'))
+            sb.Append((char)Reader.Read());
 
         var value = sb.ToString();
         var type = TokenRegistry.TryGetKeywordType(value, out var keywordType) ? keywordType : Token.TokenType.Identifier;
 
-        return new Token(type, value);
+        return CreateToken(type, value);
     }
 }

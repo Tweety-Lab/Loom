@@ -2,16 +2,16 @@
 namespace Loom.Parser.Tokenizer.Rules.Default;
 
 [TokenizerRule]
-public class CharacterRule : ITokenizerRule
+public class CharacterRule : TokenizerRule
 {
     /// <inheritdoc />
-    public bool CanHandle(char current) => TokenRegistry.Characters.ContainsKey(current);
+    public override bool CanHandle(char current) => TokenRegistry.Characters.ContainsKey(current);
 
     /// <inheritdoc />
-    public Token Read(LoomStringReader reader)
+    public override Token Read()
     {
-        var c = (char)reader.Read();
+        var c = (char)Reader.Read();
         TokenRegistry.TryGetCharacterType(c, out var type);
-        return new Token(type, c.ToString());
+        return CreateToken(type, c.ToString());
     }
 }

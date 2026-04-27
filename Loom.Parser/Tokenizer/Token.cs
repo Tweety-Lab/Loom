@@ -33,6 +33,22 @@ public sealed class CharacterAttribute : Attribute
     public CharacterAttribute(char character) => Character = character;
 }
 
+public readonly struct TokenLocation
+{
+    public int Line { get; }
+    public int Column { get; }
+
+    /// <summary> Initializes a new instance of the <see cref="TokenLocation"/> class. </summary>
+    public TokenLocation(int line, int column)
+    {
+        Line = line;
+        Column = column;
+    }
+
+    /// <inheritdoc/>
+    public override string ToString() => $"({Line}, {Column})";
+}
+
 public class Token
 {
     public enum TokenType
@@ -65,15 +81,19 @@ public class Token
     }
 
     /// <summary> The tokenized type. </summary>
-    public TokenType Type { get; set; }
+    public TokenType Type { get; }
 
     /// <summary> The tokenized string value. </summary>
-    public string Value { get; set; }
+    public string Value { get; }
+    
+    /// <summary> The source location of the token. </summary>
+    public TokenLocation Location { get; }
 
     /// <summary> Initializes a new instance of the <see cref="Token"/> class. </summary>
-    public Token(TokenType type, string value)
+    public Token(TokenType type, string value, TokenLocation location)
     {
         Type = type;
         Value = value;
+        Location = location;
     }
 }

@@ -13,14 +13,14 @@ public class LoomTokenizer
     public List<Token> Tokens { get; } = new();
 
     /// <summary> All registered rules the tokenizer uses. </summary>
-    public List<ITokenizerRule> Rules
+    public List<TokenizerRule> Rules
     {
         get
         {
             if (field != null)
                 return field;
 
-            field = LoomReflection.InstansiateAllWithAttribute<TokenizerRuleAttribute>(Assembly.GetExecutingAssembly()).Cast<ITokenizerRule>().ToList();
+            field = LoomReflection.InstansiateAllWithAttribute<TokenizerRuleAttribute>(Assembly.GetExecutingAssembly()).Cast<TokenizerRule>().ToList();
 
             return field;
         }
@@ -55,7 +55,8 @@ public class LoomTokenizer
             foreach (var rule in Rules)
                 if (rule.CanHandle(current))
                 {
-                    Tokens.Add(rule.Read(Reader));
+                    rule.Reader = Reader;
+                    Tokens.Add(rule.Read());
                     matched = true;
                     break;
                 }
@@ -64,7 +65,7 @@ public class LoomTokenizer
                 Reader.Read();
         }
 
-        Tokens.Add(new Token(Token.TokenType.EOF, ""));
+        Tokens.Add(new Token(Token.TokenType.EOF, "", new TokenLocation(Reader.Line, Reader.Column)));
         return Tokens;
     }
 }

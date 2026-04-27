@@ -3,20 +3,20 @@
 namespace Loom.Parser.Tokenizer.Rules.Default;
 
 [TokenizerRule]
-public class NumberRule : ITokenizerRule
+public class NumberRule : TokenizerRule
 {
     /// <inheritdoc />
-    public bool CanHandle(char current) => char.IsDigit(current);
+    public override bool CanHandle(char current) => char.IsDigit(current);
 
     /// <inheritdoc />
-    public Token Read(LoomStringReader reader)
+    public override Token Read()
     {
         var sb = new StringBuilder();
 
-        while (reader.Peek() != -1 && char.IsDigit(reader.PeekChar()))
-            sb.Append((char)reader.Read());
+        while (Reader.Peek() != -1 && char.IsDigit(Reader.PeekChar()))
+            sb.Append((char)Reader.Read());
 
-        return new Token(Token.TokenType.Number, sb.ToString());
+        return CreateToken(Token.TokenType.Number, sb.ToString());
     }
 }
 
