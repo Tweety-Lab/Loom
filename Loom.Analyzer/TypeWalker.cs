@@ -7,7 +7,7 @@ namespace Loom.Analyzer;
 /// <summary>
 /// Walks the AST and resolves the <see cref="TypeSymbol"/> for every <see cref="ExpressionNode"/>.
 /// </summary>
-internal class TypeWalker : ASTVisitor
+internal class TypeWalker : ASTWalker
 {
     /// <summary> All currently mapped <see cref="ExpressionNode"/>s to their <see cref="TypeSymbol"/>. </summary>
     public Dictionary<ExpressionNode, TypeSymbol> ExpressionTypes { get; private set; }
@@ -19,12 +19,5 @@ internal class TypeWalker : ASTVisitor
     public TypeWalker(Dictionary<ExpressionNode, TypeSymbol> expressionTypes, SymbolTable rootTable) => (ExpressionTypes, RootTable) = (expressionTypes, rootTable);
 
     [Visitor]
-    public void Visit(NumberLiteralNode node)
-    {
-        ExpressionTypes[node] = (TypeSymbol)RootTable.Resolve("i32")!;
-        VisitChildren(node);
-    }
-
-    /// <inheritdoc/>
-    protected override void OnUnhandled(ASTNode node) => VisitChildren(node);
+    public void Visit(NumberLiteralNode node) => ExpressionTypes[node] = (TypeSymbol)RootTable.Resolve("i32")!;
 }
