@@ -29,6 +29,15 @@ internal class SemanticWalker : ASTVisitor
         CurrentTable = parent;
     }
 
+    [Visitor]
+    public void Visit(MethodDefinitionNode node)
+    {
+        var parent = CurrentTable;
+        CurrentTable = SymbolTables[node];
+        VisitChildren(node);
+        CurrentTable = parent;
+    }
+
     /// <inheritdoc/>
     protected override void OnUnhandled(ASTNode node) => VisitChildren(node);
 }

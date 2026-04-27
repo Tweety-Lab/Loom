@@ -14,14 +14,14 @@ import Test2;
 
 module Test
 {
-    export void MyMethod()
+    export i32 MyMethod()
     {
-        Test();
+        return Test();
     }
 
-    i32 Test()
+    void Test()
     {
-        return 2;
+
     }
 }
 

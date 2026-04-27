@@ -22,22 +22,6 @@ public class AnalysisContext
     /// <summary> Maps <see cref="ASTNode"/>s to their parent <see cref="ASTNode"/>. </summary>
     public Dictionary<ASTNode, ASTNode> Parents { get; } = new();
 
-    public ASTNode? GetParent(ASTNode node) => Parents.TryGetValue(node, out var parent) ? parent : null;
-
-    /// <summary> Gets the first parent (or self) of the given type. </summary>
-    public T? FirstAncestorOrSelf<T>(ASTNode node) where T : ASTNode
-    {
-        var current = node;
-        while (current != null)
-        {
-            if (current is T match)
-                return match;
-
-            current = GetParent(current);
-        }
-        return null;
-    }
-
     /// <summary> All registered analyzers the pipeline uses. </summary>
     public List<Analyzers.Analyzer> Analyzers
     {
@@ -55,6 +39,23 @@ public class AnalysisContext
     /// <summary> Initializes a new instance of the <see cref="AnalysisContext"/> class. </summary>
     public AnalysisContext(DiagnosticContext? diagnosticContext = null) => DiagnosticContext = diagnosticContext;
 
+    /// <summary> Gets the first parent (or self) of the given type. </summary>
+    public T? FirstAncestorOrSelf<T>(ASTNode node) where T : ASTNode
+    {
+        var current = node;
+        while (current != null)
+        {
+            if (current is T match)
+                return match;
+
+            current = GetParent(current);
+        }
+        return null;
+    }
+
+    /// <summary> Gets the immediate parent of the given <see cref="ASTNode"/>. </summary>
+    public ASTNode? GetParent(ASTNode node) => Parents.TryGetValue(node, out var parent) ? parent : null;
+
     /// <summary> Runs the given <see cref="ProgramNode"/> through the Semantic Analyzer. </summary>
     public void Analyze(ProgramNode root)
     {
@@ -66,22 +67,25 @@ public class AnalysisContext
 
         SymbolTables[root] = rootTable;
 
+        // Order here MATTERS
+
         // Resolve Declarations
         var declWalker = new DeclarationWalker(SymbolTables, rootTable);
         declWalker.VisitChildren(root);
-
-        // Resolve Types
-        var typeWalker = new TypeWalker(ExpressionTypes, rootTable);
-        typeWalker.VisitChildren(root);
 
         // Resolve Parents
         var parentWalker = new ParentWalker(Parents);
         parentWalker.VisitChildren(root);
 
-
+        // Resolve Scopes
         var semWalker = new SemanticWalker(SymbolTables);
         semWalker.SetRootTable(rootTable);
         semWalker.VisitChildren(root);
+
+
+        // Resolve Types
+        var typeWalker = new TypeWalker(ExpressionTypes, this);
+        typeWalker.Dispatch(root);
 
         foreach (var analyzer in Analyzers)
         {
@@ -93,9 +97,15 @@ public class AnalysisContext
     /// <summary> Resolves a <see cref="Symbol"/> by name or null if not found. </summary>
     public Symbol? ResolveSymbol(ASTNode node, string name)
     {
-        if (!SymbolTables.TryGetValue(node, out var table))
-            return null;
+        var current = node;
+        while (current != null)
+        {
+            if (SymbolTables.TryGetValue(current, out var table))
+                return table.Resolve(name);
 
-        return table.Resolve(name);
+            current = GetParent(current);
+        }
+
+        return null;
     }
 }

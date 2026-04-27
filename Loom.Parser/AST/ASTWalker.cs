@@ -1,4 +1,5 @@
 ﻿using Loom.Parser.Rules.Default;
+using System.Diagnostics;
 using System.Reflection;
 
 namespace Loom.Parser.AST;
@@ -11,10 +12,10 @@ public class ASTWalker : ASTVisitor
     /// <inheritdoc/>
     public override void Dispatch(ASTNode node)
     {
-        var hasVisitor = cache.ContainsKey((GetType(), node.GetType()));
+        var nodeType = node.GetType();
         base.Dispatch(node);
 
-        if (hasVisitor)
+        if (cache.TryGetValue((GetType(), nodeType), out var method) && method != null)
             VisitChildren(node);
     }
 
