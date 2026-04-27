@@ -29,6 +29,7 @@ public class ExpressionRule : ParserRule<ExpressionNode>
         return Parser.Reader.Current.Type switch
         {
             TokenType.Number => new NumberLiteralNode(Parser.Reader.Advance().Value),
+            TokenType.Identifier when Parser.Reader.Peek().Type == TokenType.LParen => RunRule<CallExpressionRule, CallExpressionNode>(),
             _ => throw new Exception($"Unexpected token: {Parser.Reader.Current.Value}")
         };
     }

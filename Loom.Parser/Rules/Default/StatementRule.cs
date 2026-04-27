@@ -6,6 +6,12 @@ namespace Loom.Parser.Rules.Default;
 
 public abstract record StatementNode() : ASTNode;
 
+public record ExpressionStatementNode(ExpressionNode Expression) : StatementNode
+{
+    /// <inheritdoc/>
+    public override IEnumerable<ASTNode> Children => [Expression];
+}
+
 [ParserRule]
 public class StatementRule : ParserRule<StatementNode>
 {
@@ -15,11 +21,11 @@ public class StatementRule : ParserRule<StatementNode>
     /// <inheritdoc/>
     public override StatementNode Parse()
     {
-        var statement = Parser.Reader.Current.Type switch
+        var statement = (StatementNode)(Parser.Reader.Current.Type switch
         {
             TokenType.Return => RunRule<ReturnStatementRule, ReturnStatementNode>(),
-            _ => throw new Exception($"Unexpected token: {Parser.Reader.Current.Value}")
-        };
+            _ => new ExpressionStatementNode(RunRule<ExpressionRule, ExpressionNode>())
+        });
 
         Parser.Reader.Expect(TokenType.Semicolon); // ;
         return statement;

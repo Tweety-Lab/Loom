@@ -56,6 +56,20 @@ module Test
 }
 ";
 
+    public const string METHOD_CALL_SOURCE = @"
+module Test
+{
+    void Caller()
+    {
+        MyMethod();
+    }
+
+    void MyMethod()
+    {
+    }
+}
+";
+
     private (ProgramNode root, CompilationContext context) ParseAndAnalyze(string source = TEST_SOURCE)
     {
         CompilationContext context = new CompilationContext();
@@ -141,5 +155,16 @@ module Test
     {
         var (_, context) = ParseAndAnalyze(UNRESOLVED_TYPE_SOURCE);
         Assert.Contains(context.DiagnosticContext.Diagnostics, d => d.Level == Diagnostic.DiagnosticLevel.Error);
+    }
+
+    [Fact]
+    public void Parse_MethodCallStatement()
+    {
+        var (root, _) = ParseAndAnalyze(METHOD_CALL_SOURCE);
+        var caller = (MethodDefinitionNode)root.Modules[0].Body.Contents.First();
+        var statement = Assert.IsType<ExpressionStatementNode>(caller.Body.Contents.First());
+        var call = Assert.IsType<CallExpressionNode>(statement.Expression);
+        Assert.Equal("MyMethod", call.MethodName);
+        Assert.Empty(call.Arguments);
     }
 }

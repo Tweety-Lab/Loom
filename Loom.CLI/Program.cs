@@ -14,9 +14,9 @@ import Test2;
 
 module Test
 {
-    export gsds MyMethod()
+    export i32 MyMethod()
     {
-        return 123;
+        Test();
     }
 
     i32 Test()
