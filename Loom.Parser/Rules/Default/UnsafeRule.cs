@@ -17,10 +17,10 @@ public class UnsafeRule : ParserRule<UnsafeNode>
     public UnsafeRule(LoomParser parser) : base(parser) { }
 
     /// <inheritdoc/>
-    public override UnsafeNode Parse()
+    public override UnsafeNode ParseNode()
     {
         Parser.Reader.Expect(TokenType.Unsafe); // unsafe
 
-        return new UnsafeNode(Parser.GetRule<BlockRule>().Parse());
+        return new UnsafeNode(Parser.GetRule<BlockRule>().ParseNode());
     }
 }

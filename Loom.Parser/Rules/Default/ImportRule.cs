@@ -17,7 +17,7 @@ public class ImportRule : ParserRule<ImportNode>
     public ImportRule(LoomParser parser) : base(parser) { }
 
     /// <inheritdoc/>
-    public override ImportNode Parse()
+    public override ImportNode ParseNode()
     {
         Parser.Reader.Expect(TokenType.Import); // import
         var moduleName = Parser.Reader.Expect(TokenType.Identifier).Value; // name

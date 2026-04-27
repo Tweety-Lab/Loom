@@ -17,7 +17,15 @@ public abstract class ParserRule<T> : IParserRule where T : ASTNode
     public ParserRule(LoomParser parser) => Parser = parser;
 
     /// <summary> Parses <typeparamref name="T"/>. </summary>
-    public abstract T Parse();
+    public abstract T ParseNode();
+
+    public T Parse()
+    {
+        var startToken = Parser.Reader.Current;
+        var node = ParseNode();
+        node.StartToken = startToken;
+        return node;
+    }
 
     /// <inheritdoc/>
     public ASTNode? ParseUntyped(LoomParser parser) => Parse();

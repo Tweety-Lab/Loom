@@ -19,7 +19,7 @@ public class CallExpressionRule : ParserRule<CallExpressionNode>
     public CallExpressionRule(LoomParser parser) : base(parser) { }
 
     /// <inheritdoc/>
-    public override CallExpressionNode Parse()
+    public override CallExpressionNode ParseNode()
     {
         var callName = Parser.Reader.Expect(TokenType.Identifier).Value; // name
 

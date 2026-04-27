@@ -13,10 +13,10 @@ public class LoomStringReader
     public int Position { get; private set; }
 
     /// <summary> The current reading line in the source string. </summary>
-    public int Line { get; private set; } = 1;
+    public int Line { get; private set; } = 0;
 
     /// <summary> The current reading column in the source string. </summary>
-    public int Column { get; private set; } = 1;
+    public int Column { get; private set; } = 0;
 
     /// <summary> Checks if the reader is at the end of the source string. </summary>
     public bool IsEnd => Position >= Source.Length;

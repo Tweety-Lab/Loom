@@ -10,7 +10,7 @@ public class Program
 {
     public const string TEST_SOURCE = @"
 import Test;
-import Test2;
+import Test2sfds;
 
 module Test
 {

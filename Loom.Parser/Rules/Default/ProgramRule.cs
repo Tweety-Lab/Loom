@@ -16,7 +16,7 @@ public class ProgramRule : ParserRule<ProgramNode>
     public ProgramRule(LoomParser parser) : base(parser) { }
 
     /// <inheritdoc/>
-    public override ProgramNode Parse()
+    public override ProgramNode ParseNode()
     {
         var imports = new List<ImportNode>();
         var modules = new List<ModuleNode>();

@@ -19,7 +19,7 @@ public class StatementRule : ParserRule<StatementNode>
     public StatementRule(LoomParser parser) : base(parser) { }
 
     /// <inheritdoc/>
-    public override StatementNode Parse()
+    public override StatementNode ParseNode()
     {
         var statement = (StatementNode)(Parser.Reader.Current.Type switch
         {

@@ -18,7 +18,7 @@ public class MethodDefinitionRule : ParserRule<MethodDefinitionNode>
     public MethodDefinitionRule(LoomParser parser) : base(parser) { }
 
     /// <inheritdoc/>
-    public override MethodDefinitionNode Parse()
+    public override MethodDefinitionNode ParseNode()
     {
         var modifiers = Parser.Reader.ExpectMany(t => TokenRegistry.IsModifier(t.Type));
 
@@ -28,6 +28,6 @@ public class MethodDefinitionRule : ParserRule<MethodDefinitionNode>
         Parser.Reader.Expect(TokenType.LParen); // (
         Parser.Reader.Expect(TokenType.RParen); // )
 
-        return new MethodDefinitionNode(returnType, methodName, Parser.GetRule<BlockRule>().Parse(), modifiers);
+        return new MethodDefinitionNode(returnType, methodName, Parser.GetRule<BlockRule>().ParseNode(), modifiers);
     }
 }

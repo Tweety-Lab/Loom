@@ -17,11 +17,11 @@ public class ModuleRule : ParserRule<ModuleNode>
     public ModuleRule(LoomParser parser) : base(parser) { }
     
     /// <inheritdoc/>
-    public override ModuleNode Parse()
+    public override ModuleNode ParseNode()
     {
         Parser.Reader.Expect(TokenType.Module); // module
         string name = Parser.Reader.Expect(TokenType.Identifier).Value; // name
 
-        return new ModuleNode(name, Parser.GetRule<BlockRule>().Parse());
+        return new ModuleNode(name, Parser.GetRule<BlockRule>().ParseNode());
     }
 }

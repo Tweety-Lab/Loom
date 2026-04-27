@@ -17,7 +17,7 @@ public class ReturnStatementRule : ParserRule<ReturnStatementNode>
     public ReturnStatementRule(LoomParser parser) : base(parser) { }
 
     /// <inheritdoc/>
-    public override ReturnStatementNode Parse()
+    public override ReturnStatementNode ParseNode()
     {
         Parser.Reader.Expect(TokenType.Return); // return
 

@@ -17,7 +17,7 @@ public class BlockRule : ParserRule<BlockNode>
     public BlockRule(LoomParser parser) : base(parser) { }
 
     /// <inheritdoc/>
-    public override BlockNode Parse()
+    public override BlockNode ParseNode()
     {
         var body = new List<ASTNode>();
         Parser.Reader.Expect(TokenType.LBrace); // {

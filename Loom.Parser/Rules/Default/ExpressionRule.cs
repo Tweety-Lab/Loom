@@ -24,7 +24,7 @@ public class ExpressionRule : ParserRule<ExpressionNode>
     public ExpressionRule(LoomParser parser) : base(parser) { }
 
     /// <inheritdoc/>
-    public override ExpressionNode Parse()
+    public override ExpressionNode ParseNode()
     {
         return Parser.Reader.Current.Type switch
         {

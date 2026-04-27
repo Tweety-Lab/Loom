@@ -38,5 +38,5 @@ public class LoomParser
     public T GetRule<T>() where T : IParserRule => (T)Rules.First(x => x.GetType() == typeof(T));
 
     /// <summary> Parses the given source code into a root <see cref="ProgramNode"/>. </summary>
-    public ProgramNode ParseProgram() => new ProgramRule(this).Parse();
+    public ProgramNode ParseProgram() => new ProgramRule(this).ParseNode();
 }
