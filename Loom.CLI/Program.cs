@@ -19,9 +19,9 @@ module Test
         return Test();
     }
 
-    void Test()
+    i32 Test()
     {
-
+        return 1;
     }
 }
 
