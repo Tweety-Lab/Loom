@@ -21,18 +21,12 @@ public class ReturnTypeMismatchAnalyzer : Analyzer
         var method = Context.FirstAncestorOrSelf<MethodDefinitionNode>(node);
 
         if (method == null)
-        {
-            WalkChildren(node);
             return;
-        }
 
         var methodSymbol = Context.FirstAncestorOrSelf<ModuleNode>(method) is { } module ? Context.ResolveSymbol(module, method.MethodName) as MethodDefinitionSymbol : null;
 
         if (methodSymbol == null)
-        {
-            WalkChildren(node);
             return;
-        }
 
         var isVoid = methodSymbol.ReturnType.KnownType == TypeSymbol.Type.Void;
 
@@ -43,7 +37,5 @@ public class ReturnTypeMismatchAnalyzer : Analyzer
         else if (node.Expression != null && Context.ExpressionTypes.TryGetValue(node.Expression, out var exprType))
             if (exprType.KnownType != methodSymbol.ReturnType.KnownType)
                 Context.DiagnosticContext?.Report(ReturnTypeMismatch, exprType.Name, methodSymbol.ReturnType.Name);
-
-        WalkChildren(node);
     }
 }
