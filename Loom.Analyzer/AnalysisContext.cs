@@ -101,5 +101,12 @@ public class AnalysisContext
     }
 
     /// <summary> Resolves a <see cref="Symbol"/> from the given <see cref="ASTNode"/>. </summary>
-    public Symbol? ResolveSymbol(ASTNode node) => BoundSymbols.TryGetValue(node, out var symbol) ? symbol : null;
-}
+    public SymbolInfo ResolveSymbol(ASTNode node)
+    {
+        if (BoundSymbols.TryGetValue(node, out var symbol))
+            return new SymbolInfo(symbol);
+
+        return default;
+    }
+} 
+
