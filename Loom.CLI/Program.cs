@@ -21,15 +21,14 @@ module Test
         i32 x = Test();
         return x;
     }
-
-    i32 Test()
-    {
-        return 1 + 1;
-    }
 }
 
 module Test2
 {
+    i32 Test()
+    {
+        return 1 + 1;
+    }
 }
 ";
 

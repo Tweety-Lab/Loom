@@ -9,6 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Loom.Analyzer\Loom.Analyzer.csproj" />
     <ProjectReference Include="..\Loom.Common\Loom.Common.csproj" />
+    <ProjectReference Include="..\Loom.Parser\Loom.Parser.csproj" />
   </ItemGroup>
 
 </Project>

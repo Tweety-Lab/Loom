@@ -3,6 +3,7 @@ using Loom.LIR.Builders;
 using Loom.LIR.Generators;
 using Loom.LIR.OpCodes;
 using Loom.LIR.Printers;
+using Loom.Parser;
 
 namespace Loom.LIR;
 
@@ -18,31 +19,15 @@ public static class CompilationContextExtensions
         /// <summary> Runs the <see cref="CompilationContext"/> through the Loom Intermediate Representation generation pipeline. </summary>
         public CompilationContext EmitLIR()
         {
-            CompilationUnitBuilder builder = new();
-            var func = builder.DefineFunction("TestModule::AdditionFunc", LIRType.Int32, new List<LIRType>());
-            var il = func.LIRGenerator;
+            foreach (var syntaxTree in ctx.SyntaxTrees)
+            {
+                LIRASTWalker walker = new(ctx);
+                LIRCompilationUnit comp = walker.Build(syntaxTree);
 
-            var a = il.Emit(LIROpCode.Const, new LIRConstantValue(1));
-            var b = il.Emit(LIROpCode.Const, new LIRConstantValue(1));
-            var sum = il.Emit(LIROpCode.Add, a, b);
-
-            il.Emit(LIROpCode.Ret, sum);
-
-            var callingFunc = builder.DefineFunction("TestModule::CallingFunc", LIRType.Int32, new List<LIRType>());
-            var il2 = callingFunc.LIRGenerator;
-
-            var callResult = il2.Emit(LIROpCode.Call, new LIRFunctionValue(func.Build()));
-            il2.Emit(LIROpCode.Ret, callResult);
-
-            callingFunc.WritingBlock = callingFunc.CreateBlock("second");
-
-            il2.Emit(LIROpCode.Call, new LIRFunctionValue(func.Build()));
-
-            var unit = builder.Build();
-            LIRPrinter printer = new LIRPrinter(new StringPrinterStyle());
-            string lir = printer.Print(unit);
-
-            Console.WriteLine(lir);
+                LIRPrinter printer = new LIRPrinter(new StringPrinterStyle());
+                string lir = printer.Print(comp);
+                Console.WriteLine(lir);
+            }
 
             return ctx;
         }
