@@ -100,6 +100,27 @@ module Test
 }
 ";
 
+    public const string BINDING_SOURCE = @"
+import Test2;
+
+module Test
+{
+    i32 MyMethod()
+    {
+        return Helper();
+    }
+
+    i32 Helper()
+    {
+        return 42;
+    }
+}
+
+module Test2
+{
+}
+";
+
     private (ProgramNode root, CompilationContext context) ParseAndAnalyze(string source = TEST_SOURCE)
     {
         CompilationContext context = new CompilationContext();
@@ -156,7 +177,7 @@ module Test
     public void Analyze_ModulesRegisteredInBinder()
     {
         var (root, context) = ParseAndAnalyze();
-        var symbolMap = context.SymbolMap!;
+        var symbolMap = context.AnalysisContext.Binders;
 
         Assert.IsType<ModuleSymbol>(symbolMap[root].Lookup("Test")?.First());
         Assert.IsType<ModuleSymbol>(symbolMap[root].Lookup("Test2")?.First());
@@ -166,7 +187,7 @@ module Test
     public void Analyze_MethodRegisteredInBinder()
     {
         var (root, context) = ParseAndAnalyze();
-        var symbolMap = context.SymbolMap!;
+        var symbolMap = context.AnalysisContext.Binders;
 
         var methodSymbol = symbolMap[root.Modules[0]].Lookup("MyMethod")?.First();
         Assert.IsType<MethodDefinitionSymbol>(methodSymbol);
@@ -256,5 +277,47 @@ module Test
 
         Assert.Equal("2", multLeft.Value);
         Assert.Equal("3", multRight.Value);
+    }
+
+    [Fact]
+    public void Analyze_ImportNode_BoundToModuleSymbol()
+    {
+        var (root, context) = ParseAndAnalyze(BINDING_SOURCE);
+        var import = root.Imports[0];
+        var symbol = context.AnalysisContext.ResolveSymbol(import.ModuleName).Symbol;
+        Assert.IsType<ModuleSymbol>(symbol);
+        Assert.Equal("Test2", ((ModuleSymbol)symbol).Name);
+    }
+
+    [Fact]
+    public void Analyze_MethodDefinitionNode_BoundToMethodSymbol()
+    {
+        var (root, context) = ParseAndAnalyze(BINDING_SOURCE);
+        var method = (MethodDefinitionNode)root.Modules[0].Body.Contents.First();
+        var symbol = context.AnalysisContext.ResolveSymbol(method).Symbol;
+        Assert.IsType<MethodDefinitionSymbol>(symbol);
+        Assert.Equal("MyMethod", ((MethodDefinitionSymbol)symbol).Name);
+    }
+
+    [Fact]
+    public void Analyze_ModuleNode_BoundToModuleSymbol()
+    {
+        var (root, context) = ParseAndAnalyze(BINDING_SOURCE);
+        var module = root.Modules[0];
+        var symbol = context.AnalysisContext.ResolveSymbol(module).Symbol;
+        Assert.IsType<ModuleSymbol>(symbol);
+        Assert.Equal("Test", ((ModuleSymbol)symbol).Name);
+    }
+
+    [Fact]
+    public void Analyze_CallExpression_BoundToMethodSymbol()
+    {
+        var (root, context) = ParseAndAnalyze(BINDING_SOURCE);
+        var method = (MethodDefinitionNode)root.Modules[0].Body.Contents.First();
+        var returnStatement = (ReturnStatementNode)method.Body.Contents.First();
+        var call = Assert.IsType<CallExpressionNode>(returnStatement.Expression);
+        var symbol = context.AnalysisContext.ResolveSymbol(call.MethodName).Symbol;
+        Assert.IsType<MethodDefinitionSymbol>(symbol);
+        Assert.Equal("Helper", ((MethodDefinitionSymbol)symbol).Name);
     }
 }

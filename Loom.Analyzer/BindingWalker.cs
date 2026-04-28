@@ -23,5 +23,13 @@ internal class BindingWalker : ASTWalker
 
         Context.BoundSymbols[node.ModuleName] = symbol;
     }
+
+    [Visitor]
+    public void Visit(CallExpressionNode node)
+    {
+        var binder = Context.FirstAncestorOrSelf<MethodDefinitionNode>(node) is { } method ? Context.Binders[method] : Context.Binders.First().Value;
+        var methodSymbol = binder.Lookup(node.MethodName.BaseName)?.First() as MethodDefinitionSymbol;
+        Context.BoundSymbols[node.MethodName] = methodSymbol;
+    }
 }
 

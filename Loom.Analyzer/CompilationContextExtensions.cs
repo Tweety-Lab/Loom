@@ -11,20 +11,20 @@ namespace Loom.Analyzer;
 /// </summary>
 public static class CompilationContextExtensions
 {
-    public const string SYMBOL_DICT_KEY = "Semantics.SymbolDict";
+    public const string ANALYSIS_CONTEXT_KEY = "Semantics.AnalysisContext";
 
     extension(CompilationContext ctx)
     {
         /// <summary> Maps <see cref="ASTNode"/>s to their corresponding <see cref="Binder"/>. </summary>
-        public Dictionary<ASTNode, Binder>? SymbolMap => ctx.ExtendedProperties.TryGetValue(SYMBOL_DICT_KEY, out object? obj) ? (Dictionary<ASTNode, Binder>)obj : null;
+        public AnalysisContext AnalysisContext => ctx.ExtendedProperties[ANALYSIS_CONTEXT_KEY] as AnalysisContext ?? throw new InvalidOperationException("CompilationContext.AnalysisContext is null, has semantic analysis been run?");
 
         /// <summary> Runs the <see cref="CompilationContext"/> through the Semantic Analyzer. </summary>
         public CompilationContext Analyze()
         {
-            AnalysisContext Analyzer = new(ctx.DiagnosticContext);
-            Analyzer.Analyze(ctx.RootNode ?? throw new InvalidOperationException("CompilationContext.RootNode is null, has parsing been run?"));
+            AnalysisContext analyzer = new(ctx.DiagnosticContext);
+            analyzer.Analyze(ctx.RootNode ?? throw new InvalidOperationException("CompilationContext.RootNode is null, has parsing been run?"));
 
-            ctx.ExtendedProperties[SYMBOL_DICT_KEY] = Analyzer.Binders;
+            ctx.ExtendedProperties[ANALYSIS_CONTEXT_KEY] = analyzer;
 
             return ctx;
         }
