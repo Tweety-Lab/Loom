@@ -148,7 +148,7 @@ module Test
     {
         CompilationContext context = new CompilationContext();
         context.Parse(source).Analyze();
-        return (context.RootNode!, context);
+        return (context.SyntaxTrees!.First(), context);
     }
 
     [Fact]

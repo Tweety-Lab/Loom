@@ -14,21 +14,24 @@ public static class CompilationContextExtensions
 
     extension(CompilationContext ctx)
     {
-        /// <summary> The root <see cref="ASTNode"/> of the Abstract Syntax Tree or null if parsing has not been run. </summary>
-        public ProgramNode? RootNode => ctx.ExtendedProperties.TryGetValue(ROOT_NODE_KEY, out object? obj) ? (ProgramNode)obj : null;
+        /// <summary> All parsed <see cref="ProgramNode"/>s. </summary>
+        public IReadOnlyList<ProgramNode> SyntaxTrees => ctx.ExtendedProperties.TryGetValue(ROOT_NODE_KEY, out var obj) ? (List<ProgramNode>)obj : [];
 
         /// <summary> Runs the <see cref="CompilationContext"/> through the Parser. </summary>
-        public CompilationContext Parse(string input)
+        public CompilationContext Parse(params string[] inputs)
         {
-            LoomTokenizer tokenizer = new(input);
+            var trees = new List<ProgramNode>();
 
-            tokenizer.Tokenize();
+            foreach (var input in inputs)
+            {
+                LoomTokenizer tokenizer = new(input);
+                tokenizer.Tokenize();
 
-            LoomParser parser = new LoomParser(tokenizer.Tokens, ctx.DiagnosticContext);
+                LoomParser parser = new LoomParser(tokenizer.Tokens, ctx.DiagnosticContext);
+                trees.Add(parser.ParseProgram());
+            }
 
-            ProgramNode root = parser.ParseProgram();
-            ctx.ExtendedProperties[ROOT_NODE_KEY] = root;
-
+            ctx.ExtendedProperties[ROOT_NODE_KEY] = trees;
             return ctx;
         }
     }

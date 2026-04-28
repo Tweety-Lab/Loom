@@ -58,39 +58,48 @@ public class AnalysisContext
     /// <summary> Gets the immediate parent of the given <see cref="ASTNode"/>. </summary>
     public ASTNode? GetParent(ASTNode node) => Parents.TryGetValue(node, out var parent) ? parent : null;
 
-    /// <summary> Runs the given <see cref="ProgramNode"/> through the Semantic Analyzer. </summary>
-    public void Analyze(ProgramNode root)
+    /// <summary> Runs the given <see cref="ProgramNode"/>s through the Semantic Analyzer. </summary>
+    public void Analyze(IEnumerable<ProgramNode> roots)
     {
+        var rootList = roots.ToList();
         var rootTable = new Symbols.Binder();
 
-        // Built-in types
+        // Built in types
         rootTable.Define(new TypeSymbol("void", TypeSymbol.DefaultType.Void));
         rootTable.Define(new TypeSymbol("i32", TypeSymbol.DefaultType.I32));
 
-        Binders[root] = rootTable;
+        // Register all roots against the same root table
+        foreach (var root in rootList)
+            Binders[root] = rootTable;
 
         // Order here MATTERS
 
-        // Resolve Declarations
+        // Resolve Declarations - across all trees first
         var declWalker = new DeclarationWalker(this, rootTable);
-        declWalker.Dispatch(root);
+        foreach (var root in rootList)
+            declWalker.Dispatch(root);
 
         // Resolve Parents
         var parentWalker = new ParentWalker(this);
-        parentWalker.Dispatch(root);
+        foreach (var root in rootList)
+            parentWalker.Dispatch(root);
 
         // Resolve special binding
         var bindWalker = new BindingWalker(this);
-        bindWalker.Dispatch(root);
+        foreach (var root in rootList)
+            bindWalker.Dispatch(root);
 
         // Resolve Types
         var typeWalker = new TypeWalker(this);
-        typeWalker.Dispatch(root);
+        foreach (var root in rootList)
+            typeWalker.Dispatch(root);
 
+        // Run analyzers
         foreach (var analyzer in Analyzers)
         {
             analyzer.Context = this;
-            root.Accept(analyzer);
+            foreach (var root in rootList)
+                root.Accept(analyzer);
         }
     }
 
