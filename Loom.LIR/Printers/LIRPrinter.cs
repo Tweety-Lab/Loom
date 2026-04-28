@@ -4,8 +4,14 @@ using System.Text;
 
 namespace Loom.LIR.Printers;
 
-public sealed class LIRPrinter
+public class LIRPrinter
 {
+    /// <summary> The currently used printer style. </summary>
+    public ILIRPrinterStyle Style { get; }
+
+    /// <summary> Initializes a new instance of the <see cref="LIRPrinter"/> class. </summary>
+    public LIRPrinter(ILIRPrinterStyle style) => Style = style;
+
     public string Print(LIRCompilationUnit unit)
     {
         var sb = new StringBuilder();
@@ -23,37 +29,15 @@ public sealed class LIRPrinter
     {
         var sb = new StringBuilder();
 
-        sb.AppendLine($"define {function.Name} {{");
+        sb.AppendLine(Style.PrintFunctionHeader(function));
 
         foreach (var inst in function.Instructions)
         {
-            sb.Append("  ");
-            sb.AppendLine(Print(inst));
+            sb.AppendLine("  " + Style.PrintInstruction(inst));
         }
 
-        sb.AppendLine("}");
+        sb.AppendLine(Style.PrintFunctionFooter());
+
         return sb.ToString();
-    }
-
-    public string Print(LIRInstruction inst)
-    {
-        var operands = string.Join(", ", inst.Operands.Select(PrintValue));
-
-        var result = inst.Result is not null
-            ? $"{PrintValue(inst.Result)} = "
-            : "";
-
-        return $"{result}{inst.OpCode.Name} {operands}".TrimEnd();
-    }
-
-    private static string PrintValue(LIRValue value)
-    {
-        ArgumentNullException.ThrowIfNull(value);
-
-        return value switch
-        {
-            LIRConstantValue c => c.Value?.ToString() ?? "null",
-            _ => value.ToString()
-        };
     }
 }

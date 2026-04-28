@@ -35,7 +35,7 @@ public static class CompilationContextExtensions
             il2.Emit(LIROpCode.Ret, callResult);
 
             var unit = builder.Build();
-            LIRPrinter printer = new();
+            LIRPrinter printer = new LIRPrinter(new StringPrinterStyle());
             string lir = printer.Print(unit);
 
             Console.WriteLine(lir);
