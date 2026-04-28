@@ -16,7 +16,7 @@ public class AnalysisContext
     /// <summary> Maps <see cref="ASTNode"/>s to their corresponding <see cref="Binder"/>. </summary>
     public Dictionary<ASTNode, Symbols.Binder> Binders { get; } = new();
 
-    public Dictionary<ASTNode, Symbol> BoundSymbols { get; } = new();
+    public Dictionary<ASTNode, Symbol?> BoundSymbols { get; } = new();
 
     /// <summary> Maps <see cref="ExpressionNode"/>s to their corresponding <see cref="TypeSymbol"/>. </summary>
     public Dictionary<ExpressionNode, TypeSymbol> ExpressionTypes { get; } = new();
