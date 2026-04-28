@@ -34,6 +34,10 @@ public static class CompilationContextExtensions
             var callResult = il2.Emit(LIROpCode.Call, new LIRFunctionValue(func.Build()));
             il2.Emit(LIROpCode.Ret, callResult);
 
+            callingFunc.WritingBlock = callingFunc.CreateBlock("second");
+
+            il2.Emit(LIROpCode.Call, new LIRFunctionValue(func.Build()));
+
             var unit = builder.Build();
             LIRPrinter printer = new LIRPrinter(new StringPrinterStyle());
             string lir = printer.Print(unit);

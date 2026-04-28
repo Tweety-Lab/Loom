@@ -31,12 +31,24 @@ public class LIRPrinter
 
         sb.AppendLine(Style.PrintFunctionHeader(function));
 
-        foreach (var inst in function.Instructions)
-        {
-            sb.AppendLine("  " + Style.PrintInstruction(inst));
-        }
+        foreach (var block in function.Blocks)
+            sb.AppendLine(PrintBlock(block));
 
         sb.AppendLine(Style.PrintFunctionFooter());
+
+        return sb.ToString();
+    }
+
+
+
+    private string PrintBlock(LIRBasicBlock block)
+    {
+        var sb = new StringBuilder();
+
+        sb.AppendLine($"{block.Name}:");
+
+        foreach (var inst in block.Instructions)
+            sb.AppendLine("  " + Style.PrintInstruction(inst));
 
         return sb.ToString();
     }
