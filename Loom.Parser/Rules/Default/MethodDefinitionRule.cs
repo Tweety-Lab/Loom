@@ -28,6 +28,6 @@ public class MethodDefinitionRule : ParserRule<MethodDefinitionNode>
         Parser.Reader.Expect(TokenType.LParen); // (
         Parser.Reader.Expect(TokenType.RParen); // )
 
-        return new MethodDefinitionNode(returnType, new IdentifierNameNode(methodName), Parser.GetRule<BlockRule>().ParseNode(), modifiers);
+        return new MethodDefinitionNode(returnType, new IdentifierNameNode(methodName), Parser.GetRule<MethodBlockRule>().ParseNode(), modifiers);
     }
 }

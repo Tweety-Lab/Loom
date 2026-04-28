@@ -11,10 +11,10 @@ public record BlockNode(List<ASTNode> Contents) : ASTNode
 }
 
 [ParserRule]
-public class BlockRule : ParserRule<BlockNode>
+public class ModuleBlockRule : ParserRule<BlockNode>
 {
     /// <inheritdoc/>
-    public BlockRule(LoomParser parser) : base(parser) { }
+    public ModuleBlockRule(LoomParser parser) : base(parser) { }
 
     /// <inheritdoc/>
     public override BlockNode ParseNode()
@@ -24,25 +24,34 @@ public class BlockRule : ParserRule<BlockNode>
 
         var dispatch = new Dictionary<TokenType, Action>
         {
-            // Method Definitions
-            [TokenType.Void] = () => body.Add(RunRule<MethodDefinitionRule, MethodDefinitionNode>()),
-            [TokenType.I32] = () => body.Add(RunRule<MethodDefinitionRule, MethodDefinitionNode>()),
-            [TokenType.Identifier] = () =>
-            {
-                if (Parser.Reader.Peek().Type == TokenType.LParen)
-                    body.Add(RunRule<StatementRule, StatementNode>());
-                else
-                    body.Add(RunRule<MethodDefinitionRule, MethodDefinitionNode>());
-            },
-
-            [TokenType.Module] = () => body.Add(RunRule<ModuleRule, ModuleNode>()), // Nested Modules
-            [TokenType.Unsafe] = () => body.Add(RunRule<UnsafeRule, UnsafeNode>()), // Unsafe
+            [TokenType.Module] = () => body.Add(RunRule<ModuleRule, ModuleNode>()),
+            [TokenType.Unsafe] = () => body.Add(RunRule<UnsafeRule, UnsafeNode>()),
         };
 
         foreach (var modifier in TokenRegistry.Modifiers)
-            dispatch[modifier] = () => body.Add(RunRule<MethodDefinitionRule, MethodDefinitionNode>()); // Keywords
+            dispatch[modifier] = () => body.Add(RunRule<MethodDefinitionRule, MethodDefinitionNode>());
 
-        ParseUntil(TokenType.RBrace, dispatch, () => body.Add(RunRule<StatementRule, StatementNode>()));
+        ParseUntil(TokenType.RBrace, dispatch, () => body.Add(RunRule<MethodDefinitionRule, MethodDefinitionNode>()));
+
+        Parser.Reader.Expect(TokenType.RBrace); // }
+
+        return new BlockNode(body);
+    }
+}
+
+[ParserRule]
+public class MethodBlockRule : ParserRule<BlockNode>
+{
+    /// <inheritdoc/>
+    public MethodBlockRule(LoomParser parser) : base(parser) { }
+
+    /// <inheritdoc/>
+    public override BlockNode ParseNode()
+    {
+        var body = new List<ASTNode>();
+        Parser.Reader.Expect(TokenType.LBrace); // {
+
+        ParseUntil(TokenType.RBrace, new Dictionary<TokenType, Action>(), () => body.Add(RunRule<StatementRule, StatementNode>()));
 
         Parser.Reader.Expect(TokenType.RBrace); // }
 

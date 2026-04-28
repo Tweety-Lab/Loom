@@ -20,6 +20,7 @@ module Test
 
     i32 Test()
     {
+        i32 x = 1 + 1;
         return 1 + 1;
     }
 }

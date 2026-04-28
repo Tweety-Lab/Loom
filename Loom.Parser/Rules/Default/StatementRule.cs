@@ -24,6 +24,7 @@ public class StatementRule : ParserRule<StatementNode>
         var statement = (StatementNode)(Parser.Reader.Current.Type switch
         {
             TokenType.Return => RunRule<ReturnStatementRule, ReturnStatementNode>(),
+            (TokenType.I32 or TokenType.Identifier) when Parser.Reader.Peek().Type == TokenType.Identifier => RunRule<VariableDeclarationRule, VariableDeclarationNode>(),
             _ => new ExpressionStatementNode(RunRule<ExpressionRule, ExpressionNode>())
         });
 
