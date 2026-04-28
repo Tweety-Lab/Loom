@@ -32,7 +32,7 @@ public class LoomParser
     }
 
     /// <summary> Initializes a new instance of the <see cref="LoomParser"/> class. </summary>
-    public LoomParser(List<Token> tokens, DiagnosticContext? diagnosticContext = null) => (Reader, DiagnosticContext) = (new TokenReader(tokens), diagnosticContext);
+    public LoomParser(List<Token> tokens, DiagnosticContext? diagnosticContext = null) => (Reader, DiagnosticContext) = (new TokenReader(tokens) { DiagnosticContext = diagnosticContext }, diagnosticContext);
 
     /// <summary> Gets the rule for the given type. </summary>
     public T GetRule<T>() where T : IParserRule => (T)Rules.First(x => x.GetType() == typeof(T));

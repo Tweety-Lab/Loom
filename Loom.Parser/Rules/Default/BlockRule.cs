@@ -1,6 +1,8 @@
 ﻿using Loom.Parser.AST;
 using Loom.Parser.Tokenizer;
+using System.ComponentModel;
 using static Loom.Parser.Tokenizer.Token;
+using static System.Reflection.Metadata.BlobBuilder;
 
 namespace Loom.Parser.Rules.Default;
 
@@ -24,8 +26,7 @@ public class ModuleBlockRule : ParserRule<BlockNode>
 
         var dispatch = new Dictionary<TokenType, Action>
         {
-            [TokenType.Module] = () => body.Add(RunRule<ModuleRule, ModuleNode>()),
-            [TokenType.Unsafe] = () => body.Add(RunRule<UnsafeRule, UnsafeNode>()),
+            [TokenType.Module] = () => body.Add(RunRule<ModuleRule, ModuleNode>())
         };
 
         foreach (var modifier in TokenRegistry.Modifiers)
@@ -51,10 +52,19 @@ public class MethodBlockRule : ParserRule<BlockNode>
         var body = new List<ASTNode>();
         Parser.Reader.Expect(TokenType.LBrace); // {
 
-        ParseUntil(TokenType.RBrace, new Dictionary<TokenType, Action>(), () => body.Add(RunRule<StatementRule, StatementNode>()));
+        var dispatch = new Dictionary<TokenType, Action>
+        {
+            [TokenType.Unsafe] = () => body.Add(RunRule<UnsafeRule, UnsafeNode>()),
+        };
+
+        ParseUntil(TokenType.RBrace, dispatch, () => body.Add(RunRule<StatementRule, StatementNode>()));
 
         Parser.Reader.Expect(TokenType.RBrace); // }
 
         return new BlockNode(body);
     }
 }
+
+
+
+
