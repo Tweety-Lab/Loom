@@ -2,6 +2,7 @@
 using Loom.Analyzer.Symbols;
 using Loom.Common;
 using Loom.Common.Diagnostics;
+using Loom.LIR;
 using Loom.Parser;
 using Loom.Parser.Rules.Default;
 using System.Diagnostics;
@@ -35,7 +36,7 @@ module Test2
     static void Main(string[] args)
     {
         CompilationContext context = new CompilationContext();
-        context.Parse(TEST_SOURCE).Analyze();
+        context.Parse(TEST_SOURCE).Analyze().EmitLIR();
 
         foreach (var diagnostic in context.DiagnosticContext.Diagnostics)
         {
