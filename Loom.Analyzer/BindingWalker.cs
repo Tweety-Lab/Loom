@@ -22,4 +22,3 @@ internal class BindingWalker : ASTWalker
         Context.BoundSymbols[node] = symbol;
     }
 }
-
