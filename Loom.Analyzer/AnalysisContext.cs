@@ -64,8 +64,8 @@ public class AnalysisContext
         var rootTable = new Symbols.Binder();
 
         // Built-in types
-        rootTable.Define(new TypeSymbol("void", TypeSymbol.KnownType.Void));
-        rootTable.Define(new TypeSymbol("i32", TypeSymbol.KnownType.I32));
+        rootTable.Define(new TypeSymbol("void", TypeSymbol.DefaultType.Void));
+        rootTable.Define(new TypeSymbol("i32", TypeSymbol.DefaultType.I32));
 
         Binders[root] = rootTable;
 

@@ -1,7 +1,9 @@
 ﻿using Loom.Analyzer;
+using Loom.Analyzer.Symbols;
 using Loom.Common;
 using Loom.Common.Diagnostics;
 using Loom.Parser;
+using Loom.Parser.Rules.Default;
 using System.Diagnostics;
 
 namespace Loom.CLI;

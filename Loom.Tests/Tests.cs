@@ -214,7 +214,7 @@ module Test
 
         var methodSymbol = symbolMap[root.Modules[0]].Lookup("MyMethod")?.First();
         Assert.IsType<MethodDefinitionSymbol>(methodSymbol);
-        Assert.Equal(TypeSymbol.KnownType.I32, ((MethodDefinitionSymbol)methodSymbol).ReturnType.Type);
+        Assert.Equal(TypeSymbol.DefaultType.I32, ((MethodDefinitionSymbol)methodSymbol).ReturnType.KnownType);
     }
 
     [Fact]
@@ -383,7 +383,7 @@ module Test
         var method = (MethodDefinitionNode)root.Modules[0].Body.Contents.First();
         var decl = (VariableDeclarationNode)method.Body.Contents.First();
         var symbol = context.AnalysisContext.ResolveSymbol(decl).Symbol as LocalVariableSymbol;
-        Assert.Equal(TypeSymbol.KnownType.I32, symbol!.Type.Type);
+        Assert.Equal(TypeSymbol.DefaultType.I32, symbol!.Type.KnownType);
     }
 
     [Fact]
@@ -406,7 +406,7 @@ module Test
         var returnStatement = (ReturnStatementNode)method.Body.Contents.Last();
         var identifier = Assert.IsType<IdentifierNameNode>(returnStatement.Expression);
         var type = context.AnalysisContext.ExpressionTypes[identifier];
-        Assert.Equal(TypeSymbol.KnownType.I32, type.Type);
+        Assert.Equal(TypeSymbol.DefaultType.I32, type.KnownType);
     }
 
     [Fact]
