@@ -26,7 +26,7 @@ public class ModuleBlockRule : ParserRule<BlockNode>
 
         var dispatch = new Dictionary<TokenType, Action>
         {
-            [TokenType.Module] = () => body.Add(RunRule<ModuleRule, ModuleNode>())
+            [TokenType.Module] = () => body.Add(RunRule<ModuleDeclarationRule, ModuleNode>())
         };
 
         foreach (var modifier in TokenRegistry.Modifiers)

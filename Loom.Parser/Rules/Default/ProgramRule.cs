@@ -24,7 +24,7 @@ public class ProgramRule : ParserRule<ProgramNode>
         ParseUntil(TokenType.EOF, new()
         {
             [TokenType.Import] = () => imports.Add(RunRule<ImportRule, ImportNode>()), // Imports
-            [TokenType.Module] = () => modules.Add(RunRule<ModuleRule, ModuleNode>()), // Modules
+            [TokenType.Module] = () => modules.Add(RunRule<ModuleDeclarationRule, ModuleNode>()), // Modules
         });
 
         return new ProgramNode(imports, modules);
