@@ -7,7 +7,7 @@ namespace Loom.Parser.Rules.Default;
 public record ImportNode(IdentifierNameNode ModuleName) : ASTNode
 {
     /// <inheritdoc/>
-    public override IEnumerable<ASTNode> Children => Enumerable.Empty<ASTNode>();
+    public override IEnumerable<ASTNode> Children => [ModuleName];
 }
 
 [ParserRule]

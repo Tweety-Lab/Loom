@@ -7,7 +7,7 @@ namespace Loom.Parser.Rules.Default;
 public record ModuleNode(IdentifierNameNode Name, BlockNode Body) : ASTNode
 {
     /// <inheritdoc/>
-    public override IEnumerable<ASTNode> Children => new[] { Body };
+    public override IEnumerable<ASTNode> Children => [Name, Body];
 }
 
 [ParserRule]

@@ -21,19 +21,5 @@ internal class BindingWalker : ASTWalker
         var symbol = Context.GetBinder(node)?.Lookup(node.BaseName)?.First();
         Context.BoundSymbols[node] = symbol;
     }
-
-    [Visitor]
-    public void Visit(ImportNode node)
-    {
-        var symbol = Context.GetBinder(node)?.Lookup(node.ModuleName.BaseName)?.First() as ModuleSymbol;
-        Context.BoundSymbols[node.ModuleName] = symbol;
-    }
-
-    [Visitor]
-    public void Visit(CallExpressionNode node)
-    {
-        var symbol = Context.GetBinder(node)?.Lookup(node.MethodName.BaseName)?.First() as MethodDefinitionSymbol;
-        Context.BoundSymbols[node.MethodName] = symbol;
-    }
 }
 

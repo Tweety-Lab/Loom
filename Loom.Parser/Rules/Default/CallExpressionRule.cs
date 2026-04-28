@@ -9,7 +9,7 @@ namespace Loom.Parser.Rules.Default;
 public record CallExpressionNode(IdentifierNameNode MethodName, List<ExpressionNode> Arguments) : ExpressionNode
 {
     /// <inheritdoc/>
-    public override IEnumerable<ASTNode> Children => Arguments;
+    public override IEnumerable<ASTNode> Children => Arguments.Prepend(MethodName);
 }
 
 [ParserRule]
