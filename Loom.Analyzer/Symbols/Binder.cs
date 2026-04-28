@@ -20,6 +20,8 @@ public class Binder
     public void Define(Symbol symbol) => symbols.Add(symbol);
 
     /// <summary> Resolves a set of <see cref="Symbol"/> by name. </summary>
+    /// <param name="name"> The name to resolve. </param>
+    /// <returns> A set of all <see cref="Symbol"/>s matching the given name. </returns>
     public IEnumerable<Symbol>? Lookup(string name)
     {
         if (symbols.Any(symbol => symbol.Name == name))

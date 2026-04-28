@@ -16,7 +16,7 @@ public class AnalysisContext
     /// <summary> Maps <see cref="ASTNode"/>s to their corresponding <see cref="Binder"/>. </summary>
     public Dictionary<ASTNode, Symbols.Binder> Binders { get; } = new();
 
-    public Dictionary<ASTNode, Symbol> BoundSybols { get; } = new();
+    public Dictionary<ASTNode, Symbol> BoundSymbols { get; } = new();
 
     /// <summary> Maps <see cref="ExpressionNode"/>s to their corresponding <see cref="TypeSymbol"/>. </summary>
     public Dictionary<ExpressionNode, TypeSymbol> ExpressionTypes { get; } = new();
@@ -79,6 +79,10 @@ public class AnalysisContext
         var parentWalker = new ParentWalker(this);
         parentWalker.VisitChildren(root);
 
+        // Resolve special binding
+        var bindWalker = new BindingWalker(this);
+        bindWalker.Dispatch(root);
+
         // Resolve Scopes
         var semWalker = new SemanticWalker(this);
         semWalker.SetRootTable(rootTable);
@@ -96,18 +100,6 @@ public class AnalysisContext
         }
     }
 
-    /// <summary> Resolves a <see cref="Symbol"/> by name or null if not found. </summary>
-    public Symbol? ResolveSymbol(ASTNode node, string name)
-    {
-        var current = node;
-        while (current != null)
-        {
-            if (Binders.TryGetValue(current, out var table))
-                return table.Lookup(name)?.First();
-
-            current = GetParent(current);
-        }
-
-        return null;
-    }
+    /// <summary> Resolves a <see cref="Symbol"/> from the given <see cref="ASTNode"/>. </summary>
+    public Symbol? ResolveSymbol(ASTNode node) => BoundSymbols.TryGetValue(node, out var symbol) ? symbol : null;
 }

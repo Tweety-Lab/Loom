@@ -54,7 +54,10 @@ internal class DeclarationWalker : ASTVisitor
         Context.Binders[node] = CurrentTable;
 
         if (symbol is not null)
+        {
             CurrentSymbol = symbol;
+            Context.BoundSymbols[node] = symbol;
+        }
 
         body();
 
