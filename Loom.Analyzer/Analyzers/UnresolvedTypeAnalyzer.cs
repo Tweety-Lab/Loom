@@ -19,7 +19,7 @@ public class UnresolvedTypeAnalyzer : Analyzer
     {
         if (node.ReturnType.Type == Token.TokenType.Identifier)
         {
-            var symbol = Context.ResolveSymbol(Context.SymbolTables.First().Key, node.ReturnType.Value) as TypeSymbol;
+            var symbol = Context.ResolveSymbol(Context.Binders.First().Key, node.ReturnType.Value) as TypeSymbol;
 
             if (symbol == null)
                 Context.DiagnosticContext?.Report(UnresolvedTypeDiagnostic, node.ReturnType.Value);

@@ -37,7 +37,7 @@ internal class DeclarationWalker : ASTVisitor
     [Visitor]
     public void Visit(MethodDefinitionNode node)
     {
-        var returnType = CurrentTable.Lookup(node.ReturnType.Value) as TypeSymbol ?? new TypeSymbol(node.ReturnType.Value, null);
+        var returnType = CurrentTable.Lookup(node.ReturnType.Value)?.First() as TypeSymbol ?? new TypeSymbol(node.ReturnType.Value, null);
 
         var symbol = new MethodDefinitionSymbol(node.MethodName.BaseName, returnType);
         CurrentTable.Define(symbol);
@@ -51,7 +51,7 @@ internal class DeclarationWalker : ASTVisitor
         var previousSymbol = CurrentSymbol;
 
         CurrentTable = new Binder(parentTable);
-        Context.SymbolTables[node] = CurrentTable;
+        Context.Binders[node] = CurrentTable;
 
         if (symbol is not null)
             CurrentSymbol = symbol;

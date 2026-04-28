@@ -24,7 +24,7 @@ internal class SemanticWalker : ASTVisitor
     public void Visit(ModuleNode node)
     {
         var parent = CurrentTable;
-        CurrentTable = Context.SymbolTables[node];
+        CurrentTable = Context.Binders[node];
         VisitChildren(node);
         CurrentTable = parent;
     }
@@ -33,7 +33,7 @@ internal class SemanticWalker : ASTVisitor
     public void Visit(MethodDefinitionNode node)
     {
         var parent = CurrentTable;
-        CurrentTable = Context.SymbolTables[node];
+        CurrentTable = Context.Binders[node];
         VisitChildren(node);
         CurrentTable = parent;
     }

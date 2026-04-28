@@ -153,24 +153,24 @@ module Test
     }
 
     [Fact]
-    public void Analyze_ModulesRegisteredInSymbolTable()
+    public void Analyze_ModulesRegisteredInBinder()
     {
         var (root, context) = ParseAndAnalyze();
         var symbolMap = context.SymbolMap!;
 
-        Assert.IsType<ModuleSymbol>(symbolMap[root].Lookup("Test"));
-        Assert.IsType<ModuleSymbol>(symbolMap[root].Lookup("Test2"));
+        Assert.IsType<ModuleSymbol>(symbolMap[root].Lookup("Test")?.First());
+        Assert.IsType<ModuleSymbol>(symbolMap[root].Lookup("Test2")?.First());
     }
 
     [Fact]
-    public void Analyze_MethodRegisteredInSymbolTable()
+    public void Analyze_MethodRegisteredInBinder()
     {
         var (root, context) = ParseAndAnalyze();
         var symbolMap = context.SymbolMap!;
 
-        var methodSymbol = symbolMap[root.Modules[0]].Lookup("MyMethod");
+        var methodSymbol = symbolMap[root.Modules[0]].Lookup("MyMethod")?.First();
         Assert.IsType<MethodDefinitionSymbol>(methodSymbol);
-        Assert.Equal(TypeSymbol.Type.I32, ((MethodDefinitionSymbol)methodSymbol).ReturnType.KnownType);
+        Assert.Equal(TypeSymbol.KnownType.I32, ((MethodDefinitionSymbol)methodSymbol).ReturnType.Type);
     }
 
     [Fact]

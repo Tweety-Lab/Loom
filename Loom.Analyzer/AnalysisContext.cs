@@ -14,7 +14,9 @@ public class AnalysisContext
     public DiagnosticContext? DiagnosticContext { get; set; }
 
     /// <summary> Maps <see cref="ASTNode"/>s to their corresponding <see cref="Binder"/>. </summary>
-    public Dictionary<ASTNode, Symbols.Binder> SymbolTables { get; } = new();
+    public Dictionary<ASTNode, Symbols.Binder> Binders { get; } = new();
+
+    public Dictionary<ASTNode, Symbol> BoundSybols { get; } = new();
 
     /// <summary> Maps <see cref="ExpressionNode"/>s to their corresponding <see cref="TypeSymbol"/>. </summary>
     public Dictionary<ExpressionNode, TypeSymbol> ExpressionTypes { get; } = new();
@@ -62,10 +64,10 @@ public class AnalysisContext
         var rootTable = new Symbols.Binder();
 
         // Built-in types
-        rootTable.Define(new TypeSymbol("void", TypeSymbol.Type.Void));
-        rootTable.Define(new TypeSymbol("i32", TypeSymbol.Type.I32));
+        rootTable.Define(new TypeSymbol("void", TypeSymbol.KnownType.Void));
+        rootTable.Define(new TypeSymbol("i32", TypeSymbol.KnownType.I32));
 
-        SymbolTables[root] = rootTable;
+        Binders[root] = rootTable;
 
         // Order here MATTERS
 
@@ -100,8 +102,8 @@ public class AnalysisContext
         var current = node;
         while (current != null)
         {
-            if (SymbolTables.TryGetValue(current, out var table))
-                return table.Lookup(name);
+            if (Binders.TryGetValue(current, out var table))
+                return table.Lookup(name)?.First();
 
             current = GetParent(current);
         }

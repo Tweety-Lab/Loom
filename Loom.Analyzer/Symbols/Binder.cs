@@ -1,5 +1,8 @@
 ﻿namespace Loom.Analyzer.Symbols;
 
+/// <summary>
+/// A Scoped set of <see cref="Symbol"/>s.
+/// </summary>
 public class Binder
 {
     /// <summary> The owning <see cref="Binder"/> or null if root. </summary>
@@ -16,12 +19,11 @@ public class Binder
     /// <summary> Adds a new <see cref="Symbol"/> to the table. </summary>
     public void Define(Symbol symbol) => symbols.Add(symbol);
 
-    /// <summary> Resolves a <see cref="Symbol"/> by name. </summary>
-    public Symbol? Lookup(string name)
+    /// <summary> Resolves a set of <see cref="Symbol"/> by name. </summary>
+    public IEnumerable<Symbol>? Lookup(string name)
     {
-        foreach (var symbol in symbols)
-            if (symbol.Name == name)
-                return symbol;
+        if (symbols.Any(symbol => symbol.Name == name))
+            return symbols.Where(symbol => symbol.Name == name);
 
         return Parent?.Lookup(name);
     }

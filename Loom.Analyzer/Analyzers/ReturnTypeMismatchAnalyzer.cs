@@ -28,14 +28,14 @@ public class ReturnTypeMismatchAnalyzer : Analyzer
         if (methodSymbol == null)
             return;
 
-        var isVoid = methodSymbol.ReturnType.KnownType == TypeSymbol.Type.Void;
+        var isVoid = methodSymbol.ReturnType.Type == TypeSymbol.KnownType.Void;
 
         if (node.Expression == null && !isVoid)
             Context.DiagnosticContext?.Report(MissingReturn, methodSymbol.ReturnType.Name);
         else if (node.Expression != null && isVoid)
             Context.DiagnosticContext?.Report(UnexpectedValue);
         else if (node.Expression != null && Context.ExpressionTypes.TryGetValue(node.Expression, out var exprType))
-            if (exprType.KnownType != methodSymbol.ReturnType.KnownType)
+            if (exprType.Type != methodSymbol.ReturnType.Type)
                 Context.DiagnosticContext?.Report(ReturnTypeMismatch, exprType.Name, methodSymbol.ReturnType.Name);
     }
 }
