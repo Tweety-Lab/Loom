@@ -165,8 +165,8 @@ module Test
     {
         var (root, _) = ParseAndAnalyze();
         Assert.Equal(2, root.Modules.Count);
-        Assert.Equal("Test", root.Modules[0].Name.Value);
-        Assert.Equal("Test2", root.Modules[1].Name.Value);
+        Assert.Equal("Test", root.Modules[0].Name.Text);
+        Assert.Equal("Test2", root.Modules[1].Name.Text);
     }
 
     [Fact]
@@ -350,8 +350,8 @@ module Test
         var (root, _) = ParseAndAnalyze(VARIABLE_DECLARATION_SOURCE);
         var method = (MethodDeclarationNode)root.Modules[0].Body.Contents.First();
         var decl = Assert.IsType<VariableDeclarationNode>(method.Body.Contents.First());
-        Assert.Equal("x", decl.Name.Value);
-        Assert.Equal("i32", decl.Type.Value);
+        Assert.Equal("x", decl.Name.Text);
+        Assert.Equal("i32", decl.Type.Text);
         Assert.IsType<NumberLiteralNode>(decl.Initializer);
     }
 

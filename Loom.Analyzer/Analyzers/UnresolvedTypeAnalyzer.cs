@@ -19,10 +19,10 @@ public class UnresolvedTypeAnalyzer : Analyzer
     {
         if (node.ReturnType.Type == Token.TokenType.Identifier)
         {
-            var symbol = Context.Binders.First().Value.Lookup(node.ReturnType.Value) as TypeSymbol;
+            var symbol = Context.Binders.First().Value.Lookup(node.ReturnType.Text) as TypeSymbol;
 
             if (symbol == null)
-                Context.DiagnosticContext?.Report(UnresolvedTypeDiagnostic, node.ReturnType.Value);
+                Context.DiagnosticContext?.Report(UnresolvedTypeDiagnostic, node.ReturnType.Text);
         }
     }
 }

@@ -88,7 +88,7 @@ public class Token
     public TokenType Type { get; }
 
     /// <summary> The tokenized string value. </summary>
-    public string Value { get; }
+    public string Text { get; }
     
     /// <summary> The source location of the token. </summary>
     public TokenLocation Location { get; }
@@ -97,7 +97,7 @@ public class Token
     public Token(TokenType type, string value, TokenLocation location)
     {
         Type = type;
-        Value = value;
+        Text = value;
         Location = location;
     }
 }

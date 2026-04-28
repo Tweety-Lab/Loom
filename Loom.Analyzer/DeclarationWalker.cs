@@ -28,7 +28,7 @@ internal class DeclarationWalker : ASTVisitor
     [Visitor]
     public void Visit(ModuleNode node)
     {
-        var symbol = new ModuleSymbol(node.Name.Value);
+        var symbol = new ModuleSymbol(node.Name.Text);
         CurrentTable.Define(symbol);
 
         WithScope(node, () => VisitChildren(node), symbol);
@@ -37,9 +37,9 @@ internal class DeclarationWalker : ASTVisitor
     [Visitor]
     public void Visit(MethodDeclarationNode node)
     {
-        var returnType = CurrentTable.Lookup(node.ReturnType.Value)?.First() as TypeSymbol ?? new TypeSymbol(node.ReturnType.Value, null);
+        var returnType = CurrentTable.Lookup(node.ReturnType.Text)?.First() as TypeSymbol ?? new TypeSymbol(node.ReturnType.Text, null);
 
-        var symbol = new MethodDefinitionSymbol(node.MethodName.Value, returnType);
+        var symbol = new MethodDefinitionSymbol(node.MethodName.Text, returnType);
         CurrentTable.Define(symbol);
 
         WithScope(node, () => VisitChildren(node), symbol);
@@ -48,8 +48,8 @@ internal class DeclarationWalker : ASTVisitor
     [Visitor]
     public void Visit(VariableDeclarationNode node)
     {
-        var type = CurrentTable.Lookup(node.Type.Value)?.First() as TypeSymbol ?? new TypeSymbol(node.Type.Value, null);
-        var symbol = new LocalVariableSymbol(node.Name.Value, type);
+        var type = CurrentTable.Lookup(node.Type.Text)?.First() as TypeSymbol ?? new TypeSymbol(node.Type.Text, null);
+        var symbol = new LocalVariableSymbol(node.Name.Text, type);
         CurrentTable.Define(symbol);
         Context.BoundSymbols[node] = symbol;
 

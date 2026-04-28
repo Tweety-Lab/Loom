@@ -6,5 +6,5 @@ namespace Loom.Parser.AST;
 public abstract record NameNode : ExpressionNode;
 public record IdentifierNameNode(Token Token) : NameNode
 {
-    public string BaseName => Token.Value;
+    public string BaseName => Token.Text;
 }
