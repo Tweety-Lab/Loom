@@ -15,7 +15,7 @@ public class UnresolvedTypeAnalyzer : Analyzer
     public static Diagnostic UnresolvedTypeDiagnostic = new(Diagnostic.DiagnosticLevel.Error, "The type '{0}' could not be found.");
 
     [Visitor]
-    public void Visit(MethodDefinitionNode node)
+    public void Visit(MethodDeclarationNode node)
     {
         if (node.ReturnType.Type == Token.TokenType.Identifier)
         {

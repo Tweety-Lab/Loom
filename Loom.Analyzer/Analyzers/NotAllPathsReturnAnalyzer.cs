@@ -13,7 +13,7 @@ public class NotAllPathsReturnAnalyzer : Analyzer
     public static Diagnostic NotAllPathsReturnDiagnostic = new(Diagnostic.DiagnosticLevel.Error, "Not all code paths return a value.");
 
     [Visitor]
-    public void Visit(MethodDefinitionNode node)
+    public void Visit(MethodDeclarationNode node)
     {
         if (node.ReturnType.Type == Parser.Tokenizer.Token.TokenType.Void)
             return;

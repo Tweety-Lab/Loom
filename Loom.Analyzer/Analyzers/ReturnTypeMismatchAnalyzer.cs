@@ -18,7 +18,7 @@ public class ReturnTypeMismatchAnalyzer : Analyzer
     [Visitor]
     public void Visit(ReturnStatementNode node)
     {
-        var method = Context.FirstAncestorOrSelf<MethodDefinitionNode>(node);
+        var method = Context.FirstAncestorOrSelf<MethodDeclarationNode>(node);
 
         if (method == null)
             return;

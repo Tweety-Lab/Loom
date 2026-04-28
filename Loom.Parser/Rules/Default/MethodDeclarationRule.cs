@@ -4,7 +4,7 @@ using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.Rules.Default;
 
-public record MethodDefinitionNode(Token ReturnType, IdentifierNameNode MethodName, BlockNode Body, List<Token> Modifiers) : ASTNode
+public record MethodDeclarationNode(Token ReturnType, IdentifierNameNode MethodName, BlockNode Body, List<Token> Modifiers) : ASTNode
 {
     /// <inheritdoc/>
     public override IEnumerable<ASTNode> Children => [MethodName, Body];
@@ -12,13 +12,13 @@ public record MethodDefinitionNode(Token ReturnType, IdentifierNameNode MethodNa
 
 
 [ParserRule]
-public class MethodDefinitionRule : ParserRule<MethodDefinitionNode>
+public class MethodDeclarationRule : ParserRule<MethodDeclarationNode>
 {
     /// <inheritdoc/>
-    public MethodDefinitionRule(LoomParser parser) : base(parser) { }
+    public MethodDeclarationRule(LoomParser parser) : base(parser) { }
 
     /// <inheritdoc/>
-    public override MethodDefinitionNode ParseNode()
+    public override MethodDeclarationNode ParseNode()
     {
         var modifiers = Parser.Reader.ExpectMany(t => TokenRegistry.IsModifier(t.Type));
 
@@ -28,6 +28,6 @@ public class MethodDefinitionRule : ParserRule<MethodDefinitionNode>
         Parser.Reader.Expect(TokenType.LParen); // (
         Parser.Reader.Expect(TokenType.RParen); // )
 
-        return new MethodDefinitionNode(returnType, new IdentifierNameNode(methodName), Parser.GetRule<MethodBlockRule>().ParseNode(), modifiers);
+        return new MethodDeclarationNode(returnType, new IdentifierNameNode(methodName), Parser.GetRule<MethodBlockRule>().ParseNode(), modifiers);
     }
 }

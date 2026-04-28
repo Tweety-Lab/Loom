@@ -35,7 +35,7 @@ internal class DeclarationWalker : ASTVisitor
     }
 
     [Visitor]
-    public void Visit(MethodDefinitionNode node)
+    public void Visit(MethodDeclarationNode node)
     {
         var returnType = CurrentTable.Lookup(node.ReturnType.Value)?.First() as TypeSymbol ?? new TypeSymbol(node.ReturnType.Value, null);
 

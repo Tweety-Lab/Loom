@@ -30,9 +30,9 @@ public class ModuleBlockRule : ParserRule<BlockNode>
         };
 
         foreach (var modifier in TokenRegistry.Modifiers)
-            dispatch[modifier] = () => body.Add(RunRule<MethodDefinitionRule, MethodDefinitionNode>());
+            dispatch[modifier] = () => body.Add(RunRule<MethodDeclarationRule, MethodDeclarationNode>());
 
-        ParseUntil(TokenType.RBrace, dispatch, () => body.Add(RunRule<MethodDefinitionRule, MethodDefinitionNode>()));
+        ParseUntil(TokenType.RBrace, dispatch, () => body.Add(RunRule<MethodDeclarationRule, MethodDeclarationNode>()));
 
         Parser.Reader.Expect(TokenType.RBrace); // }
 
