@@ -73,11 +73,11 @@ public class AnalysisContext
 
         // Resolve Declarations
         var declWalker = new DeclarationWalker(this, rootTable);
-        declWalker.VisitChildren(root);
+        declWalker.Dispatch(root);
 
         // Resolve Parents
         var parentWalker = new ParentWalker(this);
-        parentWalker.VisitChildren(root);
+        parentWalker.Dispatch(root);
 
         // Resolve special binding
         var bindWalker = new BindingWalker(this);
@@ -86,7 +86,7 @@ public class AnalysisContext
         // Resolve Scopes
         var semWalker = new SemanticWalker(this);
         semWalker.SetRootTable(rootTable);
-        semWalker.VisitChildren(root);
+        semWalker.Dispatch(root);
 
 
         // Resolve Types
@@ -98,6 +98,21 @@ public class AnalysisContext
             analyzer.Context = this;
             root.Accept(analyzer);
         }
+    }
+
+    /// <summary> Gets the nearest <see cref="Binder"/> in scope for the given node. </summary>
+    public Symbols.Binder? GetBinder(ASTNode node)
+    {
+        var current = node;
+        while (current != null)
+        {
+            if (Binders.TryGetValue(current, out var binder))
+                return binder;
+
+            current = GetParent(current);
+        }
+
+        return null;
     }
 
     /// <summary> Resolves a <see cref="Symbol"/> from the given <see cref="ASTNode"/>. </summary>
