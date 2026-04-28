@@ -16,7 +16,7 @@ internal class StringPrinterStyle : ILIRPrinterStyle
     {
         var sig = f.Signature;
         var parameters = string.Join(", ", sig.ParameterTypes.Select(PrintType));
-        return $"define {PrintType(sig.ReturnType)} {f.Name}({parameters}) {{";
+        return $"define {f.Name}({parameters}) -> {PrintType(sig.ReturnType)} {{";
     }
 
     /// <inheritdoc/>
