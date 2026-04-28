@@ -1,4 +1,6 @@
 ﻿
+using Loom.LIR.Builders;
+
 namespace Loom.LIR;
 
 public abstract record LIRValue;
@@ -11,3 +13,9 @@ public record LIRTempValue(int Id) : LIRValue
 }
 
 public record LIRConstantValue(object Value) : LIRValue;
+
+public record LIRFunctionValue(LIRFunction Function) : LIRValue
+{
+    /// <inheritdoc/>
+    public override string ToString() => $"@{Function.Name}";
+}

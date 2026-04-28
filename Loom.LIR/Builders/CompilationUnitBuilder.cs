@@ -1,21 +1,27 @@
 ﻿
 namespace Loom.LIR.Builders;
 
-public record class LIRCompilationUnit(List<LIRFunction> Functions);
+public class LIRCompilationUnit
+{
+    public List<LIRFunction> Functions { get; } = new List<LIRFunction>();
 
-public class CompilationUnitBuilder : LIRBuilder<LIRCompilationUnit>
+    /// <summary> Initializes a new instance of the <see cref="LIRCompilationUnit"/> class. </summary>
+    public LIRCompilationUnit(List<LIRFunction> functions) => Functions = functions;
+}
+
+public class CompilationUnitBuilder : ILIRBuilder<LIRCompilationUnit>
 {
     public List<FunctionBuilder> Functions { get; } = new List<FunctionBuilder>();
 
-    public FunctionBuilder DefineFunction(string name)
+    public FunctionBuilder DefineFunction(string name, LIRType returnType, List<LIRType> parameters)
     {
-        var function = new FunctionBuilder(name);
+        var function = new FunctionBuilder(name, returnType, parameters);
         Functions.Add(function);
         return function;
     }
 
     /// <inheritdoc />
-    public override LIRCompilationUnit Build()
+    public LIRCompilationUnit Build()
     {
         return new LIRCompilationUnit(Functions.Select(f => f.Build()).ToList());
     }

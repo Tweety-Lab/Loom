@@ -19,7 +19,7 @@ public static class CompilationContextExtensions
         public CompilationContext EmitLIR()
         {
             CompilationUnitBuilder builder = new();
-            var func = builder.DefineFunction("TestModule::MyFunc");
+            var func = builder.DefineFunction("TestModule::AdditionFunc", LIRType.Int32, new List<LIRType>());
             var il = func.LIRGenerator;
 
             var a = il.Emit(LIROpCode.Const, new LIRConstantValue(1));
@@ -28,8 +28,13 @@ public static class CompilationContextExtensions
 
             il.Emit(LIROpCode.Ret, sum);
 
-            var unit = builder.Build();
+            var callingFunc = builder.DefineFunction("TestModule::CallingFunc", LIRType.Int32, new List<LIRType>());
+            var il2 = callingFunc.LIRGenerator;
 
+            var callResult = il2.Emit(LIROpCode.Call, new LIRFunctionValue(func.Build()));
+            il2.Emit(LIROpCode.Ret, callResult);
+
+            var unit = builder.Build();
             LIRPrinter printer = new();
             string lir = printer.Print(unit);
 

@@ -2,10 +2,10 @@
 namespace Loom.LIR.Builders;
 
 /// <summary>
-/// The base class for all LIR builders.
+/// Base interface for all LIR builders.
 /// </summary>
-public abstract class LIRBuilder<T>
+public interface ILIRBuilder<T>
 {
     /// <summary> Builds into a LIR </summary>
-    public abstract T Build();
+    T Build();
 }
