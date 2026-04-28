@@ -40,6 +40,7 @@ public class PrimaryExpressionRule : ParserRule<ExpressionNode>
         {
             TokenType.Number => new NumberLiteralNode(Parser.Reader.Advance().Value),
             TokenType.Identifier when Parser.Reader.Peek().Type == TokenType.LParen => RunRule<CallExpressionRule, CallExpressionNode>(),
+            TokenType.Identifier => new IdentifierNameNode(Parser.Reader.Advance()),
             _ => throw new Exception($"Unexpected token: '{Parser.Reader.Current.Value}' type={Parser.Reader.Current.Type} at {Parser.Reader.Current.Location}")
         };
     }

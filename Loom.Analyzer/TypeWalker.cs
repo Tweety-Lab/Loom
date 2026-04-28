@@ -20,6 +20,22 @@ internal class TypeWalker : ASTWalker
     public void Visit(NumberLiteralNode node) => Context.ExpressionTypes[node] = (TypeSymbol)Context.Binders.First().Value.Lookup("i32")!.First();
 
     [Visitor]
+    public void Visit(IdentifierNameNode node)
+    {
+        var symbol = Context.ResolveSymbol(node).Symbol;
+
+        var type = symbol switch
+        {
+            LocalVariableSymbol local => local.Type,
+            MethodDefinitionSymbol method => method.ReturnType,
+            _ => null
+        };
+
+        if (type != null)
+            Context.ExpressionTypes[node] = type;
+    }
+
+    [Visitor]
     public void Visit(CallExpressionNode node)
     {
         if (Context.ResolveSymbol(node.MethodName).Symbol is MethodDefinitionSymbol methodSymbol)

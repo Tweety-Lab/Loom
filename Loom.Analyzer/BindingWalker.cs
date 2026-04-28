@@ -16,12 +16,18 @@ internal class BindingWalker : ASTWalker
     public BindingWalker(AnalysisContext context) => Context = context;
 
     [Visitor]
+    public void Visit(IdentifierNameNode node)
+    {
+        var symbol = Context.GetBinder(node)?.Lookup(node.BaseName)?.First();
+        Context.BoundSymbols[node] = symbol;
+    }
+
+    [Visitor]
     public void Visit(ImportNode node)
     {
         var symbol = Context.GetBinder(node)?.Lookup(node.ModuleName.BaseName)?.First() as ModuleSymbol;
         Context.BoundSymbols[node.ModuleName] = symbol;
     }
-
 
     [Visitor]
     public void Visit(CallExpressionNode node)

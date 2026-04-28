@@ -19,7 +19,11 @@ public class TokenReader
     public Token Current => Tokens[Position];
 
     /// <summary> Initializes a new instance of the <see cref="TokenReader"/> class. </summary>
-    public TokenReader(List<Token> tokens) => Tokens = tokens;
+    public TokenReader(List<Token> tokens, DiagnosticContext? diagnosticContext = null)
+    {
+        Tokens = tokens;
+        DiagnosticContext = diagnosticContext;
+    }
 
     public Token Peek(int offset = 1)
     {

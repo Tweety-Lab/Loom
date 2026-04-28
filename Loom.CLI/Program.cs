@@ -15,12 +15,12 @@ module Test
 {
     export i32 MyMethod()
     {
-        return Test();
+        i32 x = Test();
+        return x;
     }
 
     i32 Test()
     {
-        i32 x = 1 + 1;
         return 1 + 1;
     }
 }

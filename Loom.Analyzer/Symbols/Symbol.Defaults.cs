@@ -13,3 +13,4 @@ public record TypeSymbol(string Name, TypeSymbol.KnownType? Type) : Symbol(Name)
 }
 
 public record MethodDefinitionSymbol(string Name, TypeSymbol ReturnType) : Symbol(Name);
+public record LocalVariableSymbol(string Name, TypeSymbol Type) : Symbol(Name);

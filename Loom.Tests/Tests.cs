@@ -121,6 +121,29 @@ module Test2
 }
 ";
 
+    public const string VARIABLE_DECLARATION_SOURCE = @"
+module Test
+{
+    i32 MyMethod()
+    {
+        i32 x = 42;
+        return x;
+    }
+}
+";
+
+    public const string VARIABLE_EXPRESSION_SOURCE = @"
+module Test
+{
+    i32 MyMethod()
+    {
+        i32 x = 1 + 2;
+        i32 y = x + 3;
+        return y;
+    }
+}
+";
+
     private (ProgramNode root, CompilationContext context) ParseAndAnalyze(string source = TEST_SOURCE)
     {
         CompilationContext context = new CompilationContext();
@@ -319,5 +342,83 @@ module Test2
         var symbol = context.AnalysisContext.ResolveSymbol(call.MethodName).Symbol;
         Assert.IsType<MethodDefinitionSymbol>(symbol);
         Assert.Equal("Helper", ((MethodDefinitionSymbol)symbol).Name);
+    }
+
+    [Fact]
+    public void Parse_VariableDeclaration()
+    {
+        var (root, _) = ParseAndAnalyze(VARIABLE_DECLARATION_SOURCE);
+        var method = (MethodDefinitionNode)root.Modules[0].Body.Contents.First();
+        var decl = Assert.IsType<VariableDeclarationNode>(method.Body.Contents.First());
+        Assert.Equal("x", decl.Name.BaseName);
+        Assert.Equal("i32", decl.Type.Value);
+        Assert.IsType<NumberLiteralNode>(decl.Initializer);
+    }
+
+    [Fact]
+    public void Parse_VariableDeclaration_InitializerValue()
+    {
+        var (root, _) = ParseAndAnalyze(VARIABLE_DECLARATION_SOURCE);
+        var method = (MethodDefinitionNode)root.Modules[0].Body.Contents.First();
+        var decl = (VariableDeclarationNode)method.Body.Contents.First();
+        var literal = Assert.IsType<NumberLiteralNode>(decl.Initializer);
+        Assert.Equal("42", literal.Value);
+    }
+
+    [Fact]
+    public void Analyze_VariableDeclaration_BoundToLocalVariableSymbol()
+    {
+        var (root, context) = ParseAndAnalyze(VARIABLE_DECLARATION_SOURCE);
+        var method = (MethodDefinitionNode)root.Modules[0].Body.Contents.First();
+        var decl = (VariableDeclarationNode)method.Body.Contents.First();
+        var symbol = context.AnalysisContext.ResolveSymbol(decl).Symbol;
+        Assert.IsType<LocalVariableSymbol>(symbol);
+        Assert.Equal("x", ((LocalVariableSymbol)symbol).Name);
+    }
+
+    [Fact]
+    public void Analyze_VariableDeclaration_HasCorrectType()
+    {
+        var (root, context) = ParseAndAnalyze(VARIABLE_DECLARATION_SOURCE);
+        var method = (MethodDefinitionNode)root.Modules[0].Body.Contents.First();
+        var decl = (VariableDeclarationNode)method.Body.Contents.First();
+        var symbol = context.AnalysisContext.ResolveSymbol(decl).Symbol as LocalVariableSymbol;
+        Assert.Equal(TypeSymbol.KnownType.I32, symbol!.Type.Type);
+    }
+
+    [Fact]
+    public void Analyze_VariableReference_BoundToLocalVariableSymbol()
+    {
+        var (root, context) = ParseAndAnalyze(VARIABLE_DECLARATION_SOURCE);
+        var method = (MethodDefinitionNode)root.Modules[0].Body.Contents.First();
+        var returnStatement = (ReturnStatementNode)method.Body.Contents.Last();
+        var identifier = Assert.IsType<IdentifierNameNode>(returnStatement.Expression);
+        var symbol = context.AnalysisContext.ResolveSymbol(identifier).Symbol;
+        Assert.IsType<LocalVariableSymbol>(symbol);
+        Assert.Equal("x", ((LocalVariableSymbol)symbol).Name);
+    }
+
+    [Fact]
+    public void Analyze_VariableReference_HasCorrectType()
+    {
+        var (root, context) = ParseAndAnalyze(VARIABLE_DECLARATION_SOURCE);
+        var method = (MethodDefinitionNode)root.Modules[0].Body.Contents.First();
+        var returnStatement = (ReturnStatementNode)method.Body.Contents.Last();
+        var identifier = Assert.IsType<IdentifierNameNode>(returnStatement.Expression);
+        var type = context.AnalysisContext.ExpressionTypes[identifier];
+        Assert.Equal(TypeSymbol.KnownType.I32, type.Type);
+    }
+
+    [Fact]
+    public void Analyze_VariableUsedInExpression_HasCorrectType()
+    {
+        var (root, context) = ParseAndAnalyze(VARIABLE_EXPRESSION_SOURCE);
+        var method = (MethodDefinitionNode)root.Modules[0].Body.Contents.First();
+        var secondDecl = (VariableDeclarationNode)method.Body.Contents[1];
+        var binary = Assert.IsType<BinaryExpressionNode>(secondDecl.Initializer);
+        var left = Assert.IsType<IdentifierNameNode>(binary.Left);
+        var symbol = context.AnalysisContext.ResolveSymbol(left).Symbol;
+        Assert.IsType<LocalVariableSymbol>(symbol);
+        Assert.Equal("x", ((LocalVariableSymbol)symbol).Name);
     }
 }

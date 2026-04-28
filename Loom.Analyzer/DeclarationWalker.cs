@@ -45,6 +45,17 @@ internal class DeclarationWalker : ASTVisitor
         WithScope(node, () => VisitChildren(node), symbol);
     }
 
+    [Visitor]
+    public void Visit(VariableDeclarationNode node)
+    {
+        var type = CurrentTable.Lookup(node.Type.Value)?.First() as TypeSymbol ?? new TypeSymbol(node.Type.Value, null);
+        var symbol = new LocalVariableSymbol(node.Name.BaseName, type);
+        CurrentTable.Define(symbol);
+        Context.BoundSymbols[node] = symbol;
+
+        VisitChildren(node);
+    }
+
     private void WithScope(ASTNode node, Action body, Symbol? symbol = null)
     {
         var parentTable = CurrentTable;
