@@ -5,21 +5,21 @@ using Loom.Parser.Rules.Default;
 namespace Loom.Analyzer;
 
 /// <summary>
-/// Walks the AST and builds scoped <see cref="SymbolTable"/>s, defining symbols for all declarations.
+/// Walks the AST and builds scoped <see cref="Binder"/>s, defining symbols for all declarations.
 /// </summary>
 internal class DeclarationWalker : ASTVisitor
 {
     /// <summary> The owning <see cref="AnalysisContext"/>. </summary>
     public AnalysisContext Context { get; private set; }
 
-    /// <summary> The current <see cref="SymbolTable"/>. </summary>
-    public SymbolTable CurrentTable { get; private set; }
+    /// <summary> The current <see cref="Binder"/>. </summary>
+    public Binder CurrentTable { get; private set; }
 
     /// <summary> The current <see cref="Symbol"/>. </summary>
     public Symbol? CurrentSymbol { get; private set; }
 
     /// <summary> Initializes a new instance of the <see cref="DeclarationWalker"/> class. </summary>
-    public DeclarationWalker(AnalysisContext context, SymbolTable currentTable)
+    public DeclarationWalker(AnalysisContext context, Binder currentTable)
     {
         Context = context;
         CurrentTable = currentTable;
@@ -29,7 +29,7 @@ internal class DeclarationWalker : ASTVisitor
     public void Visit(ModuleNode node)
     {
         var symbol = new ModuleSymbol(node.Name.BaseName);
-        CurrentTable.Define(node.Name.BaseName, symbol);
+        CurrentTable.Define(symbol);
 
         WithScope(node, () => VisitChildren(node), symbol);
     }
@@ -37,10 +37,10 @@ internal class DeclarationWalker : ASTVisitor
     [Visitor]
     public void Visit(MethodDefinitionNode node)
     {
-        var returnType = CurrentTable.Resolve(node.ReturnType.Value) as TypeSymbol ?? new TypeSymbol(node.ReturnType.Value, null);
+        var returnType = CurrentTable.Lookup(node.ReturnType.Value) as TypeSymbol ?? new TypeSymbol(node.ReturnType.Value, null);
 
         var symbol = new MethodDefinitionSymbol(node.MethodName.BaseName, returnType);
-        CurrentTable.Define(node.MethodName.BaseName, symbol);
+        CurrentTable.Define(symbol);
 
         WithScope(node, () => VisitChildren(node), symbol);
     }
@@ -50,7 +50,7 @@ internal class DeclarationWalker : ASTVisitor
         var parentTable = CurrentTable;
         var previousSymbol = CurrentSymbol;
 
-        CurrentTable = new SymbolTable(parentTable);
+        CurrentTable = new Binder(parentTable);
         Context.SymbolTables[node] = CurrentTable;
 
         if (symbol is not null)

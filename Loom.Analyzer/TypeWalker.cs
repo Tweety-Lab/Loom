@@ -17,7 +17,7 @@ internal class TypeWalker : ASTWalker
     public TypeWalker(AnalysisContext context) => Context = context;
 
     [Visitor]
-    public void Visit(NumberLiteralNode node) => Context.ExpressionTypes[node] = (TypeSymbol)Context.SymbolTables.First().Value.Resolve("i32")!;
+    public void Visit(NumberLiteralNode node) => Context.ExpressionTypes[node] = (TypeSymbol)Context.SymbolTables.First().Value.Lookup("i32")!;
 
     [Visitor]
     public void Visit(CallExpressionNode node)

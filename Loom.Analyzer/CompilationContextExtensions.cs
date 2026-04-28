@@ -15,8 +15,8 @@ public static class CompilationContextExtensions
 
     extension(CompilationContext ctx)
     {
-        /// <summary> Maps <see cref="ASTNode"/>s to their corresponding <see cref="SymbolTable"/>. </summary>
-        public Dictionary<ASTNode, SymbolTable>? SymbolMap => ctx.ExtendedProperties.TryGetValue(SYMBOL_DICT_KEY, out object? obj) ? (Dictionary<ASTNode, SymbolTable>)obj : null;
+        /// <summary> Maps <see cref="ASTNode"/>s to their corresponding <see cref="Binder"/>. </summary>
+        public Dictionary<ASTNode, Binder>? SymbolMap => ctx.ExtendedProperties.TryGetValue(SYMBOL_DICT_KEY, out object? obj) ? (Dictionary<ASTNode, Binder>)obj : null;
 
         /// <summary> Runs the <see cref="CompilationContext"/> through the Semantic Analyzer. </summary>
         public CompilationContext Analyze()

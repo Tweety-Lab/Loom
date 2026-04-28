@@ -20,7 +20,7 @@ module Test
 
     i32 Test()
     {
-        return 1 * 1 * 3 + 10;
+        return 1 + 1;
     }
 }
 

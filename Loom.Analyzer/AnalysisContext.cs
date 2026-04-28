@@ -13,8 +13,8 @@ public class AnalysisContext
     /// <summary> The <see cref="Common.Diagnostics.DiagnosticContext"/> this reports to, if any. </summary>
     public DiagnosticContext? DiagnosticContext { get; set; }
 
-    /// <summary> Maps <see cref="ASTNode"/>s to their corresponding <see cref="SymbolTable"/>. </summary>
-    public Dictionary<ASTNode, SymbolTable> SymbolTables { get; } = new();
+    /// <summary> Maps <see cref="ASTNode"/>s to their corresponding <see cref="Binder"/>. </summary>
+    public Dictionary<ASTNode, Symbols.Binder> SymbolTables { get; } = new();
 
     /// <summary> Maps <see cref="ExpressionNode"/>s to their corresponding <see cref="TypeSymbol"/>. </summary>
     public Dictionary<ExpressionNode, TypeSymbol> ExpressionTypes { get; } = new();
@@ -59,11 +59,11 @@ public class AnalysisContext
     /// <summary> Runs the given <see cref="ProgramNode"/> through the Semantic Analyzer. </summary>
     public void Analyze(ProgramNode root)
     {
-        var rootTable = new SymbolTable();
+        var rootTable = new Symbols.Binder();
 
         // Built-in types
-        rootTable.Define("void", new TypeSymbol("void", TypeSymbol.Type.Void));
-        rootTable.Define("i32", new TypeSymbol("i32", TypeSymbol.Type.I32));
+        rootTable.Define(new TypeSymbol("void", TypeSymbol.Type.Void));
+        rootTable.Define(new TypeSymbol("i32", TypeSymbol.Type.I32));
 
         SymbolTables[root] = rootTable;
 
@@ -101,7 +101,7 @@ public class AnalysisContext
         while (current != null)
         {
             if (SymbolTables.TryGetValue(current, out var table))
-                return table.Resolve(name);
+                return table.Lookup(name);
 
             current = GetParent(current);
         }

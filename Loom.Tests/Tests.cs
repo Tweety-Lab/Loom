@@ -158,8 +158,8 @@ module Test
         var (root, context) = ParseAndAnalyze();
         var symbolMap = context.SymbolMap!;
 
-        Assert.IsType<ModuleSymbol>(symbolMap[root].Resolve("Test"));
-        Assert.IsType<ModuleSymbol>(symbolMap[root].Resolve("Test2"));
+        Assert.IsType<ModuleSymbol>(symbolMap[root].Lookup("Test"));
+        Assert.IsType<ModuleSymbol>(symbolMap[root].Lookup("Test2"));
     }
 
     [Fact]
@@ -168,7 +168,7 @@ module Test
         var (root, context) = ParseAndAnalyze();
         var symbolMap = context.SymbolMap!;
 
-        var methodSymbol = symbolMap[root.Modules[0]].Resolve("MyMethod");
+        var methodSymbol = symbolMap[root.Modules[0]].Lookup("MyMethod");
         Assert.IsType<MethodDefinitionSymbol>(methodSymbol);
         Assert.Equal(TypeSymbol.Type.I32, ((MethodDefinitionSymbol)methodSymbol).ReturnType.KnownType);
     }
