@@ -83,12 +83,6 @@ public class AnalysisContext
         var bindWalker = new BindingWalker(this);
         bindWalker.Dispatch(root);
 
-        // Resolve Scopes
-        var semWalker = new SemanticWalker(this);
-        semWalker.SetRootTable(rootTable);
-        semWalker.Dispatch(root);
-
-
         // Resolve Types
         var typeWalker = new TypeWalker(this);
         typeWalker.Dispatch(root);
