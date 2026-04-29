@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/CodeGen/">
+    <Project Path="Loom.CodeGen.LLVM/Loom.CodeGen.LLVM.csproj" Id="717ccacf-c04c-4319-a039-0520e662fa26" />
+  </Folder>
   <Project Path="Loom.Analyzer/Loom.Analyzer.csproj" Id="68bd67b2-4319-4aa5-9caa-07cc9737ab1f" />
   <Project Path="Loom.CLI/Loom.CLI.csproj" Id="f6b9f11f-342e-41c6-aecc-2de9b4c78d2f" />
   <Project Path="Loom.Common/Loom.Common.csproj" />

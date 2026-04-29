@@ -4,6 +4,7 @@ namespace Loom.LIR.Builders;
 
 public class CompilationUnitBuilder : ILIRBuilder<LIRCompilationUnit>
 {
+    /// <inheritdoc cref="LIRCompilationUnit.Functions"/>
     public List<FunctionBuilder> Functions { get; } = new List<FunctionBuilder>();
 
     /// <inheritdoc/>
@@ -21,8 +22,5 @@ public class CompilationUnitBuilder : ILIRBuilder<LIRCompilationUnit>
     public FunctionBuilder GetFunction(string name) => Functions.First(f => f.Name == name);
 
     /// <inheritdoc />
-    public LIRCompilationUnit Build()
-    {
-        return new LIRCompilationUnit(Functions.Select(f => f.Build()).ToList()) { MetaData = MetaData };
-    }
+    public LIRCompilationUnit Build() => new LIRCompilationUnit(Functions.Select(f => f.Build()).ToList()) { MetaData = MetaData };
 }

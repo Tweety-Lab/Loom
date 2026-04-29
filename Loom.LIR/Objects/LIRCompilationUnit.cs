@@ -2,6 +2,7 @@
 
 public class LIRCompilationUnit : ILIRObject
 {
+    /// <summary> All functions owned by this <see cref="LIRCompilationUnit"/>. </summary>
     public List<LIRFunction> Functions { get; } = new List<LIRFunction>();
 
     /// <inheritdoc/>

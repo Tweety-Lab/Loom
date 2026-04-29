@@ -16,6 +16,7 @@ public class LIRPrinter
         var sb = new StringBuilder();
 
         sb.Append(PrintMeta(unit));
+        sb.AppendLine();
 
         foreach (var function in unit.Functions)
         {

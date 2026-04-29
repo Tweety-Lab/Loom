@@ -1,4 +1,6 @@
-﻿using Loom.Analyzer;
+﻿using LLVMSharp.Interop;
+using Loom.Analyzer;
+using Loom.CodeGen.LLVM;
 using Loom.Common;
 using Loom.Common.Diagnostics;
 using Loom.LIR;
@@ -33,6 +35,11 @@ module Base
     {
         CompilationContext context = new CompilationContext();
         context.Parse(TEST_SOURCE).Analyze().EmitLIR();
+
+        LIRToLLVMLowerer lowerer = new LIRToLLVMLowerer();
+        LLVMModuleRef module = lowerer.Lower(context.CompilationUnits);
+
+        Console.WriteLine(module.PrintToString());
 
         foreach (var diagnostic in context.DiagnosticContext.Diagnostics)
         {

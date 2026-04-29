@@ -14,11 +14,17 @@ public static class CompilationContextExtensions
 
     extension(CompilationContext ctx)
     {
+        /// <summary> All <see cref="LIRCompilationUnit"/>s that make up the IR compilation of the current <see cref="CompilationContext"/>. </summary>
+        public IEnumerable<LIRCompilationUnit> CompilationUnits => ctx.ExtendedProperties[LIRGEN_CONTEXT_KEY] as IEnumerable<LIRCompilationUnit> ?? throw new InvalidOperationException("CompilationContext.CompilationUnits is null, has LIR emmission been run?");
+
         /// <summary> Runs the <see cref="CompilationContext"/> through the Loom Intermediate Representation generation pipeline. </summary>
         public CompilationContext EmitLIR()
         {
             LIRASTWalker walker = new(ctx);
             LIRCompilationUnit comp = walker.Build(ctx.SyntaxTrees);
+            comp.MetaData.Add("Name", "MyFile.loom");
+
+            ctx.ExtendedProperties[LIRGEN_CONTEXT_KEY] = new List<LIRCompilationUnit> { comp };
 
             LIRPrinter printer = new LIRPrinter(new StringPrinterStyle());
             string lir = printer.Print(comp);
