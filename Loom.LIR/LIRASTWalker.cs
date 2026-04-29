@@ -2,6 +2,7 @@
 using Loom.Common;
 using Loom.LIR.Builders;
 using Loom.LIR.Generators;
+using Loom.LIR.Objects;
 using Loom.LIR.OpCodes;
 using Loom.Parser.AST;
 using Loom.Parser.Rules.Default;
@@ -28,6 +29,7 @@ internal class LIRASTWalker : ASTWalker
     public LIRCompilationUnit Build(ASTNode root)
     {
         Dispatch(root);
+
         return unitBuilder.Build();
     }
 
@@ -36,6 +38,11 @@ internal class LIRASTWalker : ASTWalker
     {
         string fullName = context.AnalysisContext.FirstAncestorOrSelf<ModuleNode>(node)?.Name.Text + "::" + node.MethodName.Text;
         currentFunction = unitBuilder.DefineFunction(fullName, LIRType.Int32, new List<LIRType>());
+
+        currentFunction.MetaData.Add("OwningType", "global");
+
+        if (node.Modifiers.Count > 0)
+            currentFunction.MetaData.Add("Modifiers", string.Join(", ", node.Modifiers.Select(m => m.Text)));
 
         il = currentFunction.LIRGenerator;
     }

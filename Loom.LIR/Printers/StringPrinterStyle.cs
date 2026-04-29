@@ -1,5 +1,6 @@
 ﻿
 using Loom.LIR.Builders;
+using Loom.LIR.Objects;
 
 namespace Loom.LIR.Printers;
 
@@ -10,6 +11,9 @@ internal class StringPrinterStyle : ILIRPrinterStyle
 {
     /// <inheritdoc/>
     public string PrintFunctionFooter() => "}";
+
+    /// <inheritdoc/>
+    public string PrintMeta(string key, string value) => $"[{key}: {value}]";
 
     /// <inheritdoc/>
     public string PrintFunctionHeader(LIRFunction f)

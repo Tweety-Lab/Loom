@@ -1,23 +1,7 @@
-﻿
-using Loom.LIR.Generators;
-using static System.Reflection.Metadata.BlobBuilder;
+﻿using Loom.LIR.Generators;
+using Loom.LIR.Objects;
 
 namespace Loom.LIR.Builders;
-
-public sealed class LIRFunction
-{
-    public string Name { get; }
-    public LIRFunctionType Signature { get; }
-    public List<LIRBasicBlock> Blocks { get; }
-
-    /// <summary> Initializes a new instance of the <see cref="LIRFunction"/> class. </summary>
-    public LIRFunction(string name, LIRFunctionType signature, List<LIRBasicBlock> blocks)
-    {
-        Name = name;
-        Signature = signature;
-        Blocks = blocks;
-    }
-}
 
 public class FunctionBuilder : ILIRBuilder<LIRFunction>
 {
@@ -39,6 +23,9 @@ public class FunctionBuilder : ILIRBuilder<LIRFunction>
     /// <summary> The current writing basic block. </summary>
     public LIRBasicBlock WritingBlock { get; set; }
 
+    /// <inheritdoc/>
+    public Dictionary<string, string> MetaData { get; } = new();
+
     /// <summary> Initializes a new instance of the <see cref="FunctionBuilder"/> class. </summary>
     public FunctionBuilder(string name, LIRType returnType, List<LIRType> parameters)
     {
@@ -53,7 +40,7 @@ public class FunctionBuilder : ILIRBuilder<LIRFunction>
     /// <inheritdoc/>
     public LIRFunction Build()
     {
-        return new LIRFunction(Name, new LIRFunctionType(ReturnType, Parameters), Blocks);
+        return new LIRFunction(Name, new LIRFunctionType(ReturnType, Parameters), Blocks) {  MetaData = MetaData };
     }
 
     /// <summary> Creates a new basic block. </summary>

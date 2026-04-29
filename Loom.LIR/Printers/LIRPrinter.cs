@@ -1,5 +1,4 @@
-﻿
-using Loom.LIR.Builders;
+﻿using Loom.LIR.Objects;
 using System.Text;
 
 namespace Loom.LIR.Printers;
@@ -16,6 +15,8 @@ public class LIRPrinter
     {
         var sb = new StringBuilder();
 
+        sb.Append(PrintMeta(unit));
+
         foreach (var function in unit.Functions)
         {
             sb.AppendLine(Print(function));
@@ -29,6 +30,8 @@ public class LIRPrinter
     {
         var sb = new StringBuilder();
 
+        sb.Append(PrintMeta(function));
+
         sb.AppendLine(Style.PrintFunctionHeader(function));
 
         foreach (var block in function.Blocks)
@@ -40,7 +43,6 @@ public class LIRPrinter
     }
 
 
-
     private string PrintBlock(LIRBasicBlock block)
     {
         var sb = new StringBuilder();
@@ -49,6 +51,16 @@ public class LIRPrinter
 
         foreach (var inst in block.Instructions)
             sb.AppendLine("  " + Style.PrintInstruction(inst));
+
+        return sb.ToString();
+    }
+
+    private string PrintMeta(LIRObject obj)
+    {
+        var sb = new StringBuilder();
+
+        foreach (var meta in obj.MetaData)
+            sb.AppendLine(Style.PrintMeta(meta.Key, meta.Value));
 
         return sb.ToString();
     }

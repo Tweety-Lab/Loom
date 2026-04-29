@@ -1,5 +1,6 @@
 ﻿
 using Loom.LIR.Builders;
+using Loom.LIR.Objects;
 
 namespace Loom.LIR;
 

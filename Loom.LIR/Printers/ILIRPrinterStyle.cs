@@ -1,4 +1,5 @@
 ﻿using Loom.LIR.Builders;
+using Loom.LIR.Objects;
 
 namespace Loom.LIR.Printers;
 
@@ -7,6 +8,7 @@ namespace Loom.LIR.Printers;
 /// </summary>
 public interface ILIRPrinterStyle
 {
+    string PrintMeta(string key, string value);
     string PrintType(LIRType type);
     string PrintValue(LIRValue value);
     string PrintInstruction(LIRInstruction inst);
