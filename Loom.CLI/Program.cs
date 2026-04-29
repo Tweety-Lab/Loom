@@ -1,11 +1,8 @@
 ﻿using Loom.Analyzer;
-using Loom.Analyzer.Symbols;
 using Loom.Common;
 using Loom.Common.Diagnostics;
 using Loom.LIR;
 using Loom.Parser;
-using Loom.Parser.Rules.Default;
-using System.Diagnostics;
 
 namespace Loom.CLI;
 
@@ -18,8 +15,7 @@ module Consumer
 {
     i32 MyMethod()
     {
-        i32 x = Test();
-        return x;
+        return Test();
     }
 }
 
@@ -27,7 +23,7 @@ module Base
 {
     export i32 Test()
     {
-        return 1;
+        return 1 + 1;
     }
 }
 ";

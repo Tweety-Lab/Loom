@@ -1,7 +1,4 @@
 ﻿using Loom.Parser.AST;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.Rules.Default;

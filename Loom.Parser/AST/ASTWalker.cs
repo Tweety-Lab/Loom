@@ -1,8 +1,4 @@
-﻿using Loom.Parser.Rules.Default;
-using System.Diagnostics;
-using System.Reflection;
-
-namespace Loom.Parser.AST;
+﻿namespace Loom.Parser.AST;
 
 /// <summary>
 /// A version of <see cref="ASTVisitor"/> that automatically visits child nodes.

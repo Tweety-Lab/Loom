@@ -1,6 +1,4 @@
-﻿
-using Loom.LIR.Builders;
-using Loom.LIR.Objects;
+﻿using Loom.LIR.Objects;
 
 namespace Loom.LIR.Printers;
 

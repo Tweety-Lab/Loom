@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Loom.LIR.Objects;
+﻿namespace Loom.LIR.Objects;
 
 public class LIRCompilationUnit : ILIRObject
 {

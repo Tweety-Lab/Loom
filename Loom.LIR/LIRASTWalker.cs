@@ -1,5 +1,4 @@
 ﻿using Loom.Analyzer;
-using Loom.Analyzer.Symbols;
 using Loom.Common;
 using Loom.LIR.Builders;
 using Loom.LIR.Objects;
@@ -27,12 +26,12 @@ internal class LIRASTWalker
         var rootList = roots.ToList();
 
         // Declare all functions
-        var declPass = new FunctionDeclarationWalker(context.AnalysisContext, unitBuilder);
+        var declPass = new FunctionDeclarationGenerator(context.AnalysisContext, unitBuilder);
         foreach (var root in rootList)
             declPass.Dispatch(root);
 
         // Emit bodies
-        var bodyPass = new FunctionBodyWalker(context.AnalysisContext, unitBuilder);
+        var bodyPass = new FunctionBodyGenerator(context.AnalysisContext, unitBuilder);
         foreach (var root in rootList)
             bodyPass.Dispatch(root);
 
