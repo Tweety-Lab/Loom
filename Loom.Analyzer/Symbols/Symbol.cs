@@ -3,5 +3,5 @@ namespace Loom.Analyzer.Symbols;
 
 public abstract record Symbol(string Name)
 {
-    public string? FullyQualifiedName { get; set; }
+    public string FullyQualifiedName { get; set; } = Name;
 }

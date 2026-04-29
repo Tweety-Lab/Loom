@@ -17,6 +17,9 @@ public class CompilationUnitBuilder : ILIRBuilder<LIRCompilationUnit>
         return function;
     }
 
+    /// <summary> Gets a <see cref="FunctionBuilder"/> by name. </summary>
+    public FunctionBuilder GetFunction(string name) => Functions.First(f => f.Name == name);
+
     /// <inheritdoc />
     public LIRCompilationUnit Build()
     {

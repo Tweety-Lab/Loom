@@ -16,10 +16,10 @@ namespace Loom.LIR;
 /// </summary>
 internal class LIRASTWalker
 {
-    private readonly CompilationContext context;
-    private readonly CompilationUnitBuilder unitBuilder = new();
-    private readonly Dictionary<Symbol, FunctionBuilder> functions = new();
+    private CompilationContext context;
+    private CompilationUnitBuilder unitBuilder = new();
 
+    /// <summary> Initializes a new instance of the <see cref="LIRASTWalker"/> class. </summary>
     public LIRASTWalker(CompilationContext context) => this.context = context;
 
     public LIRCompilationUnit Build(IEnumerable<ProgramNode> roots)
@@ -27,12 +27,12 @@ internal class LIRASTWalker
         var rootList = roots.ToList();
 
         // Declare all functions
-        var declPass = new FunctionDeclarationWalker(context.AnalysisContext, unitBuilder, functions);
+        var declPass = new FunctionDeclarationWalker(context.AnalysisContext, unitBuilder);
         foreach (var root in rootList)
             declPass.Dispatch(root);
 
         // Emit bodies
-        var bodyPass = new FunctionBodyWalker(context.AnalysisContext, functions);
+        var bodyPass = new FunctionBodyWalker(context.AnalysisContext, unitBuilder);
         foreach (var root in rootList)
             bodyPass.Dispatch(root);
 
