@@ -24,6 +24,9 @@ public class AnalysisContext
     /// <summary> Maps <see cref="ASTNode"/>s to their parent <see cref="ASTNode"/>. </summary>
     public Dictionary<ASTNode, ASTNode> Parents { get; } = new();
 
+    /// <summary> The entry point of the program or null if one could not be resolved. </summary>
+    public MethodDefinitionSymbol? EntryPoint { get; private set; }
+
     /// <summary> All registered analyzers the pipeline uses. </summary>
     public List<Analyzers.Analyzer> Analyzers
     {
@@ -101,6 +104,8 @@ public class AnalysisContext
             foreach (var root in rootList)
                 root.Accept(analyzer);
         }
+
+        EntryPoint = rootTable.Lookup("main")?.First() as MethodDefinitionSymbol;
     }
 
     /// <summary> Gets the nearest <see cref="Binder"/> in scope for the given node. </summary>
