@@ -33,10 +33,9 @@ internal class FunctionDeclarationWalker : ASTWalker
             _ => LIRType.Int32
         };
 
-        var moduleName = context.FirstAncestorOrSelf<ModuleNode>(node)?.Name.Text ?? "Global";
-        var fullName = $"{moduleName}::{node.MethodName.Text}";
+        var symbol = context.ResolveSymbol(node).Symbol as MethodDefinitionSymbol;
 
-        var builder = unitBuilder.DefineFunction(fullName, returnType, new List<LIRType>());
+        var builder = unitBuilder.DefineFunction(symbol?.FullyQualifiedName ?? node.MethodName.Text, returnType, new List<LIRType>());
 
         if (node.Modifiers.Count > 0)
             builder.MetaData.Add("Modifiers", string.Join(", ", node.Modifiers.Select(m => m.Text)));

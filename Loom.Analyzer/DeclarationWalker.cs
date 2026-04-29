@@ -40,6 +40,7 @@ internal class DeclarationWalker : ASTVisitor
         var returnType = CurrentTable.Lookup(node.ReturnType.Text)?.First() as TypeSymbol ?? new TypeSymbol(node.ReturnType.Text, null);
 
         var symbol = new MethodDefinitionSymbol(node.MethodName.Text, returnType);
+        symbol.FullyQualifiedName = BuildQualifiedName(node.MethodName.Text);
         CurrentTable.Define(symbol);
 
         WithScope(node, () => VisitChildren(node), symbol);
@@ -50,6 +51,7 @@ internal class DeclarationWalker : ASTVisitor
     {
         var type = CurrentTable.Lookup(node.Type.Text)?.First() as TypeSymbol ?? new TypeSymbol(node.Type.Text, null);
         var symbol = new LocalVariableSymbol(node.Name.Text, type);
+        symbol.FullyQualifiedName = BuildQualifiedName(node.Name.Text);
         CurrentTable.Define(symbol);
         Context.BoundSymbols[node] = symbol;
 
@@ -78,4 +80,16 @@ internal class DeclarationWalker : ASTVisitor
 
     /// <inheritdoc/>
     protected override void OnUnhandled(ASTNode node) => VisitChildren(node);
+
+    private string BuildQualifiedName(string name)
+    {
+        var parts = new Stack<string>();
+        parts.Push(name);
+
+        var current = CurrentSymbol;
+        if (current != null)
+            parts.Push(current.Name);
+
+        return string.Join("::", parts);
+    }
 }
