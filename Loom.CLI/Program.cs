@@ -21,10 +21,7 @@ module Test
         i32 x = Test();
         return x;
     }
-}
 
-module Test2
-{
     i32 Test()
     {
         return 1 + 1;

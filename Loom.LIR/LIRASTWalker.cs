@@ -1,9 +1,9 @@
 ﻿using Loom.Analyzer;
+using Loom.Analyzer.Symbols;
 using Loom.Common;
 using Loom.LIR.Builders;
-using Loom.LIR.Generators;
 using Loom.LIR.Objects;
-using Loom.LIR.OpCodes;
+using Loom.LIR.Passes;
 using Loom.Parser.AST;
 using Loom.Parser.Rules.Default;
 
@@ -14,42 +14,28 @@ namespace Loom.LIR;
 /// <summary>
 /// A <see cref="ASTWalker"/> that converts the AST into Loom Intermediate Representation (LIR).
 /// </summary>
-internal class LIRASTWalker : ASTWalker
+internal class LIRASTWalker
 {
+    private readonly CompilationContext context;
     private readonly CompilationUnitBuilder unitBuilder = new();
-    private FunctionBuilder? currentFunction;
-    private LIRGenerator? il;
+    private readonly Dictionary<Symbol, FunctionBuilder> functions = new();
 
-    private CompilationContext context;
-
-    /// <summary> Initializes a new instance of the <see cref="LIRASTWalker"/> class. </summary>
     public LIRASTWalker(CompilationContext context) => this.context = context;
 
-    /// <summary> Builds the root of the AST into an <see cref="LIRCompilationUnit"/>. </summary>
-    public LIRCompilationUnit Build(ASTNode root)
+    public LIRCompilationUnit Build(IEnumerable<ProgramNode> roots)
     {
-        Dispatch(root);
+        var rootList = roots.ToList();
+
+        // Declare all functions
+        var declPass = new FunctionDeclarationWalker(context.AnalysisContext, unitBuilder, functions);
+        foreach (var root in rootList)
+            declPass.Dispatch(root);
+
+        // Emit bodies
+        var bodyPass = new FunctionBodyWalker(context.AnalysisContext, functions);
+        foreach (var root in rootList)
+            bodyPass.Dispatch(root);
 
         return unitBuilder.Build();
-    }
-
-    [Visitor]
-    public void Visit(MethodDeclarationNode node)
-    {
-        string fullName = context.AnalysisContext.FirstAncestorOrSelf<ModuleNode>(node)?.Name.Text + "::" + node.MethodName.Text;
-        currentFunction = unitBuilder.DefineFunction(fullName, LIRType.Int32, new List<LIRType>());
-
-        currentFunction.MetaData.Add("OwningType", "global");
-
-        if (node.Modifiers.Count > 0)
-            currentFunction.MetaData.Add("Modifiers", string.Join(", ", node.Modifiers.Select(m => m.Text)));
-
-        il = currentFunction.LIRGenerator;
-    }
-
-    [Visitor]
-    public void Visit(CallExpressionNode node)
-    {
-        il.Emit(LIROpCode.Call, new LIRFunction(node.MethodName.BaseName, new LIRFunctionType(LIRType.Void, new List<LIRType>()), new List<LIRBasicBlock>()));
     }
 }

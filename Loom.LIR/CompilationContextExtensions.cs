@@ -17,15 +17,12 @@ public static class CompilationContextExtensions
         /// <summary> Runs the <see cref="CompilationContext"/> through the Loom Intermediate Representation generation pipeline. </summary>
         public CompilationContext EmitLIR()
         {
-            foreach (var syntaxTree in ctx.SyntaxTrees)
-            {
-                LIRASTWalker walker = new(ctx);
-                LIRCompilationUnit comp = walker.Build(syntaxTree);
+            LIRASTWalker walker = new(ctx);
+            LIRCompilationUnit comp = walker.Build(ctx.SyntaxTrees);
 
-                LIRPrinter printer = new LIRPrinter(new StringPrinterStyle());
-                string lir = printer.Print(comp);
-                Console.WriteLine(lir);
-            }
+            LIRPrinter printer = new LIRPrinter(new StringPrinterStyle());
+            string lir = printer.Print(comp);
+            Console.WriteLine(lir);
 
             return ctx;
         }
