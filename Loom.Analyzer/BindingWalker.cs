@@ -18,7 +18,36 @@ internal class BindingWalker : ASTWalker
     [Visitor]
     public void Visit(IdentifierNameNode node)
     {
+        // Search local scope
         var symbol = Context.GetBinder(node)?.Lookup(node.BaseName)?.First();
+
+        // Search imported modules
+        if (symbol == null)
+        {
+            var programNode = Context.FirstAncestorOrSelf<ProgramNode>(node);
+            if (programNode != null)
+            {
+                foreach (var import in programNode.Imports)
+                {
+                    var moduleSymbol = Context.ResolveSymbol(import.ModuleName).Symbol as ModuleSymbol;
+                    if (moduleSymbol == null)
+                        continue;
+
+                    var moduleNode = moduleSymbol.DeclaringNode;
+                    if (moduleNode == null)
+                        continue;
+
+                    var exportedSymbol = Context.Binders[moduleNode].Lookup(node.BaseName)?.FirstOrDefault(s => s is MethodDefinitionSymbol m);
+
+                    if (exportedSymbol != null)
+                    {
+                        symbol = exportedSymbol;
+                        break;
+                    }
+                }
+            }
+        }
+
         Context.BoundSymbols[node] = symbol;
     }
 }

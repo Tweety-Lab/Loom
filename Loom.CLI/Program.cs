@@ -12,19 +12,22 @@ namespace Loom.CLI;
 public class Program
 {
     public const string TEST_SOURCE = @"
-import Test;
+import Base;
 
-module Test
+module Consumer
 {
-    export i32 MyMethod()
+    i32 MyMethod()
     {
         i32 x = Test();
         return x;
     }
+}
 
-    i32 Test()
+module Base
+{
+    export i32 Test()
     {
-        return 1 + 1;
+        return 1;
     }
 }
 ";

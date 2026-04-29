@@ -21,8 +21,7 @@ internal class FunctionDeclarationWalker : ASTWalker
     [Visitor]
     public void Visit(MethodDeclarationNode node)
     {
-        var method = context.ResolveSymbol(node).Symbol as MethodDefinitionSymbol;
-        if (method == null) return;
+        var method = (context.ResolveSymbol(node).Symbol as MethodDefinitionSymbol)!;
 
         LIRType returnType = method.ReturnType.KnownType switch
         {

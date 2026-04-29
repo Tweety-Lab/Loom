@@ -29,6 +29,8 @@ internal class DeclarationWalker : ASTVisitor
     public void Visit(ModuleNode node)
     {
         var symbol = new ModuleSymbol(node.Name.Text);
+        symbol.DeclaringNode = node;
+
         CurrentTable.Define(symbol);
 
         WithScope(node, () => VisitChildren(node), symbol);
@@ -52,6 +54,7 @@ internal class DeclarationWalker : ASTVisitor
         var type = CurrentTable.Lookup(node.Type.Text)?.First() as TypeSymbol ?? new TypeSymbol(node.Type.Text, null);
         var symbol = new LocalVariableSymbol(node.Name.Text, type);
         symbol.FullyQualifiedName = BuildQualifiedName(node.Name.Text);
+        symbol.DeclaringNode = node;
         CurrentTable.Define(symbol);
         Context.BoundSymbols[node] = symbol;
 
