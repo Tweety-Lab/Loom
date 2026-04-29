@@ -107,7 +107,6 @@ internal class FunctionBodyGenerator : ASTVisitor
         var value = ValueStack.Pop();
         IL!.Emit(LIROpCode.Alloca, new LIRTempValue($"{node.Name.Text}"));
         IL!.Emit(LIROpCode.Store, new LIRTempValue($"{node.Name.Text}"), value);
-        VisitChildren(node);
     }
 
     /// <inheritdoc/>

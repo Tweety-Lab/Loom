@@ -15,7 +15,8 @@ module Consumer
 {
     i32 MyMethod()
     {
-        return Test();
+        i32 i = Test();
+        return i;
     }
 }
 
