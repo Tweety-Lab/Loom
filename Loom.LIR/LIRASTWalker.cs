@@ -50,6 +50,6 @@ internal class LIRASTWalker : ASTWalker
     [Visitor]
     public void Visit(CallExpressionNode node)
     {
-        il.Emit(LIROpCode.Call, new LIRFunctionValue(new LIRFunction(node.MethodName.BaseName, new LIRFunctionType(LIRType.Void, new List<LIRType>()), new List<LIRBasicBlock>())));
+        il.Emit(LIROpCode.Call, new LIRFunction(node.MethodName.BaseName, new LIRFunctionType(LIRType.Void, new List<LIRType>()), new List<LIRBasicBlock>()));
     }
 }

@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
+﻿
 namespace Loom.LIR.Objects;
 
-public sealed class LIRFunction : LIRObject
+public sealed class LIRFunction : LIRValueObject
 {
     public string Name { get; }
     public LIRFunctionType Signature { get; }
@@ -17,4 +14,7 @@ public sealed class LIRFunction : LIRObject
         Signature = signature;
         Blocks = blocks;
     }
+
+    /// <inheritdoc />
+    public override string ToString() => $"@{Name}";
 }

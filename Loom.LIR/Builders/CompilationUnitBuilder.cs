@@ -9,6 +9,7 @@ public class CompilationUnitBuilder : ILIRBuilder<LIRCompilationUnit>
     /// <inheritdoc/>
     public Dictionary<string, string> MetaData { get; } = new();
 
+    /// <summary> Defines a new function in the <see cref="LIRCompilationUnit"/>. </summary>
     public FunctionBuilder DefineFunction(string name, LIRType returnType, List<LIRType> parameters)
     {
         var function = new FunctionBuilder(name, returnType, parameters);

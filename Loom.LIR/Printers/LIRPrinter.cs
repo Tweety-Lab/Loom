@@ -55,7 +55,7 @@ public class LIRPrinter
         return sb.ToString();
     }
 
-    private string PrintMeta(LIRObject obj)
+    private string PrintMeta(ILIRObject obj)
     {
         var sb = new StringBuilder();
 

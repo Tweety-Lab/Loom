@@ -1,22 +1,24 @@
 ﻿
-using Loom.LIR.Builders;
-using Loom.LIR.Objects;
-
 namespace Loom.LIR;
 
-public abstract record LIRValue;
+public abstract class LIRValue;
 
 /// <summary> A reference to a named temporary e.g. %0, %x </summary>
-public record LIRTempValue(int Id) : LIRValue
+public class LIRTempValue : LIRValue
 {
+    public int Id { get; }
+
+    /// <summary> Initializes a new instance of the <see cref="LIRTempValue"/> class. </summary>
+    public LIRTempValue(int id) => Id = id;
+
     /// <inheritdoc/>
     public override string ToString() => $"%{Id}";
 }
 
-public record LIRConstantValue(object Value) : LIRValue;
-
-public record LIRFunctionValue(LIRFunction Function) : LIRValue
+public class LIRConstantValue : LIRValue
 {
-    /// <inheritdoc/>
-    public override string ToString() => $"@{Function.Name}";
+    public object Value { get; }
+
+    /// <summary> Initializes a new instance of the <see cref="LIRConstantValue"/> class. </summary>
+    public LIRConstantValue(object value) => Value = value;
 }
