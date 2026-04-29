@@ -28,7 +28,7 @@ public class LIRGenerator
         LIRTempValue? result = null;
 
         if (opCode.HasResult)
-            result = new LIRTempValue(currentTemp++);
+            result = new LIRTempValue(currentTemp++.ToString());
 
         block.Instructions.Add(new LIRInstruction(opCode, operands.ToList()) { Result = result });
 

@@ -6,13 +6,13 @@ public abstract class LIRValue;
 /// <summary> A reference to a named temporary e.g. %0, %x </summary>
 public class LIRTempValue : LIRValue
 {
-    public int Id { get; }
+    public string ID { get; }
 
     /// <summary> Initializes a new instance of the <see cref="LIRTempValue"/> class. </summary>
-    public LIRTempValue(int id) => Id = id;
+    public LIRTempValue(string id) => ID = id;
 
     /// <inheritdoc/>
-    public override string ToString() => $"%{Id}";
+    public override string ToString() => $"%{ID}";
 }
 
 public class LIRConstantValue : LIRValue
