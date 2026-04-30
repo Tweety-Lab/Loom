@@ -14,11 +14,14 @@ internal class FunctionDeclarationGenerator : ASTWalker
     /// <summary> The owning <see cref="CompilationUnitBuilder"/>. </summary>
     public CompilationUnitBuilder UnitBuilder { get; }
 
+    public LIRSemanticContext SemanticContext { get; }
+
     /// <summary> Initializes a new instance of the <see cref="FunctionDeclarationGenerator"/> class. </summary>
-    public FunctionDeclarationGenerator(AnalysisContext context, CompilationUnitBuilder unitBuilder)
+    public FunctionDeclarationGenerator(AnalysisContext context, CompilationUnitBuilder unitBuilder, LIRSemanticContext semanticContext)
     {
         Context = context;
         UnitBuilder = unitBuilder;
+        SemanticContext = semanticContext;
     }
 
     [Visitor]
@@ -39,5 +42,7 @@ internal class FunctionDeclarationGenerator : ASTWalker
             builder.MetaData.Add("Modifiers", string.Join(", ", node.Modifiers.Select(m => m.Text)));
 
         builder.MetaData.Add("OwningType", "global");
+
+        SemanticContext.Functions.Add(method, builder);
     }
 }

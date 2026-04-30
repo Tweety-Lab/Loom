@@ -105,7 +105,8 @@ public class AnalysisContext
                 root.Accept(analyzer);
         }
 
-        EntryPoint = rootTable.Lookup("main")?.First() as MethodDefinitionSymbol;
+        // Resolve entry point
+        EntryPoint = roots.SelectMany(r => r.Modules).SelectMany(m => Binders[m].Symbols).OfType<MethodDefinitionSymbol>().FirstOrDefault(s => string.Equals(s.Name, "main", StringComparison.OrdinalIgnoreCase));
     }
 
     /// <summary> Gets the nearest <see cref="Binder"/> in scope for the given node. </summary>

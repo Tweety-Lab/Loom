@@ -1,4 +1,5 @@
 ﻿using Loom.Analyzer;
+using Loom.Analyzer.Symbols;
 using Loom.Common;
 using Loom.LIR.Builders;
 using Loom.LIR.Objects;
@@ -8,13 +9,13 @@ using Loom.Parser.Rules.Default;
 
 namespace Loom.LIR;
 
-// This whole class is a hack
-
 /// <summary>
 /// A <see cref="ASTWalker"/> that converts the AST into Loom Intermediate Representation (LIR).
 /// </summary>
 internal class LIRASTWalker
 {
+    public LIRSemanticContext SemanticContext { get; private set; } = new();
+
     private CompilationContext context;
     private CompilationUnitBuilder unitBuilder = new();
 
@@ -26,12 +27,12 @@ internal class LIRASTWalker
         var rootList = roots.ToList();
 
         // Declare all functions
-        var declPass = new FunctionDeclarationGenerator(context.AnalysisContext, unitBuilder);
+        var declPass = new FunctionDeclarationGenerator(context.AnalysisContext, unitBuilder, SemanticContext);
         foreach (var root in rootList)
             declPass.Dispatch(root);
 
         // Emit bodies
-        var bodyPass = new FunctionBodyGenerator(context.AnalysisContext, unitBuilder);
+        var bodyPass = new FunctionBodyGenerator(context.AnalysisContext, unitBuilder, SemanticContext);
         foreach (var root in rootList)
             bodyPass.Dispatch(root);
 

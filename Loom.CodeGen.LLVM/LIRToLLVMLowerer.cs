@@ -1,38 +1,98 @@
-﻿using LLVMSharp.Interop;
+﻿using LLVMSharp;
+using LLVMSharp.Interop;
+using Loom.LIR;
 using Loom.LIR.Objects;
 
 namespace Loom.CodeGen.LLVM;
 
+/// <summary>
+/// This entire class is just a hack for testing.
+/// </summary>
 public class LIRToLLVMLowerer
 {
     public LLVMModuleRef Lower(IEnumerable<LIRCompilationUnit> units)
     {
-        List<LLVMModuleRef> modules = new();
-        foreach (var unit in units)
-            modules.Add(LowerUnit(unit));
+        var unit = units.First();
 
-        return modules.First();
-    }
+        string name = unit.MetaData.TryGetValue("Name", out var nameValue) ? nameValue : "Unknown";
 
-    private LLVMModuleRef LowerUnit(LIRCompilationUnit unit)
-    {
-        string name = unit.MetaData.TryGetValue("Name", out string? nameValue) ? nameValue : "Unknown";
-        var llvmModule = LLVMModuleRef.CreateWithName(name);
+        var ctx = new LLVMLoweringContext(name);
 
         foreach (var func in unit.Functions)
-            LowerFunction(llvmModule, func);
+            LowerFunction(ctx, func);
 
-        return llvmModule;
+        return ctx.Module;
     }
 
-    private LLVMValueRef LowerFunction(LLVMModuleRef module, LIRFunction func)
+    private LLVMValueRef LowerFunction(LLVMLoweringContext ctx, LIRFunction func)
     {
-        // Create new LLVM Function
-        var baseFunc = LLVMTypeRef.CreateFunction(LLVMTypeRef.Void, []);
-        var llvmFunc = module.AddFunction(func.Name, baseFunc);
+        var functionType = LLVMTypeRef.CreateFunction(LLVMTypeRef.Void,Array.Empty<LLVMTypeRef>());
+
+        var llvmFunc = ctx.Module.AddFunction(func.Name, functionType);
+
+        foreach (var block in func.Blocks)
+            LowerBlock(ctx, llvmFunc, block);
 
         return llvmFunc;
     }
 
+    private void LowerBlock(LLVMLoweringContext ctx, LLVMValueRef func, LIRBasicBlock block)
+    {
+        var llvmBlock = func.AppendBasicBlock(block.Name);
 
+        ctx.Builder.PositionAtEnd(llvmBlock);
+
+        foreach (var instr in block.Instructions)
+            LowerInstruction(ctx, instr);
+
+        if (block.Terminator != null)
+            LowerInstruction(ctx, block.Terminator);
+    }
+
+    private LLVMValueRef? LowerInstruction(LLVMLoweringContext ctx, LIRInstruction instr)
+    {
+        LLVMValueRef? result = instr.OpCode.Name switch
+        {
+            "add" => ctx.Builder.BuildAdd(LowerOperand(ctx, instr.Operands[0]), LowerOperand(ctx, instr.Operands[1]), "addtmp"),
+
+            "sub" => ctx.Builder.BuildSub(LowerOperand(ctx, instr.Operands[0]), LowerOperand(ctx, instr.Operands[1]), "subtmp"),
+
+            "mul" => ctx.Builder.BuildMul(LowerOperand(ctx, instr.Operands[0]), LowerOperand(ctx, instr.Operands[1]), "multmp"),
+
+            "div" => ctx.Builder.BuildSDiv(LowerOperand(ctx, instr.Operands[0]), LowerOperand(ctx, instr.Operands[1]), "divtmp"),
+
+            "alloca" => ctx.Builder.BuildAlloca(LLVMTypeRef.Int32, instr.Result?.ToString() ?? "allocatmp"),
+
+            "store" => ctx.Builder.BuildStore(LowerOperand(ctx, instr.Operands[0]), LowerOperand(ctx, instr.Operands[1])),
+
+            "load" => ctx.Builder.BuildLoad2(LLVMTypeRef.Int32, LowerOperand(ctx, instr.Operands[0]), "loadtmp"),
+
+            "return" => instr.Operands.Count == 0 ? ctx.Builder.BuildRetVoid() : ctx.Builder.BuildRet(LowerOperand(ctx, instr.Operands[0])),
+
+
+            _ => throw new NotSupportedException(instr.OpCode.Name)
+        };
+
+        if (instr.Result != null && result.HasValue)
+            ctx.Values[instr.Result] = result.Value;
+
+        return result;
+    }
+
+    private LLVMValueRef LowerOperand(LLVMLoweringContext ctx, LIRValue value)
+    {
+        if (value is LIRConstantValue c)
+            return LLVMValueRef.CreateConstInt(LLVMTypeRef.Int32, (ulong)Convert.ToInt64(c.Value), true);
+
+        if (ctx.Values.TryGetValue(value, out var llvmValue))
+            return llvmValue;
+
+        throw new NotSupportedException($"Unknown operand: {value}");
+    }
+
+    private LLVMTypeRef LIRTypeToLLVM(LIRType type) => type switch
+    {
+        LIRIntType => LLVMTypeRef.Int32,
+        _ => throw new NotSupportedException($"Unknown type: {type}")
+    };
 }

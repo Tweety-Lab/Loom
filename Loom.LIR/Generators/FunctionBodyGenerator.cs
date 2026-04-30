@@ -14,6 +14,8 @@ namespace Loom.LIR.Passes;
 /// </summary>
 internal class FunctionBodyGenerator : ASTVisitor
 {
+    public LIRSemanticContext SemanticContext { get; private set; }
+
     /// <summary> The value stack used during expression emission. </summary>
     public Stack<LIRValue> ValueStack { get; } = new();
 
@@ -27,10 +29,11 @@ internal class FunctionBodyGenerator : ASTVisitor
     public LIRGenerator? IL { get; private set; }
 
     /// <summary> Initializes a new instance of the <see cref="FunctionBodyGenerator"/> class. </summary>
-    public FunctionBodyGenerator(AnalysisContext context, CompilationUnitBuilder unitBuilder)
+    public FunctionBodyGenerator(AnalysisContext context, CompilationUnitBuilder unitBuilder, LIRSemanticContext semanticContext)
     {
         Context = context;
         UnitBuilder = unitBuilder;
+        SemanticContext = semanticContext;
     }
 
     [Visitor]
@@ -84,8 +87,7 @@ internal class FunctionBodyGenerator : ASTVisitor
     public void Visit(CallExpressionNode node)
     {
         var method = (Context.ResolveSymbol(node.MethodName).Symbol as MethodDefinitionSymbol)!;
-        var builder = UnitBuilder.GetFunction(method.FullyQualifiedName);
-        var result = IL!.Emit(LIROpCode.Call, builder.Build());
+        var result = IL!.Emit(LIROpCode.Call, SemanticContext.Functions[method].Build());
         ValueStack.Push(result!);
     }
 
@@ -95,7 +97,7 @@ internal class FunctionBodyGenerator : ASTVisitor
         var symbol = Context.ResolveSymbol(node).Symbol;
         if (symbol is LocalVariableSymbol local)
         {
-            var result = IL!.Emit(LIROpCode.Load, new LIRTempValue($"{local.Name}"));
+            var result = IL!.Emit(LIROpCode.Load, SemanticContext.LocalVariables[local]);
             ValueStack.Push(result!);
         }
     }
@@ -103,10 +105,15 @@ internal class FunctionBodyGenerator : ASTVisitor
     [Visitor]
     public void Visit(VariableDeclarationNode node)
     {
+        var symbol = (Context.ResolveSymbol(node).Symbol as LocalVariableSymbol)!;
+        var ptr = IL!.Emit(LIROpCode.Alloca);
+
+        SemanticContext.LocalVariables[symbol] = ptr!;
+
         Dispatch(node.Initializer);
         var value = ValueStack.Pop();
-        IL!.Emit(LIROpCode.Alloca, new LIRTempValue($"{node.Name.Text}"));
-        IL!.Emit(LIROpCode.Store, new LIRTempValue($"{node.Name.Text}"), value);
+
+        IL.Emit(LIROpCode.Store, value, ptr);
     }
 
     /// <inheritdoc/>
