@@ -23,10 +23,18 @@ public class CallExpressionRule : ParserRule<CallExpressionNode>
         Parser.Reader.Expect(TokenType.LParen); // (
 
         // Arguments
+        var args = new List<ExpressionNode>();
+        if (Parser.Reader.Peek(0).Type != TokenType.RParen)
+        {
+            args.Add(Parser.GetRule<ExpressionRule>().ParseNode());
+
+            while (Parser.Reader.Match(TokenType.Comma))
+                args.Add(Parser.GetRule<ExpressionRule>().ParseNode());
+        }
 
         Parser.Reader.Expect(TokenType.RParen); // )
 
-        return new CallExpressionNode(new IdentifierNameNode(callName), new List<ExpressionNode>());
+        return new CallExpressionNode(new IdentifierNameNode(callName), args);
     }
 }
 

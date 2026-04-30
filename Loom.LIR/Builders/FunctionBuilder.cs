@@ -12,7 +12,7 @@ public class FunctionBuilder : LIRBuilder<LIRFunction>
     public LIRType ReturnType { get; }
 
     /// <summary> The input parameters of the function. </summary>
-    public List<LIRType> Parameters { get; }
+    public List<LIRParameter> Parameters { get; }
 
     /// <summary> The current LIR generator. </summary>
     public LIRGenerator LIRGenerator { get; }
@@ -24,7 +24,7 @@ public class FunctionBuilder : LIRBuilder<LIRFunction>
     public LIRBasicBlock WritingBlock { get; set; }
 
     /// <summary> Initializes a new instance of the <see cref="FunctionBuilder"/> class. </summary>
-    public FunctionBuilder(string name, LIRType returnType, List<LIRType> parameters)
+    public FunctionBuilder(string name, LIRType returnType, List<LIRParameter> parameters)
     {
         Name = name;
         ReturnType = returnType;

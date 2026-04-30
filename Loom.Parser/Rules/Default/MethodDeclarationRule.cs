@@ -4,7 +4,12 @@ using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.Rules.Default;
 
-public record MethodDeclarationNode(Token ReturnType, Token MethodName, BlockNode Body, List<Token> Modifiers) : ASTNode
+public record ParameterNode(Token Type, Token Name) : ASTNode
+{
+    public override IEnumerable<ASTNode> Children => [];
+}
+
+public record MethodDeclarationNode(Token ReturnType, Token MethodName, List<ParameterNode> Parameters, BlockNode Body, List<Token> Modifiers) : ASTNode
 {
     /// <inheritdoc/>
     public override IEnumerable<ASTNode> Children => [Body];
@@ -26,8 +31,23 @@ public class MethodDeclarationRule : ParserRule<MethodDeclarationNode>
         var methodName = Parser.Reader.Expect(TokenType.Identifier); // name
 
         Parser.Reader.Expect(TokenType.LParen); // (
+
+        // Paramaters
+        var parameters = new List<ParameterNode>();
+        if (Parser.Reader.Peek(0).Type != TokenType.RParen)
+        {
+            do
+            {
+                var type = Parser.Reader.ExpectAny(TokenType.Identifier, TokenType.I32, TokenType.Void);
+                var name = Parser.Reader.Expect(TokenType.Identifier);
+
+                parameters.Add(new ParameterNode(type, name));
+            }
+            while (Parser.Reader.Match(TokenType.Comma));
+        }
+
         Parser.Reader.Expect(TokenType.RParen); // )
 
-        return new MethodDeclarationNode(returnType, methodName, Parser.GetRule<MethodBlockRule>().ParseNode(), modifiers);
+        return new MethodDeclarationNode(returnType, methodName, parameters, Parser.GetRule<MethodBlockRule>().ParseNode(), modifiers);
     }
 }

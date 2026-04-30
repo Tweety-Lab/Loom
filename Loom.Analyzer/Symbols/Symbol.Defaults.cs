@@ -12,5 +12,6 @@ public record TypeSymbol(string Name, TypeSymbol.DefaultType? KnownType) : Symbo
     }
 }
 
-public record MethodDefinitionSymbol(string Name, TypeSymbol ReturnType) : Symbol(Name);
+public record MethodDefinitionSymbol(string Name, TypeSymbol ReturnType, List<ParameterSymbol> Parameters) : Symbol(Name);
 public record LocalVariableSymbol(string Name, TypeSymbol Type) : Symbol(Name);
+public record ParameterSymbol(string Name, TypeSymbol Type) : Symbol(Name);

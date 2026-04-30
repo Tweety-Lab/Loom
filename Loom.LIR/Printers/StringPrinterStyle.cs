@@ -17,7 +17,7 @@ internal class StringPrinterStyle : ILIRPrinterStyle
     public string PrintFunctionHeader(LIRFunction f)
     {
         var sig = f.Type;
-        var parameters = string.Join(", ", sig.ParameterTypes.Select(PrintType));
+        var parameters = string.Join(", ", sig.Parameters.Select(p => $"{PrintType(p.Type)} %{p.Name}"));
         return $"define {f.Name}({parameters}) -> {PrintType(sig.ReturnType)} {{";
     }
 

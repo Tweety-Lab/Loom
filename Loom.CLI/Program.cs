@@ -18,14 +18,14 @@ module Consumer
     // Entry Point
     export i32 Main()
     {
-        i32 i = Test() + 5;
+        i32 i = Test(13, 13);
         return i;
     }
 }
 
 module Base
 {
-    i32 Test()
+    i32 Test(i32 myNum, i32 myNumAgain)
     {
         return 1 + 1;
     }

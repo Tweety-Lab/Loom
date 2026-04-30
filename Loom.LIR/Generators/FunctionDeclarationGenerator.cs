@@ -36,7 +36,9 @@ internal class FunctionDeclarationGenerator : ASTWalker
             _ => LIRType.Int32
         };
 
-        var builder = UnitBuilder.DefineFunction(method?.FullyQualifiedName ?? node.MethodName.Text, returnType, new List<LIRType>());
+        List<LIRParameter> parameters = method.Parameters.Select(p => new LIRParameter(p.Name, MapType(p.Type.KnownType ?? TypeSymbol.DefaultType.I32))).ToList();
+
+        var builder = UnitBuilder.DefineFunction(method?.FullyQualifiedName ?? node.MethodName.Text, returnType, parameters);
 
         if (node.Modifiers.Count > 0)
             builder.MetaData.Add("Modifiers", string.Join(", ", node.Modifiers.Select(m => m.Text)));
@@ -45,4 +47,12 @@ internal class FunctionDeclarationGenerator : ASTWalker
 
         SemanticContext.Functions.Add(method, builder);
     }
+
+
+    private static LIRType MapType(TypeSymbol.DefaultType type) => type switch
+    {
+        TypeSymbol.DefaultType.Void => LIRType.Void,
+        TypeSymbol.DefaultType.I32 => LIRType.Int32,
+        _ => LIRType.Int32
+    };
 }

@@ -8,7 +8,7 @@ public class CompilationUnitBuilder : LIRBuilder<LIRCompilationUnit>
     public List<FunctionBuilder> Functions { get; } = new List<FunctionBuilder>();
 
     /// <summary> Defines a new function in the <see cref="LIRCompilationUnit"/>. </summary>
-    public FunctionBuilder DefineFunction(string name, LIRType returnType, List<LIRType> parameters)
+    public FunctionBuilder DefineFunction(string name, LIRType returnType, List<LIRParameter> parameters)
     {
         var function = new FunctionBuilder(name, returnType, parameters);
         Functions.Add(function);

@@ -20,7 +20,8 @@ public class LIRToLLVMLowerer
 
         foreach (var func in unit.Functions)
         {
-            var functionType = LLVMTypeRef.CreateFunction(LIRTypeToLLVM(func.Type.ReturnType), Array.Empty<LLVMTypeRef>());
+            List<LLVMTypeRef> paramTypes = func.Type.Parameters.Select(p => LIRTypeToLLVM(p.Type)).ToList();
+            var functionType = LLVMTypeRef.CreateFunction(LIRTypeToLLVM(func.Type.ReturnType), paramTypes.ToArray());
             var llvmFunc = ctx.Module.AddFunction(func.Name, functionType);
             ctx.Functions[func] = (llvmFunc, functionType);
         }

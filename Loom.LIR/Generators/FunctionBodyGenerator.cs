@@ -50,11 +50,11 @@ internal class FunctionBodyGenerator : ASTVisitor
         if (node.Expression != null)
         {
             Dispatch(node.Expression);
-            IL!.Emit(LIROpCode.Ret, ValueStack.Pop());
+            IL!.Emit(LIROpCode.Return, ValueStack.Pop());
         }
         else
         {
-            IL!.Emit(LIROpCode.Ret);
+            IL!.Emit(LIROpCode.Return);
         }
     }
 
@@ -87,7 +87,13 @@ internal class FunctionBodyGenerator : ASTVisitor
     public void Visit(CallExpressionNode node)
     {
         var method = (Context.ResolveSymbol(node.MethodName).Symbol as MethodDefinitionSymbol)!;
-        var result = IL!.Emit(LIROpCode.Call, SemanticContext.Functions[method].BuildResult);
+
+        foreach (var argument in node.Arguments)
+            Dispatch(argument);
+
+        var arguments = node.Arguments.Select(_ => ValueStack.Pop()).Reverse().ToArray();
+
+        var result = IL!.Emit(LIROpCode.Call, [SemanticContext.Functions[method].BuildResult, .. arguments]);
         ValueStack.Push(result!);
     }
 

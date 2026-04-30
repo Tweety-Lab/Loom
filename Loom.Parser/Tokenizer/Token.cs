@@ -68,6 +68,7 @@ public class Token
         [Character('*')] Star,
         [Character('/')] Slash,
 
+        [Character(',')] Comma,
         [Character(';')] Semicolon,
 
         [Keyword("module")] Module,

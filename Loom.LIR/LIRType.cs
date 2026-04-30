@@ -11,4 +11,5 @@ public record LIRIntType(int Bits) : LIRType;
 
 public record LIRVoidType() : LIRType;
 
-public record LIRFunctionType(LIRType ReturnType, List<LIRType> ParameterTypes) : LIRType;
+public record LIRParameter(string Name, LIRType Type);
+public record LIRFunctionType(LIRType ReturnType, List<LIRParameter> Parameters) : LIRType;
