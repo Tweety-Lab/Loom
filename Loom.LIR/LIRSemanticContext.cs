@@ -11,5 +11,5 @@ namespace Loom.LIR;
 public class LIRSemanticContext
 {
     public Dictionary<MethodDefinitionSymbol, FunctionBuilder> Functions { get; } = new();
-    public Dictionary<LocalVariableSymbol, LIRValue> LocalVariables { get; } = new();
+    public Dictionary<Symbol, LIRValue> LocalVariables { get; } = new();
 }

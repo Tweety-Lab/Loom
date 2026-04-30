@@ -42,18 +42,24 @@ internal class DeclarationWalker : ASTVisitor
         var returnType = CurrentTable.Lookup(node.ReturnType.Text)?.First() as TypeSymbol ?? new TypeSymbol(node.ReturnType.Text, null);
 
         List<ParameterSymbol> parameters = new List<ParameterSymbol>();
-        foreach (var param in node.Parameters)
-        {
-            var type = CurrentTable.Lookup(param.Type.Text)?.First() as TypeSymbol ?? new TypeSymbol(param.Type.Text, null);
-            var paramSymbol = new ParameterSymbol(param.Name.Text, type);
-            parameters.Add(paramSymbol);
-        }
 
         var symbol = new MethodDefinitionSymbol(node.MethodName.Text, returnType, parameters);
         symbol.FullyQualifiedName = BuildQualifiedName(node.MethodName.Text);
         CurrentTable.Define(symbol);
 
-        WithScope(node, () => VisitChildren(node), symbol);
+        WithScope(node, () =>
+        {
+            foreach (var param in node.Parameters)
+            {
+                var type = CurrentTable.Lookup(param.Type.Text)?.First() as TypeSymbol ?? new TypeSymbol(param.Type.Text, null);
+                var paramSymbol = new ParameterSymbol(param.Name.Text, type);
+                parameters.Add(paramSymbol);
+                CurrentTable.Define(paramSymbol);
+                Context.BoundSymbols[param] = paramSymbol;
+            }
+
+            VisitChildren(node);
+        }, symbol);
     }
 
     [Visitor]

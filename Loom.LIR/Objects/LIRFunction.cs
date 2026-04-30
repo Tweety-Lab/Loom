@@ -5,6 +5,7 @@ public sealed class LIRFunction : LIRValueObject
 {
     public string Name { get; }
     public List<LIRBasicBlock> Blocks { get; }
+    public IReadOnlyList<LIRValue> Parameters { get; }
 
     /// <inheritdoc />
     public override LIRFunctionType Type {  get; }
@@ -15,6 +16,12 @@ public sealed class LIRFunction : LIRValueObject
         Name = name;
         Type = type;
         Blocks = blocks;
+
+        var parameters = new List<LIRValue>();
+        foreach (var paramInfo in type.Parameters)
+            parameters.Add(new LIRTempValue(paramInfo.Name, paramInfo.Type));
+
+        Parameters = parameters;
     }
 
     /// <inheritdoc />

@@ -40,7 +40,12 @@ internal class FunctionBodyGenerator : ASTVisitor
     public void Visit(MethodDeclarationNode node)
     {
         var method = (Context.ResolveSymbol(node).Symbol as MethodDefinitionSymbol)!;
-        IL = UnitBuilder.GetFunction(method.FullyQualifiedName).LIRGenerator;
+        var funcBuilder = UnitBuilder.GetFunction(method.FullyQualifiedName);
+        IL = funcBuilder.LIRGenerator;
+
+        foreach (var (symbol, value) in method.Parameters.Zip(funcBuilder.BuildResult.Parameters))
+            SemanticContext.LocalVariables[symbol] = value;
+
         VisitChildren(node);
     }
 
@@ -101,7 +106,12 @@ internal class FunctionBodyGenerator : ASTVisitor
     public void Visit(IdentifierNameNode node)
     {
         var symbol = Context.ResolveSymbol(node).Symbol;
-        if (symbol is LocalVariableSymbol local)
+
+        if (symbol is ParameterSymbol parameter)
+        {
+            ValueStack.Push(SemanticContext.LocalVariables[parameter]);
+        }
+        else if (symbol is LocalVariableSymbol local)
         {
             var result = IL!.Emit(LIROpCode.Load, SemanticContext.LocalVariables[local]);
             ValueStack.Push(result!);
