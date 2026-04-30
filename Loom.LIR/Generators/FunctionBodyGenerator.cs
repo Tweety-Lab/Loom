@@ -122,6 +122,14 @@ internal class FunctionBodyGenerator : ASTVisitor
         IL.Emit(LIROpCode.Store, value, ptr);
     }
 
+    [Visitor]
+    public void Visit(AssignmentStatementNode node)
+    {
+        Dispatch(node.Value);
+        var value = ValueStack.Pop();
+        IL!.Emit(LIROpCode.Store, value, SemanticContext.LocalVariables[(Context.ResolveSymbol(node.Target).Symbol as LocalVariableSymbol)!]); // TODO
+    }
+
     /// <inheritdoc/>
     protected override void OnUnhandled(ASTNode node) => VisitChildren(node);
 }
