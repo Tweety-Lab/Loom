@@ -19,6 +19,13 @@ public class LIRToLLVMLowerer
         var ctx = new LLVMLoweringContext(name);
 
         foreach (var func in unit.Functions)
+        {
+            var functionType = LLVMTypeRef.CreateFunction(LIRTypeToLLVM(func.Type.ReturnType), Array.Empty<LLVMTypeRef>());
+            var llvmFunc = ctx.Module.AddFunction(func.Name, functionType);
+            ctx.Functions[func] = (llvmFunc, functionType);
+        }
+
+        foreach (var func in unit.Functions)
             LowerFunction(ctx, func);
 
         return ctx.Module;
@@ -26,11 +33,7 @@ public class LIRToLLVMLowerer
 
     private LLVMValueRef LowerFunction(LLVMLoweringContext ctx, LIRFunction func)
     {
-        var functionType = LLVMTypeRef.CreateFunction(LIRTypeToLLVM(func.Type.ReturnType), Array.Empty<LLVMTypeRef>());
-
-        var llvmFunc = ctx.Module.AddFunction(func.Name, functionType);
-
-        ctx.Values[func] = llvmFunc;
+        var (llvmFunc, _) = ctx.Functions[func];
 
         foreach (var block in func.Blocks)
             LowerBlock(ctx, llvmFunc, block);
@@ -89,7 +92,7 @@ public class LIRToLLVMLowerer
             return LLVMValueRef.CreateConstInt(LIRTypeToLLVM(c.Type), (ulong)c.Value, true);
 
         if (value is LIRFunction func)
-            return ctx.Values[func];
+            return ctx.Functions[func].Value;
 
         if (ctx.Values.TryGetValue(value, out var llvmValue))
             return llvmValue;
@@ -106,13 +109,10 @@ public class LIRToLLVMLowerer
 
     private LLVMValueRef LowerCall(LLVMLoweringContext ctx, LIRInstruction instr)
     {
-        var callee = LowerOperand(ctx, instr.Operands[0]);
+        var lirFunc = (LIRFunction)instr.Operands[0];
+        var (callee, funcType) = ctx.Functions[lirFunc];
         var args = instr.Operands.Skip(1).Select(op => LowerOperand(ctx, op)).ToArray();
 
-        var funcType = (LIRFunctionType)instr.Operands[0].Type;
-
-        var returnType = LIRTypeToLLVM(funcType.ReturnType);
-
-        return ctx.Builder.BuildCall2(returnType, callee, args, "calltmp");
+        return ctx.Builder.BuildCall2(funcType, callee, args, "calltmp");
     }
 }

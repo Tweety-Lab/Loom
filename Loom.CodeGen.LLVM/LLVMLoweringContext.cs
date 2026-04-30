@@ -1,5 +1,6 @@
 ﻿using LLVMSharp.Interop;
 using Loom.LIR;
+using Loom.LIR.Objects;
 
 
 namespace Loom.CodeGen.LLVM;
@@ -12,6 +13,7 @@ public class LLVMLoweringContext
     public LLVMBuilderRef Builder { get; }
 
     public Dictionary<LIRValue, LLVMValueRef> Values { get; } = new();
+    public Dictionary<LIRFunction, (LLVMValueRef Value, LLVMTypeRef Type)> Functions { get; } = new();
 
     public LLVMLoweringContext(string moduleName)
     {

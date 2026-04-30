@@ -35,7 +35,7 @@ public class FunctionBuilder : LIRBuilder<LIRFunction>
     }
 
     /// <inheritdoc/>
-    public override LIRFunction Build() => new LIRFunction(Name, new LIRFunctionType(ReturnType, Parameters), Blocks) { MetaData = MetaData };
+    public override LIRFunction Rebuild() => new LIRFunction(Name, new LIRFunctionType(ReturnType, Parameters), Blocks) { MetaData = MetaData };
 
     /// <summary> Creates a new basic block. </summary>
     public LIRBasicBlock CreateBlock(string name)

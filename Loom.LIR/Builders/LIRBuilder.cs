@@ -15,7 +15,7 @@ public abstract class LIRBuilder<T> where T : ILIRObject
             if (field != null)
                 return field;
 
-            field = Build();
+            field = Rebuild();
             return field;
         }
     }
@@ -23,6 +23,6 @@ public abstract class LIRBuilder<T> where T : ILIRObject
     /// <summary> The <see cref="ILIRObject"/> MetaData. </summary>
     public Dictionary<string, string> MetaData { get; } = new();
 
-    /// <summary> Builds into a LIR </summary>
-    public abstract T Build();
+    /// <summary> Rebuilds the object into a LIR </summary>
+    public abstract T Rebuild();
 }

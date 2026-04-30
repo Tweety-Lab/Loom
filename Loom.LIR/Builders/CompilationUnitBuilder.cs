@@ -19,5 +19,5 @@ public class CompilationUnitBuilder : LIRBuilder<LIRCompilationUnit>
     public FunctionBuilder GetFunction(string name) => Functions.First(f => f.Name == name);
 
     /// <inheritdoc />
-    public override LIRCompilationUnit Build() => new LIRCompilationUnit(Functions.Select(f => f.Build()).ToList()) { MetaData = MetaData };
+    public override LIRCompilationUnit Rebuild() => new LIRCompilationUnit(Functions.Select(f => f.BuildResult).ToList()) { MetaData = MetaData };
 }

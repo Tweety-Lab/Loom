@@ -18,7 +18,7 @@ module Consumer
     // Entry Point
     export i32 Main()
     {
-        i32 i = Test() + 1;
+        i32 i = Test() + 5;
         return i;
     }
 }
