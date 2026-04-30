@@ -41,7 +41,7 @@ internal class StringPrinterStyle : ILIRPrinterStyle
     public string PrintValue(LIRValue value) =>
         value switch
         {
-            LIRConstantValue c => c.Value?.ToString() ?? "null",
+            LIRConstantIntValue c => c.ToString() ?? "null",
             _ => value.ToString()
         };
 }

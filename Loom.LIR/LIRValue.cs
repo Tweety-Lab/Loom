@@ -15,10 +15,13 @@ public class LIRTempValue : LIRValue
     public override string ToString() => $"%{ID}";
 }
 
-public class LIRConstantValue : LIRValue
+public class LIRConstantIntValue : LIRValue
 {
-    public object Value { get; }
+    public int Value { get; }
 
-    /// <summary> Initializes a new instance of the <see cref="LIRConstantValue"/> class. </summary>
-    public LIRConstantValue(object value) => Value = value;
+    /// <summary> Initializes a new instance of the <see cref="LIRConstantIntValue"/> class. </summary>
+    public LIRConstantIntValue(int value) => Value = value;
+
+    /// <inheritdoc/>
+    public override string ToString() => Value.ToString();
 }

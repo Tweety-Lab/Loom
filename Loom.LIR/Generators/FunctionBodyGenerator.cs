@@ -59,7 +59,7 @@ internal class FunctionBodyGenerator : ASTVisitor
     }
 
     [Visitor]
-    public void Visit(NumberLiteralNode node) => ValueStack.Push(new LIRConstantValue(int.Parse(node.Value)));
+    public void Visit(NumberLiteralNode node) => ValueStack.Push(new LIRConstantIntValue(int.Parse(node.Value)));
 
     [Visitor]
     public void Visit(BinaryExpressionNode node)

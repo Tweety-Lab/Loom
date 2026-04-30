@@ -81,8 +81,8 @@ public class LIRToLLVMLowerer
 
     private LLVMValueRef LowerOperand(LLVMLoweringContext ctx, LIRValue value)
     {
-        if (value is LIRConstantValue c)
-            return LLVMValueRef.CreateConstInt(LLVMTypeRef.Int32, (ulong)Convert.ToInt64(c.Value), true);
+        if (value is LIRConstantIntValue c)
+            return LLVMValueRef.CreateConstInt(LLVMTypeRef.Int32, (ulong)c.Value, true);
 
         if (ctx.Values.TryGetValue(value, out var llvmValue))
             return llvmValue;

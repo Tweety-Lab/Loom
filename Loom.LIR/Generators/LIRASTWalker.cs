@@ -7,7 +7,7 @@ using Loom.LIR.Passes;
 using Loom.Parser.AST;
 using Loom.Parser.Rules.Default;
 
-namespace Loom.LIR;
+namespace Loom.LIR.Generators;
 
 /// <summary>
 /// A <see cref="ASTWalker"/> that converts the AST into Loom Intermediate Representation (LIR).
