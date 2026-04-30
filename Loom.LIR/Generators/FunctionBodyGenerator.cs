@@ -87,7 +87,7 @@ internal class FunctionBodyGenerator : ASTVisitor
     public void Visit(CallExpressionNode node)
     {
         var method = (Context.ResolveSymbol(node.MethodName).Symbol as MethodDefinitionSymbol)!;
-        var result = IL!.Emit(LIROpCode.Call, SemanticContext.Functions[method].Build());
+        var result = IL!.Emit(LIROpCode.Call, SemanticContext.Functions[method].BuildResult);
         ValueStack.Push(result!);
     }
 

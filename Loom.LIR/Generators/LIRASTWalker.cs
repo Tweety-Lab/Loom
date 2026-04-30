@@ -36,6 +36,6 @@ internal class LIRASTWalker
         foreach (var root in rootList)
             bodyPass.Dispatch(root);
 
-        return unitBuilder.Build();
+        return unitBuilder.BuildResult;
     }
 }

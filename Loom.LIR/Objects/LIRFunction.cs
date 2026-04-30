@@ -4,14 +4,16 @@ namespace Loom.LIR.Objects;
 public sealed class LIRFunction : LIRValueObject
 {
     public string Name { get; }
-    public LIRFunctionType Signature { get; }
     public List<LIRBasicBlock> Blocks { get; }
 
+    /// <inheritdoc />
+    public override LIRFunctionType Type {  get; }
+
     /// <summary> Initializes a new instance of the <see cref="LIRFunction"/> class. </summary>
-    public LIRFunction(string name, LIRFunctionType signature, List<LIRBasicBlock> blocks)
+    public LIRFunction(string name, LIRFunctionType type, List<LIRBasicBlock> blocks)
     {
         Name = name;
-        Signature = signature;
+        Type = type;
         Blocks = blocks;
     }
 

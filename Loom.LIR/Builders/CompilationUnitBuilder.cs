@@ -2,13 +2,10 @@
 
 namespace Loom.LIR.Builders;
 
-public class CompilationUnitBuilder : ILIRBuilder<LIRCompilationUnit>
+public class CompilationUnitBuilder : LIRBuilder<LIRCompilationUnit>
 {
     /// <inheritdoc cref="LIRCompilationUnit.Functions"/>
     public List<FunctionBuilder> Functions { get; } = new List<FunctionBuilder>();
-
-    /// <inheritdoc/>
-    public Dictionary<string, string> MetaData { get; } = new();
 
     /// <summary> Defines a new function in the <see cref="LIRCompilationUnit"/>. </summary>
     public FunctionBuilder DefineFunction(string name, LIRType returnType, List<LIRType> parameters)
@@ -22,5 +19,5 @@ public class CompilationUnitBuilder : ILIRBuilder<LIRCompilationUnit>
     public FunctionBuilder GetFunction(string name) => Functions.First(f => f.Name == name);
 
     /// <inheritdoc />
-    public LIRCompilationUnit Build() => new LIRCompilationUnit(Functions.Select(f => f.Build()).ToList()) { MetaData = MetaData };
+    public override LIRCompilationUnit Build() => new LIRCompilationUnit(Functions.Select(f => f.Build()).ToList()) { MetaData = MetaData };
 }

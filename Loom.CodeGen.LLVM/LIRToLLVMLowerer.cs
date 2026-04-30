@@ -26,9 +26,11 @@ public class LIRToLLVMLowerer
 
     private LLVMValueRef LowerFunction(LLVMLoweringContext ctx, LIRFunction func)
     {
-        var functionType = LLVMTypeRef.CreateFunction(LLVMTypeRef.Void,Array.Empty<LLVMTypeRef>());
+        var functionType = LLVMTypeRef.CreateFunction(LIRTypeToLLVM(func.Type.ReturnType), Array.Empty<LLVMTypeRef>());
 
         var llvmFunc = ctx.Module.AddFunction(func.Name, functionType);
+
+        ctx.Values[func] = llvmFunc;
 
         foreach (var block in func.Blocks)
             LowerBlock(ctx, llvmFunc, block);
@@ -61,11 +63,13 @@ public class LIRToLLVMLowerer
 
             "div" => ctx.Builder.BuildSDiv(LowerOperand(ctx, instr.Operands[0]), LowerOperand(ctx, instr.Operands[1]), "divtmp"),
 
-            "alloca" => ctx.Builder.BuildAlloca(LLVMTypeRef.Int32, instr.Result?.ToString() ?? "allocatmp"),
+            "alloca" => ctx.Builder.BuildAlloca(LIRTypeToLLVM(instr.Result!.Type), instr.Result?.ToString() ?? "allocatmp"),
 
             "store" => ctx.Builder.BuildStore(LowerOperand(ctx, instr.Operands[0]), LowerOperand(ctx, instr.Operands[1])),
 
-            "load" => ctx.Builder.BuildLoad2(LLVMTypeRef.Int32, LowerOperand(ctx, instr.Operands[0]), "loadtmp"),
+            "load" => ctx.Builder.BuildLoad2(LIRTypeToLLVM(instr.Result!.Type), LowerOperand(ctx, instr.Operands[0]), "loadtmp"),
+
+            "call" => LowerCall(ctx, instr),
 
             "return" => instr.Operands.Count == 0 ? ctx.Builder.BuildRetVoid() : ctx.Builder.BuildRet(LowerOperand(ctx, instr.Operands[0])),
 
@@ -82,7 +86,10 @@ public class LIRToLLVMLowerer
     private LLVMValueRef LowerOperand(LLVMLoweringContext ctx, LIRValue value)
     {
         if (value is LIRConstantIntValue c)
-            return LLVMValueRef.CreateConstInt(LLVMTypeRef.Int32, (ulong)c.Value, true);
+            return LLVMValueRef.CreateConstInt(LIRTypeToLLVM(c.Type), (ulong)c.Value, true);
+
+        if (value is LIRFunction func)
+            return ctx.Values[func];
 
         if (ctx.Values.TryGetValue(value, out var llvmValue))
             return llvmValue;
@@ -93,6 +100,19 @@ public class LIRToLLVMLowerer
     private LLVMTypeRef LIRTypeToLLVM(LIRType type) => type switch
     {
         LIRIntType => LLVMTypeRef.Int32,
+        LIRVoidType => LLVMTypeRef.Void,
         _ => throw new NotSupportedException($"Unknown type: {type}")
     };
+
+    private LLVMValueRef LowerCall(LLVMLoweringContext ctx, LIRInstruction instr)
+    {
+        var callee = LowerOperand(ctx, instr.Operands[0]);
+        var args = instr.Operands.Skip(1).Select(op => LowerOperand(ctx, op)).ToArray();
+
+        var funcType = (LIRFunctionType)instr.Operands[0].Type;
+
+        var returnType = LIRTypeToLLVM(funcType.ReturnType);
+
+        return ctx.Builder.BuildCall2(returnType, callee, args, "calltmp");
+    }
 }

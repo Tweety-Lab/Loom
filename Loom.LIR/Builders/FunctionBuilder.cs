@@ -3,7 +3,7 @@ using Loom.LIR.Objects;
 
 namespace Loom.LIR.Builders;
 
-public class FunctionBuilder : ILIRBuilder<LIRFunction>
+public class FunctionBuilder : LIRBuilder<LIRFunction>
 {
     /// <summary> The name of the function. </summary>
     public string Name { get; }
@@ -23,9 +23,6 @@ public class FunctionBuilder : ILIRBuilder<LIRFunction>
     /// <summary> The current writing basic block. </summary>
     public LIRBasicBlock WritingBlock { get; set; }
 
-    /// <inheritdoc/>
-    public Dictionary<string, string> MetaData { get; } = new();
-
     /// <summary> Initializes a new instance of the <see cref="FunctionBuilder"/> class. </summary>
     public FunctionBuilder(string name, LIRType returnType, List<LIRType> parameters)
     {
@@ -38,10 +35,7 @@ public class FunctionBuilder : ILIRBuilder<LIRFunction>
     }
 
     /// <inheritdoc/>
-    public LIRFunction Build()
-    {
-        return new LIRFunction(Name, new LIRFunctionType(ReturnType, Parameters), Blocks) {  MetaData = MetaData };
-    }
+    public override LIRFunction Build() => new LIRFunction(Name, new LIRFunctionType(ReturnType, Parameters), Blocks) { MetaData = MetaData };
 
     /// <summary> Creates a new basic block. </summary>
     public LIRBasicBlock CreateBlock(string name)
