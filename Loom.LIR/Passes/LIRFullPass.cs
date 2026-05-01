@@ -4,7 +4,7 @@ using Loom.LIR.Objects;
 namespace Loom.LIR.Passes;
 
 /// <summary>
-/// Base class for all Loom Intermediate Representation passes.
+/// A <see cref="ICompilationPass"/> that runs on an entire <see cref="LIRCompilationUnit"/> and it's contents.
 /// </summary>
 public abstract class LIRPass : ICompilationPass
 {
