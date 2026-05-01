@@ -6,7 +6,7 @@ namespace Loom.LIR.Passes;
 /// <summary>
 /// A <see cref="ICompilationPass"/> that runs on an entire <see cref="LIRCompilationUnit"/> and it's contents.
 /// </summary>
-public abstract class LIRPass : ICompilationPass
+public abstract class LIRFullPass : ICompilationPass
 {
     /// <inheritdoc/>
     public virtual void Run(LIRCompilationUnit unit)
