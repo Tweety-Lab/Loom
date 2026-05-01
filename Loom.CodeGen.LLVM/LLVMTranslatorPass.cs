@@ -14,6 +14,6 @@ public class LLVMTranslatorPass : LIRTranslatorPass<LLVMModuleRef>
     /// <inheritdoc />
     public override void Run(LIRCompilationUnit unit)
     {
-        Result = LLVMModuleRef.CreateWithName(unit.MetaData["Name"]);
+        Result = LLVMModuleRef.CreateWithName(unit.Name);
     }
 }

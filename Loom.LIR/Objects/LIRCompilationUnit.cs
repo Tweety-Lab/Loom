@@ -2,14 +2,17 @@
 
 public class LIRCompilationUnit : ILIRObject
 {
-    /// <summary> All functions owned by this <see cref="LIRCompilationUnit"/>. </summary>
-    public List<LIRFunction> Functions { get; } = new List<LIRFunction>();
-
     /// <inheritdoc/>
     public Dictionary<string, string> MetaData { get; init; } = new();
 
+    /// <summary> All functions owned by this <see cref="LIRCompilationUnit"/>. </summary>
+    public List<LIRFunction> Functions { get; } = new List<LIRFunction>();
+
+    /// <summary> The name of this <see cref="LIRCompilationUnit"/>. </summary>
+    public string Name => MetaData["Name"];
+
     /// <summary> Initializes a new instance of the <see cref="LIRCompilationUnit"/> class. </summary>
-    public LIRCompilationUnit(List<LIRFunction> functions) => Functions = functions;
+    public LIRCompilationUnit(string name) => MetaData.Add("Name", name);
 
     /// <summary> Gets a function by name. </summary>
     public LIRFunction? GetFunction(string name) => Functions.FirstOrDefault(f => f.Name == name);

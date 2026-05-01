@@ -22,8 +22,7 @@ public static class CompilationContextExtensions
         /// <summary> Runs the <see cref="CompilationContext"/> through the Loom Intermediate Representation generation pipeline. </summary>
         public CompilationContext EmitLIR()
         {
-            LIRCompilationUnit comp = new LIRCompilationUnit(new List<LIRFunction>());
-            comp.MetaData.Add("Name", "MyFile.loom");
+            LIRCompilationUnit comp = new LIRCompilationUnit("MyFile.loom");
 
             LIRFunctionType mainType = new LIRFunctionType(LIRType.Int32, []);
             LIRFunction function = comp.DefineFunction("main", mainType);
