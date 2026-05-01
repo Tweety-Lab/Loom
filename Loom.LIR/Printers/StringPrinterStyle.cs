@@ -24,9 +24,12 @@ internal class StringPrinterStyle : ILIRPrinterStyle
     /// <inheritdoc/>
     public string PrintInstruction(LIRInstruction inst)
     {
-        var operands = string.Join(", ", inst.Operands.Select(PrintValue));
         var result = inst.Result is not null ? $"{PrintValue(inst.Result)} = " : "";
-        return $"{result}{inst.OpCode.Name} {operands}".TrimEnd();
+        var type = inst.Result?.Type is not null ? $"{PrintType(inst.Result.Type)} " : "";
+
+        var operands = string.Join(", ", inst.Operands.Select(PrintValue));
+
+        return $"{result}{inst.OpCode.Name} {type}{operands}".TrimEnd();
     }
 
     /// <inheritdoc/>
@@ -39,11 +42,14 @@ internal class StringPrinterStyle : ILIRPrinterStyle
     };
 
     /// <inheritdoc/>
-    public string PrintValue(LIRValue value) =>
-        value switch
+    public string PrintValue(LIRValue value)
+    {
+        return value switch
         {
-            LIRConstantIntValue c => c.ToString() ?? "null",
+            LIRConstantIntValue c => $"{c.Value}",
             LIRConstantBoolValue c => c.Value ? "true" : "false",
-            _ => value.Type.ToString()
+            LIRTempValue t => $"%{t.ID}",
+            _ => $"%unknown:{value.Type}"
         };
+    }
 }

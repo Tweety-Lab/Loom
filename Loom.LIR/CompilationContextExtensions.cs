@@ -24,10 +24,11 @@ public static class CompilationContextExtensions
             LIRCompilationUnit comp = new LIRCompilationUnit(new List<LIRFunction>());
             comp.MetaData.Add("Name", "MyFile.loom");
 
-            LIRFunctionType mainType = new LIRFunctionType(LIRType.Boolean, []);
+            LIRFunctionType mainType = new LIRFunctionType(LIRType.Int32, []);
             LIRFunction function = comp.DefineFunction("main", mainType);
             
-            function.LIRGenerator.Emit(LIROpCode.Return, null, new LIRConstantBoolValue(true));
+            LIRTempValue result = function.LIRGenerator.Emit(LIROpCode.Add, LIRType.Int32, new LIRConstantIntValue(1), new LIRConstantIntValue(2));
+            function.LIRGenerator.Emit(LIROpCode.Return, null, result);
 
             ctx.ExtendedProperties[LIRGEN_CONTEXT_KEY] = new List<LIRCompilationUnit> { comp };
 

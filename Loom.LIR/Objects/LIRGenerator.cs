@@ -38,6 +38,7 @@ public class LIRGenerator
 
     /// <summary> Emits a <see cref="LIROpCode"/> to the current LIR stream. </summary>
     /// <param name="opCode"> The opcode to emit. </param>
+    /// <param name="resultType"> The type of the result (if any). </param>
     /// <param name="operands"> The operands to emit. </param>
     /// <returns> The result of the emitted instruction or null if the instruction has no result. </returns>
     public LIRTempValue Emit(LIROpCode opCode, LIRType? resultType = null, params LIRValue[] operands)
