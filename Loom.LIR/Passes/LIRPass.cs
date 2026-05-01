@@ -6,9 +6,9 @@ namespace Loom.LIR.Passes;
 /// <summary>
 /// Base class for all Loom Intermediate Representation passes.
 /// </summary>
-public abstract class LIRPass
+public abstract class LIRPass : ICompilationPass
 {
-    /// <summary> Runs the <see cref="LIRPass"/> on the specified <see cref="LIRCompilationUnit"/>. </summary>
+    /// <inheritdoc/>
     public virtual void Run(LIRCompilationUnit unit)
     {
         foreach (var func in unit.Functions)
