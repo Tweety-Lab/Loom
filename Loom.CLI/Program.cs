@@ -45,27 +45,6 @@ module Base
         CompilationContext context = new CompilationContext();
         context.Parse(TEST_SOURCE).Analyze().EmitLIR();
 
-        LLVM.LinkInMCJIT();
-        LLVM.InitializeNativeTarget();
-        LLVM.InitializeNativeAsmPrinter();
-        LLVM.InitializeNativeAsmParser();
-
-        LIRToLLVMLowerer lowerer = new LIRToLLVMLowerer();
-        LLVMModuleRef module = lowerer.Lower(context.CompilationUnits);
-
-        Console.WriteLine(module.PrintToString());
-
-        LLVMValueRef entryPoint = module.GetNamedFunction(context.AnalysisContext.EntryPoint!.FullyQualifiedName!);
-
-        var engine = module.CreateExecutionEngine();
-        var result = engine.RunFunction(entryPoint, Array.Empty<LLVMGenericValueRef>());
-
-        unsafe
-        {
-            int value = unchecked((int)LLVM.GenericValueToInt(result, 1));
-            Console.WriteLine($"{entryPoint.Name} Result: {value}");
-        }
-
         foreach (var diagnostic in context.DiagnosticContext.Diagnostics)
         {
             Console.ForegroundColor = diagnostic.Level switch

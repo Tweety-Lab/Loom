@@ -1,5 +1,4 @@
 ﻿using Loom.Common;
-using Loom.LIR.Generators;
 using Loom.LIR.Objects;
 using Loom.LIR.Printers;
 using Loom.Parser;
@@ -21,9 +20,10 @@ public static class CompilationContextExtensions
         /// <summary> Runs the <see cref="CompilationContext"/> through the Loom Intermediate Representation generation pipeline. </summary>
         public CompilationContext EmitLIR()
         {
-            LIRASTWalker walker = new(ctx);
-            LIRCompilationUnit comp = walker.Build(ctx.SyntaxTrees);
+            LIRCompilationUnit comp = new LIRCompilationUnit(new List<LIRFunction>());
             comp.MetaData.Add("Name", "MyFile.loom");
+
+            LIRFunction function = comp.DefineFunction("main", new LIRFunctionType(LIRType.Void, []));
 
             ctx.ExtendedProperties[LIRGEN_CONTEXT_KEY] = new List<LIRCompilationUnit> { comp };
 
