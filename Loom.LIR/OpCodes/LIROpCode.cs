@@ -30,7 +30,8 @@ public readonly struct LIROpCode
         Type = type;
         HasResult = hasResult;
     }
-    
+
+    #region Defaults
     public static readonly LIROpCode Add = new LIROpCode("add", CodeType.Binary, true);
     public static readonly LIROpCode Sub = new LIROpCode("sub", CodeType.Binary, true);
     public static readonly LIROpCode Mul = new LIROpCode("mul", CodeType.Binary, true);
@@ -41,7 +42,7 @@ public readonly struct LIROpCode
     public static readonly LIROpCode Load = new LIROpCode("load", CodeType.Memory, true);
     public static readonly LIROpCode Store = new LIROpCode("store", CodeType.Memory, false);
     public static readonly LIROpCode Const = new LIROpCode("const", CodeType.Memory, true);
-
+    #endregion
 
     /// <inheritdoc/>
     public override string ToString() => Name;

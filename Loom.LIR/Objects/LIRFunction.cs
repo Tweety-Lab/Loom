@@ -28,7 +28,4 @@ public sealed class LIRFunction : LIRValueObject
 
         LIRGenerator = new LIRGenerator(this);
     }
-
-    /// <inheritdoc />
-    public override string ToString() => $"@{Name}";
 }

@@ -1,5 +1,6 @@
 ﻿using Loom.Common;
 using Loom.LIR.Objects;
+using Loom.LIR.OpCodes;
 using Loom.LIR.Printers;
 using Loom.Parser;
 
@@ -23,7 +24,10 @@ public static class CompilationContextExtensions
             LIRCompilationUnit comp = new LIRCompilationUnit(new List<LIRFunction>());
             comp.MetaData.Add("Name", "MyFile.loom");
 
-            LIRFunction function = comp.DefineFunction("main", new LIRFunctionType(LIRType.Void, []));
+            LIRFunctionType mainType = new LIRFunctionType(LIRType.Void, []);
+            LIRFunction function = comp.DefineFunction("main", mainType);
+            
+            function.LIRGenerator.Emit(LIROpCode.Return, null, new LIRConstantBoolValue(true));
 
             ctx.ExtendedProperties[LIRGEN_CONTEXT_KEY] = new List<LIRCompilationUnit> { comp };
 
