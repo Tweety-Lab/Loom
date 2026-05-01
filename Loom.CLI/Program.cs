@@ -4,6 +4,7 @@ using Loom.CodeGen.LLVM;
 using Loom.Common;
 using Loom.Common.Diagnostics;
 using Loom.LIR;
+using Loom.LIR.Objects;
 using Loom.Parser;
 
 namespace Loom.CLI;
@@ -44,6 +45,15 @@ module Base
     {
         CompilationContext context = new CompilationContext();
         context.Parse(TEST_SOURCE).Analyze().EmitLIR();
+
+        LIRCompilationUnit unit = context.CompilationUnits.First();
+
+        LLVMTranslatorPass translator = new LLVMTranslatorPass();
+        translator.Run(unit);
+
+        string llvmIr = translator.Result.PrintToString();
+        Console.WriteLine("===== LLVM RESULT =====");
+        Console.WriteLine(llvmIr);
 
         foreach (var diagnostic in context.DiagnosticContext.Diagnostics)
         {
