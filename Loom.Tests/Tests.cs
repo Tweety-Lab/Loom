@@ -307,7 +307,7 @@ module Test
     {
         var (root, context) = ParseAndAnalyze(BINDING_SOURCE);
         var import = root.Imports[0];
-        var symbol = context.AnalysisContext.ResolveSymbol(import.ModuleName).Symbol;
+        var symbol = context.AnalysisContext.GetSymbol(import.ModuleName).Symbol;
         Assert.IsType<ModuleSymbol>(symbol);
         Assert.Equal("Test2", ((ModuleSymbol)symbol).Name);
     }
@@ -317,7 +317,7 @@ module Test
     {
         var (root, context) = ParseAndAnalyze(BINDING_SOURCE);
         var method = (MethodDeclarationNode)root.Modules[0].Body.Contents.First();
-        var symbol = context.AnalysisContext.ResolveSymbol(method).Symbol;
+        var symbol = context.AnalysisContext.GetSymbol(method).Symbol;
         Assert.IsType<MethodDefinitionSymbol>(symbol);
         Assert.Equal("MyMethod", ((MethodDefinitionSymbol)symbol).Name);
     }
@@ -327,7 +327,7 @@ module Test
     {
         var (root, context) = ParseAndAnalyze(BINDING_SOURCE);
         var module = root.Modules[0];
-        var symbol = context.AnalysisContext.ResolveSymbol(module).Symbol;
+        var symbol = context.AnalysisContext.GetSymbol(module).Symbol;
         Assert.IsType<ModuleSymbol>(symbol);
         Assert.Equal("Test", ((ModuleSymbol)symbol).Name);
     }
@@ -339,7 +339,7 @@ module Test
         var method = (MethodDeclarationNode)root.Modules[0].Body.Contents.First();
         var returnStatement = (ReturnStatementNode)method.Body.Contents.First();
         var call = Assert.IsType<CallExpressionNode>(returnStatement.Expression);
-        var symbol = context.AnalysisContext.ResolveSymbol(call.MethodName).Symbol;
+        var symbol = context.AnalysisContext.GetSymbol(call.MethodName).Symbol;
         Assert.IsType<MethodDefinitionSymbol>(symbol);
         Assert.Equal("Helper", ((MethodDefinitionSymbol)symbol).Name);
     }
@@ -371,7 +371,7 @@ module Test
         var (root, context) = ParseAndAnalyze(VARIABLE_DECLARATION_SOURCE);
         var method = (MethodDeclarationNode)root.Modules[0].Body.Contents.First();
         var decl = (VariableDeclarationNode)method.Body.Contents.First();
-        var symbol = context.AnalysisContext.ResolveSymbol(decl).Symbol;
+        var symbol = context.AnalysisContext.GetSymbol(decl).Symbol;
         Assert.IsType<LocalVariableSymbol>(symbol);
         Assert.Equal("x", ((LocalVariableSymbol)symbol).Name);
     }
@@ -382,7 +382,7 @@ module Test
         var (root, context) = ParseAndAnalyze(VARIABLE_DECLARATION_SOURCE);
         var method = (MethodDeclarationNode)root.Modules[0].Body.Contents.First();
         var decl = (VariableDeclarationNode)method.Body.Contents.First();
-        var symbol = context.AnalysisContext.ResolveSymbol(decl).Symbol as LocalVariableSymbol;
+        var symbol = context.AnalysisContext.GetSymbol(decl).Symbol as LocalVariableSymbol;
         Assert.Equal(TypeSymbol.DefaultType.I32, symbol!.Type.KnownType);
     }
 
@@ -393,7 +393,7 @@ module Test
         var method = (MethodDeclarationNode)root.Modules[0].Body.Contents.First();
         var returnStatement = (ReturnStatementNode)method.Body.Contents.Last();
         var identifier = Assert.IsType<IdentifierNameNode>(returnStatement.Expression);
-        var symbol = context.AnalysisContext.ResolveSymbol(identifier).Symbol;
+        var symbol = context.AnalysisContext.GetSymbol(identifier).Symbol;
         Assert.IsType<LocalVariableSymbol>(symbol);
         Assert.Equal("x", ((LocalVariableSymbol)symbol).Name);
     }
@@ -417,7 +417,7 @@ module Test
         var secondDecl = (VariableDeclarationNode)method.Body.Contents[1];
         var binary = Assert.IsType<BinaryExpressionNode>(secondDecl.Initializer);
         var left = Assert.IsType<IdentifierNameNode>(binary.Left);
-        var symbol = context.AnalysisContext.ResolveSymbol(left).Symbol;
+        var symbol = context.AnalysisContext.GetSymbol(left).Symbol;
         Assert.IsType<LocalVariableSymbol>(symbol);
         Assert.Equal("x", ((LocalVariableSymbol)symbol).Name);
     }

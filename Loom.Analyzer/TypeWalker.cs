@@ -21,7 +21,7 @@ internal class TypeWalker : ASTWalker
     [Visitor]
     public void Visit(IdentifierNameNode node)
     {
-        var symbol = Context.ResolveSymbol(node).Symbol;
+        var symbol = Context.GetSymbol(node).Symbol;
 
         var type = symbol switch
         {
@@ -37,7 +37,7 @@ internal class TypeWalker : ASTWalker
     [Visitor]
     public void Visit(CallExpressionNode node)
     {
-        if (Context.ResolveSymbol(node.MethodName).Symbol is MethodDefinitionSymbol methodSymbol)
+        if (Context.GetSymbol(node.MethodName).Symbol is MethodDefinitionSymbol methodSymbol)
             Context.ExpressionTypes[node] = methodSymbol.ReturnType;
     }
 }

@@ -38,7 +38,7 @@ internal class FunctionBodyGenerator : ASTVisitor
     [Visitor]
     public void Visit(MethodDeclarationNode node)
     {
-        var method = (Context.ResolveSymbol(node).Symbol as MethodDefinitionSymbol)!;
+        var method = (Context.GetSymbol(node).Symbol as MethodDefinitionSymbol)!;
         LIRFunction? func = CompilationUnit.GetFunction(method.FullyQualifiedName);
         IL = func.LIRGenerator;
 
@@ -90,7 +90,7 @@ internal class FunctionBodyGenerator : ASTVisitor
     [Visitor]
     public void Visit(CallExpressionNode node)
     {
-        var method = (Context.ResolveSymbol(node.MethodName).Symbol as MethodDefinitionSymbol)!;
+        var method = (Context.GetSymbol(node.MethodName).Symbol as MethodDefinitionSymbol)!;
 
         foreach (var argument in node.Arguments)
             Dispatch(argument);
@@ -104,7 +104,7 @@ internal class FunctionBodyGenerator : ASTVisitor
     [Visitor]
     public void Visit(IdentifierNameNode node)
     {
-        var symbol = Context.ResolveSymbol(node).Symbol;
+        var symbol = Context.GetSymbol(node).Symbol;
 
         if (symbol is ParameterSymbol parameter)
         {
@@ -120,7 +120,7 @@ internal class FunctionBodyGenerator : ASTVisitor
     [Visitor]
     public void Visit(VariableDeclarationNode node)
     {
-        var symbol = (Context.ResolveSymbol(node).Symbol as LocalVariableSymbol)!;
+        var symbol = (Context.GetSymbol(node).Symbol as LocalVariableSymbol)!;
         var ptr = IL!.Emit(LIROpCode.Alloca);
 
         SemanticContext.LocalVariables[symbol] = ptr!;
@@ -136,7 +136,7 @@ internal class FunctionBodyGenerator : ASTVisitor
     {
         Dispatch(node.Value);
         var value = ValueStack.Pop();
-        IL!.Emit(LIROpCode.Store, value, SemanticContext.LocalVariables[(Context.ResolveSymbol(node.Target).Symbol as LocalVariableSymbol)!]); // TODO
+        IL!.Emit(LIROpCode.Store, value, SemanticContext.LocalVariables[(Context.GetSymbol(node.Target).Symbol as LocalVariableSymbol)!]); // TODO
     }
 
     /// <inheritdoc/>

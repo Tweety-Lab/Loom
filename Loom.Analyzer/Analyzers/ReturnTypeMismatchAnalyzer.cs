@@ -23,7 +23,7 @@ public class ReturnTypeMismatchAnalyzer : Analyzer
         if (method == null)
             return;
 
-        var methodSymbol = Context.FirstAncestorOrSelf<ModuleNode>(method) is { } module ? Context.ResolveSymbol(method).Symbol as MethodDefinitionSymbol : null;
+        var methodSymbol = Context.FirstAncestorOrSelf<ModuleNode>(method) is { } module ? Context.GetSymbol(method).Symbol as MethodDefinitionSymbol : null;
 
         if (methodSymbol == null)
             return;

@@ -19,7 +19,8 @@ module Consumer
     export i32 Main()
     {
         i32 i = Add(10, 20);
-        return i;
+        i32 x = Add(i, 1);
+        return x;
     }
 }
 

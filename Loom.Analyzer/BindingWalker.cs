@@ -29,7 +29,7 @@ internal class BindingWalker : ASTWalker
             {
                 foreach (var import in programNode.Imports)
                 {
-                    var moduleSymbol = Context.ResolveSymbol(import.ModuleName).Symbol as ModuleSymbol;
+                    var moduleSymbol = Context.GetSymbol(import.ModuleName).Symbol as ModuleSymbol;
                     if (moduleSymbol == null)
                         continue;
 
