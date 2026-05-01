@@ -29,14 +29,9 @@ internal class FunctionDeclarationGenerator : ASTWalker
     {
         var method = (Context.GetSymbol(node).Symbol as MethodDefinitionSymbol)!;
 
-        LIRType returnType = method.ReturnType.KnownType switch
-        {
-            TypeSymbol.DefaultType.Void => LIRType.Void,
-            TypeSymbol.DefaultType.I32 => LIRType.Int32,
-            _ => LIRType.Int32
-        };
+        LIRType returnType = MapType(method.ReturnType.KnownType);
 
-        List<LIRParameter> parameters = method.Parameters.Select(p => new LIRParameter(p.Name, MapType(p.Type.KnownType ?? TypeSymbol.DefaultType.I32))).ToList();
+        List<LIRParameter> parameters = method.Parameters.Select(p => new LIRParameter(p.Name, MapType(p.Type.KnownType!))).ToList();
 
         var builder = CompilationUnit.DefineFunction(method?.FullyQualifiedName ?? node.MethodName.Text, new LIRFunctionType(returnType, parameters));
 
@@ -53,6 +48,7 @@ internal class FunctionDeclarationGenerator : ASTWalker
     {
         TypeSymbol.DefaultType.Void => LIRType.Void,
         TypeSymbol.DefaultType.I32 => LIRType.Int32,
+        TypeSymbol.DefaultType.Bool => LIRType.Boolean,
         _ => LIRType.Int32
     };
 }

@@ -46,10 +46,10 @@ public class TokenReader
         return Advance();
     }
 
-    public Token ExpectAny(params TokenType[] types)
+    public Token ExpectAny(Func<Token, bool> predicate)
     {
-        if (!types.Contains(Current.Type))
-            DiagnosticContext?.Report(new Diagnostic(Diagnostic.DiagnosticLevel.Error, $"Expected {string.Join(" or ", types)}, got {Current.Type}"));
+        if (!predicate(Current))
+            DiagnosticContext?.Report(new Diagnostic(Diagnostic.DiagnosticLevel.Error, $"Expected {string.Join(" or ", predicate)}, got {Current.Type}"));
 
         return Advance();
     }

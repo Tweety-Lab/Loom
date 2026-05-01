@@ -34,6 +34,7 @@ internal class StringPrinterStyle : ILIRPrinterStyle
     {
         LIRIntType i => $"i{i.Bits}",
         LIRVoidType => "void",
+        LIRBoolType => "bool",
         _ => type.ToString()
     };
 

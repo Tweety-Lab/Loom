@@ -40,12 +40,15 @@ public class LIRGenerator
     /// <param name="opCode"> The opcode to emit. </param>
     /// <param name="operands"> The operands to emit. </param>
     /// <returns> The result of the emitted instruction or null if the instruction has no result. </returns>
-    public LIRTempValue Emit(LIROpCode opCode, params LIRValue[] operands)
+    public LIRTempValue Emit(LIROpCode opCode, LIRType? resultType = null, params LIRValue[] operands)
     {
         LIRTempValue? result = null;
 
+        if (opCode.HasResult && resultType == null)
+            throw new ArgumentNullException(nameof(resultType));
+
         if (opCode.HasResult)
-            result = new LIRTempValue(currentTemp++.ToString(), LIRType.Int32);
+            result = new LIRTempValue(currentTemp++.ToString(), resultType);
 
         WritingBlock.Instructions.Add(new LIRInstruction(opCode, operands.ToList()) { Result = result });
 

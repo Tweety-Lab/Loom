@@ -1,4 +1,5 @@
 ﻿using Loom.Parser.AST;
+using Loom.Parser.Tokenizer;
 
 using static Loom.Parser.Tokenizer.Token;
 
@@ -21,11 +22,19 @@ public class StatementRule : ParserRule<StatementNode>
     /// <inheritdoc/>
     public override StatementNode ParseNode()
     {
-        var statement = (StatementNode)(Parser.Reader.Current.Type switch
+        var current = Parser.Reader.Current.Type;
+        var next = Parser.Reader.Peek().Type;
+
+        bool isBuiltInType = TokenRegistry.IsBuiltInType(current);
+
+        var statement = (StatementNode)(current switch
         {
             TokenType.Return => RunRule<ReturnStatementRule, ReturnStatementNode>(),
-            (TokenType.I32 or TokenType.Identifier) when Parser.Reader.Peek().Type == TokenType.Identifier => RunRule<VariableDeclarationRule, VariableDeclarationNode>(),
-            TokenType.Identifier when Parser.Reader.Peek().Type == TokenType.Equals => RunRule<AssignmentStatementRule, AssignmentStatementNode>(),
+
+            _ when isBuiltInType && next == TokenType.Identifier=> RunRule<VariableDeclarationRule, VariableDeclarationNode>(),
+
+            TokenType.Identifier when next == TokenType.Equals => RunRule<AssignmentStatementRule, AssignmentStatementNode>(),
+
             _ => new ExpressionStatementNode(RunRule<ExpressionRule, ExpressionNode>())
         });
 

@@ -3,12 +3,14 @@ namespace Loom.Analyzer.Symbols;
 
 public record ModuleSymbol(string Name) : Symbol(Name);
 
-public record TypeSymbol(string Name, TypeSymbol.DefaultType? KnownType) : Symbol(Name)
+public record TypeSymbol(string Name, TypeSymbol.DefaultType KnownType) : Symbol(Name)
 {
     public enum DefaultType
     {
+        Func,
         Void,
-        I32
+        I32,
+        Bool
     }
 }
 

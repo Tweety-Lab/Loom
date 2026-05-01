@@ -18,6 +18,8 @@ module Consumer
     // Entry Point
     export i32 Main()
     {
+        ReturnTrue();
+
         i32 i = Add(10, 20);
         i32 x = Add(i, 1);
         return x;
@@ -29,6 +31,11 @@ module Base
     export i32 Add(i32 first, i32 second)
     {
         return first + second;
+    }
+
+    export bool ReturnTrue()
+    {
+        return true;
     }
 }
 ";

@@ -8,6 +8,12 @@ namespace Loom.Parser.Tokenizer;
 public sealed class ModifierAttribute : Attribute { }
 
 /// <summary>
+/// Marks a <see cref="Token.TokenType"/> as a built-in type.
+/// </summary>
+[AttributeUsage(AttributeTargets.Field)]
+public sealed class TypeAttribute : Attribute { }
+
+/// <summary>
 /// Marks a <see cref="Token.TokenType"/> as a keyword.
 /// </summary>
 [AttributeUsage(AttributeTargets.Field)]
@@ -77,10 +83,14 @@ public class Token
 
         [Keyword("export"), Modifier] Export,
 
+        [Keyword("true")] True,
+        [Keyword("false")] False,
+
         [Keyword("return")] Return,
 
-        [Keyword("void")] Void,
-        [Keyword("i32")] I32,
+        [Keyword("void"), Type] Void,
+        [Keyword("i32"), Type] I32,
+        [Keyword("bool"), Type] Bool,
 
         EOF
     }

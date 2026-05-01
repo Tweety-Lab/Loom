@@ -54,7 +54,7 @@ internal class FunctionBodyGenerator : ASTVisitor
         if (node.Expression != null)
         {
             Dispatch(node.Expression);
-            IL!.Emit(LIROpCode.Return, ValueStack.Pop());
+            IL!.Emit(LIROpCode.Return, null, ValueStack.Pop());
         }
         else
         {
@@ -64,6 +64,9 @@ internal class FunctionBodyGenerator : ASTVisitor
 
     [Visitor]
     public void Visit(NumberLiteralNode node) => ValueStack.Push(new LIRConstantIntValue(int.Parse(node.Value)));
+
+    [Visitor]
+    public void Visit(BooleanLiteralNode node) => ValueStack.Push(new LIRConstantBoolValue(bool.Parse(node.Value)));
 
     [Visitor]
     public void Visit(BinaryExpressionNode node)
@@ -83,7 +86,7 @@ internal class FunctionBodyGenerator : ASTVisitor
             _ => throw new Exception($"Unsupported operator: {node.Operator.Type}")
         };
 
-        var result = IL!.Emit(opCode, left, right);
+        var result = IL!.Emit(opCode, LIRType.Int32, left, right);
         ValueStack.Push(result!);
     }
 
@@ -97,7 +100,7 @@ internal class FunctionBodyGenerator : ASTVisitor
 
         var arguments = node.Arguments.Select(_ => ValueStack.Pop()).Reverse().ToArray();
 
-        var result = IL!.Emit(LIROpCode.Call, [SemanticContext.Functions[method], .. arguments]);
+        var result = IL!.Emit(LIROpCode.Call, LIRType.Int32, [SemanticContext.Functions[method], .. arguments]);
         ValueStack.Push(result!);
     }
 
@@ -112,7 +115,7 @@ internal class FunctionBodyGenerator : ASTVisitor
         }
         else if (symbol is LocalVariableSymbol local)
         {
-            var result = IL!.Emit(LIROpCode.Load, SemanticContext.LocalVariables[local]);
+            var result = IL!.Emit(LIROpCode.Load, LIRType.Int32, SemanticContext.LocalVariables[local]);
             ValueStack.Push(result!);
         }
     }
@@ -121,14 +124,14 @@ internal class FunctionBodyGenerator : ASTVisitor
     public void Visit(VariableDeclarationNode node)
     {
         var symbol = (Context.GetSymbol(node).Symbol as LocalVariableSymbol)!;
-        var ptr = IL!.Emit(LIROpCode.Alloca);
+        var ptr = IL!.Emit(LIROpCode.Alloca, LIRType.Int32);
 
         SemanticContext.LocalVariables[symbol] = ptr!;
 
         Dispatch(node.Initializer);
         var value = ValueStack.Pop();
 
-        IL.Emit(LIROpCode.Store, value, ptr);
+        IL.Emit(LIROpCode.Store, null, value, ptr);
     }
 
     [Visitor]
@@ -136,7 +139,7 @@ internal class FunctionBodyGenerator : ASTVisitor
     {
         Dispatch(node.Value);
         var value = ValueStack.Pop();
-        IL!.Emit(LIROpCode.Store, value, SemanticContext.LocalVariables[(Context.GetSymbol(node.Target).Symbol as LocalVariableSymbol)!]); // TODO
+        IL!.Emit(LIROpCode.Store, null, value, SemanticContext.LocalVariables[(Context.GetSymbol(node.Target).Symbol as LocalVariableSymbol)!]); // TODO
     }
 
     /// <inheritdoc/>

@@ -39,7 +39,7 @@ internal class DeclarationWalker : ASTVisitor
     [Visitor]
     public void Visit(MethodDeclarationNode node)
     {
-        var returnType = CurrentTable.Lookup(node.ReturnType.Text)?.First() as TypeSymbol ?? new TypeSymbol(node.ReturnType.Text, null);
+        var returnType = CurrentTable.Lookup(node.ReturnType.Text)?.First() as TypeSymbol;
 
         List<ParameterSymbol> parameters = new List<ParameterSymbol>();
 
@@ -51,7 +51,7 @@ internal class DeclarationWalker : ASTVisitor
         {
             foreach (var param in node.Parameters)
             {
-                var type = CurrentTable.Lookup(param.Type.Text)?.First() as TypeSymbol ?? new TypeSymbol(param.Type.Text, null);
+                var type = CurrentTable.Lookup(param.Type.Text)?.First() as TypeSymbol;
                 var paramSymbol = new ParameterSymbol(param.Name.Text, type);
                 parameters.Add(paramSymbol);
                 CurrentTable.Define(paramSymbol);
@@ -65,7 +65,7 @@ internal class DeclarationWalker : ASTVisitor
     [Visitor]
     public void Visit(VariableDeclarationNode node)
     {
-        var type = CurrentTable.Lookup(node.Type.Text)?.First() as TypeSymbol ?? new TypeSymbol(node.Type.Text, null);
+        var type = CurrentTable.Lookup(node.Type.Text)?.First() as TypeSymbol;
         var symbol = new LocalVariableSymbol(node.Name.Text, type);
         symbol.FullyQualifiedName = BuildQualifiedName(node.Name.Text);
         symbol.DeclaringNode = node;

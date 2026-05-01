@@ -31,11 +31,25 @@ public class LIRConstantIntValue : LIRValue
     public int Value { get; }
 
     /// <inheritdoc/>
-    public override LIRType Type => LIRIntType.Int32;
+    public override LIRType Type => LIRType.Int32;
 
     /// <summary> Initializes a new instance of the <see cref="LIRConstantIntValue"/> class. </summary>
     public LIRConstantIntValue(int value) => Value = value;
 
     /// <inheritdoc/>
     public override string ToString() => Value.ToString();
+}
+
+public class LIRConstantBoolValue : LIRValue
+{
+    public bool Value { get; }
+
+    /// <inheritdoc/>
+    public override LIRType Type => LIRType.Boolean;
+
+    /// <summary> Initializes a new instance of the <see cref="LIRConstantBoolValue"/> class. </summary>
+    public LIRConstantBoolValue(bool value) => Value = value;
+
+    /// <inheritdoc/>
+    public override string ToString() => Value ? "true" : "false";
 }

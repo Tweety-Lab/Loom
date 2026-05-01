@@ -92,8 +92,11 @@ public class LIRToLLVMLowerer
 
     private LLVMValueRef LowerOperand(LLVMLoweringContext ctx, LIRValue value)
     {
-        if (value is LIRConstantIntValue c)
-            return LLVMValueRef.CreateConstInt(LIRTypeToLLVM(c.Type), (ulong)c.Value, true);
+        if (value is LIRConstantIntValue i)
+            return LLVMValueRef.CreateConstInt(LIRTypeToLLVM(i.Type), (ulong)i.Value, true);
+
+        if (value is LIRConstantBoolValue b)
+            return LLVMValueRef.CreateConstInt(LIRTypeToLLVM(b.Type), (ulong)(b.Value ? 1 : 0), false);
 
         if (value is LIRFunction func)
             return ctx.Functions[func].Value;
@@ -108,6 +111,7 @@ public class LIRToLLVMLowerer
     {
         LIRIntType => LLVMTypeRef.Int32,
         LIRVoidType => LLVMTypeRef.Void,
+        LIRBoolType => LLVMTypeRef.Int1,
         _ => throw new NotSupportedException($"Unknown type: {type}")
     };
 

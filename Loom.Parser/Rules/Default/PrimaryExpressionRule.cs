@@ -17,6 +17,12 @@ public record NumberLiteralNode(string Value) : ExpressionNode
     public override IEnumerable<ASTNode> Children => Enumerable.Empty<ASTNode>();
 }
 
+public record BooleanLiteralNode(string Value) : ExpressionNode
+{
+    /// <inheritdoc/>
+    public override IEnumerable<ASTNode> Children => Enumerable.Empty<ASTNode>();
+}
+
 [ParserRule]
 public class ExpressionRule : ParserRule<ExpressionNode>
 {
@@ -38,6 +44,7 @@ public class PrimaryExpressionRule : ParserRule<ExpressionNode>
     {
         return Parser.Reader.Current.Type switch
         {
+            TokenType.True or TokenType.False => new BooleanLiteralNode(Parser.Reader.Advance().Text),
             TokenType.Number => new NumberLiteralNode(Parser.Reader.Advance().Text),
             TokenType.Identifier when Parser.Reader.Peek().Type == TokenType.LParen => RunRule<CallExpressionRule, CallExpressionNode>(),
             TokenType.Identifier => new IdentifierNameNode(Parser.Reader.Advance()),
