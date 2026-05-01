@@ -8,7 +8,7 @@ public readonly struct LIROpCode
 {
     public enum CodeType
     {
-        Binary,
+        Arithmetic,
         Memory,
         Control,
         Call
@@ -32,16 +32,20 @@ public readonly struct LIROpCode
     }
 
     #region Defaults
-    public static readonly LIROpCode Add = new LIROpCode("add", CodeType.Binary, true);
-    public static readonly LIROpCode Sub = new LIROpCode("sub", CodeType.Binary, true);
-    public static readonly LIROpCode Mul = new LIROpCode("mul", CodeType.Binary, true);
-    public static readonly LIROpCode Div = new LIROpCode("div", CodeType.Binary, true);
-    public static readonly LIROpCode Return = new LIROpCode("return", CodeType.Control, false);
-    public static readonly LIROpCode Call = new LIROpCode("call", CodeType.Call, true);
+    public static readonly LIROpCode Add = new LIROpCode("add", CodeType.Arithmetic, true);
+    public static readonly LIROpCode Sub = new LIROpCode("sub", CodeType.Arithmetic, true);
+    public static readonly LIROpCode Mul = new LIROpCode("mul", CodeType.Arithmetic, true);
+    public static readonly LIROpCode Div = new LIROpCode("div", CodeType.Arithmetic, true);
+
     public static readonly LIROpCode Alloca = new LIROpCode("alloca", CodeType.Memory, true);
     public static readonly LIROpCode Load = new LIROpCode("load", CodeType.Memory, true);
     public static readonly LIROpCode Store = new LIROpCode("store", CodeType.Memory, false);
-    public static readonly LIROpCode Const = new LIROpCode("const", CodeType.Memory, true);
+
+
+    public static readonly LIROpCode Return = new LIROpCode("return", CodeType.Control, false);
+
+    public static readonly LIROpCode Call = new LIROpCode("call", CodeType.Call, true);
+
     #endregion
 
     /// <inheritdoc/>

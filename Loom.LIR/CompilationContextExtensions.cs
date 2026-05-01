@@ -24,7 +24,7 @@ public static class CompilationContextExtensions
             LIRCompilationUnit comp = new LIRCompilationUnit(new List<LIRFunction>());
             comp.MetaData.Add("Name", "MyFile.loom");
 
-            LIRFunctionType mainType = new LIRFunctionType(LIRType.Void, []);
+            LIRFunctionType mainType = new LIRFunctionType(LIRType.Boolean, []);
             LIRFunction function = comp.DefineFunction("main", mainType);
             
             function.LIRGenerator.Emit(LIROpCode.Return, null, new LIRConstantBoolValue(true));
