@@ -4,7 +4,7 @@ namespace Loom.LIR.OpCodes;
 /// <summary>
 /// A Loom Intermediate Representation (LIR) operation code.
 /// </summary>
-public readonly struct LIROpCode
+public readonly struct LIROpCode : IEquatable<LIROpCode>
 {
     public enum CodeType
     {
@@ -47,6 +47,30 @@ public readonly struct LIROpCode
     public static readonly LIROpCode Call = new LIROpCode("call", CodeType.Call, true);
 
     #endregion
+
+    public static bool operator ==(LIROpCode left, LIROpCode right) => left.Equals(right);
+
+    public static bool operator !=(LIROpCode left, LIROpCode right) => !left.Equals(right);
+
+    /// <inheritdoc/>
+    public bool Equals(LIROpCode other)
+    {
+        return Name == other.Name &&
+               Type == other.Type &&
+               HasResult == other.HasResult;
+    }
+
+    /// <inheritdoc/>
+    public override bool Equals(object? obj)
+    {
+        return obj is LIROpCode other && Equals(other);
+    }
+
+    /// <inheritdoc/>
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Name, Type, HasResult);
+    }
 
     /// <inheritdoc/>
     public override string ToString() => Name;

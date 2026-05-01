@@ -1,4 +1,5 @@
 ﻿using Loom.LIR.Objects;
+using Loom.LIR.OpCodes;
 
 namespace Loom.LIR.Printers;
 
@@ -25,11 +26,40 @@ internal class StringPrinterStyle : ILIRPrinterStyle
     public string PrintInstruction(LIRInstruction inst)
     {
         var result = inst.Result is not null ? $"{PrintValue(inst.Result)} = " : "";
-        var type = inst.Result?.Type is not null ? $"{PrintType(inst.Result.Type)} " : "";
 
-        var operands = string.Join(", ", inst.Operands.Select(PrintValue));
+        switch (inst.OpCode)
+        {
+            case var op when op == LIROpCode.Alloca:
+                {
+                    var ptrType = (LIRPointerType)inst.Result!.Type;
+                    return $"{result}alloca {PrintType(ptrType.PointeeType)}";
+                }
 
-        return $"{result}{inst.OpCode.Name} {type}{operands}".TrimEnd();
+            case var op when op == LIROpCode.Store:
+                {
+                    var value = inst.Operands[0];
+                    var ptr = inst.Operands[1];
+                    var ptrType = (LIRPointerType)ptr.Type;
+
+                    return $"store {PrintType(ptrType.PointeeType)} {PrintValue(value)}, {PrintValue(ptr)}";
+                }
+
+            case var op when op == LIROpCode.Load:
+                {
+                    var ptr = inst.Operands[0];
+                    var ptrType = (LIRPointerType)ptr.Type;
+
+                    return $"{result}load {PrintType(ptrType.PointeeType)}, {PrintValue(ptr)}";
+                }
+
+            default:
+                {
+                    var type = inst.Result is not null ? $"{PrintType(inst.Result.Type)} " : "";
+
+                    var operands = string.Join(", ", inst.Operands.Select(PrintValue));
+                    return $"{result}{inst.OpCode.Name} {type}{operands}".TrimEnd();
+                }
+        }
     }
 
     /// <inheritdoc/>
@@ -38,6 +68,7 @@ internal class StringPrinterStyle : ILIRPrinterStyle
         LIRIntType i => $"i{i.Bits}",
         LIRVoidType => "void",
         LIRBoolType => "bool",
+        LIRPointerType p => $"{PrintType(p.PointeeType)}*",
         _ => type.ToString()
     };
 

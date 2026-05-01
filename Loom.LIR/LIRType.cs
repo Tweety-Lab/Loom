@@ -12,7 +12,7 @@ public record LIRIntType(int Bits) : LIRType;
 
 public record LIRVoidType() : LIRType;
 public record LIRBoolType() : LIRType;
-public record LIRRawPointerType(LIRType Pointee) : LIRType;
+public record LIRPointerType(LIRType PointeeType) : LIRType;
 
 public record LIRParameter(string Name, LIRType Type);
-public record LIRFunctionType(LIRType ReturnType, List<LIRParameter> Parameters) : LIRType;
+public record LIRFunctionType(LIRType ReturnType, LIRParameter[] Parameters) : LIRType;
