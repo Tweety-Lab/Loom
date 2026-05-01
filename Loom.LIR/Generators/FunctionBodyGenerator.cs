@@ -1,7 +1,6 @@
 ﻿using Loom.Analyzer;
 using Loom.Analyzer.Symbols;
-using Loom.LIR.Builders;
-using Loom.LIR.Generators;
+using Loom.LIR.Objects;
 using Loom.LIR.OpCodes;
 using Loom.Parser.AST;
 using Loom.Parser.Rules.Default;
@@ -22,17 +21,17 @@ internal class FunctionBodyGenerator : ASTVisitor
     /// <summary> The owning <see cref="AnalysisContext"/>. </summary>
     public AnalysisContext Context { get; }
 
-    /// <summary> The owning <see cref="CompilationUnitBuilder"/>. </summary>
-    public CompilationUnitBuilder UnitBuilder { get; }
+    /// <summary> The owning <see cref="LIRCompilationUnit"/>. </summary>
+    public LIRCompilationUnit CompilationUnit { get; }
 
     /// <summary> The current <see cref="LIRGenerator"/>. </summary>
     public LIRGenerator? IL { get; private set; }
 
     /// <summary> Initializes a new instance of the <see cref="FunctionBodyGenerator"/> class. </summary>
-    public FunctionBodyGenerator(AnalysisContext context, CompilationUnitBuilder unitBuilder, LIRSemanticContext semanticContext)
+    public FunctionBodyGenerator(AnalysisContext context, LIRCompilationUnit compilationUnit, LIRSemanticContext semanticContext)
     {
         Context = context;
-        UnitBuilder = unitBuilder;
+        CompilationUnit = compilationUnit;
         SemanticContext = semanticContext;
     }
 
@@ -40,10 +39,10 @@ internal class FunctionBodyGenerator : ASTVisitor
     public void Visit(MethodDeclarationNode node)
     {
         var method = (Context.ResolveSymbol(node).Symbol as MethodDefinitionSymbol)!;
-        var funcBuilder = UnitBuilder.GetFunction(method.FullyQualifiedName);
-        IL = funcBuilder.LIRGenerator;
+        LIRFunction? func = CompilationUnit.GetFunction(method.FullyQualifiedName);
+        IL = func.LIRGenerator;
 
-        foreach (var (symbol, value) in method.Parameters.Zip(funcBuilder.BuildResult.Parameters))
+        foreach (var (symbol, value) in method.Parameters.Zip(func.ParameterValues))
             SemanticContext.LocalVariables[symbol] = value;
 
         VisitChildren(node);
@@ -98,7 +97,7 @@ internal class FunctionBodyGenerator : ASTVisitor
 
         var arguments = node.Arguments.Select(_ => ValueStack.Pop()).Reverse().ToArray();
 
-        var result = IL!.Emit(LIROpCode.Call, [SemanticContext.Functions[method].BuildResult, .. arguments]);
+        var result = IL!.Emit(LIROpCode.Call, [SemanticContext.Functions[method], .. arguments]);
         ValueStack.Push(result!);
     }
 

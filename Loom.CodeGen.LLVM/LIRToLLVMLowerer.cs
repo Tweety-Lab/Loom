@@ -36,8 +36,8 @@ public class LIRToLLVMLowerer
     {
         var (llvmFunc, _) = ctx.Functions[func];
 
-        for (int i = 0; i < func.Parameters.Count; i++)
-            ctx.Values[func.Parameters[i]] = llvmFunc.GetParam((uint)i);
+        for (int i = 0; i < func.ParameterValues.Count; i++)
+            ctx.Values[func.ParameterValues[i]] = llvmFunc.GetParam((uint)i);
 
         foreach (var block in func.Blocks)
             LowerBlock(ctx, llvmFunc, block);

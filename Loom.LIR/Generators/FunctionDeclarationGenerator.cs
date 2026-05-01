@@ -1,6 +1,6 @@
 ﻿using Loom.Analyzer;
 using Loom.Analyzer.Symbols;
-using Loom.LIR.Builders;
+using Loom.LIR.Objects;
 using Loom.Parser.AST;
 using Loom.Parser.Rules.Default;
 
@@ -11,16 +11,16 @@ internal class FunctionDeclarationGenerator : ASTWalker
     /// <summary> The owning <see cref="AnalysisContext"/>. </summary>
     public AnalysisContext Context { get; }
 
-    /// <summary> The owning <see cref="CompilationUnitBuilder"/>. </summary>
-    public CompilationUnitBuilder UnitBuilder { get; }
+    /// <summary> The owning <see cref="LIRCompilationUnit"/>. </summary>
+    public LIRCompilationUnit CompilationUnit { get; }
 
     public LIRSemanticContext SemanticContext { get; }
 
     /// <summary> Initializes a new instance of the <see cref="FunctionDeclarationGenerator"/> class. </summary>
-    public FunctionDeclarationGenerator(AnalysisContext context, CompilationUnitBuilder unitBuilder, LIRSemanticContext semanticContext)
+    public FunctionDeclarationGenerator(AnalysisContext context, LIRCompilationUnit compilationUnit, LIRSemanticContext semanticContext)
     {
         Context = context;
-        UnitBuilder = unitBuilder;
+        CompilationUnit = compilationUnit;
         SemanticContext = semanticContext;
     }
 
@@ -38,7 +38,7 @@ internal class FunctionDeclarationGenerator : ASTWalker
 
         List<LIRParameter> parameters = method.Parameters.Select(p => new LIRParameter(p.Name, MapType(p.Type.KnownType ?? TypeSymbol.DefaultType.I32))).ToList();
 
-        var builder = UnitBuilder.DefineFunction(method?.FullyQualifiedName ?? node.MethodName.Text, returnType, parameters);
+        var builder = CompilationUnit.DefineFunction(method?.FullyQualifiedName ?? node.MethodName.Text, new LIRFunctionType(returnType, parameters));
 
         if (node.Modifiers.Count > 0)
             builder.MetaData.Add("Modifiers", string.Join(", ", node.Modifiers.Select(m => m.Text)));

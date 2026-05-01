@@ -1,7 +1,6 @@
 ﻿using Loom.Analyzer;
 using Loom.Analyzer.Symbols;
 using Loom.Common;
-using Loom.LIR.Builders;
 using Loom.LIR.Objects;
 using Loom.LIR.Passes;
 using Loom.Parser.AST;
@@ -17,7 +16,7 @@ internal class LIRASTWalker
     public LIRSemanticContext SemanticContext { get; private set; } = new();
 
     private CompilationContext context;
-    private CompilationUnitBuilder unitBuilder = new();
+    private LIRCompilationUnit unitBuilder = new(new());
 
     /// <summary> Initializes a new instance of the <see cref="LIRASTWalker"/> class. </summary>
     public LIRASTWalker(CompilationContext context) => this.context = context;
@@ -36,6 +35,6 @@ internal class LIRASTWalker
         foreach (var root in rootList)
             bodyPass.Dispatch(root);
 
-        return unitBuilder.BuildResult;
+        return unitBuilder;
     }
 }

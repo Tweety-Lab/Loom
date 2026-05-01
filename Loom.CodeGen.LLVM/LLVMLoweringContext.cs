@@ -2,7 +2,6 @@
 using Loom.LIR;
 using Loom.LIR.Objects;
 
-
 namespace Loom.CodeGen.LLVM;
 
 public class LLVMLoweringContext

@@ -1,6 +1,4 @@
-﻿
-using Loom.Analyzer.Symbols;
-using Loom.LIR.Builders;
+﻿using Loom.Analyzer.Symbols;
 using Loom.LIR.Objects;
 
 namespace Loom.LIR;
@@ -10,6 +8,6 @@ namespace Loom.LIR;
 /// </summary>
 public class LIRSemanticContext
 {
-    public Dictionary<MethodDefinitionSymbol, FunctionBuilder> Functions { get; } = new();
+    public Dictionary<MethodDefinitionSymbol, LIRFunction> Functions { get; } = new();
     public Dictionary<Symbol, LIRValue> LocalVariables { get; } = new();
 }
