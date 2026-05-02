@@ -4,9 +4,9 @@ using Loom.LIR.Objects;
 namespace Loom.LIR.Passes;
 
 /// <summary>
-/// A <see cref="ICompilationPass"/> that runs on an entire <see cref="LIRCompilationUnit"/> and it's contents.
+/// A <see cref="ICompilationPass"/> that runs on an entire <see cref="LIRCompilationUnit"/> and it's contents recursively.
 /// </summary>
-public abstract class LIRFullPass : ICompilationPass
+public abstract class LIRRecursivePass : ICompilationPass
 {
     /// <inheritdoc/>
     public virtual void Run(LIRCompilationUnit unit)
