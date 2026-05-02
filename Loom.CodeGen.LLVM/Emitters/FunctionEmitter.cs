@@ -12,8 +12,6 @@ internal class FunctionEmitter : Emitter<LIRFunction>
     /// <inheritdoc/>
     public override void Emit(LIRFunction target)
     {
-        Console.WriteLine($"Emitting Function: {target.Name}");
-
         LLVMValueRef function = Context.Module.AddFunction(target.Name, GetFunctionType(target.Type));
         Context.FunctionMap[target] = function;
     }

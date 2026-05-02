@@ -19,8 +19,6 @@ internal class InstructionEmitter : Emitter<LIRInstruction>
         foreach (var emitter in emitters)
             if (target.OpCode == emitter.TargetOpCode)
                 emitter.Emit(target, Context);
-
-        Console.WriteLine($"Emitting Instruction: {target.OpCode.Name} for block: {block.Name} for function: {block.Parent.Name}");
     }
 
     /// <inheritdoc/>
