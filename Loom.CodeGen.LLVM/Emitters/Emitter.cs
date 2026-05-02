@@ -13,5 +13,5 @@ internal abstract class Emitter<T>
     public Emitter(LLVMTranslationContext context) => Context = context;
 
     /// <summary> Emits a <typeparamref name="T"/> into the translation context. </summary>
-    public abstract void Emit(T value);
+    public abstract void Emit(T target);
 }
