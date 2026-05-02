@@ -1,9 +1,9 @@
-﻿using LLVMSharp;
+﻿using Loom.CodeGen.LLVM.Emitters.Instructions;
 using Loom.Common.Reflection;
 using Loom.LIR;
 using System.Reflection;
 
-namespace Loom.CodeGen.LLVM.Emitters.Instructions;
+namespace Loom.CodeGen.LLVM.Emitters;
 
 internal class InstructionEmitter : Emitter<LIRInstruction>
 {

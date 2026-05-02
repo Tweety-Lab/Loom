@@ -19,4 +19,19 @@ internal class LLVMTranslationContext
     public Dictionary<LIRFunction, LLVMValueRef> FunctionMap { get; set; } = new Dictionary<LIRFunction, LLVMValueRef>();
     public Dictionary<LIRBasicBlock, LLVMBasicBlockRef> BlockMap { get; set; } = new(); // TODO: Is this needed?
     public Dictionary<LIRValue, LLVMValueRef> ValueMap { get; set; } = new();
+
+    public LLVMValueRef ResolveValue(LIRValue value)
+    {
+        if (ValueMap.TryGetValue(value, out LLVMValueRef result))
+            return result;
+
+        if (value is LIRConstantIntValue intConst)
+        {
+            var llvmVal = LLVMValueRef.CreateConstInt(TypeMap[intConst.Type], (ulong)intConst.Value);
+            ValueMap[value] = llvmVal;
+            return llvmVal;
+        }
+
+        throw new InvalidOperationException("Could not resolve value.");
+    }
 }
