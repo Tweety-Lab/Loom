@@ -55,6 +55,19 @@ module Base
         Console.WriteLine("===== LLVM RESULT =====");
         Console.WriteLine(llvmIr);
 
+        LLVM.InitializeNativeTarget();
+        LLVM.InitializeNativeAsmPrinter();
+        LLVM.InitializeNativeAsmParser();
+
+        LLVMExecutionEngineRef engine = translator.Result.CreateExecutionEngine();
+        LLVMValueRef main = translator.Result.GetNamedFunction("main");
+        LLVMGenericValueRef result = engine.RunFunction(main, []);
+
+        unsafe
+        {
+            Console.WriteLine($"Result: {LLVM.GenericValueToInt(result, 1)}");
+        }
+
         foreach (var diagnostic in context.DiagnosticContext.Diagnostics)
         {
             Console.ForegroundColor = diagnostic.Level switch
