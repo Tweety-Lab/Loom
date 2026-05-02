@@ -1,6 +1,7 @@
 ﻿using LLVMSharp;
 using LLVMSharp.Interop;
 using Loom.CodeGen.LLVM.Emitters;
+using Loom.CodeGen.LLVM.Emitters.Instructions;
 using Loom.LIR;
 using Loom.LIR.Objects;
 using Loom.LIR.Passes;
@@ -23,7 +24,7 @@ public class LLVMTranslatorPass : LIRTranslatorPass<LLVMModuleRef>
             {
                 [LIRType.Void] = LLVMTypeRef.Void,
                 [LIRType.Int32] = LLVMTypeRef.Int32,
-                [LIRType.Boolean] = LLVMTypeRef.Int1
+                [LIRType.Boolean] = LLVMTypeRef.Int1,
             },
 
             Context = llvmContext,
@@ -56,6 +57,6 @@ public class LLVMTranslatorPass : LIRTranslatorPass<LLVMModuleRef>
         foreach (var function in unit.Functions)
             foreach (var block in function.Blocks)
                 foreach (var instruction in block.Instructions)
-                    instructionEmitter.Emit(instruction);
+                    instructionEmitter.Emit(block, instruction);
     }
 }

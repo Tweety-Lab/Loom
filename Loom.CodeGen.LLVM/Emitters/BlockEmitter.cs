@@ -15,6 +15,7 @@ internal class BlockEmitter : Emitter<LIRBasicBlock>
         Console.WriteLine($"Emitting Block: {target.Name} for function: {target.Parent.Name}");
 
         LLVMBasicBlockRef block = Context.FunctionMap[target.Parent].AppendBasicBlock(target.Name);
+        Context.BlockMap[target] = block;
     }
 }
 
