@@ -30,7 +30,7 @@ public class LIRGenerator
     public LIRGenerator(LIRFunction function)
     {
         this.function = function;
-        LIRBasicBlock entry = new LIRBasicBlock("entry");
+        LIRBasicBlock entry = new LIRBasicBlock("entry", function);
         function.Blocks.Add(entry);
 
         WritingBlock = entry;
