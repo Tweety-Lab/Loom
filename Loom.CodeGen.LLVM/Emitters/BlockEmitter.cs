@@ -1,4 +1,5 @@
-﻿using Loom.LIR;
+﻿using LLVMSharp.Interop;
+using Loom.LIR;
 using Loom.LIR.Objects;
 
 namespace Loom.CodeGen.LLVM.Emitters;
@@ -12,6 +13,8 @@ internal class BlockEmitter : Emitter<LIRBasicBlock>
     public override void Emit(LIRBasicBlock target)
     {
         Console.WriteLine($"Emitting Block: {target.Name} for function: {target.Parent.Name}");
+
+        LLVMBasicBlockRef block = Context.FunctionMap[target.Parent].AppendBasicBlock(target.Name);
     }
 }
 
