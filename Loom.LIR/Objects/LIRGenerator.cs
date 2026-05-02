@@ -51,7 +51,7 @@ public class LIRGenerator
         if (opCode.HasResult)
             result = new LIRTempValue(currentTemp++.ToString(), resultType);
 
-        WritingBlock.Instructions.Add(new LIRInstruction(opCode, operands.ToList()) { Result = result });
+        WritingBlock.Emit(new LIRInstruction(opCode, operands.ToList()) { Result = result });
 
         return result!;
     }

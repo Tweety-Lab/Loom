@@ -25,7 +25,7 @@ public sealed class LIRBasicBlock
         Parent = function;
     }
 
-    public void Add(LIRInstruction instruction)
+    public void Emit(LIRInstruction instruction)
     {
         if (Terminator is not null)
             throw new InvalidOperationException("Cannot add instruction after terminator.");
