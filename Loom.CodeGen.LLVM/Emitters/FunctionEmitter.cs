@@ -14,11 +14,10 @@ internal class FunctionEmitter : Emitter<LIRFunction>
     {
         Console.WriteLine($"Emitting Function: {target.Name}");
 
-        Context.Module.AddFunction(target.Name, GetFunctionType(target.Type));
+        LLVMValueRef function = Context.Module.AddFunction(target.Name, GetFunctionType(target.Type));
+        Context.FunctionMap[target] = function;
     }
 
-    public LLVMTypeRef GetFunctionType(LIRFunctionType type)
-    {
-        return LLVMTypeRef.CreateFunction(TypeMap.Map[type.ReturnType], type.Parameters.Select(x => TypeMap.Map[x.Type]).ToArray());
-    }
+    /// <summary> Converts a <see cref="LIRFunctionType"/> to a LLVM <see cref="LLVMTypeRef"/>. </summary>
+    public LLVMTypeRef GetFunctionType(LIRFunctionType type) => LLVMTypeRef.CreateFunction(Context.TypeMap[type.ReturnType], type.Parameters.Select(x => Context.TypeMap[x.Type]).ToArray());
 }

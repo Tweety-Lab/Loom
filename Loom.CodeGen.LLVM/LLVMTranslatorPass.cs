@@ -15,15 +15,17 @@ public class LLVMTranslatorPass : LIRTranslatorPass<LLVMModuleRef>
     /// <inheritdoc />
     public override void Run(LIRCompilationUnit unit)
     {
-        TypeMap.Add(LIRType.Void, LLVMTypeRef.Void);
-
-        TypeMap.Add(LIRType.Int32, LLVMTypeRef.Int32);
-        TypeMap.Add(LIRType.Boolean, LLVMTypeRef.Int1);
-
         LLVMContextRef llvmContext = LLVMContextRef.Create();
 
         LLVMTranslationContext translationContext = new LLVMTranslationContext()
         {
+            TypeMap =
+            {
+                [LIRType.Void] = LLVMTypeRef.Void,
+                [LIRType.Int32] = LLVMTypeRef.Int32,
+                [LIRType.Boolean] = LLVMTypeRef.Int1
+            },
+
             Context = llvmContext,
             Module = llvmContext.CreateModuleWithName(unit.Name),
             Builder = llvmContext.CreateBuilder()
