@@ -14,7 +14,10 @@ internal class ReturnEmitter : IInstructionEmitter
     public void Emit(LIRInstruction instruction, LLVMTranslationContext context)
     {
         if (instruction.Operands.Count < 1)
-            throw new InvalidOperationException("Return must have a result.");
+        {
+            context.Builder.BuildRetVoid();
+            return;
+        }
 
         LLVMValueRef value = context.ResolveValue(instruction.Operands[0]);
         context.Builder.BuildRet(value);
