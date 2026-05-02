@@ -1,5 +1,6 @@
 ﻿using LLVMSharp;
 using LLVMSharp.Interop;
+using Loom.CodeGen.LLVM.Emitters;
 using Loom.LIR;
 using Loom.LIR.Objects;
 using Loom.LIR.Passes;
@@ -19,7 +20,20 @@ public class LLVMTranslatorPass : LIRTranslatorPass<LLVMModuleRef>
         TypeMap.Add(LIRType.Int32, LLVMTypeRef.Int32);
         TypeMap.Add(LIRType.Boolean, LLVMTypeRef.Int1);
 
+        LLVMContextRef llvmContext = LLVMContextRef.Create();
 
-        Result = LLVMModuleRef.CreateWithName(unit.Name);
+        LLVMTranslationContext translationContext = new LLVMTranslationContext()
+        {
+            Context = llvmContext,
+            Module = llvmContext.CreateModuleWithName(unit.Name),
+            Builder = llvmContext.CreateBuilder()
+        };
+
+        FunctionEmitter functionEmitter = new FunctionEmitter(translationContext);
+
+        foreach (var function in unit.Functions)
+            functionEmitter.Emit(function);
+
+        Result = translationContext.Module;
     }
 }
