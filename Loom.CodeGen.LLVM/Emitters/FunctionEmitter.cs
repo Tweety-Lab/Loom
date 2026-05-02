@@ -6,10 +6,10 @@ namespace Loom.CodeGen.LLVM.Emitters;
 
 internal class FunctionEmitter : Emitter<LIRFunction>
 {
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public FunctionEmitter(LLVMTranslationContext context) : base(context) { }
 
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public override void Emit(LIRFunction target)
     {
         Console.WriteLine($"Emitting Function: {target.Name}");

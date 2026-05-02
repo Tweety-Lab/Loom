@@ -50,5 +50,12 @@ public class LLVMTranslatorPass : LIRTranslatorPass<LLVMModuleRef>
         foreach (var function in unit.Functions)
             foreach (var block in function.Blocks)
                 blockEmitter.Emit(block);
+
+        InstructionEmitter instructionEmitter = new InstructionEmitter(translationContext);
+
+        foreach (var function in unit.Functions)
+            foreach (var block in function.Blocks)
+                foreach (var instruction in block.Instructions)
+                    instructionEmitter.Emit(instruction);
     }
 }
