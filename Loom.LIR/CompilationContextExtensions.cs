@@ -27,13 +27,13 @@ public static class CompilationContextExtensions
             LIRFunctionType mainType = new LIRFunctionType(LIRType.Int32, []);
             LIRFunction function = comp.DefineFunction("main", mainType);
 
-            LIRTempValue intAddress = function.LIRGenerator.Emit(LIROpCode.Alloca, new LIRPointerType(LIRType.Int32));
-            function.LIRGenerator.Emit(LIROpCode.Store, null, new LIRConstantIntValue(1), intAddress);
+            LIRTempValue intAddress = function.LIRGenerator.EmitAlloca(LIRType.Int32);
+            function.LIRGenerator.EmitStore(new LIRConstantIntValue(1), intAddress);
 
-            LIRTempValue x = function.LIRGenerator.Emit(LIROpCode.Load, LIRType.Int32, intAddress);
+            LIRTempValue x = function.LIRGenerator.EmitLoad(intAddress);
             
-            LIRTempValue result = function.LIRGenerator.Emit(LIROpCode.Add, LIRType.Int32, x, new LIRConstantIntValue(1));
-            function.LIRGenerator.Emit(LIROpCode.Return, null, result);
+            LIRTempValue result = function.LIRGenerator.EmitAdd(x, new LIRConstantIntValue(1));
+            function.LIRGenerator.EmitReturn(result);
 
             ctx.ExtendedProperties[LIRGEN_CONTEXT_KEY] = new List<LIRCompilationUnit> { comp };
 
