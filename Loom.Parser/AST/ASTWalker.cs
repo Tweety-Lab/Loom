@@ -6,13 +6,25 @@
 public class ASTWalker : ASTVisitor
 {
     /// <inheritdoc/>
-    public override void Dispatch(ASTNode node)
+    public override object? Dispatch(ASTNode node)
     {
         var nodeType = node.GetType();
-        base.Dispatch(node);
 
         if (cache.TryGetValue((GetType(), nodeType), out var method) && method != null)
             VisitChildren(node);
+
+        return base.Dispatch(node);
+    }
+
+    /// <inheritdoc/>
+    public override T? DispatchResult<T>(ASTNode node) where T : default
+    {
+        var nodeType = node.GetType();
+
+        if (cache.TryGetValue((GetType(), nodeType), out var method) && method != null)
+            VisitChildren(node);
+
+        return base.DispatchResult<T>(node);
     }
 
     /// <inheritdoc/>

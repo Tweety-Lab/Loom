@@ -35,13 +35,19 @@ public abstract class ASTVisitor
     protected virtual void OnUnhandled(ASTNode node) { }
 
     /// <summary> Dispatches the node to the correct Visit method via reflection. </summary>
-    public virtual void Dispatch(ASTNode node)
+    /// <param name="node"> The node to dispatch. </param>
+    /// <returns> The result of the dispatched method or null if it returns void. </returns>
+    public virtual object? Dispatch(ASTNode node)
     {
         var method = cache.GetOrAdd((GetType(), node.GetType()), key => key.Item1.GetMethods().FirstOrDefault(m => m.GetCustomAttribute<VisitorAttribute>() != null && m.GetParameters() is [var p] && p.ParameterType == key.Item2));
 
         if (method != null)
-            method.Invoke(this, [node]);
+            return method.Invoke(this, [node]);
         else
             OnUnhandled(node);
+
+        return null;
     }
+
+    public virtual T? DispatchResult<T>(ASTNode node) => (T?)Dispatch(node);
 }

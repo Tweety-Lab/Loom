@@ -1,4 +1,5 @@
 ﻿using Loom.Common;
+using Loom.LIR.Generation;
 using Loom.LIR.Objects;
 using Loom.LIR.OpCodes;
 using Loom.LIR.Passes;
@@ -22,18 +23,8 @@ public static class CompilationContextExtensions
         /// <summary> Runs the <see cref="CompilationContext"/> through the Loom Intermediate Representation generation pipeline. </summary>
         public CompilationContext EmitLIR()
         {
-            LIRCompilationUnit comp = new LIRCompilationUnit("MyFile.loom");
-
-            LIRFunctionType mainType = new LIRFunctionType(LIRType.Int32, []);
-            LIRFunction function = comp.DefineFunction("main", mainType);
-
-            LIRTempValue intAddress = function.LIRGenerator.EmitAlloca(LIRType.Int32);
-            function.LIRGenerator.EmitStore(new LIRConstantIntValue(1), intAddress);
-
-            LIRTempValue x = function.LIRGenerator.EmitLoad(intAddress);
-            
-            LIRTempValue result = function.LIRGenerator.EmitAdd(x, new LIRConstantIntValue(1));
-            function.LIRGenerator.EmitReturn(result);
+            ASTGenerator generator = new ASTGenerator(ctx);
+            LIRCompilationUnit comp = generator.Generate(ctx.SyntaxTrees.First());
 
             ctx.ExtendedProperties[LIRGEN_CONTEXT_KEY] = new List<LIRCompilationUnit> { comp };
 

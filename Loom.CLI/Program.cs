@@ -19,8 +19,6 @@ module Consumer
     // Entry Point
     export i32 Main()
     {
-        ReturnTrue();
-
         i32 i = Add(10, 20);
         i32 x = Add(i, 1);
         return x;
@@ -60,7 +58,7 @@ module Base
         LLVM.InitializeNativeAsmParser();
 
         LLVMExecutionEngineRef engine = translator.Result.CreateExecutionEngine();
-        LLVMValueRef main = translator.Result.GetNamedFunction("main");
+        LLVMValueRef main = translator.Result.GetNamedFunction(context.AnalysisContext.EntryPoint.FullyQualifiedName);
         LLVMGenericValueRef result = engine.RunFunction(main, []);
 
         unsafe

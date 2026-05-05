@@ -56,9 +56,16 @@ public class LIRGenerator
         return result!;
     }
 
-    public void EmitReturn(LIRValue? value = null) => Emit(LIROpCode.Return, null, value);
+    public void EmitReturn(LIRValue? value = null)
+    {
+        if (value == null)
+            Emit(LIROpCode.Return, null);
+        else
+            Emit(LIROpCode.Return, null, value);
+    }
+
     public LIRTempValue EmitAdd(LIRValue left, LIRValue right) => Emit(LIROpCode.Add, left.Type, left, right);
     public LIRTempValue EmitLoad(LIRValue value) => Emit(LIROpCode.Load, value.Type, value);
-    public LIRTempValue EmitStore(LIRValue value, LIRValue address) => Emit(LIROpCode.Store, null, value, address);
+    public void EmitStore(LIRValue value, LIRValue address) => Emit(LIROpCode.Store, null, value, address);
     public LIRTempValue EmitAlloca(LIRType type) => Emit(LIROpCode.Alloca, new LIRPointerType(type));
 }
