@@ -1,4 +1,6 @@
-﻿using Loom.Common;
+﻿using Loom.Analyzer;
+using Loom.Analyzer.Symbols;
+using Loom.Common;
 using Loom.LIR.Objects;
 using Loom.Parser.Rules.Default;
 
@@ -29,7 +31,20 @@ internal class StatementGenerator
         switch (node)
         {
             case ReturnStatementNode ret: EmitReturn(ret); break;
+            case VariableDeclarationNode decl: EmitVariableDeclaration(decl); break;
+            case AssignmentStatementNode assign: EmitAssignment(assign); break;
         }
+    }
+
+    private void EmitVariableDeclaration(VariableDeclarationNode node)
+    {
+        LocalVariableSymbol symbol = (LocalVariableSymbol)context.AnalysisContext.GetSymbol(node).Symbol!;
+        var type = ASTGenerator.ConvertType(symbol.Type);
+        LIRTempValue address = Generator.EmitAlloca(type);
+        locals[node.Name.Text] = address;
+
+        var value = ExpressionGenerator(node.Initializer);
+        Generator.EmitStore(value, address);
     }
 
     private void EmitReturn(ReturnStatementNode node)
@@ -38,5 +53,14 @@ internal class StatementGenerator
             Generator.EmitReturn();
         else
             Generator.EmitReturn(ExpressionGenerator(node.Expression));
+    }
+
+    private void EmitAssignment(AssignmentStatementNode node)
+    {
+        LocalVariableSymbol symbol = (LocalVariableSymbol)context.AnalysisContext.GetSymbol(node.Target).Symbol!;
+        if (!locals.TryGetValue(symbol.Name, out var address))
+            throw new Exception($"Undeclared variable: {symbol.Name}");
+
+        Generator.EmitStore(ExpressionGenerator(node.Value), address);
     }
 }

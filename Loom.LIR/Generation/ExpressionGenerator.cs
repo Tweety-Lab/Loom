@@ -7,6 +7,9 @@ using Loom.Parser.Rules.Default;
 
 namespace Loom.LIR.Generation;
 
+/// <summary>
+/// Handles conversion of Abstract Syntax Tree (AST) expressions into Loom Intermediate Representation (LIR).
+/// </summary>
 internal class ExpressionGenerator
 {
     private CompilationContext context;

@@ -2,9 +2,7 @@
 using Loom.Analyzer.Symbols;
 using Loom.Common;
 using Loom.LIR.Objects;
-using Loom.Parser.AST;
 using Loom.Parser.Rules.Default;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Loom.LIR.Generation;
 
@@ -74,7 +72,7 @@ public class ASTGenerator
                 statementGen.EmitStatement(statementNode);
     }
     
-    public LIRType ConvertType(TypeSymbol type) => type.KnownType switch
+    public static LIRType ConvertType(TypeSymbol type) => type.KnownType switch
     {
         TypeSymbol.DefaultType.Void => LIRType.Void,
         TypeSymbol.DefaultType.Bool => LIRType.Boolean,
