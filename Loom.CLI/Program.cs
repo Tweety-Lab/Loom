@@ -17,20 +17,14 @@ module Consumer
     // Entry Point
     export i32 Main()
     {
-        i32 result = Return();
+        i32 result = Add(2, 2);
         return result;
     }
 
-    i32 Return()
+    i32 Add(i32 first, i32 second)
     {
-        return 1 + 1;
+        return first + second;
     }
-
-    bool Test()
-    {
-        return false;
-    }
-
 }
 ";
 

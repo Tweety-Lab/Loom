@@ -1,4 +1,5 @@
 ﻿using Loom.LIR.OpCodes;
+using System.Reflection;
 
 namespace Loom.LIR.Objects;
 
@@ -65,7 +66,13 @@ public class LIRGenerator
     }
 
     public LIRTempValue EmitAdd(LIRValue left, LIRValue right) => Emit(LIROpCode.Add, left.Type, left, right);
-    public LIRTempValue EmitLoad(LIRValue value) => Emit(LIROpCode.Load, value.Type, value);
+
+    public LIRTempValue EmitLoad(LIRValue pointer)
+    {
+        var pointeeType = ((LIRPointerType)pointer.Type).PointeeType;
+        return Emit(LIROpCode.Load, pointeeType, pointer);
+    }
+
     public void EmitStore(LIRValue value, LIRValue address) => Emit(LIROpCode.Store, null, value, address);
     public LIRTempValue EmitAlloca(LIRType type) => Emit(LIROpCode.Alloca, new LIRPointerType(type));
     public LIRTempValue EmitCall(LIRFunction function, params LIRValue[] arguments)

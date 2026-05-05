@@ -21,6 +21,13 @@ internal class StatementGenerator
         this.context = context;
         this.unit = unit;
         this.function = function;
+
+        foreach (var (param, value) in function.Type.Parameters.Zip(function.ParameterValues))
+        {
+            var address = Generator.EmitAlloca(param.Type);
+            Generator.EmitStore(value, address);
+            locals[param.Name] = address;
+        }
     }
 
     private LIRValue ExpressionGenerator(ExpressionNode node) => new ExpressionGenerator(context, unit, function, locals).Emit(node);

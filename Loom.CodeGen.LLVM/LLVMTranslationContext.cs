@@ -43,6 +43,6 @@ internal class LLVMTranslationContext
             if (FunctionMap.TryGetValue(funcValue, out var llvmFunc))
                 return llvmFunc;
 
-        throw new InvalidOperationException("Could not resolve value.");
+        throw new InvalidOperationException("Could not resolve value");
     }
 }
