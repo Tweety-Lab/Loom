@@ -32,6 +32,13 @@ internal class LLVMTranslationContext
             return llvmVal;
         }
 
+        if (value is LIRConstantBoolValue boolConst)
+        {
+            var llvmVal = LLVMValueRef.CreateConstInt(TypeMap[boolConst.Type], boolConst.Value ? 1UL : 0UL);
+            ValueMap[value] = llvmVal;
+            return llvmVal;
+        }
+
         if (value is LIRFunction funcValue)
             if (FunctionMap.TryGetValue(funcValue, out var llvmFunc))
                 return llvmFunc;

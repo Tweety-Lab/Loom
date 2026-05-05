@@ -32,6 +32,7 @@ internal class ExpressionGenerator
     {
         NumberLiteralNode num => new LIRConstantIntValue(int.Parse(num.Value)),
         IdentifierNameNode ident => Generator.EmitLoad(locals[ident.BaseName]),
+        BooleanLiteralNode boolean => new LIRConstantBoolValue(bool.Parse(boolean.Value)),
         BinaryExpressionNode binary => EmitBinary(binary),
         CallExpressionNode call => EmitCall(call),
         _ => throw new Exception($"Unhandled expression: {node.GetType().Name}")

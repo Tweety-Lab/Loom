@@ -26,6 +26,11 @@ module Consumer
         return 1 + 1;
     }
 
+    bool Test()
+    {
+        return false;
+    }
+
 }
 ";
 
