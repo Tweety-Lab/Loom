@@ -31,7 +31,7 @@ public class StatementRule : ParserRule<StatementNode>
         {
             TokenType.Return => RunRule<ReturnStatementRule, ReturnStatementNode>(),
 
-            _ when isBuiltInType && next == TokenType.Identifier=> RunRule<VariableDeclarationRule, VariableDeclarationNode>(),
+            _ when isBuiltInType && next == TokenType.Identifier => RunRule<VariableDeclarationRule, VariableDeclarationNode>(),
 
             TokenType.Identifier when next == TokenType.Equals => RunRule<AssignmentStatementRule, AssignmentStatementNode>(),
 

@@ -80,6 +80,7 @@ internal class StringPrinterStyle : ILIRPrinterStyle
             LIRConstantIntValue c => $"{c.Value}",
             LIRConstantBoolValue c => c.Value ? "true" : "false",
             LIRTempValue t => $"%{t.ID}",
+            LIRFunction f => $"@{f.Name}",
             null => "%null",
             _ => $"%unknown:{value.Type}"
         };

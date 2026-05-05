@@ -32,6 +32,10 @@ internal class LLVMTranslationContext
             return llvmVal;
         }
 
+        if (value is LIRFunction funcValue)
+            if (FunctionMap.TryGetValue(funcValue, out var llvmFunc))
+                return llvmFunc;
+
         throw new InvalidOperationException("Could not resolve value.");
     }
 }

@@ -4,13 +4,14 @@ using Loom.Common;
 using Loom.LIR.Objects;
 using Loom.Parser.AST;
 using Loom.Parser.Rules.Default;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Loom.LIR.Generation;
 
 /// <summary>
 /// Converts an Abstract Syntax Tree (AST) into Loom Intermediate Representation (LIR).
 /// </summary>
-public class ASTGenerator : ASTWalker
+public class ASTGenerator
 {
     private LIRCompilationUnit unit = null!;
     private CompilationContext context;
@@ -24,12 +25,23 @@ public class ASTGenerator : ASTWalker
     public LIRCompilationUnit Generate(ProgramNode root)
     {
         unit = new LIRCompilationUnit("Test");
-        Dispatch(root);
+
+        // Declare methods
+        foreach (var module in root.Modules)
+            foreach (var content in module.Body.Contents)
+                if (content is MethodDeclarationNode method)
+                    GenerateMethodDeclaration(method);
+
+        // Define method bodies
+        foreach (var module in root.Modules)
+            foreach (var content in module.Body.Contents)
+                if (content is MethodDeclarationNode method)
+                    GenerateMethodBody(method);
+
         return unit;
     }
 
-    [Visitor]
-    public void VisitMethodDefinition(MethodDeclarationNode node)
+    public void GenerateMethodDeclaration(MethodDeclarationNode node)
     {
         MethodDefinitionSymbol? symbol = (MethodDefinitionSymbol?)context.AnalysisContext.GetSymbol(node).Symbol;
 
@@ -39,13 +51,27 @@ public class ASTGenerator : ASTWalker
             return;
         }
 
-        LIRParameter[] parameters = new LIRParameter[symbol.Parameters.Count];
-        for (int i = 0; i < parameters.Length; i++)
-            parameters[i] = new LIRParameter(symbol.Parameters[i].Name, ConvertType(symbol.Parameters[i].Type));
+        LIRParameter[] parameters = symbol.Parameters.Select(p => new LIRParameter(p.Name, ConvertType(p.Type))).ToArray();
 
         LIRFunction func = unit.DefineFunction(symbol.FullyQualifiedName, new LIRFunctionType(ConvertType(symbol.ReturnType), parameters));
+    }
 
-        func.LIRGenerator.EmitReturn();
+    public void GenerateMethodBody(MethodDeclarationNode node)
+    {
+        MethodDefinitionSymbol? symbol = (MethodDefinitionSymbol?)context.AnalysisContext.GetSymbol(node).Symbol;
+
+        if (symbol == null)
+        {
+            Console.WriteLine($"Could not find symbol for {node.MethodName}!");
+            return;
+        }
+
+        LIRFunction func = unit.GetFunction(symbol.FullyQualifiedName) ?? throw new Exception($"Could not find function {symbol.FullyQualifiedName}!");
+        StatementGenerator statementGen = new StatementGenerator(context, unit, func);
+
+        foreach (var content in node.Body.Contents)
+            if (content is StatementNode statementNode)
+                statementGen.EmitStatement(statementNode);
     }
     
     public LIRType ConvertType(TypeSymbol type) => type.KnownType switch
