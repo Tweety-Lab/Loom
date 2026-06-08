@@ -72,7 +72,7 @@ module MyModule
 The Loom Compiler works via a Linear Pipeline system where each step in the pipeline mutates a compilation context using data provided by the previous steps.
 
 ### Loom.Parser
-The first step is the Parser which takes raw source code, tokenizes it, and converts it into an in-memory [Abstract Syntax Tree](https://en.wikipedia.org/wiki/Abstract_syntax_tree) (AST). The Loom parser uses modular 'Rules` to determine how to parse tokens and syntax.
+The first step is the Parser which takes raw source code, tokenizes it, and converts it into an in-memory [Abstract Syntax Tree](https://en.wikipedia.org/wiki/Abstract_syntax_tree) (AST). The Loom parser uses modular 'Rules' to determine how to parse tokens and syntax.
 ```csharp
 public record ReturnStatementNode(ExpressionNode? Expression = null) : StatementNode
 {
