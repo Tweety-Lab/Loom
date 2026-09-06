@@ -81,4 +81,21 @@ public class LIRGenerator
         var returnType = function.Type.ReturnType;
         return returnType == LIRType.Void ? null : Emit(LIROpCode.Call, returnType, operands);
     }
+
+    public LIRBasicBlock CreateBlock(string name)
+    {
+        var block = new LIRBasicBlock(name, function);
+        function.Blocks.Add(block);
+        return block;
+    }
+
+    public void SwitchTo(LIRBasicBlock block) => WritingBlock = block;
+
+    public LIRTempValue EmitCmpEq(LIRValue left, LIRValue right) => Emit(LIROpCode.CmpEq, LIRType.Boolean, left, right);
+
+    public void EmitCondBr(LIRValue condition, LIRBasicBlock trueTarget, LIRBasicBlock falseTarget) =>
+        Emit(LIROpCode.CondBr, null, condition, new LIRBlockValue(trueTarget), new LIRBlockValue(falseTarget));
+
+    public void EmitBr(LIRBasicBlock target) =>
+        Emit(LIROpCode.Br, null, new LIRBlockValue(target));
 }

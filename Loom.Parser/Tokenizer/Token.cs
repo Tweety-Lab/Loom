@@ -82,9 +82,12 @@ public class Token
         [Keyword("unsafe")] Unsafe,
 
         [Keyword("export"), Modifier] Export,
+        [Keyword("extern"), Modifier] Extern,
 
         [Keyword("true")] True,
         [Keyword("false")] False,
+
+        [Keyword("if")] If,
 
         [Keyword("return")] Return,
 

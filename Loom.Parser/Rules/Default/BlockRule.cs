@@ -53,6 +53,7 @@ public class MethodBlockRule : ParserRule<BlockNode>
         var dispatch = new Dictionary<TokenType, Action>
         {
             [TokenType.Unsafe] = () => body.Add(RunRule<UnsafeRule, UnsafeNode>()),
+            [TokenType.If] = () => body.Add(RunRule<ConditionalRule, ConditionalNode>()),
         };
 
         ParseUntil(TokenType.RBrace, dispatch, () => body.Add(RunRule<StatementRule, StatementNode>()));

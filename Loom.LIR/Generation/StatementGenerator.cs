@@ -40,6 +40,7 @@ internal class StatementGenerator
             case ReturnStatementNode ret: EmitReturn(ret); break;
             case VariableDeclarationNode decl: EmitVariableDeclaration(decl); break;
             case AssignmentStatementNode assign: EmitAssignment(assign); break;
+            case ConditionalNode conditional: EmitConditional(conditional); break;
         }
     }
 
@@ -69,5 +70,23 @@ internal class StatementGenerator
             throw new Exception($"Undeclared variable: {symbol.Name}");
 
         Generator.EmitStore(ExpressionGenerator(node.Value), address);
+    }
+
+    private void EmitConditional(ConditionalNode node)
+    {
+        var condition = ExpressionGenerator(node.Expression);
+        var thenBlock = Generator.CreateBlock("if.then");
+        var continueBlock = Generator.CreateBlock("if.continue");
+
+        Generator.EmitCondBr(condition, thenBlock, continueBlock);
+
+        Generator.SwitchTo(thenBlock);
+        foreach (var content in node.Body.Contents)
+            if (content is StatementNode statementNode)
+                EmitStatement(statementNode);
+
+        Generator.EmitBr(continueBlock);
+
+        Generator.SwitchTo(continueBlock);
     }
 }

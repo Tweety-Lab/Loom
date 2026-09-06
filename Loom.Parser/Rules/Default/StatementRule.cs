@@ -30,6 +30,7 @@ public class StatementRule : ParserRule<StatementNode>
         var statement = (StatementNode)(current switch
         {
             TokenType.Return => RunRule<ReturnStatementRule, ReturnStatementNode>(),
+            TokenType.If => RunRule<ConditionalRule, ConditionalNode>(),
 
             _ when isBuiltInType && next == TokenType.Identifier => RunRule<VariableDeclarationRule, VariableDeclarationNode>(),
 
@@ -38,7 +39,8 @@ public class StatementRule : ParserRule<StatementNode>
             _ => new ExpressionStatementNode(RunRule<ExpressionRule, ExpressionNode>())
         });
 
-        Parser.Reader.Expect(TokenType.Semicolon); // ;
+        if (current != TokenType.If)
+            Parser.Reader.Expect(TokenType.Semicolon); // ;
         return statement;
     }
 }

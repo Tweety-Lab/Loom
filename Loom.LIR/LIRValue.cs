@@ -44,3 +44,14 @@ public class LIRConstantBoolValue : LIRValue
     /// <summary> Initializes a new instance of the <see cref="LIRConstantBoolValue"/> class. </summary>
     public LIRConstantBoolValue(bool value) => Value = value;
 }
+
+public class LIRBlockValue : LIRValue
+{
+    public LIRBasicBlock Block { get; }
+
+    /// <inheritdoc/>
+    public override LIRType Type => LIRType.Void;
+
+    /// <summary> Initializes a new instance of the <see cref="LIRBlockValue"/> class. </summary>
+    public LIRBlockValue(LIRBasicBlock block) => Block = block;
+}

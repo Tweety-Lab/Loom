@@ -44,6 +44,11 @@ public readonly struct LIROpCode : IEquatable<LIROpCode>
 
     public static readonly LIROpCode Return = new LIROpCode("return", CodeType.Control, false);
 
+    public static readonly LIROpCode Br = new LIROpCode("br", CodeType.Control, false);
+    public static readonly LIROpCode CondBr = new LIROpCode("condbr", CodeType.Control, false);
+
+    public static readonly LIROpCode CmpEq = new LIROpCode("cmpeq", CodeType.Arithmetic, true);
+
     public static readonly LIROpCode Call = new LIROpCode("call", CodeType.Call, true);
 
     #endregion
