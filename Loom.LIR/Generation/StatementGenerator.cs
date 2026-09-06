@@ -13,7 +13,7 @@ internal class StatementGenerator
     private LIRFunction function;
     private Dictionary<string, LIRTempValue> locals = new();
 
-    protected LIRGenerator Generator => function.LIRGenerator;
+    protected LIRGenerator Generator => function.LIRGenerator!;
 
     /// <summary> Initializes a new instance of the <see cref="StatementGenerator"/> class. </summary>
     public StatementGenerator(CompilationContext context, LIRCompilationUnit unit, LIRFunction function)
@@ -41,7 +41,13 @@ internal class StatementGenerator
             case VariableDeclarationNode decl: EmitVariableDeclaration(decl); break;
             case AssignmentStatementNode assign: EmitAssignment(assign); break;
             case ConditionalNode conditional: EmitConditional(conditional); break;
+            case ExpressionStatementNode expression: EmitExpressionStatement(expression); break;
         }
+    }
+
+    private void EmitExpressionStatement(ExpressionStatementNode node)
+    {
+        ExpressionGenerator(node.Expression);
     }
 
     private void EmitVariableDeclaration(VariableDeclarationNode node)

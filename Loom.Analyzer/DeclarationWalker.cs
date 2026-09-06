@@ -44,7 +44,12 @@ internal class DeclarationWalker : ASTVisitor
         List<ParameterSymbol> parameters = new List<ParameterSymbol>();
 
         var symbol = new MethodDefinitionSymbol(node.MethodName.Text, returnType, parameters);
-        symbol.FullyQualifiedName = BuildQualifiedName(node.MethodName.Text);
+
+        if (node.Modifiers.Any(m => m.Type == Parser.Tokenizer.Token.TokenType.Extern))
+            symbol.FullyQualifiedName = node.MethodName.Text;
+        else
+            symbol.FullyQualifiedName = BuildQualifiedName(node.MethodName.Text);
+
         CurrentTable.Define(symbol);
 
         WithScope(node, () =>

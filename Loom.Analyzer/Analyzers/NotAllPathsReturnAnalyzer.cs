@@ -15,6 +15,9 @@ public class NotAllPathsReturnAnalyzer : Analyzer
     [Visitor]
     public void Visit(MethodDeclarationNode node)
     {
+        if (node.Modifiers.Any(m => m.Type == Parser.Tokenizer.Token.TokenType.Extern))
+            return;
+
         if (node.ReturnType.Type == Parser.Tokenizer.Token.TokenType.Void)
             return;
 

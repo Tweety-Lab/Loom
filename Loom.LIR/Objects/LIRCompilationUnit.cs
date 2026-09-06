@@ -20,7 +20,15 @@ public class LIRCompilationUnit : ILIRObject
     /// <summary> Defines a new function inside this <see cref="LIRCompilationUnit"/>. </summary>
     public LIRFunction DefineFunction(string name, LIRFunctionType type)
     {
-        var function = new LIRFunction(name, type);
+        var function = LIRFunction.Define(name, type);
+        Functions.Add(function);
+        return function;
+    }
+
+    /// <summary> Declares a new function (no body) inside this <see cref="LIRCompilationUnit"/>. </summary>
+    public LIRFunction DeclareFunction(string name, LIRFunctionType type)
+    {
+        var function = LIRFunction.Declare(name, type);
         Functions.Add(function);
         return function;
     }

@@ -19,7 +19,8 @@ internal class StringPrinterStyle : ILIRPrinterStyle
     {
         var sig = f.Type;
         var parameters = string.Join(", ", sig.Parameters.Select(p => $"{PrintType(p.Type)} %{p.Name}"));
-        return $"define {f.Name}({parameters}) -> {PrintType(sig.ReturnType)} {{";
+        var keyword = f.IsDeclaration ? "declare" : "define";
+        return $"{keyword} {f.Name}({parameters}) -> {PrintType(sig.ReturnType)}";
     }
 
     /// <inheritdoc/>
@@ -81,6 +82,7 @@ internal class StringPrinterStyle : ILIRPrinterStyle
             LIRConstantBoolValue c => c.Value ? "true" : "false",
             LIRTempValue t => $"%{t.ID}",
             LIRFunction f => $"@{f.Name}",
+            LIRBlockValue b => $"%{b.Block.Name}",
             null => "%null",
             _ => $"%unknown:{value.Type}"
         };

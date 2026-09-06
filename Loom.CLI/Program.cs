@@ -14,15 +14,16 @@ public class Program
     public const string TEST_SOURCE = @"
 module Consumer
 {   
-    export extern void Sleep(i32 ms);
+    export extern void Sleep(i32 length);
 
     // Entry Point
     export i32 Main()
     {
+        Sleep(1000);
+
         i32 result = Add(2, 4);
         if (true)
         {
-            Sleep(100);
             result = 20;
         }
 

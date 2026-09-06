@@ -35,10 +35,13 @@ public class LIRPrinter
 
         sb.AppendLine(Style.PrintFunctionHeader(function));
 
-        foreach (var block in function.Blocks)
-            sb.AppendLine(PrintBlock(block));
+        if (!function.IsDeclaration)
+        {
+            foreach (var block in function.Blocks)
+                sb.AppendLine(PrintBlock(block));
 
-        sb.AppendLine(Style.PrintFunctionFooter());
+            sb.AppendLine(Style.PrintFunctionFooter());
+        }
 
         return sb.ToString();
     }

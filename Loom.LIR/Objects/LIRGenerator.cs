@@ -79,7 +79,14 @@ public class LIRGenerator
     {
         LIRValue[] operands = [function, .. arguments];
         var returnType = function.Type.ReturnType;
-        return returnType == LIRType.Void ? null : Emit(LIROpCode.Call, returnType, operands);
+
+        if (returnType == LIRType.Void)
+        {
+            WritingBlock.Emit(new LIRInstruction(LIROpCode.Call, operands.ToList()));
+            return null;
+        }
+
+        return Emit(LIROpCode.Call, returnType, operands);
     }
 
     public LIRBasicBlock CreateBlock(string name)

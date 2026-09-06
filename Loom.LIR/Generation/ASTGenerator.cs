@@ -50,8 +50,14 @@ public class ASTGenerator
         }
 
         LIRParameter[] parameters = symbol.Parameters.Select(p => new LIRParameter(p.Name, ConvertType(p.Type))).ToArray();
+        var funcType = new LIRFunctionType(ConvertType(symbol.ReturnType), parameters);
 
-        LIRFunction func = unit.DefineFunction(symbol.FullyQualifiedName, new LIRFunctionType(ConvertType(symbol.ReturnType), parameters));
+        bool isExtern = node.Modifiers.Any(m => m.Type == Parser.Tokenizer.Token.TokenType.Extern);
+
+        if (isExtern)
+            unit.DeclareFunction(symbol.FullyQualifiedName, funcType);
+        else
+            unit.DefineFunction(symbol.FullyQualifiedName, funcType);
     }
 
     public void GenerateMethodBody(MethodDeclarationNode node)
@@ -63,6 +69,10 @@ public class ASTGenerator
             Console.WriteLine($"Could not find symbol for {node.MethodName}!");
             return;
         }
+
+        // Skip body generation for extern declarations, so they stay link-time declarations rather than empty definitions.
+        if (node.Modifiers.Any(m => m.Type == Parser.Tokenizer.Token.TokenType.Extern))
+            return;
 
         LIRFunction func = unit.GetFunction(symbol.FullyQualifiedName) ?? throw new Exception($"Could not find function {symbol.FullyQualifiedName}!");
         StatementGenerator statementGen = new StatementGenerator(context, unit, func);

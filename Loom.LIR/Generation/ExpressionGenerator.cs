@@ -17,7 +17,7 @@ internal class ExpressionGenerator
     private LIRFunction function;
     private Dictionary<string, LIRTempValue> locals;
 
-    private LIRGenerator Generator => function.LIRGenerator;
+    private LIRGenerator Generator => function.LIRGenerator!;
 
     /// <summary> Initializes a new instance of the <see cref="ExpressionGenerator"/> class. </summary>
     public ExpressionGenerator(CompilationContext context, LIRCompilationUnit unit, LIRFunction function, Dictionary<string, LIRTempValue> locals)
