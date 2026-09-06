@@ -22,6 +22,7 @@ module Consumer
         i32 result = Add(2, 4);
         if (true)
         {
+            Sleep(100);
             result = 20;
         }
 

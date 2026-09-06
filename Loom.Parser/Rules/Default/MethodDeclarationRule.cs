@@ -48,6 +48,17 @@ public class MethodDeclarationRule : ParserRule<MethodDeclarationNode>
 
         Parser.Reader.Expect(TokenType.RParen); // )
 
-        return new MethodDeclarationNode(returnType, methodName, parameters, Parser.GetRule<MethodBlockRule>().ParseNode(), modifiers);
+        
+        bool needsBody = true;
+        if (modifiers.Any(m => m.Type == TokenType.Extern))
+            needsBody = false;
+
+        BlockNode body = new BlockNode(new List<ASTNode>());
+        if (needsBody)
+            body = Parser.GetRule<MethodBlockRule>().ParseNode();
+        else
+            Parser.Reader.Expect(TokenType.Semicolon); // ;
+
+        return new MethodDeclarationNode(returnType, methodName, parameters, body, modifiers);
     }
 }
