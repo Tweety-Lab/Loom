@@ -6,7 +6,7 @@ Loom is an object-oriented systems programming language that combines the contro
 ```Loom
 module MyModule
 {
-    // Classes are reference types that are allocated on the heap and are interacted with via the Loom smart pointer memory model
+    // Classes are reference types that are typically allocated on the heap and are interacted with via the Loom smart pointer memory model
     export class MyClass
     {
         // Properties are wrappers for fields that run custom logic when getting or setting.
@@ -18,7 +18,7 @@ module MyModule
         }
     }
 
-    // Structs are value types that are allocated on the stack and reconstructed between scopes
+    // Structs are value types that are typically allocated on the stack and reconstructed between scopes
     export struct MyStruct
     {
         public i32 Value { get; set; }
