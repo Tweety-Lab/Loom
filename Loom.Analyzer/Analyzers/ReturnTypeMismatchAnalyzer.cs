@@ -25,7 +25,7 @@ public class ReturnTypeMismatchAnalyzer : Analyzer
 
         var methodSymbol = Context.FirstAncestorOrSelf<ModuleNode>(method) is { } module ? Context.GetSymbol(method).Symbol as MethodDefinitionSymbol : null;
 
-        if (methodSymbol == null)
+        if (methodSymbol == null || methodSymbol.ReturnType == null)
             return;
 
         var isVoid = methodSymbol.ReturnType.KnownType == TypeSymbol.DefaultType.Void;
