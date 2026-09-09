@@ -39,6 +39,18 @@ public sealed class CharacterAttribute : Attribute
     public CharacterAttribute(char character) => Character = character;
 }
 
+/// <summary>
+/// Marks a <see cref="Token.TokenType"/> as multiple characters.
+/// </summary>
+public sealed class MultiCharacterAttribute : Attribute
+{
+    /// <summary> The associated characters. </summary>
+    public char[] Characters { get; }
+
+    /// <summary> Initializes a new instance of the <see cref="MultiCharacterAttribute"/> class. </summary>
+    public MultiCharacterAttribute(params char[] characters) => Characters = characters;
+}
+
 public readonly struct TokenLocation
 {
     public int Line { get; }
@@ -78,10 +90,10 @@ public class Token
         [Character('<')] Less,
         [Character('>')] Greater,
 
-        EqualEqual,
-        NotEqual,
-        LessEqual,
-        GreaterEqual,
+        [MultiCharacter('=', '=')] EqualEqual,
+        [MultiCharacter('!', '=')] NotEqual,
+        [MultiCharacter('<', '=')] LessEqual,
+        [MultiCharacter('>', '=')] GreaterEqual,
 
         [Character(',')] Comma,
         [Character(';')] Semicolon,

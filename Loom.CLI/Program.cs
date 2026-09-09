@@ -12,10 +12,10 @@ namespace Loom.CLI;
 public class Program
 {
     public const string TEST_SOURCE = @"
+import Windows;
+
 module Consumer
 {   
-    export extern void Sleep(i32 length);
-
     // Entry Point
     export i32 Main()
     {
@@ -34,6 +34,11 @@ module Consumer
     {
         return a + b;
     }
+}
+
+module Windows
+{
+    export extern void Sleep(i32 length);
 }
 ";
 
