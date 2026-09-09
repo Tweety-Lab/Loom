@@ -30,7 +30,7 @@ public class ExpressionRule : ParserRule<ExpressionNode>
     public ExpressionRule(LoomParser parser) : base(parser) { }
 
     /// <inheritdoc/>
-    public override ExpressionNode ParseNode() => RunRule<AdditiveExpressionRule, ExpressionNode>();
+    public override ExpressionNode ParseNode() => RunRule<EqualityExpressionRule, ExpressionNode>();
 }
 
 [ParserRule]

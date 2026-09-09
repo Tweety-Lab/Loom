@@ -22,7 +22,7 @@ public class AdditiveExpressionRule : ParserRule<ExpressionNode>
     {
         var left = RunRule<MultiplicativeExpressionRule, ExpressionNode>();
 
-        while (Parser.Reader.Current.Type is TokenType.Plus)
+        while (Parser.Reader.Current.Type is TokenType.Plus or TokenType.Minus)
         {
             var op = Parser.Reader.Advance();
             var right = RunRule<MultiplicativeExpressionRule, ExpressionNode>();

@@ -66,6 +66,9 @@ public class LIRGenerator
     }
 
     public LIRTempValue EmitAdd(LIRValue left, LIRValue right) => Emit(LIROpCode.Add, left.Type, left, right);
+    public LIRTempValue EmitSub(LIRValue left, LIRValue right) => Emit(LIROpCode.Sub, left.Type, left, right);
+    public LIRTempValue EmitMul(LIRValue left, LIRValue right) => Emit(LIROpCode.Mul, left.Type, left, right);
+    public LIRTempValue EmitDiv(LIRValue left, LIRValue right) => Emit(LIROpCode.Div, left.Type, left, right);
 
     public LIRTempValue EmitLoad(LIRValue pointer)
     {
@@ -99,6 +102,11 @@ public class LIRGenerator
     public void SwitchTo(LIRBasicBlock block) => WritingBlock = block;
 
     public LIRTempValue EmitCmpEq(LIRValue left, LIRValue right) => Emit(LIROpCode.CmpEq, LIRType.Boolean, left, right);
+    public LIRTempValue EmitCmpNe(LIRValue left, LIRValue right) => Emit(LIROpCode.CmpNe, LIRType.Boolean, left, right);
+    public LIRTempValue EmitCmpLt(LIRValue left, LIRValue right) => Emit(LIROpCode.CmpLt, LIRType.Boolean, left, right);
+    public LIRTempValue EmitCmpGt(LIRValue left, LIRValue right) => Emit(LIROpCode.CmpGt, LIRType.Boolean, left, right);
+    public LIRTempValue EmitCmpLe(LIRValue left, LIRValue right) => Emit(LIROpCode.CmpLe, LIRType.Boolean, left, right);
+    public LIRTempValue EmitCmpGe(LIRValue left, LIRValue right) => Emit(LIROpCode.CmpGe, LIRType.Boolean, left, right);
 
     public void EmitCondBr(LIRValue condition, LIRBasicBlock trueTarget, LIRBasicBlock falseTarget) =>
         Emit(LIROpCode.CondBr, null, condition, new LIRBlockValue(trueTarget), new LIRBlockValue(falseTarget));

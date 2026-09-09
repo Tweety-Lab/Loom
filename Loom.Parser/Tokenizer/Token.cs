@@ -74,6 +74,15 @@ public class Token
         [Character('*')] Star,
         [Character('/')] Slash,
 
+        [Character('!')] Exclamation,
+        [Character('<')] Less,
+        [Character('>')] Greater,
+
+        EqualEqual,
+        NotEqual,
+        LessEqual,
+        GreaterEqual,
+
         [Character(',')] Comma,
         [Character(';')] Semicolon,
 

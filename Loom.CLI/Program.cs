@@ -22,7 +22,7 @@ module Consumer
         Sleep(1000);
 
         i32 result = Add(2, 4);
-        if (true)
+        if (result == 2 + 4)
         {
             result = 20;
         }

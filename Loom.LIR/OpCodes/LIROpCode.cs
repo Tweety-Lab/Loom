@@ -48,6 +48,11 @@ public readonly struct LIROpCode : IEquatable<LIROpCode>
     public static readonly LIROpCode CondBr = new LIROpCode("condbr", CodeType.Control, false);
 
     public static readonly LIROpCode CmpEq = new LIROpCode("cmpeq", CodeType.Arithmetic, true);
+    public static readonly LIROpCode CmpNe = new LIROpCode("cmpne", CodeType.Arithmetic, true);
+    public static readonly LIROpCode CmpLt = new LIROpCode("cmplt", CodeType.Arithmetic, true);
+    public static readonly LIROpCode CmpGt = new LIROpCode("cmpgt", CodeType.Arithmetic, true);
+    public static readonly LIROpCode CmpLe = new LIROpCode("cmple", CodeType.Arithmetic, true);
+    public static readonly LIROpCode CmpGe = new LIROpCode("cmpge", CodeType.Arithmetic, true);
 
     public static readonly LIROpCode Call = new LIROpCode("call", CodeType.Call, true);
 

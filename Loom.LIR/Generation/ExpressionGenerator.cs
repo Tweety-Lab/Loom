@@ -46,6 +46,15 @@ internal class ExpressionGenerator
         return node.Operator.Type switch
         {
             Parser.Tokenizer.Token.TokenType.Plus => Generator.EmitAdd(left, right),
+            Parser.Tokenizer.Token.TokenType.Minus => Generator.EmitSub(left, right),
+            Parser.Tokenizer.Token.TokenType.Star => Generator.EmitMul(left, right),
+            Parser.Tokenizer.Token.TokenType.Slash => Generator.EmitDiv(left, right),
+            Parser.Tokenizer.Token.TokenType.EqualEqual => Generator.EmitCmpEq(left, right),
+            Parser.Tokenizer.Token.TokenType.NotEqual => Generator.EmitCmpNe(left, right),
+            Parser.Tokenizer.Token.TokenType.Less => Generator.EmitCmpLt(left, right),
+            Parser.Tokenizer.Token.TokenType.Greater => Generator.EmitCmpGt(left, right),
+            Parser.Tokenizer.Token.TokenType.LessEqual => Generator.EmitCmpLe(left, right),
+            Parser.Tokenizer.Token.TokenType.GreaterEqual => Generator.EmitCmpGe(left, right),
             _ => throw new Exception($"Unhandled operator: {node.Operator.Text}")
         };
     }

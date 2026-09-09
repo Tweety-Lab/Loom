@@ -144,6 +144,42 @@ module Test
 }
 ";
 
+    public const string EQUALITY_EXPRESSION_SOURCE = @"
+module Test
+{
+    bool MyMethod()
+    {
+        return 1 == 2;
+    }
+}
+";
+
+    public const string RELATIONAL_EXPRESSION_SOURCE = @"
+module Test
+{
+    bool MyMethod()
+    {
+        return 1 < 2;
+    }
+}
+";
+
+    public const string CONDITIONAL_COMPARISON_SOURCE = @"
+module Test
+{
+    i32 MyMethod()
+    {
+        i32 x = 1;
+        if (x == 1)
+        {
+            return 10;
+        }
+
+        return 0;
+    }
+}
+";
+
     private (ProgramNode root, CompilationContext context) ParseAndAnalyze(string source = TEST_SOURCE)
     {
         CompilationContext context = new CompilationContext();
@@ -420,5 +456,45 @@ module Test
         var symbol = context.AnalysisContext.GetSymbol(left).Symbol;
         Assert.IsType<LocalVariableSymbol>(symbol);
         Assert.Equal("x", ((LocalVariableSymbol)symbol).Name);
+    }
+
+    [Fact]
+    public void Parse_BinaryExpression_Equality()
+    {
+        var (root, _) = ParseAndAnalyze(EQUALITY_EXPRESSION_SOURCE);
+        var method = (MethodDeclarationNode)root.Modules[0].Body.Contents.First();
+        var returnStatement = (ReturnStatementNode)method.Body.Contents.First();
+
+        var binary = Assert.IsType<BinaryExpressionNode>(returnStatement.Expression);
+        Assert.Equal(Token.TokenType.EqualEqual, binary.Operator.Type);
+    }
+
+    [Fact]
+    public void Parse_BinaryExpression_Relational()
+    {
+        var (root, _) = ParseAndAnalyze(RELATIONAL_EXPRESSION_SOURCE);
+        var method = (MethodDeclarationNode)root.Modules[0].Body.Contents.First();
+        var returnStatement = (ReturnStatementNode)method.Body.Contents.First();
+
+        var binary = Assert.IsType<BinaryExpressionNode>(returnStatement.Expression);
+        Assert.Equal(Token.TokenType.Less, binary.Operator.Type);
+    }
+
+    [Fact]
+    public void Parse_Conditional_WithComparison()
+    {
+        var (root, _) = ParseAndAnalyze(CONDITIONAL_COMPARISON_SOURCE);
+        var method = (MethodDeclarationNode)root.Modules[0].Body.Contents.First();
+        var conditional = Assert.IsType<ConditionalNode>(method.Body.Contents[1]);
+
+        var binary = Assert.IsType<BinaryExpressionNode>(conditional.Expression);
+        Assert.Equal(Token.TokenType.EqualEqual, binary.Operator.Type);
+    }
+
+    [Fact]
+    public void Analyze_Conditional_WithComparison_DoesNotThrow()
+    {
+        var (_, context) = ParseAndAnalyze(CONDITIONAL_COMPARISON_SOURCE);
+        Assert.DoesNotContain(context.DiagnosticContext.Diagnostics, d => d.Level == Diagnostic.DiagnosticLevel.Error);
     }
 }
