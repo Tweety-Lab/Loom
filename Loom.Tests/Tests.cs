@@ -180,6 +180,28 @@ module Test
 }
 ";
 
+    public const string IPTR_RETURN_SOURCE = @"
+module Test
+{
+    export iptr MyMethod()
+    {
+        return 0;
+    }
+}
+";
+
+    public const string IPTR_USAGE_SOURCE = @"
+module Test
+{
+    export iptr MyMethod()
+    {
+        return GetPointer(100);
+    }
+
+    export extern iptr GetPointer(i32 size);
+}
+";
+
     private (ProgramNode root, CompilationContext context) ParseAndAnalyze(string source = TEST_SOURCE)
     {
         CompilationContext context = new CompilationContext();
@@ -495,6 +517,30 @@ module Test
     public void Analyze_Conditional_WithComparison_DoesNotThrow()
     {
         var (_, context) = ParseAndAnalyze(CONDITIONAL_COMPARISON_SOURCE);
+        Assert.DoesNotContain(context.DiagnosticContext.Diagnostics, d => d.Level == Diagnostic.DiagnosticLevel.Error);
+    }
+
+    [Fact]
+    public void Analyze_IPtrMethodBoundToIPtrType()
+    {
+        var (root, context) = ParseAndAnalyze(IPTR_RETURN_SOURCE);
+        var method = (MethodDeclarationNode)root.Modules[0].Body.Contents.First();
+        var symbol = context.AnalysisContext.GetSymbol(method).Symbol as MethodDefinitionSymbol;
+        Assert.Equal(TypeSymbol.DefaultType.IPtr, symbol!.ReturnType.KnownType);
+        Assert.Equal("iptr", symbol.ReturnType.Name);
+    }
+
+    [Fact]
+    public void Analyze_ReturningI32LiteralFromIPtrMethod_ReportsTypeMismatch()
+    {
+        var (_, context) = ParseAndAnalyze(IPTR_RETURN_SOURCE);
+        Assert.Contains(context.DiagnosticContext.Diagnostics, d => d.Level == Diagnostic.DiagnosticLevel.Error);
+    }
+
+    [Fact]
+    public void Analyze_IPtrValueFlowThroughCall_NoDiagnostics()
+    {
+        var (_, context) = ParseAndAnalyze(IPTR_USAGE_SOURCE);
         Assert.DoesNotContain(context.DiagnosticContext.Diagnostics, d => d.Level == Diagnostic.DiagnosticLevel.Error);
     }
 }

@@ -66,6 +66,10 @@ internal class ExpressionGenerator
             throw new Exception($"Could not resolve call: {node.MethodName.Token.Text}");
 
         var target = unit.GetFunction(symbol.FullyQualifiedName);
+        if (target == null)
+            throw new Exception($"Could not find function: {symbol.FullyQualifiedName}");
+
+
         var args = node.Arguments.Select(Emit).ToArray();
         return Generator.EmitCall(target, args);
     }

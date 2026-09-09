@@ -10,6 +10,7 @@ public record TypeSymbol(string Name, TypeSymbol.DefaultType KnownType) : Symbol
         Func,
         Void,
         I32,
+        IPtr,
         Bool
     }
 }

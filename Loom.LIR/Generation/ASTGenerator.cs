@@ -87,6 +87,7 @@ public class ASTGenerator
         TypeSymbol.DefaultType.Void => LIRType.Void,
         TypeSymbol.DefaultType.Bool => LIRType.Boolean,
         TypeSymbol.DefaultType.I32 => LIRType.Int32,
-        _ => LIRType.Int32, // Hack
+        TypeSymbol.DefaultType.IPtr => LIRType.IntPtr,
+        _ => LIRType.Void,
     };
 }

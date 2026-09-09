@@ -27,6 +27,7 @@ module Consumer
             result = 20;
         }
 
+        iptr processID = GetCurrentProcess();
         return result;
     }
 
@@ -39,6 +40,7 @@ module Consumer
 module Windows
 {
     export extern void Sleep(i32 length);
+    export extern iptr GetCurrentProcess();
 }
 ";
 

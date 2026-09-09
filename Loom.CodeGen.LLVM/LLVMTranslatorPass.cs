@@ -24,6 +24,7 @@ public class LLVMTranslatorPass : LIRTranslatorPass<LLVMModuleRef>
                 [LIRType.Void] = LLVMTypeRef.Void,
                 [LIRType.Int32] = LLVMTypeRef.Int32,
                 [LIRType.Boolean] = LLVMTypeRef.Int1,
+                [LIRType.IntPtr] = LLVMTypeRef.CreateIntPtr(LLVMTargetDataRef.FromStringRepresentation($"p:{System.IntPtr.Size * 8}:{System.IntPtr.Size * 8}:{System.IntPtr.Size * 8}")),
             },
 
             Context = llvmContext,

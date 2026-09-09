@@ -114,6 +114,7 @@ public class Token
 
         [Keyword("void"), Type] Void,
         [Keyword("i32"), Type] I32,
+        [Keyword("iptr"), Type] IPtr,
         [Keyword("bool"), Type] Bool,
 
         EOF

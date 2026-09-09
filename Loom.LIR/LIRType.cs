@@ -4,6 +4,7 @@ namespace Loom.LIR;
 public abstract record LIRType
 {
     public static readonly LIRIntType Int32 = new(32);
+    public static readonly LIRIntType IntPtr = new(System.IntPtr.Size * 8);
     public static readonly LIRVoidType Void = new();
     public static readonly LIRBoolType Boolean = new();
 }

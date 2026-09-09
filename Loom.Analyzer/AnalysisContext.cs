@@ -70,6 +70,7 @@ public class AnalysisContext
         // Built in types
         rootTable.Define(new TypeSymbol("void", TypeSymbol.DefaultType.Void));
         rootTable.Define(new TypeSymbol("i32", TypeSymbol.DefaultType.I32));
+        rootTable.Define(new TypeSymbol("iptr", TypeSymbol.DefaultType.IPtr));
         rootTable.Define(new TypeSymbol("bool", TypeSymbol.DefaultType.Bool));
 
         // Register all roots against the same root table
