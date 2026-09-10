@@ -18,6 +18,12 @@ public class LIRPrinter
         sb.Append(PrintMeta(unit));
         sb.AppendLine();
 
+        foreach (var structType in unit.Structs)
+        {
+            sb.AppendLine(Print(structType));
+            sb.AppendLine();
+        }
+
         foreach (var function in unit.Functions)
         {
             sb.AppendLine(Print(function));
@@ -26,6 +32,8 @@ public class LIRPrinter
 
         return sb.ToString();
     }
+
+    private string Print(LIRStructType structType) => $"struct {Style.PrintType(structType)};";
 
     private string Print(LIRFunction function)
     {

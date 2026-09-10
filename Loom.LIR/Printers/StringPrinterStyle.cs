@@ -70,6 +70,7 @@ internal class StringPrinterStyle : ILIRPrinterStyle
         LIRVoidType => "void",
         LIRBoolType => "bool",
         LIRPointerType p => $"{PrintType(p.PointeeType)}*",
+        LIRStructType s => s.Name,
         _ => type.ToString()
     };
 

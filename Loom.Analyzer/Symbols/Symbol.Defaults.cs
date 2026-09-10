@@ -11,7 +11,8 @@ public record TypeSymbol(string Name, TypeSymbol.DefaultType KnownType) : Symbol
         Void,
         I32,
         IPtr,
-        Bool
+        Bool,
+        Struct
     }
 }
 

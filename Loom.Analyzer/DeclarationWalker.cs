@@ -68,6 +68,18 @@ internal class DeclarationWalker : ASTVisitor
     }
 
     [Visitor]
+    public void Visit(StructDeclarationNode node)
+    {
+        var symbol = new TypeSymbol(node.StructName.Text, TypeSymbol.DefaultType.Struct);
+        symbol.FullyQualifiedName = BuildQualifiedName(node.StructName.Text);
+        symbol.DeclaringNode = node;
+
+        CurrentTable.Define(symbol);
+
+        WithScope(node, () => VisitChildren(node), symbol);
+    }
+
+    [Visitor]
     public void Visit(VariableDeclarationNode node)
     {
         var type = CurrentTable.Lookup(node.Type.Text)?.First() as TypeSymbol;

@@ -24,6 +24,12 @@ public class ASTGenerator
     {
         unit = new LIRCompilationUnit("Test");
 
+        // Declare structs
+        foreach (var module in root.Modules)
+            foreach (var content in module.Body.Contents)
+                if (content is StructDeclarationNode structDeclaration)
+                    GenerateStructDeclaration(structDeclaration);
+
         // Declare methods
         foreach (var module in root.Modules)
             foreach (var content in module.Body.Contents)
@@ -37,6 +43,19 @@ public class ASTGenerator
                     GenerateMethodBody(method);
 
         return unit;
+    }
+
+    public void GenerateStructDeclaration(StructDeclarationNode node)
+    {
+        TypeSymbol? symbol = (TypeSymbol?)context.AnalysisContext.GetSymbol(node).Symbol;
+
+        if (symbol == null)
+        {
+            Console.WriteLine($"Could not find symbol for {node.StructName}!");
+            return;
+        }
+
+        unit.DefineStruct(symbol.FullyQualifiedName);
     }
 
     public void GenerateMethodDeclaration(MethodDeclarationNode node)
@@ -70,7 +89,6 @@ public class ASTGenerator
             return;
         }
 
-        // Skip body generation for extern declarations, so they stay link-time declarations rather than empty definitions.
         if (node.Modifiers.Any(m => m.Type == Parser.Tokenizer.Token.TokenType.Extern))
             return;
 

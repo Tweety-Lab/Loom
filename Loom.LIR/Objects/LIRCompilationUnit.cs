@@ -8,6 +8,9 @@ public class LIRCompilationUnit : ILIRObject
     /// <summary> All functions owned by this <see cref="LIRCompilationUnit"/>. </summary>
     public List<LIRFunction> Functions { get; } = new List<LIRFunction>();
 
+    /// <summary> All struct types declared by this <see cref="LIRCompilationUnit"/>. </summary>
+    public List<LIRStructType> Structs { get; } = new List<LIRStructType>();
+
     /// <summary> The name of this <see cref="LIRCompilationUnit"/>. </summary>
     public string Name => MetaData["Name"];
 
@@ -32,4 +35,15 @@ public class LIRCompilationUnit : ILIRObject
         Functions.Add(function);
         return function;
     }
+
+    /// <summary> Adds a struct type to this <see cref="LIRCompilationUnit"/>. </summary>
+    public LIRStructType DefineStruct(string name)
+    {
+        var structType = new LIRStructType(name);
+        Structs.Add(structType);
+        return structType;
+    }
+
+    /// <summary> Gets a struct type by name. </summary>
+    public LIRStructType? GetStruct(string name) => Structs.FirstOrDefault(s => s.Name == name);
 }
