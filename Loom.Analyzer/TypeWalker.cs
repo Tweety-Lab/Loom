@@ -40,4 +40,11 @@ internal class TypeWalker : ASTWalker
         if (Context.GetSymbol(node.MethodName).Symbol is MethodDefinitionSymbol methodSymbol)
             Context.ExpressionTypes[node] = methodSymbol.ReturnType;
     }
+
+    [Visitor]
+    public void Visit(ObjectCreationExpressionNode node)
+    {
+        if (Context.GetSymbol(node.ObjectName).Symbol is TypeSymbol type && type.KnownType == TypeSymbol.DefaultType.Struct)
+            Context.ExpressionTypes[node] = type;
+    }
 }

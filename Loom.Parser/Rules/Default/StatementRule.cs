@@ -25,14 +25,14 @@ public class StatementRule : ParserRule<StatementNode>
         var current = Parser.Reader.Current.Type;
         var next = Parser.Reader.Peek().Type;
 
-        bool isBuiltInType = TokenRegistry.IsBuiltInType(current);
+        bool isType = TokenRegistry.IsBuiltInType(current) || current == TokenType.Identifier;
 
         var statement = (StatementNode)(current switch
         {
             TokenType.Return => RunRule<ReturnStatementRule, ReturnStatementNode>(),
             TokenType.If => RunRule<ConditionalRule, ConditionalNode>(),
 
-            _ when isBuiltInType && next == TokenType.Identifier => RunRule<VariableDeclarationRule, VariableDeclarationNode>(),
+            _ when isType && next == TokenType.Identifier => RunRule<VariableDeclarationRule, VariableDeclarationNode>(),
 
             TokenType.Identifier when next == TokenType.Equals => RunRule<AssignmentStatementRule, AssignmentStatementNode>(),
 

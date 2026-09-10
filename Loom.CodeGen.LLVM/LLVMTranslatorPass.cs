@@ -32,6 +32,10 @@ public class LLVMTranslatorPass : LIRTranslatorPass<LLVMModuleRef>
             Builder = llvmContext.CreateBuilder()
         };
 
+        // Register struct types so alloca/load/store can resolve them
+        foreach (var structObj in unit.Structs)
+            translationContext.TypeMap[structObj.Type] = llvmContext.CreateNamedStruct(structObj.Name);
+
         RunEmitters(translationContext, unit);
 
         Result = translationContext.Module;

@@ -112,6 +112,7 @@ public class Token
         [Keyword("if")] If,
 
         [Keyword("return")] Return,
+        [Keyword("new")] New,
 
         [Keyword("void"), Type] Void,
         [Keyword("i32"), Type] I32,

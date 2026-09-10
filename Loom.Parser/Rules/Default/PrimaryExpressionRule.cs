@@ -46,6 +46,7 @@ public class PrimaryExpressionRule : ParserRule<ExpressionNode>
         {
             TokenType.True or TokenType.False => new BooleanLiteralNode(Parser.Reader.Advance().Text),
             TokenType.Number => new NumberLiteralNode(Parser.Reader.Advance().Text),
+            TokenType.New => RunRule<ObjectCreationExpressionRule, ObjectCreationExpressionNode>(),
             TokenType.Identifier when Parser.Reader.Peek().Type == TokenType.LParen => RunRule<CallExpressionRule, CallExpressionNode>(),
             TokenType.Identifier => new IdentifierNameNode(Parser.Reader.Advance()),
             _ => throw new Exception($"Unexpected token: '{Parser.Reader.Current.Text}' type={Parser.Reader.Current.Type} at {Parser.Reader.Current.Location}")

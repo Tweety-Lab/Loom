@@ -35,6 +35,7 @@ internal class ExpressionGenerator
         BooleanLiteralNode boolean => new LIRConstantBoolValue(bool.Parse(boolean.Value)),
         BinaryExpressionNode binary => EmitBinary(binary),
         CallExpressionNode call => EmitCall(call),
+        ObjectCreationExpressionNode creation => Generator.EmitAlloca(ASTGenerator.ConvertType(context.AnalysisContext.ExpressionTypes[creation])),
         _ => throw new Exception($"Unhandled expression: {node.GetType().Name}")
     };
 

@@ -1,7 +1,11 @@
 ﻿using Loom.Analyzer;
 using Loom.Analyzer.Symbols;
+using Loom.CodeGen.LLVM;
 using Loom.Common;
 using Loom.Common.Diagnostics;
+using Loom.LIR;
+using Loom.LIR.OpCodes;
+using Loom.LIR.Objects;
 using Loom.Parser;
 using Loom.Parser.AST;
 using Loom.Parser.Rules.Default;
@@ -199,6 +203,24 @@ module Test
     }
 
     export extern iptr GetPointer(i32 size);
+}
+";
+
+    public const string OBJECT_CREATION_SOURCE = @"
+module Test
+{
+    struct TestStruct
+    {
+        i32 Number()
+        {
+            return 1;
+        }
+    }
+
+    void MyMethod()
+    {
+        TestStruct obj = new TestStruct();
+    }
 }
 ";
 
@@ -542,5 +564,67 @@ module Test
     {
         var (_, context) = ParseAndAnalyze(IPTR_USAGE_SOURCE);
         Assert.DoesNotContain(context.DiagnosticContext.Diagnostics, d => d.Level == Diagnostic.DiagnosticLevel.Error);
+    }
+
+    [Fact]
+    public void Parse_ObjectCreationExpression()
+    {
+        var (root, _) = ParseAndAnalyze(OBJECT_CREATION_SOURCE);
+        var method = (MethodDeclarationNode)root.Modules[0].Body.Contents[1];
+        var decl = Assert.IsType<VariableDeclarationNode>(method.Body.Contents.First());
+
+        var creation = Assert.IsType<ObjectCreationExpressionNode>(decl.Initializer);
+        Assert.Equal("TestStruct", creation.ObjectName.BaseName);
+    }
+
+    [Fact]
+    public void Analyze_ObjectCreationExpression_HasStructType()
+    {
+        var (root, context) = ParseAndAnalyze(OBJECT_CREATION_SOURCE);
+        var method = (MethodDeclarationNode)root.Modules[0].Body.Contents[1];
+        var decl = (VariableDeclarationNode)method.Body.Contents.First();
+        var creation = Assert.IsType<ObjectCreationExpressionNode>(decl.Initializer);
+
+        var type = context.AnalysisContext.ExpressionTypes[creation];
+        Assert.Equal(TypeSymbol.DefaultType.Struct, type.KnownType);
+        Assert.Equal("TestStruct", type.Name);
+    }
+
+    [Fact]
+    public void Analyze_ObjectCreationExpression_NoDiagnostics()
+    {
+        var (_, context) = ParseAndAnalyze(OBJECT_CREATION_SOURCE);
+        Assert.DoesNotContain(context.DiagnosticContext.Diagnostics, d => d.Level == Diagnostic.DiagnosticLevel.Error);
+    }
+
+    [Fact]
+    public void EmitLIR_ObjectCreationExpression_EmitsAllocaAndStore()
+    {
+        CompilationContext context = new CompilationContext();
+        context.Parse(OBJECT_CREATION_SOURCE).Analyze().EmitLIR();
+
+        LIRCompilationUnit unit = context.CompilationUnits.First();
+        var main = unit.GetFunction("Test::MyMethod");
+        Assert.NotNull(main);
+
+        var instructions = main!.Blocks.SelectMany(b => b.Instructions).ToList();
+        Assert.Contains(instructions, i => i.OpCode == LIROpCode.Alloca);
+        Assert.Contains(instructions, i => i.OpCode == LIROpCode.Store);
+        Assert.DoesNotContain(instructions, i => i.OpCode == LIROpCode.Call);
+    }
+
+    [Fact]
+    public void TranslateLLVM_ObjectCreationExpression_ProducesModule()
+    {
+        CompilationContext context = new CompilationContext();
+        context.Parse(OBJECT_CREATION_SOURCE).Analyze();
+
+        LIRCompilationUnit unit = context.EmitLIR().CompilationUnits.First();
+
+        LLVMTranslatorPass translator = new LLVMTranslatorPass();
+        translator.Run(unit);
+
+        string llvmIr = translator.Result.PrintToString();
+        Assert.Contains("Test::MyMethod", llvmIr);
     }
 }

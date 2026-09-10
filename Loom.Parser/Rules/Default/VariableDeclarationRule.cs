@@ -18,7 +18,7 @@ public class VariableDeclarationRule : ParserRule<VariableDeclarationNode>
     /// <inheritdoc/>
     public override VariableDeclarationNode ParseNode()
     {
-        var type = Parser.Reader.ExpectAny(t => TokenRegistry.IsBuiltInType(t.Type)); // type
+        var type = Parser.Reader.ExpectAny(t => TokenRegistry.IsBuiltInType(t.Type) || t.Type == TokenType.Identifier); // type
         var name = Parser.Reader.Expect(TokenType.Identifier); // name
 
         Parser.Reader.Expect(TokenType.Equals); // =

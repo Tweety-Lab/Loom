@@ -15,7 +15,15 @@ public class Program
 import Windows;
 
 module Consumer
-{   
+{
+    export struct TestStruct
+    {
+        i32 Number()
+        {
+            return 1;
+        }
+    }
+
     // Entry Point
     export i32 Main()
     {
@@ -28,20 +36,15 @@ module Consumer
         }
 
         iptr processID = GetCurrentProcess();
+
+        TestStruct test = new TestStruct();
+
         return result;
     }
 
     export i32 Add(i32 a, i32 b)
     {
         return a + b;
-    }
-
-    export struct TestStruct
-    {
-        i32 Number()
-        {
-            return 1;
-        }
     }
 }
 

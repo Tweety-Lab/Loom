@@ -137,6 +137,7 @@ public class ASTGenerator
         TypeSymbol.DefaultType.Bool => LIRType.Boolean,
         TypeSymbol.DefaultType.I32 => LIRType.Int32,
         TypeSymbol.DefaultType.IPtr => LIRType.IntPtr,
+        TypeSymbol.DefaultType.Struct => new LIRStructType(type.FullyQualifiedName),
         _ => LIRType.Void,
     };
 
