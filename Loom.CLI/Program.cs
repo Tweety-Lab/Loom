@@ -35,6 +35,11 @@ module Consumer
     {
         return a + b;
     }
+
+    export struct TestStruct
+    {
+        i32 Value;
+    }
 }
 
 module Windows
@@ -47,42 +52,47 @@ module Windows
     static void Main(string[] args)
     {
         CompilationContext context = new CompilationContext();
-        context.Parse(TEST_SOURCE).Analyze().EmitLIR();
 
-        LIRCompilationUnit unit = context.CompilationUnits.First();
-
-        LLVMTranslatorPass translator = new LLVMTranslatorPass();
-        translator.Run(unit);
-
-        string llvmIr = translator.Result.PrintToString();
-        Console.WriteLine("===== LLVM RESULT =====");
-        Console.WriteLine(llvmIr);
-
-        LLVM.InitializeNativeTarget();
-        LLVM.InitializeNativeAsmPrinter();
-        LLVM.InitializeNativeAsmParser();
-
-        LLVMExecutionEngineRef engine = translator.Result.CreateExecutionEngine();
-        LLVMValueRef main = translator.Result.GetNamedFunction(context.AnalysisContext.EntryPoint.FullyQualifiedName);
-        LLVMGenericValueRef result = engine.RunFunction(main, []);
-
-        unsafe
+        try
         {
-            Console.WriteLine($"Result: {LLVM.GenericValueToInt(result, 1)}");
-        }
+            context.Parse(TEST_SOURCE).Analyze().EmitLIR();
 
-        foreach (var diagnostic in context.DiagnosticContext.Diagnostics)
-        {
-            Console.ForegroundColor = diagnostic.Level switch
+            LIRCompilationUnit unit = context.CompilationUnits.First();
+
+            LLVMTranslatorPass translator = new LLVMTranslatorPass();
+            translator.Run(unit);
+
+            string llvmIr = translator.Result.PrintToString();
+            Console.WriteLine("===== LLVM RESULT =====");
+            Console.WriteLine(llvmIr);
+
+            LLVM.InitializeNativeTarget();
+            LLVM.InitializeNativeAsmPrinter();
+            LLVM.InitializeNativeAsmParser();
+
+            LLVMExecutionEngineRef engine = translator.Result.CreateExecutionEngine();
+            LLVMValueRef main = translator.Result.GetNamedFunction(context.AnalysisContext.EntryPoint.FullyQualifiedName);
+            LLVMGenericValueRef result = engine.RunFunction(main, []);
+
+            unsafe
             {
-                Diagnostic.DiagnosticLevel.Error => ConsoleColor.Red,
-                Diagnostic.DiagnosticLevel.Warning => ConsoleColor.Yellow,
-                _ => ConsoleColor.White
-            };
+                Console.WriteLine($"Result: {LLVM.GenericValueToInt(result, 1)}");
+            }
+        } catch (Exception e)
+        {
+            foreach (var diagnostic in context.DiagnosticContext.Diagnostics)
+            {
+                Console.ForegroundColor = diagnostic.Level switch
+                {
+                    Diagnostic.DiagnosticLevel.Error => ConsoleColor.Red,
+                    Diagnostic.DiagnosticLevel.Warning => ConsoleColor.Yellow,
+                    _ => ConsoleColor.White
+                };
 
-            Console.WriteLine(diagnostic.Message);
+                Console.WriteLine(diagnostic.Message);
+            }
+
+            Console.ResetColor();
         }
-
-        Console.ResetColor();
     }
 }

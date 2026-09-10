@@ -16,7 +16,7 @@ public class TokenReader
     public int Position { get; private set; }
 
     /// <summary> The current token. </summary>
-    public Token Current => Tokens[Position];
+    public Token Current => Tokens[Math.Min(Position, Tokens.Count - 1)];
 
     /// <summary> Initializes a new instance of the <see cref="TokenReader"/> class. </summary>
     public TokenReader(List<Token> tokens, DiagnosticContext? diagnosticContext = null)
