@@ -52,6 +52,9 @@ internal class DeclarationWalker : ASTVisitor
 
         CurrentTable.Define(symbol);
 
+        if (CurrentSymbol is TypeSymbol type)
+            type.Members.Add(symbol);
+
         WithScope(node, () =>
         {
             foreach (var param in node.Parameters)

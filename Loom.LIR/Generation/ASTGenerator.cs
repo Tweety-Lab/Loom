@@ -55,7 +55,39 @@ public class ASTGenerator
             return;
         }
 
-        unit.DefineStruct(symbol.FullyQualifiedName);
+        LIRStruct structObj = unit.DefineStruct(symbol.FullyQualifiedName);
+
+        foreach (var content in node.Body.Contents)
+            if (content is MethodDeclarationNode method)
+                GenerateStructMethod(structObj, method);
+    }
+
+    public void GenerateStructMethod(LIRStruct structObj, MethodDeclarationNode node)
+    {
+        MethodDefinitionSymbol? symbol = (MethodDefinitionSymbol?)context.AnalysisContext.GetSymbol(node).Symbol;
+
+        if (symbol == null)
+        {
+            Console.WriteLine($"Could not find symbol for {node.MethodName}!");
+            return;
+        }
+
+        var funcType = BuildFunctionType(symbol);
+
+        bool isExtern = node.Modifiers.Any(m => m.Type == Parser.Tokenizer.Token.TokenType.Extern);
+
+        if (isExtern)
+        {
+            structObj.DeclareMethod(symbol.FullyQualifiedName, funcType);
+            return;
+        }
+
+        LIRFunction func = structObj.DefineMethod(symbol.FullyQualifiedName, funcType);
+        StatementGenerator statementGen = new StatementGenerator(context, unit, func);
+
+        foreach (var content in node.Body.Contents)
+            if (content is StatementNode statementNode)
+                statementGen.EmitStatement(statementNode);
     }
 
     public void GenerateMethodDeclaration(MethodDeclarationNode node)
@@ -68,8 +100,7 @@ public class ASTGenerator
             return;
         }
 
-        LIRParameter[] parameters = symbol.Parameters.Select(p => new LIRParameter(p.Name, ConvertType(p.Type))).ToArray();
-        var funcType = new LIRFunctionType(ConvertType(symbol.ReturnType), parameters);
+        var funcType = BuildFunctionType(symbol);
 
         bool isExtern = node.Modifiers.Any(m => m.Type == Parser.Tokenizer.Token.TokenType.Extern);
 
@@ -108,4 +139,10 @@ public class ASTGenerator
         TypeSymbol.DefaultType.IPtr => LIRType.IntPtr,
         _ => LIRType.Void,
     };
+
+    private static LIRFunctionType BuildFunctionType(MethodDefinitionSymbol symbol)
+    {
+        var parameters = symbol.Parameters.Select(p => new LIRParameter(p.Name, ConvertType(p.Type))).ToArray();
+        return new LIRFunctionType(ConvertType(symbol.ReturnType), parameters);
+    }
 }

@@ -8,8 +8,8 @@ public class LIRCompilationUnit : ILIRObject
     /// <summary> All functions owned by this <see cref="LIRCompilationUnit"/>. </summary>
     public List<LIRFunction> Functions { get; } = new List<LIRFunction>();
 
-    /// <summary> All struct types declared by this <see cref="LIRCompilationUnit"/>. </summary>
-    public List<LIRStructType> Structs { get; } = new List<LIRStructType>();
+    /// <summary> All structs declared by this <see cref="LIRCompilationUnit"/>. </summary>
+    public List<LIRStruct> Structs { get; } = new List<LIRStruct>();
 
     /// <summary> The name of this <see cref="LIRCompilationUnit"/>. </summary>
     public string Name => MetaData["Name"];
@@ -36,14 +36,14 @@ public class LIRCompilationUnit : ILIRObject
         return function;
     }
 
-    /// <summary> Adds a struct type to this <see cref="LIRCompilationUnit"/>. </summary>
-    public LIRStructType DefineStruct(string name)
+    /// <summary> Adds a struct to this <see cref="LIRCompilationUnit"/>. </summary>
+    public LIRStruct DefineStruct(string name)
     {
-        var structType = new LIRStructType(name);
-        Structs.Add(structType);
-        return structType;
+        var structObj = LIRStruct.Define(name);
+        Structs.Add(structObj);
+        return structObj;
     }
 
-    /// <summary> Gets a struct type by name. </summary>
-    public LIRStructType? GetStruct(string name) => Structs.FirstOrDefault(s => s.Name == name);
+    /// <summary> Gets a struct by name. </summary>
+    public LIRStruct? GetStruct(string name) => Structs.FirstOrDefault(s => s.Name == name);
 }

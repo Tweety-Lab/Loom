@@ -11,6 +11,9 @@ internal class StringPrinterStyle : ILIRPrinterStyle
     /// <inheritdoc/>
     public string PrintFunctionFooter() => "}";
 
+    public string PrintStructHeader(LIRStruct s) => $"struct {s.Name}";
+    public string PrintStructFooter() => "}";
+
     /// <inheritdoc/>
     public string PrintMeta(string key, string value) => $"[{key}: {value}]";
 

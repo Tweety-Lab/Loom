@@ -5,6 +5,9 @@ public record ModuleSymbol(string Name) : Symbol(Name);
 
 public record TypeSymbol(string Name, TypeSymbol.DefaultType KnownType) : Symbol(Name)
 {
+    /// <summary> The members declared by this type. </summary>
+    public List<Symbol> Members { get; } = new();
+
     public enum DefaultType
     {
         Func,

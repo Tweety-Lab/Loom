@@ -18,9 +18,9 @@ public class LIRPrinter
         sb.Append(PrintMeta(unit));
         sb.AppendLine();
 
-        foreach (var structType in unit.Structs)
+        foreach (var structObj in unit.Structs)
         {
-            sb.AppendLine(Print(structType));
+            sb.AppendLine(Print(structObj));
             sb.AppendLine();
         }
 
@@ -33,7 +33,28 @@ public class LIRPrinter
         return sb.ToString();
     }
 
-    private string Print(LIRStructType structType) => $"struct {Style.PrintType(structType)};";
+    private string Print(LIRStruct structObj)
+    {
+        var sb = new StringBuilder();
+
+        sb.Append(PrintMeta(structObj));
+
+        sb.AppendLine(Style.PrintStructHeader(structObj));
+
+        foreach (var method in structObj.Methods)
+        {
+            sb.AppendLine("  " + Style.PrintFunctionHeader(method).Replace("\n", "\n  "));
+            foreach (var block in method.Blocks)
+            {
+                sb.AppendLine(PrintBlock(block, "    "));
+            }
+            if (!method.IsDeclaration)
+                sb.AppendLine("  " + Style.PrintFunctionFooter());
+        }
+
+        sb.AppendLine(Style.PrintStructFooter());
+        return sb.ToString();
+    }
 
     private string Print(LIRFunction function)
     {
@@ -46,7 +67,7 @@ public class LIRPrinter
         if (!function.IsDeclaration)
         {
             foreach (var block in function.Blocks)
-                sb.AppendLine(PrintBlock(block));
+                sb.AppendLine(PrintBlock(block, "  "));
 
             sb.AppendLine(Style.PrintFunctionFooter());
         }
@@ -55,14 +76,14 @@ public class LIRPrinter
     }
 
 
-    private string PrintBlock(LIRBasicBlock block)
+    private string PrintBlock(LIRBasicBlock block, string indent = "  ")
     {
         var sb = new StringBuilder();
 
-        sb.AppendLine($"{block.Name}:");
+        sb.AppendLine($"{indent}{block.Name}:");
 
         foreach (var inst in block.Instructions)
-            sb.AppendLine("  " + Style.PrintInstruction(inst));
+            sb.AppendLine(indent + "  " + Style.PrintInstruction(inst));
 
         return sb.ToString();
     }

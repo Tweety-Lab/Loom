@@ -13,4 +13,7 @@ public interface ILIRPrinterStyle
     string PrintInstruction(LIRInstruction inst);
     string PrintFunctionHeader(LIRFunction function);
     string PrintFunctionFooter();
+
+    string PrintStructHeader(LIRStruct structObj);
+    string PrintStructFooter();
 }
