@@ -38,7 +38,10 @@ module Consumer
 
     export struct TestStruct
     {
-        i32 Value;
+        i32 Number()
+        {
+            return 1;
+        }
     }
 }
 
@@ -78,7 +81,8 @@ module Windows
             {
                 Console.WriteLine($"Result: {LLVM.GenericValueToInt(result, 1)}");
             }
-        } catch (Exception e)
+        }
+        catch (Exception)
         {
             foreach (var diagnostic in context.DiagnosticContext.Diagnostics)
             {

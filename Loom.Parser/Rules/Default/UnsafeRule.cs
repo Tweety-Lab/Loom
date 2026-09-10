@@ -21,6 +21,6 @@ public class UnsafeRule : ParserRule<UnsafeNode>
     {
         Parser.Reader.Expect(TokenType.Unsafe); // unsafe
 
-        return new UnsafeNode(Parser.GetRule<MethodBlockRule>().ParseNode());
+        return new UnsafeNode(Parser.GetRule<BlockRule>().ParseNode());
     }
 }

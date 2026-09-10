@@ -23,6 +23,9 @@ public class ModuleDeclarationRule : ParserRule<ModuleNode>
         Parser.Reader.Expect(TokenType.Module); // module
         var name = Parser.Reader.Expect(TokenType.Identifier); // name
 
-        return new ModuleNode(name, Parser.GetRule<ModuleBlockRule>().ParseNode());
+        return new ModuleNode(name, Parser.GetRule<BlockRule>().ParseNode());
     }
 }
+
+
+

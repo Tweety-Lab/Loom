@@ -99,6 +99,7 @@ public class Token
         [Character(';')] Semicolon,
 
         [Keyword("module")] Module,
+        [Keyword("struct")] Struct,
         [Keyword("import")] Import,
         [Keyword("unsafe")] Unsafe,
 
