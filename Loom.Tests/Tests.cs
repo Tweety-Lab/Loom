@@ -224,6 +224,25 @@ module Test
 }
 ";
 
+    public const string MEMBER_CALL_SOURCE = @"
+module Test
+{
+    struct TestStruct
+    {
+        i32 Number()
+        {
+            return 1;
+        }
+    }
+
+    void MyMethod()
+    {
+        TestStruct obj = new TestStruct();
+        i32 result = obj.Number();
+    }
+}
+";
+
     private (ProgramNode root, CompilationContext context) ParseAndAnalyze(string source = TEST_SOURCE)
     {
         CompilationContext context = new CompilationContext();
@@ -603,5 +622,43 @@ module Test
 
         string llvmIr = translator.Result.PrintToString();
         Assert.Contains("Test::MyMethod", llvmIr);
+    }
+
+    [Fact]
+    public void EmitLIR_MemberCall_EmitsCallInstancedWithReceiver()
+    {
+        CompilationContext context = new CompilationContext();
+        context.Parse(MEMBER_CALL_SOURCE).Analyze().EmitLIR();
+
+        LIRCompilationUnit unit = context.CompilationUnits.First();
+        var main = unit.GetFunction("Test::MyMethod");
+        Assert.NotNull(main);
+
+        var instanced = main!.Blocks.SelectMany(b => b.Instructions).First(i => i.OpCode == LIROpCode.CallInstanced);
+        Assert.Equal(2, instanced.Operands.Count);
+
+        var target = Assert.IsType<LIRFunction>(instanced.Operands[0]);
+        Assert.Equal("Test::TestStruct::Number", target.Name);
+
+        var selfParam = target.Type.Parameters.First();
+        Assert.Equal("self", selfParam.Name);
+        Assert.IsType<LIRPointerType>(selfParam.Type);
+        Assert.Equal(LIRType.Int32, target.Type.ReturnType);
+    }
+
+    [Fact]
+    public void TranslateLLVM_MemberCall_PassesReceiverToInstanceMethod()
+    {
+        CompilationContext context = new CompilationContext();
+        context.Parse(MEMBER_CALL_SOURCE).Analyze();
+
+        LIRCompilationUnit unit = context.EmitLIR().CompilationUnits.First();
+
+        LLVMTranslatorPass translator = new LLVMTranslatorPass();
+        translator.Run(unit);
+
+        string llvmIr = translator.Result.PrintToString();
+        Assert.Contains("define i32 @\"Test::TestStruct::Number\"(ptr %self)", llvmIr);
+        Assert.Contains("call i32 @\"Test::TestStruct::Number\"(ptr", llvmIr);
     }
 }

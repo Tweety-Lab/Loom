@@ -39,7 +39,7 @@ module Consumer
         TestStruct test = new TestStruct();
         i32 testInt = test.Number();
 
-        return result;
+        return testInt + result;
     }
 
     export i32 Add(i32 a, i32 b)

@@ -92,6 +92,21 @@ public class LIRGenerator
         return Emit(LIROpCode.Call, returnType, operands);
     }
 
+    /// <summary> Emits an instance call to <paramref name="function"/> where <paramref name="receiver"/> is passed as the instance (this) argument. </summary>
+    public LIRTempValue EmitCallInstanced(LIRFunction function, LIRValue receiver, params LIRValue[] arguments)
+    {
+        LIRValue[] operands = [function, receiver, .. arguments];
+        var returnType = function.Type.ReturnType;
+
+        if (returnType == LIRType.Void)
+        {
+            WritingBlock.Emit(new LIRInstruction(LIROpCode.CallInstanced, operands.ToList()));
+            return null;
+        }
+
+        return Emit(LIROpCode.CallInstanced, returnType, operands);
+    }
+
     public LIRBasicBlock CreateBlock(string name)
     {
         var block = new LIRBasicBlock(name, function);

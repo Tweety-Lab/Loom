@@ -72,7 +72,7 @@ public class ASTGenerator
             return;
         }
 
-        var funcType = BuildFunctionType(symbol);
+        var funcType = BuildFunctionType(symbol, new LIRPointerType(structObj.Type));
 
         bool isExtern = node.Modifiers.Any(m => m.Type == Parser.Tokenizer.Token.TokenType.Extern);
 
@@ -138,9 +138,15 @@ public class ASTGenerator
         _ => LIRType.Void,
     };
 
-    private static LIRFunctionType BuildFunctionType(MethodDefinitionSymbol symbol)
+    private static LIRFunctionType BuildFunctionType(MethodDefinitionSymbol symbol, LIRType? instancePointerType = null)
     {
-        var parameters = symbol.Parameters.Select(p => new LIRParameter(p.Name, ConvertType(p.Type))).ToArray();
-        return new LIRFunctionType(ConvertType(symbol.ReturnType), parameters);
+        var parameters = new List<LIRParameter>();
+
+        if (instancePointerType != null)
+            parameters.Add(new LIRParameter("self", instancePointerType));
+
+        parameters.AddRange(symbol.Parameters.Select(p => new LIRParameter(p.Name, ConvertType(p.Type))));
+
+        return new LIRFunctionType(ConvertType(symbol.ReturnType), parameters.ToArray());
     }
 }

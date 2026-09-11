@@ -63,6 +63,7 @@ internal class ExpressionGenerator
     private LIRValue EmitCall(CallExpressionNode node)
     {
         LIRFunction? target = null;
+        LIRValue? self = null;
 
         if (node.Callee is MemberAccessExpressionNode member)
         {
@@ -73,6 +74,7 @@ internal class ExpressionGenerator
                 throw new Exception($"Could not resolve member call: {member.Name.BaseName}");
 
             target = unit.AllFunctions.FirstOrDefault(f => f.Name == method.FullyQualifiedName);
+            self = EmitReceiverAddress(member.Receiver);
         }
         else if (node.Callee is IdentifierNameNode ident)
         {
@@ -91,6 +93,18 @@ internal class ExpressionGenerator
             throw new Exception($"Could not find function: {node.Callee}");
 
         var args = node.Arguments.Select(Emit).ToArray();
+
+        if (self != null)
+            return Generator.EmitCallInstanced(target, self, args);
+
         return Generator.EmitCall(target, args);
     }
+
+    /// <summary> Emits the address of <paramref name="receiver"/> to be passed as the instance (self) argument of a member call. </summary>
+    private LIRValue EmitReceiverAddress(ExpressionNode receiver) => receiver switch
+    {
+        IdentifierNameNode ident => locals[ident.BaseName],
+        ObjectCreationExpressionNode => Emit(receiver),
+        _ => throw new Exception($"Unsupported member-access receiver: {receiver.GetType().Name}")
+    };
 }

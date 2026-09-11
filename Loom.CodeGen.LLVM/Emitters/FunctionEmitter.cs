@@ -25,5 +25,5 @@ internal class FunctionEmitter : Emitter<LIRFunction>
     }
 
     /// <summary> Converts a <see cref="LIRFunctionType"/> to a LLVM <see cref="LLVMTypeRef"/>. </summary>
-    public LLVMTypeRef GetFunctionType(LIRFunctionType type) => LLVMTypeRef.CreateFunction(Context.TypeMap[type.ReturnType], type.Parameters.Select(x => Context.TypeMap[x.Type]).ToArray());
+    public LLVMTypeRef GetFunctionType(LIRFunctionType type) => LLVMTypeRef.CreateFunction(Context.ResolveType(type.ReturnType), type.Parameters.Select(x => Context.ResolveType(x.Type)).ToArray());
 }

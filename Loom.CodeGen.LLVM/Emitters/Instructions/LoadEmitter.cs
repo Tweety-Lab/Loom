@@ -25,7 +25,7 @@ internal class LoadEmitter : IInstructionEmitter
             throw new InvalidOperationException("Load source must be a pointer.");
 
         var pointeeLirType = ((LIRPointerType)instruction.Operands[0].Type).PointeeType;
-        LLVMTypeRef llvmType = context.TypeMap[pointeeLirType];
+        LLVMTypeRef llvmType = context.ResolveType(pointeeLirType);
 
         LLVMValueRef value = context.Builder.BuildLoad2(llvmType, ptr, "loadtmp");
 

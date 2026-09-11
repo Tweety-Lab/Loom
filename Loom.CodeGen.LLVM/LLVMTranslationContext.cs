@@ -20,6 +20,21 @@ internal class LLVMTranslationContext
     public Dictionary<LIRBasicBlock, LLVMBasicBlockRef> BlockMap { get; set; } = new(); // TODO: Is this needed?
     public Dictionary<LIRValue, LLVMValueRef> ValueMap { get; set; } = new();
 
+    /// <summary> Resolves an <see cref="LIRType"/> to its LLVM type, creating pointer types on demand. </summary>
+    public LLVMTypeRef ResolveType(LIRType type)
+    {
+        if (TypeMap.TryGetValue(type, out LLVMTypeRef result))
+            return result;
+
+        if (type is LIRPointerType { PointeeType: var pointee })
+        {
+            // Opaque ptr pointees are typed (validated) at call sites via named struct signatures.
+            return LLVMTypeRef.CreatePointer(ResolveType(pointee), 0);
+        }
+
+        throw new InvalidOperationException($"Unhandled LIR type: {type.GetType().Name}");
+    }
+
     public LLVMValueRef ResolveValue(LIRValue value)
     {
         if (ValueMap.TryGetValue(value, out LLVMValueRef result))

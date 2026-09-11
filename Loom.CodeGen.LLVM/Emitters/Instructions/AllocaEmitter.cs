@@ -18,7 +18,7 @@ internal class AllocaEmitter : IInstructionEmitter
 
         LIRPointerType pointer = instruction.Result.Type as LIRPointerType ?? throw new InvalidOperationException("Alloca must produce a pointer type.");
 
-        LLVMTypeRef llvmType = LLVMTypeRef.CreatePointer(context.TypeMap[pointer.PointeeType], 0);
+        LLVMTypeRef llvmType = context.ResolveType(pointer.PointeeType);
         LLVMValueRef alloca = context.Builder.BuildAlloca(llvmType);
 
         context.ValueMap[instruction.Result] = alloca;
