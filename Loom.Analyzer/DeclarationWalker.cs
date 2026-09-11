@@ -125,7 +125,7 @@ internal class DeclarationWalker : ASTVisitor
 
         var current = CurrentSymbol;
         if (current != null)
-            parts.Push(current.Name);
+            parts.Push(current.FullyQualifiedName);
 
         return string.Join("::", parts);
     }

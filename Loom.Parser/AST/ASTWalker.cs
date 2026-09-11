@@ -1,4 +1,6 @@
-﻿namespace Loom.Parser.AST;
+﻿using System.Reflection;
+
+namespace Loom.Parser.AST;
 
 /// <summary>
 /// A version of <see cref="ASTVisitor"/> that automatically visits child nodes.
@@ -10,7 +12,9 @@ public class ASTWalker : ASTVisitor
     {
         var nodeType = node.GetType();
 
-        if (cache.TryGetValue((GetType(), nodeType), out var method) && method != null)
+        var method = cache.GetOrAdd((GetType(), nodeType), key => key.Item1.GetMethods().FirstOrDefault(m => m.GetCustomAttribute<VisitorAttribute>() != null && m.GetParameters() is [var p] && p.ParameterType == key.Item2));
+
+        if (method != null)
             VisitChildren(node);
 
         return base.Dispatch(node);
@@ -21,7 +25,9 @@ public class ASTWalker : ASTVisitor
     {
         var nodeType = node.GetType();
 
-        if (cache.TryGetValue((GetType(), nodeType), out var method) && method != null)
+        var method = cache.GetOrAdd((GetType(), nodeType), key => key.Item1.GetMethods().FirstOrDefault(m => m.GetCustomAttribute<VisitorAttribute>() != null && m.GetParameters() is [var p] && p.ParameterType == key.Item2));
+
+        if (method != null)
             VisitChildren(node);
 
         return base.DispatchResult<T>(node);

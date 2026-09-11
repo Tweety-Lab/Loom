@@ -55,6 +55,7 @@ public readonly struct LIROpCode : IEquatable<LIROpCode>
     public static readonly LIROpCode CmpGe = new LIROpCode("cmpge", CodeType.Arithmetic, true);
 
     public static readonly LIROpCode Call = new LIROpCode("call", CodeType.Call, true);
+    public static readonly LIROpCode CallInstanced = new LIROpCode("callinstanced", CodeType.Call, true);
 
     #endregion
 

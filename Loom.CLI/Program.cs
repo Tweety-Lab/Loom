@@ -1,5 +1,6 @@
 ﻿using LLVMSharp.Interop;
 using Loom.Analyzer;
+using Loom.Analyzer.Symbols;
 using Loom.CodeGen.LLVM;
 using Loom.Common;
 using Loom.Common.Diagnostics;
@@ -35,9 +36,8 @@ module Consumer
             result = 20;
         }
 
-        iptr processID = GetCurrentProcess();
-
         TestStruct test = new TestStruct();
+        i32 testInt = test.Number();
 
         return result;
     }

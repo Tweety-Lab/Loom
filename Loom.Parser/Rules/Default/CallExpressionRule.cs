@@ -3,10 +3,10 @@ using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.Rules.Default;
 
-public record CallExpressionNode(IdentifierNameNode MethodName, List<ExpressionNode> Arguments) : ExpressionNode
+public record CallExpressionNode(ExpressionNode Callee, List<ExpressionNode> Arguments) : ExpressionNode
 {
     /// <inheritdoc/>
-    public override IEnumerable<ASTNode> Children => Arguments.Prepend(MethodName);
+    public override IEnumerable<ASTNode> Children => Arguments.Prepend(Callee);
 }
 
 [ParserRule]
@@ -15,11 +15,18 @@ public class CallExpressionRule : ParserRule<CallExpressionNode>
     /// <inheritdoc/>
     public CallExpressionRule(LoomParser parser) : base(parser) { }
 
+    private ExpressionNode callee = null!;
+
+    /// <summary> Parses a call on the given <paramref name="callee"/> expression. </summary>
+    public CallExpressionNode Parse(ExpressionNode callee)
+    {
+        this.callee = callee;
+        return Parse();
+    }
+
     /// <inheritdoc/>
     public override CallExpressionNode ParseNode()
     {
-        var callName = Parser.Reader.Expect(TokenType.Identifier); // name
-
         Parser.Reader.Expect(TokenType.LParen); // (
 
         // Arguments
@@ -34,7 +41,7 @@ public class CallExpressionRule : ParserRule<CallExpressionNode>
 
         Parser.Reader.Expect(TokenType.RParen); // )
 
-        return new CallExpressionNode(new IdentifierNameNode(callName), args);
+        return new CallExpressionNode(callee, args);
     }
 }
 

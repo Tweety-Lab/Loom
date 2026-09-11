@@ -35,10 +35,28 @@ internal class TypeWalker : ASTWalker
     }
 
     [Visitor]
+    public void Visit(MemberAccessExpressionNode node)
+    {
+        var receiverType = Context.ExpressionTypes.TryGetValue(node.Receiver, out var type) ? type : null;
+        if (receiverType == null)
+            return;
+
+        if (receiverType.Members.FirstOrDefault(m => m.Name == node.Name.BaseName) is MethodDefinitionSymbol method)
+            Context.ExpressionTypes[node] = method.ReturnType;
+    }
+
+    [Visitor]
     public void Visit(CallExpressionNode node)
     {
-        if (Context.GetSymbol(node.MethodName).Symbol is MethodDefinitionSymbol methodSymbol)
-            Context.ExpressionTypes[node] = methodSymbol.ReturnType;
+        var returnType = node.Callee switch
+        {
+            IdentifierNameNode ident => (Context.GetSymbol(ident).Symbol as MethodDefinitionSymbol)?.ReturnType,
+            MemberAccessExpressionNode member => Context.ExpressionTypes.TryGetValue(member, out var type) ? type : null,
+            _ => null
+        };
+
+        if (returnType != null)
+            Context.ExpressionTypes[node] = returnType;
     }
 
     [Visitor]

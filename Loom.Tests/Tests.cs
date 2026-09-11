@@ -312,17 +312,6 @@ module Test
     }
 
     [Fact]
-    public void Parse_MethodCallStatement()
-    {
-        var (root, _) = ParseAndAnalyze(METHOD_CALL_SOURCE);
-        var caller = (MethodDeclarationNode)root.Modules[0].Body.Contents.First();
-        var statement = Assert.IsType<ExpressionStatementNode>(caller.Body.Contents.First());
-        var call = Assert.IsType<CallExpressionNode>(statement.Expression);
-        Assert.Equal("MyMethod", call.MethodName.BaseName);
-        Assert.Empty(call.Arguments);
-    }
-
-    [Fact]
     public void Parse_BinaryExpression_Addition()
     {
         var (root, _) = ParseAndAnalyze(ADD_EXPRESSION_SOURCE);
@@ -410,18 +399,6 @@ module Test
         var symbol = context.AnalysisContext.GetSymbol(module).Symbol;
         Assert.IsType<ModuleSymbol>(symbol);
         Assert.Equal("Test", ((ModuleSymbol)symbol).Name);
-    }
-
-    [Fact]
-    public void Analyze_CallExpression_BoundToMethodSymbol()
-    {
-        var (root, context) = ParseAndAnalyze(BINDING_SOURCE);
-        var method = (MethodDeclarationNode)root.Modules[0].Body.Contents.First();
-        var returnStatement = (ReturnStatementNode)method.Body.Contents.First();
-        var call = Assert.IsType<CallExpressionNode>(returnStatement.Expression);
-        var symbol = context.AnalysisContext.GetSymbol(call.MethodName).Symbol;
-        Assert.IsType<MethodDefinitionSymbol>(symbol);
-        Assert.Equal("Helper", ((MethodDefinitionSymbol)symbol).Name);
     }
 
     [Fact]

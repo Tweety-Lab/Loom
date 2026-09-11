@@ -104,10 +104,7 @@ public class ASTGenerator
 
         bool isExtern = node.Modifiers.Any(m => m.Type == Parser.Tokenizer.Token.TokenType.Extern);
 
-        if (isExtern)
-            unit.DeclareFunction(symbol.FullyQualifiedName, funcType);
-        else
-            unit.DefineFunction(symbol.FullyQualifiedName, funcType);
+        unit.DefineFunction(symbol.FullyQualifiedName, funcType, !isExtern);
     }
 
     public void GenerateMethodBody(MethodDeclarationNode node)

@@ -62,14 +62,33 @@ internal class ExpressionGenerator
 
     private LIRValue EmitCall(CallExpressionNode node)
     {
-        var symbol = context.AnalysisContext.GetSymbol(node.MethodName).Symbol;
-        if (symbol == null)
-            throw new Exception($"Could not resolve call: {node.MethodName.Token.Text}");
+        LIRFunction? target = null;
 
-        var target = unit.GetFunction(symbol.FullyQualifiedName);
+        if (node.Callee is MemberAccessExpressionNode member)
+        {
+            var receiverType = context.AnalysisContext.ExpressionTypes.TryGetValue(member.Receiver, out var type) ? type : null;
+            var method = receiverType?.Members.OfType<MethodDefinitionSymbol>().FirstOrDefault(m => m.Name == member.Name.BaseName);
+
+            if (method == null)
+                throw new Exception($"Could not resolve member call: {member.Name.BaseName}");
+
+            target = unit.AllFunctions.FirstOrDefault(f => f.Name == method.FullyQualifiedName);
+        }
+        else if (node.Callee is IdentifierNameNode ident)
+        {
+            var symbol = context.AnalysisContext.GetSymbol(ident).Symbol;
+            if (symbol == null)
+                throw new Exception($"Could not resolve call: {ident.Token.Text}");
+
+            target = unit.GetFunction(symbol.FullyQualifiedName);
+        }
+        else
+        {
+            throw new Exception($"Unhandled call callee: {node.Callee.GetType().Name}");
+        }
+
         if (target == null)
-            throw new Exception($"Could not find function: {symbol.FullyQualifiedName}");
-
+            throw new Exception($"Could not find function: {node.Callee}");
 
         var args = node.Arguments.Select(Emit).ToArray();
         return Generator.EmitCall(target, args);

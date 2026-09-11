@@ -90,6 +90,8 @@ public class Token
         [Character('<')] Less,
         [Character('>')] Greater,
 
+        [Character('.')] Period,
+
         [MultiCharacter('=', '=')] EqualEqual,
         [MultiCharacter('!', '=')] NotEqual,
         [MultiCharacter('<', '=')] LessEqual,

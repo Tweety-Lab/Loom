@@ -5,6 +5,9 @@ public class LIRCompilationUnit : ILIRObject
     /// <inheritdoc/>
     public Dictionary<string, string> MetaData { get; init; } = new();
 
+    /// <summary> All functions owned by this <see cref="LIRCompilationUnit"/>, including methods declared in types. </summary>
+    public IEnumerable<LIRFunction> AllFunctions => Functions.Concat(Structs.SelectMany(s => s.Methods));
+
     /// <summary> All functions owned by this <see cref="LIRCompilationUnit"/>. </summary>
     public List<LIRFunction> Functions { get; } = new List<LIRFunction>();
 
@@ -21,17 +24,14 @@ public class LIRCompilationUnit : ILIRObject
     public LIRFunction? GetFunction(string name) => Functions.FirstOrDefault(f => f.Name == name);
 
     /// <summary> Defines a new function inside this <see cref="LIRCompilationUnit"/>. </summary>
-    public LIRFunction DefineFunction(string name, LIRFunctionType type)
+    public LIRFunction DefineFunction(string name, LIRFunctionType type, bool hasBody = true)
     {
-        var function = LIRFunction.Define(name, type);
-        Functions.Add(function);
-        return function;
-    }
+        LIRFunction function;
+        if (hasBody)
+            function = LIRFunction.Define(name, type);
+        else
+            function = LIRFunction.Declare(name, type);
 
-    /// <summary> Declares a new function (no body) inside this <see cref="LIRCompilationUnit"/>. </summary>
-    public LIRFunction DeclareFunction(string name, LIRFunctionType type)
-    {
-        var function = LIRFunction.Declare(name, type);
         Functions.Add(function);
         return function;
     }

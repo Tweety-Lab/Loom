@@ -12,12 +12,12 @@ public class MultiplicativeExpressionRule : ParserRule<ExpressionNode>
     /// <inheritdoc/>
     public override ExpressionNode ParseNode()
     {
-        var left = RunRule<PrimaryExpressionRule, ExpressionNode>();
+        var left = RunRule<PostfixExpressionRule, ExpressionNode>();
 
         while (Parser.Reader.Current.Type is TokenType.Star or TokenType.Slash)
         {
             var op = Parser.Reader.Advance();
-            var right = RunRule<PrimaryExpressionRule, ExpressionNode>();
+            var right = RunRule<PostfixExpressionRule, ExpressionNode>();
             left = new BinaryExpressionNode(left, op, right);
         }
 
