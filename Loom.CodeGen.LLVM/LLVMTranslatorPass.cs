@@ -7,17 +7,25 @@ using Loom.LIR.Passes;
 
 namespace Loom.CodeGen.LLVM;
 
-public class LLVMTranslatorPass : LIRTranslatorPass<LLVMModuleRef>
+/// <summary>
+/// A <see cref="LIRLayeredPass"/> that translates a <see cref="LIRCompilationUnit"/> into an LLVM module.
+/// </summary>
+public class LLVMTranslatorPass : LIRLayeredPass
 {
-    /// <inheritdoc/>
-    public override LLVMModuleRef Result { get; set; }
+    /// <summary> The translated LLVM module, set after <see cref="Run"/> has completed. </summary>
+    public LLVMModuleRef Result { get; private set; }
+
+    private LLVMTranslationContext translationContext = null!;
+    private FunctionEmitter functionEmitter = null!;
+    private BlockEmitter blockEmitter = null!;
+    private InstructionEmitter instructionEmitter = null!;
 
     /// <inheritdoc />
     public override void Run(LIRCompilationUnit unit)
     {
         LLVMContextRef llvmContext = LLVMContextRef.Create();
 
-        LLVMTranslationContext translationContext = new LLVMTranslationContext()
+        translationContext = new LLVMTranslationContext()
         {
             TypeMap =
             {
@@ -36,35 +44,21 @@ public class LLVMTranslatorPass : LIRTranslatorPass<LLVMModuleRef>
         foreach (var structObj in unit.Structs)
             translationContext.TypeMap[structObj.Type] = llvmContext.CreateNamedStruct(structObj.Name);
 
-        RunEmitters(translationContext, unit);
+        functionEmitter = new FunctionEmitter(translationContext);
+        blockEmitter = new BlockEmitter(translationContext);
+        instructionEmitter = new InstructionEmitter(translationContext);
+
+        base.Run(unit);
 
         Result = translationContext.Module;
     }
 
-    private void RunEmitters(LLVMTranslationContext translationContext, LIRCompilationUnit unit)
-    {
-        // We navigate manually like this instead of using recursion because recursion would result in cases such as calling a function from a block thats emitted before the function
+    /// <inheritdoc/>
+    protected override void RunOnFunction(LIRFunction func) => functionEmitter.Emit(func);
 
-        FunctionEmitter functionEmitter = new FunctionEmitter(translationContext);
+    /// <inheritdoc/>
+    protected override void RunOnBlock(LIRBasicBlock block) => blockEmitter.Emit(block);
 
-        var allFunctions = unit.AllFunctions.ToList();
-
-        foreach (var function in allFunctions)
-            functionEmitter.Emit(function);
-
-        BlockEmitter blockEmitter = new BlockEmitter(translationContext);
-
-        foreach (var function in allFunctions)
-            if (!function.IsDeclaration)
-                foreach (var block in function.Blocks)
-                    blockEmitter.Emit(block);
-
-        InstructionEmitter instructionEmitter = new InstructionEmitter(translationContext);
-
-        foreach (var function in allFunctions)
-            if (!function.IsDeclaration)
-                foreach (var block in function.Blocks)
-                    foreach (var instruction in block.Instructions)
-                        instructionEmitter.Emit(block, instruction);
-    }
+    /// <inheritdoc/>
+    protected override void RunOnInstruction(LIRBasicBlock block, LIRInstruction inst) => instructionEmitter.Emit(block, inst);
 }

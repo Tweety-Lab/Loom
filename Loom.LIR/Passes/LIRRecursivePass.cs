@@ -11,7 +11,7 @@ public abstract class LIRRecursivePass : ICompilationPass
     /// <inheritdoc/>
     public virtual void Run(LIRCompilationUnit unit)
     {
-        foreach (var func in unit.Functions)
+        foreach (var func in unit.AllFunctions.ToList())
             RunOnFunction(func);
     }
 

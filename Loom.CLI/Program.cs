@@ -17,11 +17,11 @@ import Windows;
 
 module Consumer
 {
-    export struct TestStruct
+    export struct MathInstance
     {
-        i32 Number()
+        i32 Add(i32 a, i32 b)
         {
-            return 1;
+            return a + b;
         }
     }
 
@@ -30,21 +30,14 @@ module Consumer
     {
         Sleep(1000);
 
-        i32 result = Add(2, 4);
+        MathInstance math = new MathInstance();
+        i32 result = math.Add(2, 4);
         if (result == 2 + 4)
         {
             result = 20;
         }
 
-        TestStruct test = new TestStruct();
-        i32 testInt = test.Number();
-
-        return testInt + result;
-    }
-
-    export i32 Add(i32 a, i32 b)
-    {
-        return a + b;
+        return result;
     }
 }
 
