@@ -83,11 +83,11 @@ internal class DeclarationWalker : ASTVisitor
     }
 
     [Visitor]
-    public void Visit(VariableDeclarationNode node)
+    public void Visit(LocalDeclarationStatementNode node)
     {
-        var type = CurrentTable.Lookup(node.Type.Text)?.First() as TypeSymbol;
-        var symbol = new LocalVariableSymbol(node.Name.Text, type);
-        symbol.FullyQualifiedName = BuildQualifiedName(node.Name.Text);
+        var type = CurrentTable.Lookup(node.Variable.Type.Text)?.First() as TypeSymbol;
+        var symbol = new LocalVariableSymbol(node.Variable.Name.Text, type);
+        symbol.FullyQualifiedName = BuildQualifiedName(node.Variable.Name.Text);
         symbol.DeclaringNode = node;
         CurrentTable.Define(symbol);
         Context.BoundSymbols[node] = symbol;

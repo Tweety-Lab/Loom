@@ -38,7 +38,7 @@ internal class StatementGenerator
         switch (node)
         {
             case ReturnStatementNode ret: EmitReturn(ret); break;
-            case VariableDeclarationNode decl: EmitVariableDeclaration(decl); break;
+            case LocalDeclarationStatementNode decl: EmitLocalDeclaration(decl); break;
             case AssignmentStatementNode assign: EmitAssignment(assign); break;
             case ConditionalNode conditional: EmitConditional(conditional); break;
             case ExpressionStatementNode expression: EmitExpressionStatement(expression); break;
@@ -50,7 +50,7 @@ internal class StatementGenerator
         ExpressionGenerator(node.Expression);
     }
 
-    private void EmitVariableDeclaration(VariableDeclarationNode node)
+    private void EmitLocalDeclaration(LocalDeclarationStatementNode node)
     {
         LocalVariableSymbol symbol = (LocalVariableSymbol)context.AnalysisContext.GetSymbol(node).Symbol!;
         var type = ASTGenerator.ConvertType(symbol.Type);
@@ -59,9 +59,9 @@ internal class StatementGenerator
             type = new LIRPointerType(type);
 
         LIRTempValue address = Generator.EmitAlloca(type);
-        locals[node.Name.Text] = address;
+        locals[node.Variable.Name.Text] = address;
 
-        var value = ExpressionGenerator(node.Initializer);
+        var value = ExpressionGenerator(node.Variable.Initializer);
         Generator.EmitStore(value, address);
     }
 

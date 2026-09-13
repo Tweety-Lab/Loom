@@ -53,9 +53,7 @@ public class BlockRule : ParserRule<BlockNode>
             return true;
         }
 
-        if (IsTypeName(Parser.Reader.Peek(offset).Type)
-            && Parser.Reader.Peek(offset + 1).Type == TokenType.Identifier
-            && Parser.Reader.Peek(offset + 2).Type == TokenType.LParen)
+        if (IsTypeName(Parser.Reader.Peek(offset).Type) && Parser.Reader.Peek(offset + 1).Type == TokenType.Identifier && Parser.Reader.Peek(offset + 2).Type == TokenType.LParen)
         {
             node = RunRule<MethodDeclarationRule, MethodDeclarationNode>();
             return true;

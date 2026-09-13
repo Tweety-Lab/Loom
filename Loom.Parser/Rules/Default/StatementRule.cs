@@ -31,11 +31,9 @@ public class StatementRule : ParserRule<StatementNode>
         {
             TokenType.Return => RunRule<ReturnStatementRule, ReturnStatementNode>(),
             TokenType.If => RunRule<ConditionalRule, ConditionalNode>(),
-
-            _ when isType && next == TokenType.Identifier => RunRule<VariableDeclarationRule, VariableDeclarationNode>(),
-
             TokenType.Identifier when next == TokenType.Equals => RunRule<AssignmentStatementRule, AssignmentStatementNode>(),
 
+            _ when isType && next == TokenType.Identifier => RunRule<LocalDeclarationStatementRule, LocalDeclarationStatementNode>(),
             _ => new ExpressionStatementNode(RunRule<ExpressionRule, ExpressionNode>())
         });
 
