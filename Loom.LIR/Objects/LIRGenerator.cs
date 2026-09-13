@@ -123,9 +123,7 @@ public class LIRGenerator
     public LIRTempValue EmitCmpLe(LIRValue left, LIRValue right) => Emit(LIROpCode.CmpLe, LIRType.Boolean, left, right);
     public LIRTempValue EmitCmpGe(LIRValue left, LIRValue right) => Emit(LIROpCode.CmpGe, LIRType.Boolean, left, right);
 
-    public void EmitCondBr(LIRValue condition, LIRBasicBlock trueTarget, LIRBasicBlock falseTarget) =>
-        Emit(LIROpCode.CondBr, null, condition, new LIRBlockValue(trueTarget), new LIRBlockValue(falseTarget));
+    public void EmitCondBr(LIRValue condition, LIRBasicBlock trueTarget, LIRBasicBlock falseTarget) => Emit(LIROpCode.CondBr, null, condition, new LIRBlockValue(trueTarget), new LIRBlockValue(falseTarget));
 
-    public void EmitBr(LIRBasicBlock target) =>
-        Emit(LIROpCode.Br, null, new LIRBlockValue(target));
+    public void EmitBr(LIRBasicBlock target) => Emit(LIROpCode.Br, null, new LIRBlockValue(target));
 }

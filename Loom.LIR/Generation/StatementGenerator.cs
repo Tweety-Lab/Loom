@@ -47,16 +47,23 @@ internal class StatementGenerator
 
     private void EmitLocalDeclaration(LocalDeclarationStatementNode node)
     {
+        var declaration = node.Variable;
         LocalVariableSymbol symbol = (LocalVariableSymbol)context.AnalysisContext.GetSymbol(node).Symbol!;
         var type = ASTGenerator.ConvertType(symbol.Type);
+
+        if (type is LIRStructType && declaration.Initializer is ObjectCreationExpressionNode)
+        {
+            locals[declaration.Name.Text] = Generator.EmitAlloca(type);
+            return;
+        }
 
         if (type is LIRStructType)
             type = new LIRPointerType(type);
 
         LIRTempValue address = Generator.EmitAlloca(type);
-        locals[node.Variable.Name.Text] = address;
+        locals[declaration.Name.Text] = address;
 
-        var value = EmitExpression(node.Variable.Initializer);
+        var value = EmitExpression(declaration.Initializer);
         Generator.EmitStore(value, address);
     }
 

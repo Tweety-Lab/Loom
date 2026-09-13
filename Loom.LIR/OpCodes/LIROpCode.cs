@@ -64,24 +64,13 @@ public readonly struct LIROpCode : IEquatable<LIROpCode>
     public static bool operator !=(LIROpCode left, LIROpCode right) => !left.Equals(right);
 
     /// <inheritdoc/>
-    public bool Equals(LIROpCode other)
-    {
-        return Name == other.Name &&
-               Type == other.Type &&
-               HasResult == other.HasResult;
-    }
+    public bool Equals(LIROpCode other) => Name == other.Name && Type == other.Type && HasResult == other.HasResult;
 
     /// <inheritdoc/>
-    public override bool Equals(object? obj)
-    {
-        return obj is LIROpCode other && Equals(other);
-    }
+    public override bool Equals(object? obj) => obj is LIROpCode other && Equals(other);
 
     /// <inheritdoc/>
-    public override int GetHashCode()
-    {
-        return HashCode.Combine(Name, Type, HasResult);
-    }
+    public override int GetHashCode() => HashCode.Combine(Name, Type, HasResult);
 
     /// <inheritdoc/>
     public override string ToString() => Name;
