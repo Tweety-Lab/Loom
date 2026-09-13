@@ -30,8 +30,6 @@ internal class StatementGenerator
         }
     }
 
-    private LIRValue ExpressionGenerator(ExpressionNode node) => new ExpressionGenerator(context, unit, function, locals).Emit(node);
-
     /// <summary> Emits a statement for the given node. </summary>
     public void EmitStatement(StatementNode node)
     {
@@ -41,14 +39,11 @@ internal class StatementGenerator
             case LocalDeclarationStatementNode decl: EmitLocalDeclaration(decl); break;
             case AssignmentStatementNode assign: EmitAssignment(assign); break;
             case ConditionalNode conditional: EmitConditional(conditional); break;
-            case ExpressionStatementNode expression: EmitExpressionStatement(expression); break;
+            case ExpressionStatementNode expression: EmitExpression(expression.Expression); break;
         }
     }
 
-    private void EmitExpressionStatement(ExpressionStatementNode node)
-    {
-        ExpressionGenerator(node.Expression);
-    }
+    private LIRValue EmitExpression(ExpressionNode node) => new ExpressionGenerator(context, unit, function, locals).Emit(node);
 
     private void EmitLocalDeclaration(LocalDeclarationStatementNode node)
     {
@@ -61,7 +56,7 @@ internal class StatementGenerator
         LIRTempValue address = Generator.EmitAlloca(type);
         locals[node.Variable.Name.Text] = address;
 
-        var value = ExpressionGenerator(node.Variable.Initializer);
+        var value = EmitExpression(node.Variable.Initializer);
         Generator.EmitStore(value, address);
     }
 
@@ -70,7 +65,7 @@ internal class StatementGenerator
         if (node.Expression == null)
             Generator.EmitReturn();
         else
-            Generator.EmitReturn(ExpressionGenerator(node.Expression));
+            Generator.EmitReturn(EmitExpression(node.Expression));
     }
 
     private void EmitAssignment(AssignmentStatementNode node)
@@ -79,12 +74,12 @@ internal class StatementGenerator
         if (!locals.TryGetValue(symbol.Name, out var address))
             throw new Exception($"Undeclared variable: {symbol.Name}");
 
-        Generator.EmitStore(ExpressionGenerator(node.Value), address);
+        Generator.EmitStore(EmitExpression(node.Value), address);
     }
 
     private void EmitConditional(ConditionalNode node)
     {
-        var condition = ExpressionGenerator(node.Expression);
+        var condition = EmitExpression(node.Expression);
         var thenBlock = Generator.CreateBlock("if.then");
         var continueBlock = Generator.CreateBlock("if.continue");
 
