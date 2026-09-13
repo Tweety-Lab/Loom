@@ -4,7 +4,7 @@ using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.Rules.Default;
 
-public record VariableDeclarationNode(Token Type, Token Name, ExpressionNode Initializer) : StatementNode
+public record VariableDeclarationNode(Token Type, Token Name, ExpressionNode Initializer) : ASTNode
 {
     public override IEnumerable<ASTNode> Children => [Initializer];
 }
