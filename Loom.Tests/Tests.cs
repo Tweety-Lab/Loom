@@ -243,6 +243,33 @@ module Test
 }
 ";
 
+    public const string INVALID_STATEMENT_MODULE_SOURCE = @"
+module Test
+{
+    i32 x = 42;
+}
+";
+
+    public const string INVALID_STATEMENT_STRUCT_SOURCE = @"
+module Test
+{
+    struct TestStruct
+    {
+        i32 x = 42;
+    }
+}
+";
+
+    public const string INVALID_STATEMENT_CONDITIONAL_SOURCE = @"
+module Test
+{
+    if (true)
+    {
+        return 1;
+    }
+}
+";
+
     private (ProgramNode root, CompilationContext context) ParseAndAnalyze(string source = TEST_SOURCE)
     {
         CompilationContext context = new CompilationContext();
@@ -594,7 +621,7 @@ module Test
     }
 
     [Fact]
-    public void EmitLIR_ObjectCreationExpression_EmitsAllocaAndStore()
+    public void EmitLIR_ObjectCreationExpression_EmitsSingleAlloca()
     {
         CompilationContext context = new CompilationContext();
         context.Parse(OBJECT_CREATION_SOURCE).Analyze().EmitLIR();
@@ -604,8 +631,11 @@ module Test
         Assert.NotNull(main);
 
         var instructions = main!.Blocks.SelectMany(b => b.Instructions).ToList();
-        Assert.Contains(instructions, i => i.OpCode == LIROpCode.Alloca);
-        Assert.Contains(instructions, i => i.OpCode == LIROpCode.Store);
+        var alloca = Assert.Single(instructions, i => i.OpCode == LIROpCode.Alloca);
+        var pointer = Assert.IsType<LIRPointerType>(alloca.Result!.Type);
+        Assert.IsType<LIRStructType>(pointer.PointeeType);
+
+        Assert.DoesNotContain(instructions, i => i.OpCode == LIROpCode.Store);
         Assert.DoesNotContain(instructions, i => i.OpCode == LIROpCode.Call);
     }
 
@@ -660,5 +690,30 @@ module Test
         string llvmIr = translator.Result.PrintToString();
         Assert.Contains("define i32 @\"Test::TestStruct::Number\"(ptr %self)", llvmIr);
         Assert.Contains("call i32 @\"Test::TestStruct::Number\"(ptr", llvmIr);
+    }
+
+    [Fact]
+    public void Analyze_StatementInModuleBody_ReportsDiagnostic()
+    {
+        var (_, context) = ParseAndAnalyze(INVALID_STATEMENT_MODULE_SOURCE);
+        var diagnostic = Assert.Single(context.DiagnosticContext.Diagnostics, d => d.Level == Diagnostic.DiagnosticLevel.Error);
+        Assert.Contains("local variable declaration", diagnostic.Message);
+        Assert.Contains("module 'Test'", diagnostic.Message);
+    }
+
+    [Fact]
+    public void Analyze_StatementInStructBody_ReportsDiagnostic()
+    {
+        var (_, context) = ParseAndAnalyze(INVALID_STATEMENT_STRUCT_SOURCE);
+        var diagnostic = Assert.Single(context.DiagnosticContext.Diagnostics, d => d.Level == Diagnostic.DiagnosticLevel.Error);
+        Assert.Contains("struct 'TestStruct'", diagnostic.Message);
+    }
+
+    [Fact]
+    public void Analyze_MisplacedConditional_ReportsOnceForNestedStatements()
+    {
+        var (_, context) = ParseAndAnalyze(INVALID_STATEMENT_CONDITIONAL_SOURCE);
+        var diagnostic = Assert.Single(context.DiagnosticContext.Diagnostics, d => d.Level == Diagnostic.DiagnosticLevel.Error);
+        Assert.Contains("if statement", diagnostic.Message);
     }
 }

@@ -16,8 +16,10 @@ public sealed class VisitorAttribute : Attribute { }
 /// An Abstract Syntax Tree visitor.
 /// </summary>
 /// <remarks>
-/// To visit an AST node from a clas that inhe
-/// 
+/// To visit an AST node, declare a method taking that node type and mark it with <see cref="VisitorAttribute"/>. A method
+/// taking a base node type (e.g. <see cref="StatementNode"/>) is matched for any of its subtypes, with the most derived
+/// visitor taking precedence.
+///
 /// This visitor requires manual visiting of children nodes. For automatic visiting, see <see cref="ASTWalker"/>.
 /// </remarks>
 public abstract class ASTVisitor
@@ -39,15 +41,37 @@ public abstract class ASTVisitor
     /// <returns> The result of the dispatched method or null if it returns void. </returns>
     public virtual object? Dispatch(ASTNode node)
     {
-        var method = cache.GetOrAdd((GetType(), node.GetType()), key => key.Item1.GetMethods().FirstOrDefault(m => m.GetCustomAttribute<VisitorAttribute>() != null && m.GetParameters() is [var p] && p.ParameterType == key.Item2));
+        var method = FindVisitMethod(GetType(), node.GetType());
 
         if (method != null)
             return method.Invoke(this, [node]);
-        else
-            OnUnhandled(node);
 
+        OnUnhandled(node);
         return null;
     }
 
     public virtual T? DispatchResult<T>(ASTNode node) => (T?)Dispatch(node);
+
+    /// <summary> Finds the most specific visitor method for <paramref name="nodeType"/>, preferring exact matches over base types. </summary>
+    protected static MethodInfo? FindVisitMethod(Type visitorType, Type nodeType)
+    {
+        return cache.GetOrAdd((visitorType, nodeType), key =>
+            key.Item1.GetMethods()
+                .Where(m => m.GetCustomAttribute<VisitorAttribute>() != null && m.GetParameters() is [var p] && p.ParameterType.IsAssignableFrom(key.Item2))
+                .OrderBy(m => InheritanceDistance(key.Item2, m.GetParameters()[0].ParameterType))
+                .FirstOrDefault());
+    }
+
+    /// <summary> The number of inheritance steps between <paramref name="from"/> and <paramref name="to"/>, or <see cref="int.MaxValue"/> if unrelated. </summary>
+    private static int InheritanceDistance(Type from, Type to)
+    {
+        var distance = 0;
+        var current = from;
+        while (current != null && current != to)
+        {
+            current = current.BaseType;
+            distance++;
+        }
+        return current == to ? distance : int.MaxValue;
+    }
 }

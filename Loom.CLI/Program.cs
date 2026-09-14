@@ -17,9 +17,11 @@ import Windows;
 
 module Consumer
 {
+    if (1 == 0) { }
+
     export struct MathInstance
     {
-        // i32 Number = 0;
+        i32 Number = 0;
 
         i32 Add(i32 a, i32 b)
         {
@@ -75,6 +77,8 @@ module Windows
             LLVMValueRef main = translator.Result.GetNamedFunction(context.AnalysisContext.EntryPoint.FullyQualifiedName);
             LLVMGenericValueRef result = engine.RunFunction(main, []);
 
+            PrintDiagnostics(context.DiagnosticContext);
+
             unsafe
             {
                 Console.WriteLine($"Result: {LLVM.GenericValueToInt(result, 1)}");
@@ -82,19 +86,24 @@ module Windows
         }
         catch (Exception)
         {
-            foreach (var diagnostic in context.DiagnosticContext.Diagnostics)
-            {
-                Console.ForegroundColor = diagnostic.Level switch
-                {
-                    Diagnostic.DiagnosticLevel.Error => ConsoleColor.Red,
-                    Diagnostic.DiagnosticLevel.Warning => ConsoleColor.Yellow,
-                    _ => ConsoleColor.White
-                };
-
-                Console.WriteLine(diagnostic.Message);
-            }
-
-            Console.ResetColor();
+            PrintDiagnostics(context.DiagnosticContext);
         }
+    }
+
+    private static void PrintDiagnostics(DiagnosticContext context)
+    {
+        foreach (var diagnostic in context.Diagnostics)
+        {
+            Console.ForegroundColor = diagnostic.Level switch
+            {
+                Diagnostic.DiagnosticLevel.Error => ConsoleColor.Red,
+                Diagnostic.DiagnosticLevel.Warning => ConsoleColor.Yellow,
+                _ => ConsoleColor.White
+            };
+
+            Console.WriteLine(diagnostic.Message);
+        }
+
+        Console.ResetColor();
     }
 }

@@ -12,7 +12,7 @@ public class ASTWalker : ASTVisitor
     {
         var nodeType = node.GetType();
 
-        var method = cache.GetOrAdd((GetType(), nodeType), key => key.Item1.GetMethods().FirstOrDefault(m => m.GetCustomAttribute<VisitorAttribute>() != null && m.GetParameters() is [var p] && p.ParameterType == key.Item2));
+        var method = FindVisitMethod(GetType(), nodeType);
 
         if (method != null)
             VisitChildren(node);
@@ -25,7 +25,7 @@ public class ASTWalker : ASTVisitor
     {
         var nodeType = node.GetType();
 
-        var method = cache.GetOrAdd((GetType(), nodeType), key => key.Item1.GetMethods().FirstOrDefault(m => m.GetCustomAttribute<VisitorAttribute>() != null && m.GetParameters() is [var p] && p.ParameterType == key.Item2));
+        var method = FindVisitMethod(GetType(), nodeType);
 
         if (method != null)
             VisitChildren(node);
