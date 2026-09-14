@@ -62,6 +62,12 @@ internal class StringPrinterStyle : ILIRPrinterStyle
                     return $"{result}load {PrintType(ptrType.PointeeType)}, {PrintValue(ptr)}";
                 }
 
+            case var op when op == LIROpCode.GetField:
+                {
+                    var ptrType = (LIRPointerType)inst.Result!.Type;
+                    return $"{result}getfield {PrintType(ptrType.PointeeType)} {PrintValue(inst.Operands[0])}, {PrintValue(inst.Operands[1])}";
+                }
+
             default:
                 {
                     var type = inst.Result is not null ? $"{PrintType(inst.Result.Type)} " : "";
@@ -92,6 +98,7 @@ internal class StringPrinterStyle : ILIRPrinterStyle
             LIRConstantBoolValue c => c.Value ? "true" : "false",
             LIRTempValue t => $"%{t.ID}",
             LIRFunction f => $"@{f.Name}",
+            LIRField field => field.Name,
             LIRBlockValue b => $"%{b.Block.Name}",
             null => "%null",
             _ => $"%unknown:{value.Type}"

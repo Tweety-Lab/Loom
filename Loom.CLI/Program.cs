@@ -23,7 +23,7 @@ module Consumer
 
         i32 Add(i32 a, i32 b)
         {
-            return a + b;
+            return a + Number;
         }
     }
 

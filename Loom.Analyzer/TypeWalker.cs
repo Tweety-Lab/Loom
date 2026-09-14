@@ -27,6 +27,7 @@ internal class TypeWalker : ASTWalker
         {
             LocalVariableSymbol local => local.Type,
             MethodSymbol method => method.ReturnType,
+            FieldSymbol field => field.Type,
             _ => null
         };
 
@@ -43,6 +44,8 @@ internal class TypeWalker : ASTWalker
 
         if (receiverType.Members.FirstOrDefault(m => m.Name == node.Name.BaseName) is MethodSymbol method)
             Context.ExpressionTypes[node] = method.ReturnType;
+        else if (receiverType.Members.FirstOrDefault(m => m.Name == node.Name.BaseName) is FieldSymbol field)
+            Context.ExpressionTypes[node] = field.Type;
     }
 
     [Visitor]

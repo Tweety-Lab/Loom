@@ -40,10 +40,10 @@ public sealed class LIRStruct : LIRValueObject
         return function;
     }
 
-    /// <summary> Adds a field declaration to this struct. </summary>
+/// <summary> Adds a field declaration to this struct. </summary>
     public LIRField DeclareField(string name, LIRType type)
     {
-        var field = LIRField.Declare(name, type);
+        var field = LIRField.Declare(name, Fields.Count, type);
         Fields.Add(field);
         return field;
     }

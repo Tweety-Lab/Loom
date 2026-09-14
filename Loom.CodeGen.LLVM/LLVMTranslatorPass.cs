@@ -44,6 +44,14 @@ public class LLVMTranslatorPass : LIRLayeredPass
         foreach (var structObj in unit.Structs)
             translationContext.TypeMap[structObj.Type] = llvmContext.CreateNamedStruct(structObj.Name);
 
+        // Set struct bodies once every struct type is registered so field access (getelementptr) is valid.
+        foreach (var structObj in unit.Structs)
+        {
+            LLVMTypeRef structType = translationContext.TypeMap[structObj.Type];
+            LLVMTypeRef[] fieldTypes = structObj.Fields.Select(f => translationContext.ResolveType(f.Type)).ToArray();
+            structType.StructSetBody(fieldTypes, false);
+        }
+
         functionEmitter = new FunctionEmitter(translationContext);
         blockEmitter = new BlockEmitter(translationContext);
         instructionEmitter = new InstructionEmitter(translationContext);

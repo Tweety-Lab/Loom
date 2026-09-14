@@ -31,13 +31,73 @@ internal class ExpressionGenerator
     public LIRValue Emit(ExpressionNode node) => node switch
     {
         NumberLiteralNode num => new LIRConstantIntValue(int.Parse(num.Value)),
-        IdentifierNameNode ident => Generator.EmitLoad(locals[ident.BaseName]),
+        IdentifierNameNode ident => EmitIdentifier(ident),
         BooleanLiteralNode boolean => new LIRConstantBoolValue(bool.Parse(boolean.Value)),
         BinaryExpressionNode binary => EmitBinary(binary),
         CallExpressionNode call => EmitCall(call),
+        MemberAccessExpressionNode member => EmitMemberAccess(member),
         ObjectCreationExpressionNode creation => Generator.EmitAlloca(ASTGenerator.ConvertType(context.AnalysisContext.ExpressionTypes[creation])),
         _ => throw new Exception($"Unhandled expression: {node.GetType().Name}")
     };
+
+    private LIRValue EmitIdentifier(IdentifierNameNode ident)
+    {
+        if (locals.TryGetValue(ident.BaseName, out var address))
+            return Generator.EmitLoad(address);
+
+        var symbol = context.AnalysisContext.GetSymbol(ident).Symbol;
+        if (symbol is FieldSymbol fieldSymbol)
+            return Generator.EmitLoad(EmitBareFieldAddress(fieldSymbol, ident));
+
+        throw new Exception($"Unhandled identifier: {ident.BaseName}");
+    }
+
+    private LIRValue EmitMemberAccess(MemberAccessExpressionNode node)
+    {
+        var receiverType = context.AnalysisContext.ExpressionTypes.TryGetValue(node.Receiver, out var type) ? type : null;
+        if (receiverType == null)
+            throw new Exception($"Could not resolve receiver type: {node.Receiver}");
+
+        var fieldSymbol = receiverType.Members.OfType<FieldSymbol>().FirstOrDefault(m => m.Name == node.Name.BaseName)
+            ?? throw new Exception($"Could not resolve member field: {node.Name.BaseName}");
+
+        return Generator.EmitLoad(EmitFieldAddress(EmitReceiverAddress(node.Receiver), receiverType, fieldSymbol));
+    }
+
+    /// <summary> Emits the address of a field referenced by bare name inside a method of the containing struct, accessed through the instance (self) parameter. </summary>
+    private LIRValue EmitBareFieldAddress(FieldSymbol symbol, ASTNode contextNode)
+    {
+        var structNode = context.AnalysisContext.FirstAncestorOrSelf<StructDeclarationNode>(contextNode)
+            ?? throw new Exception($"Could not find containing struct for field: {symbol.Name}");
+
+        var structTypeSymbol = (TypeSymbol)context.AnalysisContext.GetSymbol(structNode).Symbol
+            ?? throw new Exception($"Could not find symbol for struct: {structNode.StructName}");
+
+        // Within a struct method the instance is the function's 'self' parameter.
+        return EmitFieldAddress(EmitSelfParameter(), structTypeSymbol, symbol);
+    }
+
+    /// <summary> Emits the value of the instance ('self') parameter of a struct method. </summary>
+    private LIRValue EmitSelfParameter()
+    {
+        var index = Array.FindIndex(function.Type.Parameters, p => p.Name == "self");
+        if (index < 0)
+            throw new Exception($"Field access requires an instance method with a 'self' parameter ({function.Name}).");
+
+        return function.ParameterValues[index];
+    }
+
+    /// <summary> Emits the address of <paramref name="fieldSymbol"/> within an instance of <paramref name="structTypeSymbol"/>. </summary>
+    private LIRValue EmitFieldAddress(LIRValue instance, TypeSymbol structTypeSymbol, FieldSymbol fieldSymbol)
+    {
+        var structObj = unit.Structs.FirstOrDefault(s => s.Type == new LIRStructType(structTypeSymbol.FullyQualifiedName))
+            ?? throw new Exception($"Could not find struct: {structTypeSymbol.FullyQualifiedName}");
+
+        var field = structObj.Fields.FirstOrDefault(f => f.Name == fieldSymbol.Name)
+            ?? throw new Exception($"Could not find field: {fieldSymbol.Name}");
+
+        return Generator.EmitGetField(instance, field);
+    }
 
     private LIRValue EmitBinary(BinaryExpressionNode node)
     {
