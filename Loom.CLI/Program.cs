@@ -17,8 +17,6 @@ import Windows;
 
 module Consumer
 {
-    if (1 == 0) { }
-
     export struct MathInstance
     {
         i32 Number = 0;
@@ -101,7 +99,7 @@ module Windows
                 _ => ConsoleColor.White
             };
 
-            Console.WriteLine(diagnostic.Message);
+            Console.WriteLine($"[{diagnostic.Level}] {diagnostic.Message}");
         }
 
         Console.ResetColor();

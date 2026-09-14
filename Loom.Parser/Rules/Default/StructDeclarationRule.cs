@@ -26,7 +26,7 @@ public class StructDeclarationRule : ParserRule<StructDeclarationNode>
 
         var structName = Parser.Reader.Expect(TokenType.Identifier); // name
 
-        BlockNode body = RunRule<BlockRule, BlockNode>();
+        BlockNode body = RunRule<TypeBlockRule, BlockNode>();
 
         return new StructDeclarationNode(structName, body, modifiers);
     }

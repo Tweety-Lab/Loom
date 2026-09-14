@@ -55,7 +55,7 @@ public class MethodDeclarationRule : ParserRule<MethodDeclarationNode>
 
         BlockNode body = new BlockNode(new List<ASTNode>());
         if (needsBody)
-            body = Parser.GetRule<BlockRule>().ParseNode();
+            body = RunRule<MethodBlockRule, BlockNode>();
         else
             Parser.Reader.Expect(TokenType.Semicolon); // ;
 

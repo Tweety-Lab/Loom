@@ -1,7 +1,7 @@
-﻿using Loom.Parser.AST;
+﻿using System.Diagnostics.CodeAnalysis;
+using Loom.Parser.AST;
 using Loom.Parser.Tokenizer;
 using static Loom.Parser.Tokenizer.Token;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Loom.Parser.Rules.Default;
 
@@ -11,11 +11,11 @@ public record BlockNode(List<ASTNode> Contents) : ASTNode
     public override IEnumerable<ASTNode> Children => Contents;
 }
 
-[ParserRule]
-public class BlockRule : ParserRule<BlockNode>
+/// <summary> Base rule for parsing a <c>{ ... }</c> body. </summary>
+public abstract class BlockRule : ParserRule<BlockNode>
 {
     /// <inheritdoc/>
-    public BlockRule(LoomParser parser) : base(parser) { }
+    protected BlockRule(LoomParser parser) : base(parser) { }
 
     /// <inheritdoc/>
     public override BlockNode ParseNode()
@@ -31,7 +31,7 @@ public class BlockRule : ParserRule<BlockNode>
 
         ParseUntil(TokenType.RBrace, dispatch, () =>
         {
-            if (TryParseDeclaration(out var node))
+            if (TryParseMember(out var node))
                 body.Add(node);
             else
                 body.Add(RunRule<StatementRule, StatementNode>());
@@ -41,27 +41,12 @@ public class BlockRule : ParserRule<BlockNode>
         return new BlockNode(body);
     }
 
-    private bool TryParseDeclaration([NotNullWhen(true)] out ASTNode? node)
+    /// <summary> Attempts to parse a member declaration valid in this block context. Returns <see langword="false"/> to fall back to statement parsing. </summary>
+    protected virtual bool TryParseMember([NotNullWhen(true)] out ASTNode? node)
     {
-        var offset = 0;
-        while (TokenRegistry.IsModifier(Parser.Reader.Peek(offset).Type))
-            offset++;
-
-        if (Parser.Reader.Peek(offset).Type == TokenType.Struct)
-        {
-            node = RunRule<StructDeclarationRule, StructDeclarationNode>();
-            return true;
-        }
-
-        if (IsTypeName(Parser.Reader.Peek(offset).Type) && Parser.Reader.Peek(offset + 1).Type == TokenType.Identifier && Parser.Reader.Peek(offset + 2).Type == TokenType.LParen)
-        {
-            node = RunRule<MethodDeclarationRule, MethodDeclarationNode>();
-            return true;
-        }
-
         node = null;
         return false;
-
-        static bool IsTypeName(TokenType type) => type == TokenType.Identifier || TokenRegistry.IsBuiltInType(type);
     }
+
+    protected static bool IsTypeName(TokenType type) => type == TokenType.Identifier || TokenRegistry.IsBuiltInType(type);
 }
