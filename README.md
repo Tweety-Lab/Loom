@@ -153,5 +153,7 @@ entry:
 }
 ```
 
+LIR is flattened, but still relatively high level. Unlike LLVM, concepts akin to classes and structs are retained.
+
 ### Loom.CodeGen
 The constructed LIR is then passed into a `Loom.CodeGen.*` project. The default implementation uses [LLVM](https://llvm.org/docs/LangRef.html) to support extreme portability and code optimisation.
