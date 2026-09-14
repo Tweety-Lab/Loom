@@ -19,6 +19,7 @@ public record TypeSymbol(string Name, TypeSymbol.DefaultType KnownType) : Symbol
     }
 }
 
-public record MethodDefinitionSymbol(string Name, TypeSymbol ReturnType, List<ParameterSymbol> Parameters) : Symbol(Name);
+public record MethodSymbol(string Name, TypeSymbol ReturnType, List<ParameterSymbol> Parameters) : Symbol(Name);
 public record LocalVariableSymbol(string Name, TypeSymbol Type) : Symbol(Name);
+public record FieldSymbol(string Name, TypeSymbol Type) : Symbol(Name);
 public record ParameterSymbol(string Name, TypeSymbol Type) : Symbol(Name);

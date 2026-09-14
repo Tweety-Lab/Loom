@@ -26,7 +26,7 @@ internal class TypeWalker : ASTWalker
         var type = symbol switch
         {
             LocalVariableSymbol local => local.Type,
-            MethodDefinitionSymbol method => method.ReturnType,
+            MethodSymbol method => method.ReturnType,
             _ => null
         };
 
@@ -41,7 +41,7 @@ internal class TypeWalker : ASTWalker
         if (receiverType == null)
             return;
 
-        if (receiverType.Members.FirstOrDefault(m => m.Name == node.Name.BaseName) is MethodDefinitionSymbol method)
+        if (receiverType.Members.FirstOrDefault(m => m.Name == node.Name.BaseName) is MethodSymbol method)
             Context.ExpressionTypes[node] = method.ReturnType;
     }
 
@@ -50,7 +50,7 @@ internal class TypeWalker : ASTWalker
     {
         var returnType = node.Callee switch
         {
-            IdentifierNameNode ident => (Context.GetSymbol(ident).Symbol as MethodDefinitionSymbol)?.ReturnType,
+            IdentifierNameNode ident => (Context.GetSymbol(ident).Symbol as MethodSymbol)?.ReturnType,
             MemberAccessExpressionNode member => Context.ExpressionTypes.TryGetValue(member, out var type) ? type : null,
             _ => null
         };

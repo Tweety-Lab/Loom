@@ -339,8 +339,8 @@ module Test
         var symbolMap = context.AnalysisContext.Binders;
 
         var methodSymbol = symbolMap[root.Modules[0]].Lookup("MyMethod")?.First();
-        Assert.IsType<MethodDefinitionSymbol>(methodSymbol);
-        Assert.Equal(TypeSymbol.DefaultType.I32, ((MethodDefinitionSymbol)methodSymbol).ReturnType.KnownType);
+        Assert.IsType<MethodSymbol>(methodSymbol);
+        Assert.Equal(TypeSymbol.DefaultType.I32, ((MethodSymbol)methodSymbol).ReturnType.KnownType);
     }
 
     [Fact]
@@ -433,8 +433,8 @@ module Test
         var (root, context) = ParseAndAnalyze(BINDING_SOURCE);
         var method = (MethodDeclarationNode)root.Modules[0].Body.Contents.First();
         var symbol = context.AnalysisContext.GetSymbol(method).Symbol;
-        Assert.IsType<MethodDefinitionSymbol>(symbol);
-        Assert.Equal("MyMethod", ((MethodDefinitionSymbol)symbol).Name);
+        Assert.IsType<MethodSymbol>(symbol);
+        Assert.Equal("MyMethod", ((MethodSymbol)symbol).Name);
     }
 
     [Fact]
@@ -570,7 +570,7 @@ module Test
     {
         var (root, context) = ParseAndAnalyze(IPTR_RETURN_SOURCE);
         var method = (MethodDeclarationNode)root.Modules[0].Body.Contents.First();
-        var symbol = context.AnalysisContext.GetSymbol(method).Symbol as MethodDefinitionSymbol;
+        var symbol = context.AnalysisContext.GetSymbol(method).Symbol as MethodSymbol;
         Assert.Equal(TypeSymbol.DefaultType.IPtr, symbol!.ReturnType.KnownType);
         Assert.Equal("iptr", symbol.ReturnType.Name);
     }

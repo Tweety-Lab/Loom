@@ -68,7 +68,7 @@ internal class ExpressionGenerator
         if (node.Callee is MemberAccessExpressionNode member)
         {
             var receiverType = context.AnalysisContext.ExpressionTypes.TryGetValue(member.Receiver, out var type) ? type : null;
-            var method = receiverType?.Members.OfType<MethodDefinitionSymbol>().FirstOrDefault(m => m.Name == member.Name.BaseName);
+            var method = receiverType?.Members.OfType<MethodSymbol>().FirstOrDefault(m => m.Name == member.Name.BaseName);
 
             if (method == null)
                 throw new Exception($"Could not resolve member call: {member.Name.BaseName}");

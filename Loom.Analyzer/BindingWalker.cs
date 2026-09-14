@@ -37,7 +37,7 @@ internal class BindingWalker : ASTWalker
                     if (moduleNode == null)
                         continue;
 
-                    var exportedSymbol = Context.Binders[moduleNode].Lookup(node.BaseName)?.FirstOrDefault(s => s is MethodDefinitionSymbol m);
+                    var exportedSymbol = Context.Binders[moduleNode].Lookup(node.BaseName)?.FirstOrDefault(s => s is MethodSymbol m);
 
                     if (exportedSymbol != null)
                     {

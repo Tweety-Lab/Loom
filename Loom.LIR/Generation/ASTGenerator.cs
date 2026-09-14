@@ -58,13 +58,18 @@ public class ASTGenerator
         LIRStruct structObj = unit.DefineStruct(symbol.FullyQualifiedName);
 
         foreach (var content in node.Body.Contents)
+        {
             if (content is MethodDeclarationNode method)
                 GenerateStructMethod(structObj, method);
+
+            if (content is FieldDeclarationNode field)
+                GenerateStructField(structObj, field);
+        }
     }
 
     public void GenerateStructMethod(LIRStruct structObj, MethodDeclarationNode node)
     {
-        MethodDefinitionSymbol? symbol = (MethodDefinitionSymbol?)context.AnalysisContext.GetSymbol(node).Symbol;
+        MethodSymbol? symbol = (MethodSymbol?)context.AnalysisContext.GetSymbol(node).Symbol;
 
         if (symbol == null)
         {
@@ -90,9 +95,22 @@ public class ASTGenerator
                 statementGen.EmitStatement(statementNode);
     }
 
+    public void GenerateStructField(LIRStruct structObj, FieldDeclarationNode node)
+    {
+        FieldSymbol? symbol = (FieldSymbol?)context.AnalysisContext.GetSymbol(node).Symbol;
+
+        if (symbol == null)
+        {
+            Console.WriteLine($"Could not find symbol for {node.Variable.Name}!");
+            return;
+        }
+
+        structObj.DeclareField(symbol.Name, ConvertType(symbol.Type));
+    }
+
     public void GenerateMethodDeclaration(MethodDeclarationNode node)
     {
-        MethodDefinitionSymbol? symbol = (MethodDefinitionSymbol?)context.AnalysisContext.GetSymbol(node).Symbol;
+        MethodSymbol? symbol = (MethodSymbol?)context.AnalysisContext.GetSymbol(node).Symbol;
 
         if (symbol == null)
         {
@@ -109,7 +127,7 @@ public class ASTGenerator
 
     public void GenerateMethodBody(MethodDeclarationNode node)
     {
-        MethodDefinitionSymbol? symbol = (MethodDefinitionSymbol?)context.AnalysisContext.GetSymbol(node).Symbol;
+        MethodSymbol? symbol = (MethodSymbol?)context.AnalysisContext.GetSymbol(node).Symbol;
 
         if (symbol == null)
         {
@@ -138,7 +156,7 @@ public class ASTGenerator
         _ => LIRType.Void,
     };
 
-    private static LIRFunctionType BuildFunctionType(MethodDefinitionSymbol symbol, LIRType? instancePointerType = null)
+    private static LIRFunctionType BuildFunctionType(MethodSymbol symbol, LIRType? instancePointerType = null)
     {
         var parameters = new List<LIRParameter>();
 

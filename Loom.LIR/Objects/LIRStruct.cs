@@ -11,6 +11,9 @@ public sealed class LIRStruct : LIRValueObject
     /// <summary> The methods declared by this struct. </summary>
     public List<LIRFunction> Methods { get; } = new List<LIRFunction>();
 
+    /// <summary> The fields declared by this struct. </summary>
+    public List<LIRField> Fields { get; } = new List<LIRField>();
+
     /// <summary> Initializes a new instance of the <see cref="LIRStruct"/> class. </summary>
     private LIRStruct(string name)
     {
@@ -35,5 +38,13 @@ public sealed class LIRStruct : LIRValueObject
         var function = LIRFunction.Define(name, type);
         Methods.Add(function);
         return function;
+    }
+
+    /// <summary> Adds a field declaration to this struct. </summary>
+    public LIRField DeclareField(string name, LIRType type)
+    {
+        var field = LIRField.Declare(name, type);
+        Fields.Add(field);
+        return field;
     }
 }

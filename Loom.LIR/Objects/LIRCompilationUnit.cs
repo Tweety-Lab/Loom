@@ -20,9 +20,6 @@ public class LIRCompilationUnit : ILIRObject
     /// <summary> Initializes a new instance of the <see cref="LIRCompilationUnit"/> class. </summary>
     public LIRCompilationUnit(string name) => MetaData.Add("Name", name);
 
-    /// <summary> Gets a function by name. </summary>
-    public LIRFunction? GetFunction(string name) => Functions.FirstOrDefault(f => f.Name == name);
-
     /// <summary> Defines a new function inside this <see cref="LIRCompilationUnit"/>. </summary>
     public LIRFunction DefineFunction(string name, LIRFunctionType type, bool hasBody = true)
     {
@@ -46,4 +43,7 @@ public class LIRCompilationUnit : ILIRObject
 
     /// <summary> Gets a struct by name. </summary>
     public LIRStruct? GetStruct(string name) => Structs.FirstOrDefault(s => s.Name == name);
+
+    /// <summary> Gets a function by name. </summary>
+    public LIRFunction? GetFunction(string name) => Functions.FirstOrDefault(f => f.Name == name);
 }

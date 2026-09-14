@@ -41,13 +41,18 @@ public class LIRPrinter
 
         sb.AppendLine(Style.PrintStructHeader(structObj));
 
+        foreach (var field  in structObj.Fields)
+        {
+            sb.AppendLine("  " + Style.PrintField(field).Replace("\n", "\n  "));
+            sb.AppendLine();
+        }
+
         foreach (var method in structObj.Methods)
         {
             sb.AppendLine("  " + Style.PrintFunctionHeader(method).Replace("\n", "\n  "));
             foreach (var block in method.Blocks)
-            {
                 sb.AppendLine(PrintBlock(block, "    "));
-            }
+
             if (!method.IsDeclaration)
                 sb.AppendLine("  " + Style.PrintFunctionFooter());
         }

@@ -25,7 +25,7 @@ public class AnalysisContext
     public Dictionary<ASTNode, ASTNode> Parents { get; } = new();
 
     /// <summary> The entry point of the program or null if one could not be resolved. </summary>
-    public MethodDefinitionSymbol? EntryPoint { get; private set; }
+    public MethodSymbol? EntryPoint { get; private set; }
 
     /// <summary> All registered analyzers the pipeline uses. </summary>
     public List<Analyzers.Analyzer> Analyzers
@@ -108,7 +108,7 @@ public class AnalysisContext
         }
 
         // Resolve entry point
-        EntryPoint = roots.SelectMany(r => r.Modules).SelectMany(m => Binders[m].Symbols).OfType<MethodDefinitionSymbol>().FirstOrDefault(s => string.Equals(s.Name, "main", StringComparison.OrdinalIgnoreCase));
+        EntryPoint = roots.SelectMany(r => r.Modules).SelectMany(m => Binders[m].Symbols).OfType<MethodSymbol>().FirstOrDefault(s => string.Equals(s.Name, "main", StringComparison.OrdinalIgnoreCase));
     }
 
     /// <summary> Gets the nearest <see cref="Binder"/> in scope for the given node. </summary>
