@@ -17,29 +17,15 @@ import Windows;
 
 module Consumer
 {
-    export struct MathInstance
-    {
-        i32 Number = 0;
-
-        i32 Add(i32 a, i32 b)
-        {
-            return a + Number;
-        }
-    }
-
     // Entry Point
     export i32 Main()
     {
         Sleep(1000);
 
-        MathInstance math = new MathInstance();
-        i32 result = math.Add(2, 4);
-        if (result == 2 + 4)
-        {
-            result = 20;
-        }
+        Process process = GetProcess();
+        process.Close();
 
-        return result;
+        return 1;
     }
 }
 
@@ -47,6 +33,25 @@ module Windows
 {
     export extern void Sleep(i32 length);
     export extern iptr GetCurrentProcess();
+    export extern bool TerminateProcess(iptr process, i32 exitCode);
+
+    export struct Process
+    {
+        iptr Handle = 0;
+
+        void Close()
+        {
+            TerminateProcess(Handle, 0);
+            return;
+        }
+    }
+
+    export Process GetProcess()
+    {
+        Process process = new Process();
+        process.Handle = GetCurrentProcess();
+        return process;
+    }
 }
 ";
 

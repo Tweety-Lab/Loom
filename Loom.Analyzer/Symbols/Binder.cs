@@ -9,9 +9,9 @@ public class Binder
     public Binder? Parent { get; }
 
     /// <summary> All symbols in the table. </summary>
-    public IReadOnlySet<Symbol> Symbols => symbols;
+    public IReadOnlyList<Symbol> Symbols => symbols;
 
-    private HashSet<Symbol> symbols = new();
+    private List<Symbol> symbols = new();
 
     /// <summary> Initializes a new instance of the <see cref="Binder"/> class. </summary>
     public Binder(Binder? parent = null) => Parent = parent;

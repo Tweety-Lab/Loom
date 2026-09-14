@@ -39,11 +39,9 @@ internal class DeclarationWalker : ASTVisitor
     [Visitor]
     public void Visit(MethodDeclarationNode node)
     {
-        var returnType = CurrentTable.Lookup(node.ReturnType.Text)?.First() as TypeSymbol ?? throw new Exception($"Type not found: {node.ReturnType.Text}!");
+        var parameters = new List<ParameterSymbol>();
 
-        List<ParameterSymbol> parameters = new List<ParameterSymbol>();
-
-        var symbol = new MethodSymbol(node.MethodName.Text, returnType, parameters);
+        var symbol = new MethodSymbol(node.MethodName.Text, parameters);
 
         if (node.Modifiers.Any(m => m.Type == Parser.Tokenizer.Token.TokenType.Extern))
             symbol.FullyQualifiedName = node.MethodName.Text;
@@ -59,8 +57,7 @@ internal class DeclarationWalker : ASTVisitor
         {
             foreach (var param in node.Parameters)
             {
-                var type = CurrentTable.Lookup(param.Type.Text)?.First() as TypeSymbol ?? throw new Exception($"Type not found: {param.Type.Text}!");
-                var paramSymbol = new ParameterSymbol(param.Name.Text, type);
+                var paramSymbol = new ParameterSymbol(param.Name.Text);
                 parameters.Add(paramSymbol);
                 CurrentTable.Define(paramSymbol);
                 Context.BoundSymbols[param] = paramSymbol;
@@ -82,16 +79,17 @@ internal class DeclarationWalker : ASTVisitor
         WithScope(node, () => VisitChildren(node), symbol);
     }
 
-
     [Visitor]
     public void Visit(FieldDeclarationNode node)
     {
-        var type = CurrentTable.Lookup(node.Variable.Type.Text)?.First() as TypeSymbol ?? throw new Exception($"Type not found: {node.Variable.Type.Text}!");
-        var symbol = new FieldSymbol(node.Variable.Name.Text, type);
+        var symbol = new FieldSymbol(node.Variable.Name.Text);
         symbol.FullyQualifiedName = BuildQualifiedName(node.Variable.Name.Text);
         symbol.DeclaringNode = node;
         CurrentTable.Define(symbol);
         Context.BoundSymbols[node] = symbol;
+
+        if (CurrentSymbol is TypeSymbol typeSymbol)
+            typeSymbol.Members.Add(symbol);
 
         VisitChildren(node);
     }
@@ -99,8 +97,7 @@ internal class DeclarationWalker : ASTVisitor
     [Visitor]
     public void Visit(LocalDeclarationStatementNode node)
     {
-        var type = CurrentTable.Lookup(node.Variable.Type.Text)?.First() as TypeSymbol ?? throw new Exception($"Type not found: {node.Variable.Type.Text}!");
-        var symbol = new LocalVariableSymbol(node.Variable.Name.Text, type);
+        var symbol = new LocalVariableSymbol(node.Variable.Name.Text);
         symbol.FullyQualifiedName = BuildQualifiedName(node.Variable.Name.Text);
         symbol.DeclaringNode = node;
         CurrentTable.Define(symbol);

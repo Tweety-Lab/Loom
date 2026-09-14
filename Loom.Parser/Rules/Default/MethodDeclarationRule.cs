@@ -27,7 +27,7 @@ public class MethodDeclarationRule : ParserRule<MethodDeclarationNode>
     {
         var modifiers = Parser.Reader.ExpectMany(t => TokenRegistry.IsModifier(t.Type));
 
-        Token returnType = Parser.Reader.ExpectAny(t => TokenRegistry.IsBuiltInType(t.Type)); // return type
+        Token returnType = Parser.Reader.ExpectAny(t => TokenRegistry.IsBuiltInType(t.Type) || t.Type == TokenType.Identifier); // return type
         var methodName = Parser.Reader.Expect(TokenType.Identifier); // name
 
         Parser.Reader.Expect(TokenType.LParen); // (
@@ -38,7 +38,7 @@ public class MethodDeclarationRule : ParserRule<MethodDeclarationNode>
         {
             do
             {
-                var type = Parser.Reader.ExpectAny(t => TokenRegistry.IsBuiltInType(t.Type));
+                var type = Parser.Reader.ExpectAny(t => TokenRegistry.IsBuiltInType(t.Type) || t.Type == TokenType.Identifier);
                 var name = Parser.Reader.Expect(TokenType.Identifier);
 
                 parameters.Add(new ParameterNode(type, name));

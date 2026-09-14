@@ -42,10 +42,10 @@ internal class TypeWalker : ASTWalker
         if (receiverType == null)
             return;
 
-        if (receiverType.Members.FirstOrDefault(m => m.Name == node.Name.BaseName) is MethodSymbol method)
-            Context.ExpressionTypes[node] = method.ReturnType;
-        else if (receiverType.Members.FirstOrDefault(m => m.Name == node.Name.BaseName) is FieldSymbol field)
-            Context.ExpressionTypes[node] = field.Type;
+        if (receiverType.Members.FirstOrDefault(m => m.Name == node.Name.BaseName) is MethodSymbol method && method.ReturnType is { } returnType)
+            Context.ExpressionTypes[node] = returnType;
+        else if (receiverType.Members.FirstOrDefault(m => m.Name == node.Name.BaseName) is FieldSymbol field && field.Type is { } fieldType)
+            Context.ExpressionTypes[node] = fieldType;
     }
 
     [Visitor]

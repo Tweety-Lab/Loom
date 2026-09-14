@@ -1,5 +1,4 @@
-﻿using Loom.Analyzer.Symbols;
-using Loom.Common.Diagnostics;
+﻿using Loom.Common.Diagnostics;
 using Loom.Parser.AST;
 using Loom.Parser.Rules.Default;
 using Loom.Parser.Tokenizer;
@@ -19,7 +18,7 @@ public class UnresolvedTypeAnalyzer : Analyzer
     {
         if (node.ReturnType.Type == Token.TokenType.Identifier)
         {
-            var symbol = Context.Binders.First().Value.Lookup(node.ReturnType.Text) as TypeSymbol;
+            var symbol = TypeResolver.Resolve(Context, node, node.ReturnType.Text);
 
             if (symbol == null)
                 Context.DiagnosticContext?.Report(UnresolvedTypeDiagnostic, node.ReturnType.Text);

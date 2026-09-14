@@ -105,7 +105,7 @@ public class ASTGenerator
             return;
         }
 
-        structObj.DeclareField(symbol.Name, ConvertType(symbol.Type));
+        structObj.DeclareField(symbol.Name, ConvertType(symbol.Type!));
     }
 
     public void GenerateMethodDeclaration(MethodDeclarationNode node)
@@ -163,8 +163,8 @@ public class ASTGenerator
         if (instancePointerType != null)
             parameters.Add(new LIRParameter("self", instancePointerType));
 
-        parameters.AddRange(symbol.Parameters.Select(p => new LIRParameter(p.Name, ConvertType(p.Type))));
+        parameters.AddRange(symbol.Parameters.Select(p => new LIRParameter(p.Name, ConvertType(p.Type!))));
 
-        return new LIRFunctionType(ConvertType(symbol.ReturnType), parameters.ToArray());
+        return new LIRFunctionType(ConvertType(symbol.ReturnType!), parameters.ToArray());
     }
 }

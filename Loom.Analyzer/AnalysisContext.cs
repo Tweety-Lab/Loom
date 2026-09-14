@@ -89,7 +89,7 @@ public class AnalysisContext
         foreach (var root in rootList)
             parentWalker.Dispatch(root);
 
-        // Resolve special binding
+        // Bind identifiers and resolve declared types
         var bindWalker = new BindingWalker(this);
         foreach (var root in rootList)
             bindWalker.Dispatch(root);

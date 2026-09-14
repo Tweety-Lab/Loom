@@ -31,28 +31,37 @@ internal class ExpressionGenerator
     public LIRValue Emit(ExpressionNode node) => node switch
     {
         NumberLiteralNode num => new LIRConstantIntValue(int.Parse(num.Value)),
-        IdentifierNameNode ident => EmitIdentifier(ident),
+        IdentifierNameNode ident => Generator.EmitLoad(EmitAddress(ident)),
         BooleanLiteralNode boolean => new LIRConstantBoolValue(bool.Parse(boolean.Value)),
         BinaryExpressionNode binary => EmitBinary(binary),
         CallExpressionNode call => EmitCall(call),
-        MemberAccessExpressionNode member => EmitMemberAccess(member),
+        MemberAccessExpressionNode member => Generator.EmitLoad(EmitAddress(member)),
         ObjectCreationExpressionNode creation => Generator.EmitAlloca(ASTGenerator.ConvertType(context.AnalysisContext.ExpressionTypes[creation])),
         _ => throw new Exception($"Unhandled expression: {node.GetType().Name}")
     };
 
-    private LIRValue EmitIdentifier(IdentifierNameNode ident)
+    /// <summary> Emits the address of an addressable expression (a local variable or a field). </summary>
+    public LIRValue EmitAddress(ExpressionNode node) => node switch
+    {
+        IdentifierNameNode ident => EmitIdentifierAddress(ident),
+        MemberAccessExpressionNode member => EmitMemberAddress(member),
+        ObjectCreationExpressionNode creation => Emit(creation),
+        _ => throw new Exception($"Unhandled addressable expression: {node.GetType().Name}")
+    };
+
+    private LIRValue EmitIdentifierAddress(IdentifierNameNode ident)
     {
         if (locals.TryGetValue(ident.BaseName, out var address))
-            return Generator.EmitLoad(address);
+            return address;
 
         var symbol = context.AnalysisContext.GetSymbol(ident).Symbol;
         if (symbol is FieldSymbol fieldSymbol)
-            return Generator.EmitLoad(EmitBareFieldAddress(fieldSymbol, ident));
+            return EmitBareFieldAddress(fieldSymbol, ident);
 
         throw new Exception($"Unhandled identifier: {ident.BaseName}");
     }
 
-    private LIRValue EmitMemberAccess(MemberAccessExpressionNode node)
+    private LIRValue EmitMemberAddress(MemberAccessExpressionNode node)
     {
         var receiverType = context.AnalysisContext.ExpressionTypes.TryGetValue(node.Receiver, out var type) ? type : null;
         if (receiverType == null)
@@ -61,7 +70,7 @@ internal class ExpressionGenerator
         var fieldSymbol = receiverType.Members.OfType<FieldSymbol>().FirstOrDefault(m => m.Name == node.Name.BaseName)
             ?? throw new Exception($"Could not resolve member field: {node.Name.BaseName}");
 
-        return Generator.EmitLoad(EmitFieldAddress(EmitReceiverAddress(node.Receiver), receiverType, fieldSymbol));
+        return EmitFieldAddress(EmitReceiverAddress(node.Receiver), receiverType, fieldSymbol);
     }
 
     /// <summary> Emits the address of a field referenced by bare name inside a method of the containing struct, accessed through the instance (self) parameter. </summary>

@@ -19,7 +19,26 @@ public record TypeSymbol(string Name, TypeSymbol.DefaultType KnownType) : Symbol
     }
 }
 
-public record MethodSymbol(string Name, TypeSymbol ReturnType, List<ParameterSymbol> Parameters) : Symbol(Name);
-public record LocalVariableSymbol(string Name, TypeSymbol Type) : Symbol(Name);
-public record FieldSymbol(string Name, TypeSymbol Type) : Symbol(Name);
-public record ParameterSymbol(string Name, TypeSymbol Type) : Symbol(Name);
+public record MethodSymbol(string Name, List<ParameterSymbol> Parameters) : Symbol(Name)
+{
+    /// <summary> The resolved return type, bound after all declarations. </summary>
+    public TypeSymbol? ReturnType { get; set; }
+}
+
+public record LocalVariableSymbol(string Name) : Symbol(Name)
+{
+    /// <summary> The resolved type, bound after all declarations. </summary>
+    public TypeSymbol? Type { get; set; }
+}
+
+public record FieldSymbol(string Name) : Symbol(Name)
+{
+    /// <summary> The resolved type, bound after all declarations. </summary>
+    public TypeSymbol? Type { get; set; }
+}
+
+public record ParameterSymbol(string Name) : Symbol(Name)
+{
+    /// <summary> The resolved type, bound after all declarations. </summary>
+    public TypeSymbol? Type { get; set; }
+}

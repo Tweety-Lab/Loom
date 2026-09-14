@@ -53,7 +53,7 @@ internal class StatementGenerator
     {
         var declaration = node.Variable;
         LocalVariableSymbol symbol = (LocalVariableSymbol)context.AnalysisContext.GetSymbol(node).Symbol!;
-        var type = ASTGenerator.ConvertType(symbol.Type);
+        var type = ASTGenerator.ConvertType(symbol.Type!);
 
         if (type is LIRStructType && declaration.Initializer is ObjectCreationExpressionNode)
         {
@@ -81,11 +81,9 @@ internal class StatementGenerator
 
     private void EmitAssignment(AssignmentStatementNode node)
     {
-        LocalVariableSymbol symbol = (LocalVariableSymbol)context.AnalysisContext.GetSymbol(node.Target).Symbol!;
-        if (!locals.TryGetValue(symbol.Name, out var address))
-            throw new Exception($"Undeclared variable: {symbol.Name}");
-
-        Generator.EmitStore(EmitExpression(node.Value), address);
+        var value = EmitExpression(node.Value);
+        var address = new ExpressionGenerator(context, unit, function, locals).EmitAddress(node.Target);
+        Generator.EmitStore(value, address);
     }
 
     private void EmitConditional(ConditionalNode node)
