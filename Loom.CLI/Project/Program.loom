@@ -2,7 +2,7 @@ import Windows;
 
 module Consumer
 {
-    // Entry Point
+    /// @brief Program Entry Point
     export i32 Main()
     {
         i32 exitCode = 1;
@@ -17,19 +17,25 @@ module Consumer
 
 module Windows
 {
+#region Native
     extern iptr GetCurrentProcess();
     extern bool TerminateProcess(iptr process, i32 exitCode);
-
+#endregion
+    
+	/// @brief Native Windows Process
     export struct Process
     {
         iptr Handle = default;
 
+        /// @brief Closes the process
         bool Close()
         {
             return TerminateProcess(Handle, 0);
         }
     }
 
+    /// @brief Gets the current process
+    /// @return The current process
     export Process GetProcess()
     {
         Process process = new Process();

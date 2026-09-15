@@ -42,7 +42,7 @@ public class LoomTokenizer
                 continue;
             }
 
-            if (current == '/' && Reader.Peek(1) == '/')
+            if ((current == '/' && Reader.Peek(1) == '/') || current == '#')
             {
                 while (Reader.Peek() != '\n' && !Reader.IsEnd)
                     Reader.Read();

@@ -10,6 +10,9 @@
       "include": "#comments"
     },
     {
+      "include": "#preprocessor"
+    },
+    {
       "include": "#strings"
     },
     {
@@ -25,10 +28,10 @@
       "include": "#functions"
     },
     {
-      "include": "#types"
+      "include": "#keywords"
     },
     {
-      "include": "#keywords"
+      "include": "#types"
     },
     {
       "include": "#constants"
@@ -56,6 +59,15 @@
           "name": "comment.block.loom",
           "begin": "/\\*",
           "end": "\\*/"
+        }
+      ]
+    },
+
+    "preprocessor": {
+      "patterns": [
+        {
+          "name": "keyword.preprocessor.region.loom",
+          "match": "^\\s*#\\w+\\b.*$"
         }
       ]
     },
@@ -98,18 +110,8 @@
         },
 
         {
-          "name": "entity.name.namespace.loom",
-          "match": "(?<=\\bmodule\\s+)[A-Za-z_][A-Za-z0-9_]*"
-        },
-
-        {
           "name": "keyword.control.import.loom",
           "match": "\\bimport\\b"
-        },
-
-        {
-          "name": "entity.name.namespace.import.loom",
-          "match": "(?<=\\bimport\\s+)[A-Za-z_][A-Za-z0-9_]*"
         }
 
       ]
@@ -157,17 +159,6 @@
       ]
     },
 
-    "types": {
-      "patterns": [
-
-        {
-          "name": "storage.type.primitive.loom",
-          "match": "\\b(?:void|bool|i8|i16|i32|i64|u8|u16|u32|u64|iptr|f32|f64|default)\\b"
-        }
-
-      ]
-    },
-
     "keywords": {
       "patterns": [
 
@@ -182,8 +173,28 @@
         },
 
         {
-          "name": "keyword.operator.new.loom",
+          "name": "storage.modifier.new.loom",
           "match": "\\bnew\\b"
+        }
+
+      ]
+    },
+
+    "types": {
+      "patterns": [
+        {
+          "name": "storage.type.primitive.loom",
+          "match": "\\b(?:void|bool|i8|i16|i32|i64|u8|u16|u32|u64|iptr|f32|f64|default)\\b"
+        },
+
+        {
+          "name": "entity.name.type.loom",
+          "match": "\\b[A-Za-z_][A-Za-z0-9_]*(?=\\s+[A-Za-z_][A-Za-z0-9_]*\\s*\\()"
+        },
+
+        {
+          "name": "entity.name.type.loom",
+          "match": "\\b[A-Za-z_][A-Za-z0-9_]*(?=\\s+[A-Za-z_][A-Za-z0-9_]*\\s*=)"
         }
 
       ]
