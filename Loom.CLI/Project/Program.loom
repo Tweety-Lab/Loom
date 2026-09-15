@@ -5,14 +5,37 @@ module Consumer
     // Entry Point
     export i32 Main()
     {
-        Sleep(1000);
-        return 1;
+        i32 exitCode = 0;
+
+        Process process = GetProcess();
+        if (process.Close())
+        {
+            exitCode = 1;
+        }
+        
+        return exitCode;
     }
 }
 
 module Windows
 {
-    export extern void Sleep(i32 length);
-    export extern iptr GetCurrentProcess();
-    export extern bool TerminateProcess(iptr process, i32 exitCode);
+    extern iptr GetCurrentProcess();
+    extern bool TerminateProcess(iptr process, i32 exitCode);
+
+    export struct Process
+    {
+        iptr Handle = 0;
+
+        bool Close()
+        {
+            return TerminateProcess(Handle, 0);
+        }
+    }
+
+    export Process GetProcess()
+    {
+        Process process = new Process();
+        process.Handle = GetCurrentProcess();
+        return process;
+    }
 }
