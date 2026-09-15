@@ -25,8 +25,9 @@ public class ConditionalRule : ParserRule<ConditionalNode>
         var condition = RunRule<ExpressionRule, ExpressionNode>();
         Parser.Reader.Expect(TokenType.RParen); // )
 
-        var body = RunRule<MethodBlockRule, BlockNode>();
+        if (!Parser.Reader.Check(TokenType.LBrace))
+            return new ConditionalNode(condition, new BlockNode([RunRule<StatementRule, StatementNode>()])); // Hacky single line conditionals
 
-        return new ConditionalNode(condition, body);
+        return new ConditionalNode(condition, RunRule<MethodBlockRule, BlockNode>());
     }
 }

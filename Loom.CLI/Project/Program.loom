@@ -9,9 +9,7 @@ module Consumer
 
         Process process = GetProcess();
         if (process.Close())
-        {
             exitCode = 1;
-        }
         
         return exitCode;
     }
