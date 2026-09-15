@@ -76,13 +76,10 @@ internal class ExpressionGenerator
     /// <summary> Emits the address of a field referenced by bare name inside a method of the containing struct, accessed through the instance (self) parameter. </summary>
     private LIRValue EmitBareFieldAddress(FieldSymbol symbol, ASTNode contextNode)
     {
-        var structNode = context.AnalysisContext.FirstAncestorOrSelf<StructDeclarationNode>(contextNode)
-            ?? throw new Exception($"Could not find containing struct for field: {symbol.Name}");
+        var structNode = context.AnalysisContext.FirstAncestorOrSelf<StructDeclarationNode>(contextNode) ?? throw new Exception($"Could not find containing struct for field: {symbol.Name}");
 
-        var structTypeSymbol = (TypeSymbol)context.AnalysisContext.GetSymbol(structNode).Symbol
-            ?? throw new Exception($"Could not find symbol for struct: {structNode.StructName}");
+        var structTypeSymbol = (TypeSymbol)context.AnalysisContext.GetSymbol(structNode).Symbol ?? throw new Exception($"Could not find symbol for struct: {structNode.StructName}");
 
-        // Within a struct method the instance is the function's 'self' parameter.
         return EmitFieldAddress(EmitSelfParameter(), structTypeSymbol, symbol);
     }
 
@@ -90,6 +87,7 @@ internal class ExpressionGenerator
     private LIRValue EmitSelfParameter()
     {
         var index = Array.FindIndex(function.Type.Parameters, p => p.Name == "self");
+
         if (index < 0)
             throw new Exception($"Field access requires an instance method with a 'self' parameter ({function.Name}).");
 
@@ -99,11 +97,9 @@ internal class ExpressionGenerator
     /// <summary> Emits the address of <paramref name="fieldSymbol"/> within an instance of <paramref name="structTypeSymbol"/>. </summary>
     private LIRValue EmitFieldAddress(LIRValue instance, TypeSymbol structTypeSymbol, FieldSymbol fieldSymbol)
     {
-        var structObj = unit.Structs.FirstOrDefault(s => s.Type == new LIRStructType(structTypeSymbol.FullyQualifiedName))
-            ?? throw new Exception($"Could not find struct: {structTypeSymbol.FullyQualifiedName}");
+        var structObj = unit.Structs.FirstOrDefault(s => s.Type == new LIRStructType(structTypeSymbol.FullyQualifiedName)) ?? throw new Exception($"Could not find struct: {structTypeSymbol.FullyQualifiedName}");
 
-        var field = structObj.Fields.FirstOrDefault(f => f.Name == fieldSymbol.Name)
-            ?? throw new Exception($"Could not find field: {fieldSymbol.Name}");
+        var field = structObj.Fields.FirstOrDefault(f => f.Name == fieldSymbol.Name) ?? throw new Exception($"Could not find field: {fieldSymbol.Name}");
 
         return Generator.EmitGetField(instance, field);
     }
