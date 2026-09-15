@@ -12,54 +12,13 @@ namespace Loom.CLI;
 
 public class Program
 {
-    public const string TEST_SOURCE = @"
-import Windows;
-
-module Consumer
-{
-    // Entry Point
-    export i32 Main()
-    {
-        Sleep(1000);
-
-        Process process = GetProcess();
-        process.Close();
-
-        return 1;
-    }
-}
-
-module Windows
-{
-    export extern void Sleep(i32 length);
-    export extern iptr GetCurrentProcess();
-    export extern bool TerminateProcess(iptr process, i32 exitCode);
-
-    export struct Process
-    {
-        iptr Handle = 0;
-
-        void Close()
-        {
-            TerminateProcess(Handle, 0);
-            return;
-        }
-    }
-
-    export Process GetProcess()
-    {
-        Process process = new Process();
-        process.Handle = GetCurrentProcess();
-        return process;
-    }
-}
-";
-
     static void Main(string[] args)
     {
+        string projectSource = File.ReadAllText("Project/Program.loom");
+
         CompilationContext context = new CompilationContext();
 
-        context.Parse(TEST_SOURCE).Analyze().EmitLIR();
+        context.Parse(projectSource).Analyze().EmitLIR();
 
         LIRCompilationUnit unit = context.CompilationUnits.First();
 

@@ -17,7 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Loom.Analyzer\Loom.Analyzer.csproj" />
-    <ProjectReference Include="..\Loom.CodeGen.LLVM\Loom.CodeGen.LLVM.csproj" />
+    <ProjectReference Include="..\CodeGen\Loom.CodeGen.LLVM\Loom.CodeGen.LLVM.csproj" />
     <ProjectReference Include="..\Loom.Common\Loom.Common.csproj" />
     <ProjectReference Include="..\Loom.LIR\Loom.LIR.csproj" />
     <ProjectReference Include="..\Loom.Parser\Loom.Parser.csproj" />

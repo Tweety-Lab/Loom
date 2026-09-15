@@ -1,0 +1,18 @@
+import Windows;
+
+module Consumer
+{
+    // Entry Point
+    export i32 Main()
+    {
+        Sleep(1000);
+        return 1;
+    }
+}
+
+module Windows
+{
+    export extern void Sleep(i32 length);
+    export extern iptr GetCurrentProcess();
+    export extern bool TerminateProcess(iptr process, i32 exitCode);
+}

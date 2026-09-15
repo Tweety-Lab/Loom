@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Loom.LIR\Loom.LIR.csproj" />
+    <ProjectReference Include="..\..\Loom.LIR\Loom.LIR.csproj" />
   </ItemGroup>
 
 </Project>
