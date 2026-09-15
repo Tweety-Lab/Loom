@@ -33,6 +33,7 @@ internal class ExpressionGenerator
         NumberLiteralNode num => new LIRConstantIntValue(int.Parse(num.Value)),
         IdentifierNameNode ident => Generator.EmitLoad(EmitAddress(ident)),
         BooleanLiteralNode boolean => new LIRConstantBoolValue(bool.Parse(boolean.Value)),
+        DefaultLiteralNode @default => EmitDefault(context.AnalysisContext.ExpressionTypes[@default]),
         BinaryExpressionNode binary => EmitBinary(binary),
         CallExpressionNode call => EmitCall(call),
         MemberAccessExpressionNode member => Generator.EmitLoad(EmitAddress(member)),
@@ -47,6 +48,14 @@ internal class ExpressionGenerator
         MemberAccessExpressionNode member => EmitMemberAddress(member),
         ObjectCreationExpressionNode creation => Emit(creation),
         _ => throw new Exception($"Unhandled addressable expression: {node.GetType().Name}")
+    };
+
+    public LIRValue EmitDefault(TypeSymbol type) => type.KnownType switch
+    {
+        TypeSymbol.DefaultType.I32 => new LIRConstantIntValue(0),
+        TypeSymbol.DefaultType.Bool => new LIRConstantBoolValue(false),
+        TypeSymbol.DefaultType.IPtr => new LIRConstantIntValue(0),
+        _ => throw new Exception($"Unhandled default value type: {type.KnownType}")
     };
 
     private LIRValue EmitIdentifierAddress(IdentifierNameNode ident)

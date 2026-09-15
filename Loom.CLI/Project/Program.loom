@@ -5,11 +5,11 @@ module Consumer
     // Entry Point
     export i32 Main()
     {
-        i32 exitCode = 0;
+        i32 exitCode = 1;
 
         Process process = GetProcess();
         if (process.Close())
-            exitCode = 1;
+            exitCode = 0;
         
         return exitCode;
     }
@@ -22,7 +22,7 @@ module Windows
 
     export struct Process
     {
-        iptr Handle = 0;
+        iptr Handle = default;
 
         bool Close()
         {

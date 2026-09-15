@@ -1,5 +1,5 @@
 ﻿using Loom.Parser.AST;
-
+using Loom.Parser.Tokenizer;
 using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.Rules.Default;
@@ -18,6 +18,13 @@ public record NumberLiteralNode(string Value) : ExpressionNode
 }
 
 public record BooleanLiteralNode(string Value) : ExpressionNode
+{
+    /// <inheritdoc/>
+    public override IEnumerable<ASTNode> Children => Enumerable.Empty<ASTNode>();
+}
+
+// Storing the token is a bit hacky, we don't really need to
+public record DefaultLiteralNode(Token Token) : ExpressionNode
 {
     /// <inheritdoc/>
     public override IEnumerable<ASTNode> Children => Enumerable.Empty<ASTNode>();
@@ -48,6 +55,7 @@ public class PrimaryExpressionRule : ParserRule<ExpressionNode>
             TokenType.Number => new NumberLiteralNode(Parser.Reader.Advance().Text),
             TokenType.New => RunRule<ObjectCreationExpressionRule, ObjectCreationExpressionNode>(),
             TokenType.Identifier => new IdentifierNameNode(Parser.Reader.Advance()),
+            TokenType.Default => new DefaultLiteralNode(Parser.Reader.Advance()),
             _ => throw new Exception($"Unexpected token: '{Parser.Reader.Current.Text}' type={Parser.Reader.Current.Type} at {Parser.Reader.Current.Location}")
         };
     }

@@ -110,6 +110,7 @@ public class Token
 
         [Keyword("true")] True,
         [Keyword("false")] False,
+        [Keyword("default")] Default,
 
         [Keyword("if")] If,
 
