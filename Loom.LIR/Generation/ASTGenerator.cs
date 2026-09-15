@@ -83,7 +83,9 @@ public class ASTGenerator
             return;
         }
 
-        var funcType = BuildFunctionType(symbol, new LIRPointerType(structObj.Type));
+        bool isStatic = node.Modifiers.Any(m => m.Type == Parser.Tokenizer.Token.TokenType.Static);
+
+        var funcType = BuildFunctionType(symbol, isStatic ? null : new LIRPointerType(structObj.Type));
 
         bool isExtern = node.Modifiers.Any(m => m.Type == Parser.Tokenizer.Token.TokenType.Extern);
 

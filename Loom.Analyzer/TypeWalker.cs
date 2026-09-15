@@ -47,13 +47,19 @@ internal class TypeWalker : ASTWalker
     [Visitor]
     public void Visit(MemberAccessExpressionNode node)
     {
-        var receiverType = Context.ExpressionTypes.TryGetValue(node.Receiver, out var type) ? type : null;
+        var receiverIsValue = Context.ExpressionTypes.TryGetValue(node.Receiver, out var receiverType);
+        if (!receiverIsValue)
+            receiverType = Context.GetSymbol(node.Receiver).Symbol as TypeSymbol;
+
         if (receiverType == null)
             return;
 
-        if (receiverType.Members.FirstOrDefault(m => m.Name == node.Name.BaseName) is MethodSymbol method && method.ReturnType is { } returnType)
+        var member = receiverType.Members.FirstOrDefault(m => m.Name == node.Name.BaseName);
+
+        if (member is MethodSymbol method && method.ReturnType is { } returnType && (receiverIsValue || method.IsStatic))
             Context.ExpressionTypes[node] = returnType;
-        else if (receiverType.Members.FirstOrDefault(m => m.Name == node.Name.BaseName) is FieldSymbol field && field.Type is { } fieldType)
+
+        else if (receiverIsValue && member is FieldSymbol field && field.Type is { } fieldType)
             Context.ExpressionTypes[node] = fieldType;
     }
 

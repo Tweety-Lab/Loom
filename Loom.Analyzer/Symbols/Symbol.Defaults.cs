@@ -23,6 +23,9 @@ public record MethodSymbol(string Name, List<ParameterSymbol> Parameters) : Symb
 {
     /// <summary> The resolved return type, bound after all declarations. </summary>
     public TypeSymbol? ReturnType { get; set; }
+
+    /// <summary> Whether this method is static. </summary>
+    public bool IsStatic { get; set; }
 }
 
 public record LocalVariableSymbol(string Name) : Symbol(Name)

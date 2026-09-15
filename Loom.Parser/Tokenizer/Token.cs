@@ -107,6 +107,7 @@ public class Token
 
         [Keyword("export"), Modifier] Export,
         [Keyword("extern"), Modifier] Extern,
+        [Keyword("static"), Modifier] Static,
 
         [Keyword("true")] True,
         [Keyword("false")] False,

@@ -141,14 +141,22 @@ internal class ExpressionGenerator
 
         if (node.Callee is MemberAccessExpressionNode member)
         {
-            var receiverType = context.AnalysisContext.ExpressionTypes.TryGetValue(member.Receiver, out var type) ? type : null;
+            var receiverIsValue = context.AnalysisContext.ExpressionTypes.TryGetValue(member.Receiver, out var receiverType);
+            if (!receiverIsValue)
+                receiverType = context.AnalysisContext.GetSymbol(member.Receiver).Symbol as TypeSymbol;
+
             var method = receiverType?.Members.OfType<MethodSymbol>().FirstOrDefault(m => m.Name == member.Name.BaseName);
 
             if (method == null)
                 throw new Exception($"Could not resolve member call: {member.Name.BaseName}");
 
+            if (!receiverIsValue && !method.IsStatic)
+                throw new Exception($"Member '{member.Name.BaseName}' is not static and cannot be called on type '{receiverType?.Name}'.");
+
             target = unit.AllFunctions.FirstOrDefault(f => f.Name == method.FullyQualifiedName);
-            self = EmitReceiverAddress(member.Receiver);
+
+            if (receiverIsValue)
+                self = EmitReceiverAddress(member.Receiver);
         }
         else if (node.Callee is IdentifierNameNode ident)
         {
