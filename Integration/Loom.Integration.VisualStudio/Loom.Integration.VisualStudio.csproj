@@ -9,6 +9,24 @@
     <VSSDKBuildToolsAutoSetup>true</VSSDKBuildToolsAutoSetup>
     <GeneratePkgDefFile>true</GeneratePkgDefFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="languages.pkgdef" />
+    <None Remove="Language\loom-language-configuration.json" />
+    <None Remove="Language\loom.tmLanguage.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="languages.pkgdef">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Language\loom-language-configuration.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Language\loom.tmLanguage.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
   <ItemGroup>
     <ProjectCapability Include="CreateVsixContainer" />
   </ItemGroup>

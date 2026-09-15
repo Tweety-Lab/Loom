@@ -1,0 +1,12 @@
+; Registers the TextMate grammar and language configuration with Visual Studio.
+; The repository path is resolved to the extension install folder at runtime.
+[$RootKey$\TextMate\Repositories]
+"loom"="$PackageFolder$\Language"
+
+; Associates the Loom language configuration (comments, brackets, auto-close) with the grammar scope.
+[$RootKey$\TextMate\LanguageConfiguration\GrammarMapping]
+"source.loom"="$PackageFolder$\Language\loom-language-configuration.json"
+
+; Associate an icon with Loom files in Solution Explorer.
+[$RootKey$\ShellFileAssociations\.loom]
+"DefaultIconMoniker"="KnownMonikers.SourceFile"

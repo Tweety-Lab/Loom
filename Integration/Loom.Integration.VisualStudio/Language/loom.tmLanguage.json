@@ -1,0 +1,272 @@
+{
+  "name": "Loom",
+  "scopeName": "source.loom",
+  "fileTypes": [
+    "loom"
+  ],
+
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#numbers"
+    },
+    {
+      "include": "#modules"
+    },
+    {
+      "include": "#structs"
+    },
+    {
+      "include": "#functions"
+    },
+    {
+      "include": "#types"
+    },
+    {
+      "include": "#keywords"
+    },
+    {
+      "include": "#constants"
+    },
+    {
+      "include": "#operators"
+    },
+    {
+      "include": "#punctuation"
+    },
+    {
+      "include": "#identifiers"
+    }
+  ],
+
+  "repository": {
+
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash.loom",
+          "match": "//.*$"
+        },
+        {
+          "name": "comment.block.loom",
+          "begin": "/\\*",
+          "end": "\\*/"
+        }
+      ]
+    },
+
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.loom",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.loom",
+              "match": "\\\\(?:[\\\\\"'nrt0]|x[0-9A-Fa-f]{2}|u[0-9A-Fa-f]{4})"
+            }
+          ]
+        }
+      ]
+    },
+
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.integer.loom",
+          "match": "\\b(?:0[xX][0-9A-Fa-f]+|0[bB][01]+|0[oO][0-7]+|[0-9]+)\\b"
+        },
+        {
+          "name": "constant.numeric.float.loom",
+          "match": "\\b(?:[0-9]+\\.[0-9]*|\\.[0-9]+)(?:[eE][+-]?[0-9]+)?\\b"
+        }
+      ]
+    },
+
+    "modules": {
+      "patterns": [
+
+        {
+          "name": "keyword.declaration.module.loom",
+          "match": "\\bmodule\\b"
+        },
+
+        {
+          "name": "entity.name.namespace.loom",
+          "match": "(?<=\\bmodule\\s+)[A-Za-z_][A-Za-z0-9_]*"
+        },
+
+        {
+          "name": "keyword.control.import.loom",
+          "match": "\\bimport\\b"
+        },
+
+        {
+          "name": "entity.name.namespace.import.loom",
+          "match": "(?<=\\bimport\\s+)[A-Za-z_][A-Za-z0-9_]*"
+        }
+
+      ]
+    },
+
+    "structs": {
+      "patterns": [
+
+        {
+          "name": "keyword.declaration.struct.loom",
+          "match": "\\bstruct\\b"
+        },
+
+        {
+          "name": "entity.name.type.struct.loom",
+          "match": "(?<=\\bstruct\\s+)[A-Za-z_][A-Za-z0-9_]*"
+        }
+
+      ]
+    },
+
+    "functions": {
+      "patterns": [
+
+        {
+          "name": "entity.name.function.declaration.loom",
+          "match": "(?<=\\b(?:void|bool|i8|i16|i32|i64|u8|u16|u32|u64|iptr|uptr|f32|f64)\\s+)[A-Za-z_][A-Za-z0-9_]*(?=\\s*\\()"
+        },
+
+        {
+          "name": "entity.name.function.declaration.loom",
+          "match": "(?<=\\bexport\\s+(?:extern\\s+)?(?:void|bool|i8|i16|i32|i64|u8|u16|u32|u64|iptr|uptr|f32|f64)\\s+)[A-Za-z_][A-Za-z0-9_]*(?=\\s*\\()"
+        },
+
+        {
+          "name": "entity.name.function.call.loom",
+          "match": "\\b[A-Za-z_][A-Za-z0-9_]*(?=\\s*\\()"
+        },
+
+        {
+          "name": "variable.parameter.loom",
+          "match": "\\b[A-Za-z_][A-Za-z0-9_]*\\b(?=\\s*,|\\s*\\))"
+        }
+
+      ]
+    },
+
+    "types": {
+      "patterns": [
+
+        {
+          "name": "storage.type.primitive.loom",
+          "match": "\\b(?:void|bool|i8|i16|i32|i64|u8|u16|u32|u64|iptr|uptr|f32|f64)\\b"
+        },
+
+        {
+          "name": "support.type.loom",
+          "match": "\\b[A-Z][A-Za-z0-9_]*\\b"
+        }
+
+      ]
+    },
+
+    "keywords": {
+      "patterns": [
+
+        {
+          "name": "keyword.control.loom",
+          "match": "\\b(?:if|else|while|for|break|continue|return)\\b"
+        },
+
+        {
+          "name": "storage.modifier.loom",
+          "match": "\\b(?:export|extern|unsafe)\\b"
+        },
+
+        {
+          "name": "keyword.operator.new.loom",
+          "match": "\\bnew\\b"
+        }
+
+      ]
+    },
+
+    "constants": {
+      "patterns": [
+
+        {
+          "name": "constant.language.boolean.loom",
+          "match": "\\b(?:true|false)\\b"
+        },
+
+        {
+          "name": "constant.language.null.loom",
+          "match": "\\bnull\\b"
+        }
+
+      ]
+    },
+
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.loom",
+          "match": "==|!=|<=|>=|\\+=|-=|\\*=|/=|%=|&&|\\|\\||[=+\\-*/%<>!&|]"
+        },
+
+        {
+          "name": "punctuation.accessor.loom",
+          "match": "\\."
+        }
+      ]
+    },
+
+    "punctuation": {
+      "patterns": [
+
+        {
+          "name": "punctuation.definition.block.begin.loom",
+          "match": "\\{"
+        },
+
+        {
+          "name": "punctuation.definition.block.end.loom",
+          "match": "\\}"
+        },
+
+        {
+          "name": "punctuation.definition.parameters.begin.loom",
+          "match": "\\("
+        },
+
+        {
+          "name": "punctuation.definition.parameters.end.loom",
+          "match": "\\)"
+        },
+
+        {
+          "name": "punctuation.separator.comma.loom",
+          "match": ","
+        },
+
+        {
+          "name": "punctuation.terminator.statement.loom",
+          "match": ";"
+        }
+
+      ]
+    },
+
+    "identifiers": {
+      "patterns": [
+        {
+          "name": "variable.other.loom",
+          "match": "\\b[A-Za-z_][A-Za-z0-9_]*\\b"
+        }
+      ]
+    }
+  }
+}
