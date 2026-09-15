@@ -42,9 +42,9 @@ internal class DeclarationWalker : ASTVisitor
         var parameters = new List<ParameterSymbol>();
 
         var symbol = new MethodSymbol(node.MethodName.Text, parameters);
-        symbol.IsStatic = node.Modifiers.Any(m => m.Type == Parser.Tokenizer.Token.TokenType.Static);
+        symbol.IsStatic = node.HasModifier(Parser.Tokenizer.Token.TokenType.Static);
 
-        if (node.Modifiers.Any(m => m.Type == Parser.Tokenizer.Token.TokenType.Extern))
+        if (node.HasModifier(Parser.Tokenizer.Token.TokenType.Extern))
             symbol.FullyQualifiedName = node.MethodName.Text;
         else
             symbol.FullyQualifiedName = BuildQualifiedName(node.MethodName.Text);

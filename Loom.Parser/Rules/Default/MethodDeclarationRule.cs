@@ -13,6 +13,9 @@ public record MethodDeclarationNode(Token ReturnType, Token MethodName, List<Par
 {
     /// <inheritdoc/>
     public override IEnumerable<ASTNode> Children => [Body];
+
+    /// <summary> Returns true if the method has the specified modifier. </summary>
+    public bool HasModifier(TokenType type) => Modifiers.Any(m => m.Type == type);
 }
 
 

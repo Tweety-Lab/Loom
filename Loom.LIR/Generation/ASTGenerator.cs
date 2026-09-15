@@ -83,11 +83,11 @@ public class ASTGenerator
             return;
         }
 
-        bool isStatic = node.Modifiers.Any(m => m.Type == Parser.Tokenizer.Token.TokenType.Static);
+        bool isStatic = node.HasModifier(Parser.Tokenizer.Token.TokenType.Static);
 
         var funcType = BuildFunctionType(symbol, isStatic ? null : new LIRPointerType(structObj.Type));
 
-        bool isExtern = node.Modifiers.Any(m => m.Type == Parser.Tokenizer.Token.TokenType.Extern);
+        bool isExtern = node.HasModifier(Parser.Tokenizer.Token.TokenType.Extern);
 
         if (isExtern)
             structObj.DeclareMethod(symbol.FullyQualifiedName, funcType);
@@ -110,7 +110,7 @@ public class ASTGenerator
             return;
 
         foreach (var content in node.Body.Contents)
-            if (content is MethodDeclarationNode method && !method.Modifiers.Any(m => m.Type == Parser.Tokenizer.Token.TokenType.Extern))
+            if (content is MethodDeclarationNode method && !method.HasModifier(Parser.Tokenizer.Token.TokenType.Extern))
                 GenerateStructMethodBody(structObj, method);
     }
 
@@ -158,7 +158,7 @@ public class ASTGenerator
 
         var funcType = BuildFunctionType(symbol);
 
-        bool isExtern = node.Modifiers.Any(m => m.Type == Parser.Tokenizer.Token.TokenType.Extern);
+        bool isExtern = node.HasModifier(Parser.Tokenizer.Token.TokenType.Extern);
 
         unit.DefineFunction(symbol.FullyQualifiedName, funcType, !isExtern);
     }
@@ -173,7 +173,7 @@ public class ASTGenerator
             return;
         }
 
-        if (node.Modifiers.Any(m => m.Type == Parser.Tokenizer.Token.TokenType.Extern))
+        if (node.HasModifier(Parser.Tokenizer.Token.TokenType.Extern))
             return;
 
         LIRFunction func = unit.GetFunction(symbol.FullyQualifiedName) ?? throw new Exception($"Could not find function {symbol.FullyQualifiedName}!");
