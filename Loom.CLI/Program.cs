@@ -29,6 +29,8 @@ public class Program
         Console.WriteLine("===== LLVM RESULT =====");
         Console.WriteLine(llvmIr);
 
+        PrintDiagnostics(context.DiagnosticContext);
+
         LLVM.InitializeNativeTarget();
         LLVM.InitializeNativeAsmPrinter();
         LLVM.InitializeNativeAsmParser();
@@ -36,8 +38,6 @@ public class Program
         LLVMExecutionEngineRef engine = translator.Result.CreateExecutionEngine();
         LLVMValueRef main = translator.Result.GetNamedFunction(context.AnalysisContext.EntryPoint.FullyQualifiedName);
         LLVMGenericValueRef result = engine.RunFunction(main, []);
-
-        PrintDiagnostics(context.DiagnosticContext);
 
         unsafe
         {
