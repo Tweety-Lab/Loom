@@ -6,12 +6,13 @@ using Loom.Parser.Rules.Default;
 namespace Loom.Analyzer.Analyzers;
 
 /// <summary>
-/// Checks for usage of symbols that aren't exported.
+/// Checks for usage of symbols that aren't exported or members that are private.
 /// </summary>
 [LoomAnalyzer]
 public class InaccessibleSymbolAnalyzer : Analyzer
 {
     public static Diagnostic UnexportedSymbolDiagnostic = new(Diagnostic.DiagnosticLevel.Error, "The symbol '{0}' cannot be accessed as it is not exported.");
+    public static Diagnostic InaccessibleMemberDiagnostic = new(Diagnostic.DiagnosticLevel.Error, "The member '{0}' cannot be accessed as it is not public.");
 
     [Visitor]
     public void Visit(IdentifierNameNode node)
@@ -22,6 +23,25 @@ public class InaccessibleSymbolAnalyzer : Analyzer
             return;
 
         CheckAccessible(node, symbol);
+    }
+
+    [Visitor]
+    public void Visit(MemberAccessExpressionNode node)
+    {
+        var receiverType = Context.ExpressionTypes.TryGetValue(node.Receiver, out var type) ? type : Context.GetSymbol(node.Receiver).Symbol as TypeSymbol;
+
+        if (receiverType?.Members.FirstOrDefault(m => m.Name == node.Name.BaseName) is not Symbol member)
+            return;
+
+        MemberAccessibility? accessibility = (member as MethodSymbol)?.Accessibility ?? (member as FieldSymbol)?.Accessibility;
+        if (accessibility != MemberAccessibility.Private)
+            return;
+
+        var declaringStruct = Context.FirstAncestorOrSelf<StructDeclarationNode>(member.DeclaringNode!);
+        var usageStruct = Context.FirstAncestorOrSelf<StructDeclarationNode>(node);
+
+        if (declaringStruct != null && declaringStruct != usageStruct)
+            Context.DiagnosticContext?.Report(InaccessibleMemberDiagnostic, member.Name);
     }
 
     [Visitor]

@@ -7,7 +7,7 @@ namespace Loom.Parser.Rules.Default;
 public record UnsafeNode(BlockNode Body) : ASTNode
 {
     /// <inheritdoc/>
-    public override IEnumerable<ASTNode> Children => new[] { Body };
+    public override IEnumerable<ASTNode> Children => [Body];
 }
 
 [ParserRule]

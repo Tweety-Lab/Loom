@@ -25,20 +25,20 @@ module Windows
 	/// @brief Native Windows Process
     export struct Process
     {
-        iptr Handle = default;
+        private iptr handle = default;
 
         /// @brief Closes the process
-        bool Close()
+        public bool Close()
         {
-            return TerminateProcess(Handle, 0);
+            return TerminateProcess(handle, 0);
         }
 
         /// @brief Gets the current process
         /// @return The current process
-        static Process Current()
+        public static Process Current()
         {
             Process process = new Process();
-            process.Handle = GetCurrentProcess();
+            process.handle = GetCurrentProcess();
             return process;
         }
     }

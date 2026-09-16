@@ -6,7 +6,7 @@ namespace Loom.Parser.Rules.Default;
 
 public record ParameterNode(Token Type, Token Name) : ASTNode
 {
-    public override IEnumerable<ASTNode> Children => [];
+    public override IEnumerable<ASTNode> Children => Enumerable.Empty<ASTNode>();
 }
 
 public record MethodDeclarationNode(Token ReturnType, Token MethodName, List<ParameterNode> Parameters, BlockNode Body, List<Token> Modifiers) : ASTNode

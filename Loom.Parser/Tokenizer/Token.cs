@@ -105,6 +105,8 @@ public class Token
         [Keyword("import")] Import,
         [Keyword("unsafe")] Unsafe,
 
+        [Keyword("public"), Modifier] Public,
+        [Keyword("private"), Modifier] Private,
         [Keyword("export"), Modifier] Export,
         [Keyword("extern"), Modifier] Extern,
         [Keyword("static"), Modifier] Static,

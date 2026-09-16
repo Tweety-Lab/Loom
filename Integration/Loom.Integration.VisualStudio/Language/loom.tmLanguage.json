@@ -169,7 +169,7 @@
 
         {
           "name": "storage.modifier.loom",
-          "match": "\\b(?:export|extern|unsafe|static)\\b"
+          "match": "\\b(?:export|extern|unsafe|static|public|private)\\b"
         },
 
         {

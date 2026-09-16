@@ -80,8 +80,8 @@ public class LIRGenerator
     public LIRTempValue EmitAlloca(LIRType type) => Emit(LIROpCode.Alloca, new LIRPointerType(type));
 
     /// <summary> Emits the address of <paramref name="field"/> within the instance pointed to by <paramref name="instancePointer"/>. </summary>
-    public LIRTempValue EmitGetField(LIRValue instancePointer, LIRField field)
-        => Emit(LIROpCode.GetField, new LIRPointerType(field.Type), instancePointer, field);
+    public LIRTempValue EmitGetField(LIRValue instancePointer, LIRField field) => Emit(LIROpCode.GetField, new LIRPointerType(field.Type), instancePointer, field);
+
     public LIRTempValue EmitCall(LIRFunction function, params LIRValue[] arguments)
     {
         LIRValue[] operands = [function, .. arguments];

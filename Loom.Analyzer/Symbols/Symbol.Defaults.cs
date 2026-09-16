@@ -1,6 +1,15 @@
 ﻿
 namespace Loom.Analyzer.Symbols;
 
+public enum MemberAccessibility
+{
+    /// <summary> No accessibility (i.e., top level) </summary>
+    None,
+
+    Public,
+    Private
+}
+
 public record ModuleSymbol(string Name) : Symbol(Name);
 
 public record TypeSymbol(string Name, TypeSymbol.DefaultType KnownType) : Symbol(Name)
@@ -32,6 +41,9 @@ public record MethodSymbol(string Name, List<ParameterSymbol> Parameters) : Symb
 
     /// <summary> Whether this method is exported for use beyond it's owning module. </summary>
     public bool IsExported { get; set; }
+
+    /// <summary> The accessibility of this method. </summary>
+    public MemberAccessibility Accessibility { get; set; }
 }
 
 public record LocalVariableSymbol(string Name) : Symbol(Name)
@@ -44,6 +56,9 @@ public record FieldSymbol(string Name) : Symbol(Name)
 {
     /// <summary> The resolved type, bound after all declarations. </summary>
     public TypeSymbol? Type { get; set; }
+
+    /// <summary> The accessibility of this field. </summary>
+    public MemberAccessibility Accessibility { get; set; }
 }
 
 public record ParameterSymbol(string Name) : Symbol(Name)

@@ -44,6 +44,12 @@ internal class DeclarationWalker : ASTVisitor
         var symbol = new MethodSymbol(node.MethodName.Text, parameters);
         symbol.IsStatic = node.HasModifier(Parser.Tokenizer.Token.TokenType.Static);
         symbol.IsExported = node.HasModifier(Parser.Tokenizer.Token.TokenType.Export);
+
+        if (node.HasModifier(Parser.Tokenizer.Token.TokenType.Public))
+            symbol.Accessibility = MemberAccessibility.Public;
+        else
+            symbol.Accessibility = MemberAccessibility.Private;
+
         symbol.DeclaringNode = node;
 
         if (node.HasModifier(Parser.Tokenizer.Token.TokenType.Extern))
@@ -88,6 +94,12 @@ internal class DeclarationWalker : ASTVisitor
     {
         var symbol = new FieldSymbol(node.Variable.Name.Text);
         symbol.FullyQualifiedName = BuildQualifiedName(node.Variable.Name.Text);
+
+        if (node.HasModifier(Parser.Tokenizer.Token.TokenType.Public))
+            symbol.Accessibility = MemberAccessibility.Public;
+        else
+            symbol.Accessibility = MemberAccessibility.Private;
+
         symbol.DeclaringNode = node;
         CurrentTable.Define(symbol);
         Context.BoundSymbols[node] = symbol;
