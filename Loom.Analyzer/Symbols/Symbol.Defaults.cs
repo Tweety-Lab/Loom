@@ -26,6 +26,9 @@ public record MethodSymbol(string Name, List<ParameterSymbol> Parameters) : Symb
 
     /// <summary> Whether this method is static. </summary>
     public bool IsStatic { get; set; }
+
+    /// <summary> Whether this method is exported for use beyond it's owning module. </summary>
+    public bool IsExported { get; set; }
 }
 
 public record LocalVariableSymbol(string Name) : Symbol(Name)

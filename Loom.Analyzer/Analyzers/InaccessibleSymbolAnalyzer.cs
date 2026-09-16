@@ -18,13 +18,13 @@ public class InaccessibleSymbolAnalyzer : Analyzer
     {
         MethodSymbol? symbol = Context.GetSymbol(node.Callee).Symbol as MethodSymbol;
 
-        if (symbol == null || symbol.DeclaringNode is not MethodDeclarationNode methodDecl)
+        if (symbol == null || symbol.DeclaringNode == null)
             return;
 
         ModuleNode? callModule = Context.FirstAncestorOrSelf<ModuleNode>(node);
-        ModuleNode? methodModule = Context.FirstAncestorOrSelf<ModuleNode>(methodDecl);
+        ModuleNode? methodModule = Context.FirstAncestorOrSelf<ModuleNode>(symbol.DeclaringNode);
 
-        if (callModule != methodModule && !methodDecl.HasModifier(Parser.Tokenizer.Token.TokenType.Export))
+        if (callModule != methodModule && !symbol.IsExported)
             Context.DiagnosticContext?.Report(UnexportedSymbolDiagnostic, symbol.Name);
     }
 }
