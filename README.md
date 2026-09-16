@@ -1,7 +1,7 @@
 # Loom
 ![MIT](https://img.shields.io/badge/License-MIT-blue)
 
-Loom is an object-oriented systems programming language that combines the control, performance, and portability of low-level languages with the developer experience of high-level languages.
+Loom is an object-oriented systems programming language that combines the performance and portability of low-level languages with the developer experience of high-level languages.
 
 ```Loom
 module MyModule
