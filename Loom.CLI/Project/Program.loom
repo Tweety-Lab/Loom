@@ -25,7 +25,7 @@ module Windows
 	/// @brief Native Windows Process
     export struct Process
     {
-        private iptr handle = default;
+        iptr handle = default;
 
         /// @brief Closes the process
         public bool Close()
