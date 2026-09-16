@@ -8,6 +8,9 @@ public record TypeSymbol(string Name, TypeSymbol.DefaultType KnownType) : Symbol
     /// <summary> The members declared by this type. </summary>
     public List<Symbol> Members { get; } = new();
 
+    /// <summary> Whether this type is exported for use beyond it's owning module. </summary>
+    public bool IsExported { get; set; }
+
     public enum DefaultType
     {
         Func,

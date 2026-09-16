@@ -8,6 +8,9 @@ public record StructDeclarationNode(Token StructName, BlockNode Body, List<Token
 {
     /// <inheritdoc/>
     public override IEnumerable<ASTNode> Children => [Body];
+
+    /// <summary> Returns true if the struct has the specified modifier. </summary>
+    public bool HasModifier(TokenType type) => Modifiers.Any(m => m.Type == type);
 }
 
 

@@ -6,8 +6,7 @@ module Consumer
     export i32 Main()
     {
         i32 exitCode = 1;
-        iptr test = GetCurrentProcess();
-
+        
         Process process = Process.Current();
         if (process.Close())
             exitCode = 0;

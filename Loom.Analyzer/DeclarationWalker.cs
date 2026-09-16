@@ -75,6 +75,7 @@ internal class DeclarationWalker : ASTVisitor
     {
         var symbol = new TypeSymbol(node.StructName.Text, TypeSymbol.DefaultType.Struct);
         symbol.FullyQualifiedName = BuildQualifiedName(node.StructName.Text);
+        symbol.IsExported = node.HasModifier(Parser.Tokenizer.Token.TokenType.Export);
         symbol.DeclaringNode = node;
 
         CurrentTable.Define(symbol);
