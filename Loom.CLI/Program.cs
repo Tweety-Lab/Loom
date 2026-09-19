@@ -1,13 +1,6 @@
-﻿using LLVMSharp.Interop;
-using Loom.Analyzer;
-using Loom.Analyzer.Symbols;
+﻿using Loom.Analyzer;
 using Loom.CLI.JustInTime;
-using Loom.CodeGen.LLVM;
-using Loom.Common;
 using Loom.Common.Diagnostics;
-using Loom.LIR;
-using Loom.LIR.Objects;
-using Loom.Parser;
 
 namespace Loom.CLI;
 
@@ -28,7 +21,13 @@ public class Program
             if (sample.CompilationContext.AnalysisContext.EntryPoint == null)
                 return;
 
-            llvm.TryExecute(sample.CompilationContext.AnalysisContext.EntryPoint!);
+            if (llvm.TryExecute(sample.CompilationContext.AnalysisContext.EntryPoint!, out IJITResult? result))
+            {
+                if (result == null)
+                    return;
+
+                Console.WriteLine($"Result: {result.ToInt32()}");
+            }
         }
     }
 

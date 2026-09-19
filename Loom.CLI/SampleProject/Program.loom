@@ -13,7 +13,7 @@ module Consumer
         if (copy.Handle == process.Handle)
             exitCode = 2;
         
-        return true;
+        return exitCode;
     }
 }
 

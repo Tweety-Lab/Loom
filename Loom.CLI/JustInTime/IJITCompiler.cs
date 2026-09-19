@@ -14,5 +14,5 @@ public interface IJITCompiler
 
     /// <summary> Executes the given method. </summary>
     /// <returns> <see langword="true"/> if the method was successfully executed; otherwise, <see langword="false"/>. </returns>
-    bool TryExecute(MethodSymbol method);
+    bool TryExecute(MethodSymbol method, out IJITResult? result);
 }

@@ -31,8 +31,9 @@ public sealed class LLVMJITCompiler : IJITCompiler
     }
 
     /// <inheritdoc/>
-    public bool TryExecute(MethodSymbol method)
+    public bool TryExecute(MethodSymbol method, out IJITResult? jitResult)
     {
+        jitResult = null;
         if (Project == null)
             return false;
 
@@ -45,14 +46,20 @@ public sealed class LLVMJITCompiler : IJITCompiler
         LLVMValueRef main = translator.Result.GetNamedFunction(method.FullyQualifiedName);
         LLVMGenericValueRef result = engine.RunFunction(main, []);
 
+        jitResult = new LLVMJITResult { Value = result };
+
         Console.WriteLine("===== LLVM IR =====");
         Console.WriteLine(translator.Result.ToString());
 
-        unsafe
-        {
-            Console.WriteLine($"Result: {LLVM.GenericValueToInt(result, 1)}");
-        }
-
         return true;
     }
+}
+
+
+public readonly struct LLVMJITResult : IJITResult
+{
+    public LLVMGenericValueRef Value { get; init; }
+
+    /// <inheritdoc/>
+    public unsafe int ToInt32() => (int)LLVM.GenericValueToInt(Value, 1);
 }
