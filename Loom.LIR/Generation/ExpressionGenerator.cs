@@ -30,6 +30,7 @@ internal class ExpressionGenerator
 
     public LIRValue Emit(ExpressionNode node) => node switch
     {
+        CharacterLiteralNode character => new LIRConstantCharValue(char.Parse(character.Value)),
         NumberLiteralNode num => new LIRConstantIntValue(int.Parse(num.Value)),
         IdentifierNameNode ident => Generator.EmitLoad(EmitAddress(ident)),
         BooleanLiteralNode boolean => new LIRConstantBoolValue(bool.Parse(boolean.Value)),
@@ -59,6 +60,7 @@ internal class ExpressionGenerator
 
     public LIRValue EmitDefault(TypeSymbol type) => type.KnownType switch
     {
+        TypeSymbol.DefaultType.Char => new LIRConstantCharValue('\0'),
         TypeSymbol.DefaultType.I32 => new LIRConstantIntValue(0),
         TypeSymbol.DefaultType.Bool => new LIRConstantBoolValue(false),
         TypeSymbol.DefaultType.IPtr => new LIRConstantIntValue(0),

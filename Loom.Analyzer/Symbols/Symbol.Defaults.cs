@@ -30,6 +30,7 @@ public record TypeSymbol(string Name, TypeSymbol.DefaultType KnownType) : Symbol
         I32,
         IPtr,
         Bool,
+        Char,
         Struct
     }
 }

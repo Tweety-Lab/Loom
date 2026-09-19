@@ -1,5 +1,6 @@
 import Standard::Windows;
 import Standard::Time;
+import Standard::IO;
 
 module Standard::Program
 {
@@ -17,7 +18,11 @@ module Standard::Program
         if (copy.Handle == process.Handle)
         {
             exitCode = 0;
-            Sleep(1000);
+
+            char character = 'T';
+            putchar(character);
+
+            Sleep(2000);
         }
         
         return exitCode;

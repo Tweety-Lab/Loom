@@ -34,6 +34,17 @@ public class LIRConstantIntValue : LIRValue
     public LIRConstantIntValue(int value) => Value = value;
 }
 
+public class LIRConstantCharValue : LIRValue
+{
+    public char Value { get; }
+
+    /// <inheritdoc/>
+    public override LIRType Type => LIRType.Char;
+
+    /// <summary> Initializes a new instance of the <see cref="LIRConstantCharValue"/> class. </summary>
+    public LIRConstantCharValue(char value) => Value = value;
+}
+
 public class LIRConstantBoolValue : LIRValue
 {
     public bool Value { get; }

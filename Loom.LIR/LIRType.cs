@@ -7,12 +7,14 @@ public abstract record LIRType
     public static readonly LIRIntType IntPtr = new(System.IntPtr.Size * 8);
     public static readonly LIRVoidType Void = new();
     public static readonly LIRBoolType Boolean = new();
+    public static readonly LIRCharType Char = new();
 }
 
 public record LIRIntType(int Bits) : LIRType;
 
 public record LIRVoidType() : LIRType;
 public record LIRBoolType() : LIRType;
+public record LIRCharType() : LIRType;
 public record LIRPointerType(LIRType PointeeType) : LIRType;
 public record LIRStructType(string Name) : LIRType;
 

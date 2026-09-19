@@ -28,6 +28,9 @@ internal class TypeWalker : ASTWalker
     }
 
     [Visitor]
+    public void Visit(CharacterLiteralNode node) => Context.ExpressionTypes[node] = (TypeSymbol)Context.Binders.First().Value.Lookup("char")!.First();
+
+    [Visitor]
     public void Visit(IdentifierNameNode node)
     {
         var symbol = Context.GetSymbol(node).Symbol;

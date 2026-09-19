@@ -81,6 +81,7 @@ internal class StringPrinterStyle : ILIRPrinterStyle
     /// <inheritdoc/>
     public string PrintType(LIRType type) => type switch
     {
+        LIRCharType => "char",
         LIRIntType i => $"i{i.Bits}",
         LIRVoidType => "void",
         LIRBoolType => "bool",
@@ -94,6 +95,7 @@ internal class StringPrinterStyle : ILIRPrinterStyle
     {
         return value switch
         {
+            LIRConstantCharValue c => $"'{c.Value}'",
             LIRConstantIntValue c => $"{c.Value}",
             LIRConstantBoolValue c => c.Value ? "true" : "false",
             LIRTempValue t => $"%{t.ID}",

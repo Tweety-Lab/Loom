@@ -27,10 +27,7 @@ internal class LLVMTranslationContext
             return result;
 
         if (type is LIRPointerType { PointeeType: var pointee })
-        {
-            // Opaque ptr pointees are typed (validated) at call sites via named struct signatures.
             return LLVMTypeRef.CreatePointer(ResolveType(pointee), 0);
-        }
 
         throw new InvalidOperationException($"Unhandled LIR type: {type.GetType().Name}");
     }
@@ -39,6 +36,13 @@ internal class LLVMTranslationContext
     {
         if (ValueMap.TryGetValue(value, out LLVMValueRef result))
             return result;
+
+        if (value is LIRConstantCharValue charConst)
+        {
+            var llvmVal = LLVMValueRef.CreateConstInt(TypeMap[charConst.Type], (ulong)charConst.Value);
+            ValueMap[value] = llvmVal;
+            return llvmVal;
+        }
 
         if (value is LIRConstantIntValue intConst)
         {

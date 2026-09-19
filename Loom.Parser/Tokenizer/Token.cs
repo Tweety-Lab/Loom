@@ -85,12 +85,14 @@ public class Token
         [Character('-')] Minus,
         [Character('*')] Star,
         [Character('/')] Slash,
+        [Character('\\')] BackSlash,
 
         [Character('!')] Exclamation,
         [Character('<')] Less,
         [Character('>')] Greater,
 
         [Character('.')] Period,
+        [Character('\'')] SingleQuote,
 
         [MultiCharacter('=', '=')] EqualEqual,
         [MultiCharacter('!', '=')] NotEqual,
@@ -127,6 +129,7 @@ public class Token
         [Keyword("i32"), Type] I32,
         [Keyword("iptr"), Type] IPtr,
         [Keyword("bool"), Type] Bool,
+        [Keyword("char"), Type] Char,
 
         EOF
     }

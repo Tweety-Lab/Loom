@@ -1,0 +1,4 @@
+module Standard::IO
+{
+	export extern void putchar(char c);
+}

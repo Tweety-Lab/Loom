@@ -51,6 +51,7 @@ public class PrimaryExpressionRule : ParserRule<ExpressionNode>
     {
         return Parser.Reader.Current.Type switch
         {
+            TokenType.SingleQuote => RunRule<CharacterLiteralExpressionRule, CharacterLiteralNode>(),
             TokenType.True or TokenType.False => new BooleanLiteralNode(Parser.Reader.Advance().Text),
             TokenType.Number => new NumberLiteralNode(Parser.Reader.Advance().Text),
             TokenType.New => RunRule<ObjectCreationExpressionRule, ObjectCreationExpressionNode>(),
