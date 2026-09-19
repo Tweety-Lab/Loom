@@ -1,4 +1,5 @@
 ﻿using Loom.Parser.AST;
+using Loom.Parser.Tokenizer;
 
 using static Loom.Parser.Tokenizer.Token;
 
@@ -20,7 +21,7 @@ public class ImportRule : ParserRule<ImportNode>
     public override ImportNode ParseNode()
     {
         Parser.Reader.Expect(TokenType.Import); // import
-        var moduleName = Parser.Reader.Expect(TokenType.Identifier); // name
+        var moduleName = Parser.Reader.ExpectQualifiedName(); // name
         Parser.Reader.Expect(TokenType.Semicolon); // ;
 
         return new ImportNode(new IdentifierNameNode(moduleName));

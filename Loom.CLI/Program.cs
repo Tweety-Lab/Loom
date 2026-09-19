@@ -8,7 +8,7 @@ public class Program
 {
     static void Main(string[] args)
     {
-        LoomProject sample = new LoomProject("SampleProject/SampleProject.lmproj");
+        LoomProject sample = new LoomProject("Standard/Standard.lmproj");
         if (sample.Build() != LoomProject.BuildResult.Success)
         {
             PrintDiagnostics(sample.CompilationContext.DiagnosticContext);

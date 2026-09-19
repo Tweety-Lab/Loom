@@ -21,11 +21,8 @@ public class ModuleDeclarationRule : ParserRule<ModuleNode>
     public override ModuleNode ParseNode()
     {
         Parser.Reader.Expect(TokenType.Module); // module
-        var name = Parser.Reader.Expect(TokenType.Identifier); // name
+        var name = Parser.Reader.ExpectQualifiedName(); // name
 
         return new ModuleNode(name, RunRule<ModuleBlockRule, BlockNode>());
     }
 }
-
-
-

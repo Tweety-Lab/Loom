@@ -25,6 +25,18 @@ public class TokenReader
         DiagnosticContext = diagnosticContext;
     }
 
+    /// <summary> Reads an identifier optionally qualified with <c>::</c> segments (e.g. <c>Standard::Windows</c>). </summary>
+    public Token ExpectQualifiedName()
+    {
+        var first = Expect(TokenType.Identifier);
+        var segments = new List<string> { first.Text };
+
+        while (Match(TokenType.ColonColon))
+            segments.Add(Expect(TokenType.Identifier).Text);
+
+        return new Token(TokenType.Identifier, string.Join("::", segments), first.Location);
+    }
+
     public Token Peek(int offset = 1)
     {
         var index = Position + offset;
@@ -34,7 +46,10 @@ public class TokenReader
     public Token Advance()
     {
         var token = Current;
-        Position++;
+
+        if (Position < Tokens.Count - 1)
+            Position++;
+
         return token;
     }
 

@@ -1,6 +1,6 @@
-import Windows;
+import Standard::Windows;
 
-module Consumer
+module Standard::Program
 {
     /// @brief Program Entry Point
     export i32 Main()

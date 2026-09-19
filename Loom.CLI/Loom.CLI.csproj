@@ -18,20 +18,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="SampleProject\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="sampleproject\SampleProject.lmproj">
+    <None Include="Standard\Standard.lmproj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="SampleProject\Program.loom">
+    <None Update="Standard\Program.loom">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="SampleProject\Windows.loom">
+    <None Update="Standard\Windows.loom">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

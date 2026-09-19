@@ -97,8 +97,11 @@ public class Token
         [MultiCharacter('<', '=')] LessEqual,
         [MultiCharacter('>', '=')] GreaterEqual,
 
+        [MultiCharacter(':', ':')] ColonColon,
+
         [Character(',')] Comma,
         [Character(';')] Semicolon,
+        [Character(':')] Colon,
 
         [Keyword("module")] Module,
         [Keyword("struct")] Struct,

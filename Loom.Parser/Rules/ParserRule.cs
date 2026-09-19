@@ -35,10 +35,26 @@ public abstract class ParserRule<T> : IParserRule where T : ASTNode
 
     // TODO: Improve this design
     /// <summary> Loops until <paramref name="until"/> is matched, dispatching to handlers by token type. Throws diagnostics on unregistered tokens. </summary>
-    protected void ParseUntil(TokenType until, Dictionary<TokenType, Action> handlers, Action? fallback = null)
+protected void ParseUntil(TokenType until, Dictionary<TokenType, Action> handlers, Action? fallback = null)
     {
+        var lastPosition = -1;
+        var stuckCount = 0;
+
         while (!Parser.Reader.Check(until))
         {
+            var position = Parser.Reader.Position;
+
+            if (position == lastPosition)
+            {
+                if (++stuckCount > 10_000)
+                    throw new InvalidOperationException($"Parser stuck at token '{Parser.Reader.Current.Text}' ({Parser.Reader.Current.Type}) position {position}");
+            }
+            else
+            {
+                stuckCount = 0;
+                lastPosition = position;
+            }
+
             var token = Parser.Reader.Current;
 
             if (handlers.TryGetValue(token.Type, out var handler))

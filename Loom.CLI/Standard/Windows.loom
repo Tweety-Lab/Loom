@@ -1,4 +1,4 @@
-module Windows
+module Standard::Windows
 {
 #region Native
     extern iptr GetCurrentProcess();
