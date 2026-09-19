@@ -17,18 +17,15 @@ public static class CompilationContextExtensions
         public IReadOnlyList<ProgramNode> SyntaxTrees => ctx.ExtendedProperties.TryGetValue(ROOT_NODE_KEY, out var obj) ? (List<ProgramNode>)obj : [];
 
         /// <summary> Runs the <see cref="CompilationContext"/> through the Parser. </summary>
-        public CompilationContext Parse(params string[] inputs)
+        public CompilationContext Parse(string input, string name = "Program")
         {
             var trees = new List<ProgramNode>();
 
-            foreach (var input in inputs)
-            {
-                LoomTokenizer tokenizer = new(input);
-                tokenizer.Tokenize();
+            LoomTokenizer tokenizer = new(input);
+            tokenizer.Tokenize();
 
-                LoomParser parser = new LoomParser(tokenizer.Tokens, ctx.DiagnosticContext);
-                trees.Add(parser.ParseProgram());
-            }
+            LoomParser parser = new LoomParser(tokenizer.Tokens, ctx.DiagnosticContext);
+            trees.Add(parser.ParseProgram(name));
 
             ctx.ExtendedProperties[ROOT_NODE_KEY] = trees;
             return ctx;

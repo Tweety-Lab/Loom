@@ -22,7 +22,7 @@ public class ASTGenerator
     /// <returns> The generated LIR unit. </returns>
     public LIRCompilationUnit Generate(ProgramNode root)
     {
-        unit = new LIRCompilationUnit("Test");
+        unit = new LIRCompilationUnit(root.Name);
 
         // Declare structs
         foreach (var module in root.Modules)

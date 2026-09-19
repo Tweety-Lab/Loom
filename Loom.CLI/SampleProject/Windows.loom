@@ -1,0 +1,28 @@
+module Windows
+{
+#region Native
+    extern iptr GetCurrentProcess();
+    extern bool TerminateProcess(iptr process, i32 exitCode);
+#endregion
+    
+	/// @brief Native Windows Process
+    export struct Process
+    {
+        public iptr Handle = default;
+
+        /// @brief Closes the process
+        public bool Close()
+        {
+            return TerminateProcess(Handle, 0);
+        }
+
+        /// @brief Gets the current process
+        /// @return The current process
+        public static Process Current()
+        {
+            Process process = new Process();
+            process.Handle = GetCurrentProcess();
+            return process;
+        }
+    }
+}

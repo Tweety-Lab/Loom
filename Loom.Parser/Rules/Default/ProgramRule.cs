@@ -6,6 +6,9 @@ namespace Loom.Parser.Rules.Default;
 
 public record ProgramNode(List<ImportNode> Imports, List<ModuleNode> Modules) : ASTNode
 {
+    /// <summary> The name of the program. </summary>
+    public string Name { get; set; } = "Program";
+
     /// <inheritdoc/>
     public override IEnumerable<ASTNode> Children => Imports.Cast<ASTNode>().Concat(Modules.Cast<ASTNode>());
 }

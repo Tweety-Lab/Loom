@@ -48,7 +48,7 @@ public sealed class LoomProject
         var diagnostics = CompilationContext.DiagnosticContext.Diagnostics;
 
         foreach (var file in SourceFiles)
-            CompilationContext.Parse(File.ReadAllText(file));
+            CompilationContext.Parse(File.ReadAllText(file), Path.GetFileNameWithoutExtension(file));
 
         if (diagnostics.Count > 0)
             return BuildResult.Failure;
