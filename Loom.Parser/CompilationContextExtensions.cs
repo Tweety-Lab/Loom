@@ -19,7 +19,10 @@ public static class CompilationContextExtensions
         /// <summary> Runs the <see cref="CompilationContext"/> through the Parser. </summary>
         public CompilationContext Parse(string input, string name = "Program")
         {
-            var trees = new List<ProgramNode>();
+            if (ctx.ExtendedProperties.ContainsKey(ROOT_NODE_KEY) == false)
+                ctx.ExtendedProperties.Add(ROOT_NODE_KEY, new List<ProgramNode>());
+
+            var trees = (List<ProgramNode>)ctx.ExtendedProperties[ROOT_NODE_KEY];
 
             LoomTokenizer tokenizer = new(input);
             tokenizer.Tokenize();
@@ -27,7 +30,6 @@ public static class CompilationContextExtensions
             LoomParser parser = new LoomParser(tokenizer.Tokens, ctx.DiagnosticContext);
             trees.Add(parser.ParseProgram(name));
 
-            ctx.ExtendedProperties[ROOT_NODE_KEY] = trees;
             return ctx;
         }
     }

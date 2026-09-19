@@ -24,7 +24,7 @@ public static class CompilationContextExtensions
         public CompilationContext EmitLIR()
         {
             ASTGenerator generator = new ASTGenerator(ctx);
-            LIRCompilationUnit comp = generator.Generate(ctx.SyntaxTrees.First());
+            LIRCompilationUnit comp = generator.Generate(ctx.SyntaxTrees);
 
             ctx.ExtendedProperties[LIRGEN_CONTEXT_KEY] = new List<LIRCompilationUnit> { comp };
 

@@ -17,36 +17,33 @@ public class ASTGenerator
     /// <summary> Initializes a new instance of the <see cref="ASTGenerator"/> class. </summary>
     public ASTGenerator(CompilationContext context) => this.context = context;
 
-    /// <summary> Generates Loom Intermediate Representation (LIR) from an Abstract Syntax Tree (AST) root. </summary>
-    /// <param name="root"> The root of the AST. </param>
+    /// <summary> Generates Loom Intermediate Representation (LIR) from all Abstract Syntax Tree (AST) roots in the program. </summary>
+    /// <param name="roots"> All roots of the AST, one per source file. </param>
     /// <returns> The generated LIR unit. </returns>
-    public LIRCompilationUnit Generate(ProgramNode root)
+    public LIRCompilationUnit Generate(IEnumerable<ProgramNode> roots)
     {
-        unit = new LIRCompilationUnit(root.Name);
+        // Eventually, we want to link units instead of compiling into just one
 
-        // Declare structs
-        foreach (var module in root.Modules)
-            foreach (var content in module.Body.Contents)
-                if (content is StructDeclarationNode structDeclaration)
-                    DeclareStruct(structDeclaration);
+        var rootList = roots.ToList();
+        unit = new LIRCompilationUnit(string.Join("+", rootList.Select(r => r.Name)));
 
-        // Declare module-level function signatures
-        foreach (var module in root.Modules)
-            foreach (var content in module.Body.Contents)
-                if (content is MethodDeclarationNode method)
-                    GenerateMethodDeclaration(method);
+        var contents = rootList.SelectMany(root => root.Modules).SelectMany(module => module.Body.Contents).ToList();
 
-        // Define struct method bodies
-        foreach (var module in root.Modules)
-            foreach (var content in module.Body.Contents)
-                if (content is StructDeclarationNode structDeclaration)
-                    GenerateStructMethodBodies(structDeclaration);
+        foreach (var content in contents)
+        {
+            if (content is StructDeclarationNode structDeclaration)
+                DeclareStruct(structDeclaration);
+            else if (content is MethodDeclarationNode method)
+                GenerateMethodDeclaration(method);
+        }
 
-        // Define module-level function bodies
-        foreach (var module in root.Modules)
-            foreach (var content in module.Body.Contents)
-                if (content is MethodDeclarationNode method)
-                    GenerateMethodBody(method);
+        foreach (var content in contents)
+        {
+            if (content is StructDeclarationNode structDeclaration)
+                GenerateStructMethodBodies(structDeclaration);
+            else if (content is MethodDeclarationNode method)
+                GenerateMethodBody(method);
+        }
 
         return unit;
     }
