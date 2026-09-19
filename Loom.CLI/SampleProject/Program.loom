@@ -11,9 +11,9 @@ module Consumer
         Process copy = process;
 
         if (copy.Handle == process.Handle)
-            exitCode = 0;
+            exitCode = 2;
         
-        return exitCode;
+        return true;
     }
 }
 

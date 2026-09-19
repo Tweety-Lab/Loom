@@ -1,6 +1,7 @@
 ﻿using LLVMSharp.Interop;
 using Loom.Analyzer;
 using Loom.Analyzer.Symbols;
+using Loom.CLI.JustInTime;
 using Loom.CodeGen.LLVM;
 using Loom.Common;
 using Loom.Common.Diagnostics;
@@ -14,34 +15,20 @@ public class Program
 {
     static void Main(string[] args)
     {
-        string projectSource = File.ReadAllText("Project/Program.loom");
-
-        CompilationContext context = new CompilationContext();
-
-        context.Parse(projectSource).Analyze().EmitLIR();
-
-        LIRCompilationUnit unit = context.CompilationUnits.First();
-
-        LLVMTranslatorPass translator = new LLVMTranslatorPass();
-        translator.Run(unit);
-
-        string llvmIr = translator.Result.PrintToString();
-        Console.WriteLine("===== LLVM RESULT =====");
-        Console.WriteLine(llvmIr);
-
-        PrintDiagnostics(context.DiagnosticContext);
-
-        LLVM.InitializeNativeTarget();
-        LLVM.InitializeNativeAsmPrinter();
-        LLVM.InitializeNativeAsmParser();
-
-        LLVMExecutionEngineRef engine = translator.Result.CreateExecutionEngine();
-        LLVMValueRef main = translator.Result.GetNamedFunction(context.AnalysisContext.EntryPoint.FullyQualifiedName);
-        LLVMGenericValueRef result = engine.RunFunction(main, []);
-
-        unsafe
+        LoomProject sample = new LoomProject("SampleProject/SampleProject.lmproj");
+        if (sample.Build() != LoomProject.BuildResult.Success)
         {
-            Console.WriteLine($"Result: {LLVM.GenericValueToInt(result, 1)}");
+            PrintDiagnostics(sample.CompilationContext.DiagnosticContext);
+            return;
+        }
+
+        LLVMJITCompiler llvm = new LLVMJITCompiler();
+        if (llvm.TryInitialize(sample))  
+        {
+            if (sample.CompilationContext.AnalysisContext.EntryPoint == null)
+                return;
+
+            llvm.TryExecute(sample.CompilationContext.AnalysisContext.EntryPoint!);
         }
     }
 
