@@ -33,13 +33,13 @@ module MyModule
 
     export MyStruct ReturnStackAllocatedValueType()
     {
-        MyStruct obj = new MyStruct(); // No pointer type + value type = stack alloc
+        MyStruct obj = new MyStruct();
         return obj;
     }
 
     export unique MyClass ReturnUniqueRefType()
     {
-        unique MyClass obj = new MyClass(); // Unique pointer type = heap alloc
+        unique MyClass obj = new MyClass();
         return obj;
     }
 
