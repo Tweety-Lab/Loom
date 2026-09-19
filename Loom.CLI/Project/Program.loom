@@ -8,8 +8,6 @@ module Consumer
         i32 exitCode = 1;
         
         Process process = Process.Current();
-        if (process.Close())
-            exitCode = 0;
         
         return exitCode;
     }
@@ -26,6 +24,7 @@ module Windows
     export struct Process
     {
         iptr handle = default;
+        i32 test = default;
 
         /// @brief Closes the process
         public bool Close()

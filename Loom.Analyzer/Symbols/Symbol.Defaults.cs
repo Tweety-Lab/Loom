@@ -20,6 +20,9 @@ public record TypeSymbol(string Name, TypeSymbol.DefaultType KnownType) : Symbol
     /// <summary> Whether this type is exported for use beyond it's owning module. </summary>
     public bool IsExported { get; set; }
 
+    /// <summary> Whether this type uses value semantics. </summary>
+    public bool IsValueType { get; set; }
+
     public enum DefaultType
     {
         Func,
