@@ -1,0 +1,4 @@
+module Standard::Time
+{
+    export extern void Sleep(i32 milliseconds);
+}

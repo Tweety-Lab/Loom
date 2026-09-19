@@ -1,4 +1,5 @@
 import Standard::Windows;
+import Standard::Time;
 
 module Standard::Program
 {
@@ -7,11 +8,17 @@ module Standard::Program
     {
         i32 exitCode = 1;
         
-        Process process = Process.Current();
-        Process copy = process;
+        WinProcess process = WinProcess.Current();
+        WinProcess copy = process;
+
+        if (copy.Handle != process.Handle)
+            process.Close();
 
         if (copy.Handle == process.Handle)
-            exitCode = 2;
+        {
+            exitCode = 0;
+            Sleep(1000);
+        }
         
         return exitCode;
     }

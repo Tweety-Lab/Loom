@@ -6,7 +6,7 @@ module Standard::Windows
 #endregion
     
 	/// @brief Native Windows Process
-    export struct Process
+    export struct WinProcess
     {
         public iptr Handle = default;
 
@@ -18,9 +18,9 @@ module Standard::Windows
 
         /// @brief Gets the current process
         /// @return The current process
-        public static Process Current()
+        public static WinProcess Current()
         {
-            Process process = new Process();
+            WinProcess process = new WinProcess();
             process.Handle = GetCurrentProcess();
             return process;
         }
