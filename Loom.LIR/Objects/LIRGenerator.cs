@@ -37,6 +37,15 @@ public class LIRGenerator
         WritingBlock = entry;
     }
 
+    public LIRBasicBlock CreateBlock(string name)
+    {
+        var block = new LIRBasicBlock(name, function);
+        function.Blocks.Add(block);
+        return block;
+    }
+
+    public void SwitchTo(LIRBasicBlock block) => WritingBlock = block;
+
     /// <summary> Emits a <see cref="LIROpCode"/> to the current LIR stream. </summary>
     /// <param name="opCode"> The opcode to emit. </param>
     /// <param name="resultType"> The type of the result (if any). </param>
@@ -49,7 +58,7 @@ public class LIRGenerator
         if (opCode.HasResult && resultType == null)
             throw new ArgumentNullException(nameof(resultType));
 
-        if (opCode.HasResult)
+        if (opCode.HasResult && resultType != null)
             result = new LIRTempValue(currentTemp++.ToString(), resultType);
 
         WritingBlock.Emit(new LIRInstruction(opCode, operands.ToList()) { Result = result });
@@ -77,6 +86,7 @@ public class LIRGenerator
     }
 
     public void EmitStore(LIRValue value, LIRValue address) => Emit(LIROpCode.Store, null, value, address);
+
     public LIRTempValue EmitAlloca(LIRType type) => Emit(LIROpCode.Alloca, new LIRPointerType(type));
 
     /// <summary> Emits the address of <paramref name="field"/> within the instance pointed to by <paramref name="instancePointer"/>. </summary>
@@ -110,15 +120,6 @@ public class LIRGenerator
 
         return Emit(LIROpCode.CallInstanced, returnType, operands);
     }
-
-    public LIRBasicBlock CreateBlock(string name)
-    {
-        var block = new LIRBasicBlock(name, function);
-        function.Blocks.Add(block);
-        return block;
-    }
-
-    public void SwitchTo(LIRBasicBlock block) => WritingBlock = block;
 
     public LIRTempValue EmitCmpEq(LIRValue left, LIRValue right) => Emit(LIROpCode.CmpEq, LIRType.Boolean, left, right);
     public LIRTempValue EmitCmpNe(LIRValue left, LIRValue right) => Emit(LIROpCode.CmpNe, LIRType.Boolean, left, right);

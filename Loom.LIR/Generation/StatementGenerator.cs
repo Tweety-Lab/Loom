@@ -49,25 +49,21 @@ internal class StatementGenerator
 
     private LIRValue EmitExpression(ExpressionNode node) => new ExpressionGenerator(context, unit, function, locals).Emit(node);
 
+    private LIRValue EmitValue(ExpressionNode node) => new ExpressionGenerator(context, unit, function, locals).EmitValue(node);
+
     private void EmitLocalDeclaration(LocalDeclarationStatementNode node)
     {
         var declaration = node.Variable;
         LocalVariableSymbol symbol = (LocalVariableSymbol)context.AnalysisContext.GetSymbol(node).Symbol!;
         var type = ASTGenerator.ConvertType(symbol.Type!);
 
-        if (type is LIRStructType && declaration.Initializer is ObjectCreationExpressionNode)
-        {
-            locals[declaration.Name.Text] = Generator.EmitAlloca(type);
-            return;
-        }
-
-        if (type is LIRStructType)
-            type = new LIRPointerType(type);
-
-        LIRTempValue address = Generator.EmitAlloca(type);
+        LIRTempValue address = Generator.EmitAlloca(symbol.Type!.IsValueType ? type : new LIRPointerType(type));
         locals[declaration.Name.Text] = address;
 
-        var value = EmitExpression(declaration.Initializer);
+        if (declaration.Initializer is ObjectCreationExpressionNode)
+            return;
+
+        var value = EmitValue(declaration.Initializer);
         Generator.EmitStore(value, address);
     }
 
@@ -76,12 +72,12 @@ internal class StatementGenerator
         if (node.Expression == null)
             Generator.EmitReturn();
         else
-            Generator.EmitReturn(EmitExpression(node.Expression));
+            Generator.EmitReturn(EmitValue(node.Expression));
     }
 
     private void EmitAssignment(AssignmentStatementNode node)
     {
-        var value = EmitExpression(node.Value);
+        var value = EmitValue(node.Value);
         var address = new ExpressionGenerator(context, unit, function, locals).EmitAddress(node.Target);
         Generator.EmitStore(value, address);
     }

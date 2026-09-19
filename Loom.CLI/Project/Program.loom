@@ -8,6 +8,10 @@ module Consumer
         i32 exitCode = 1;
         
         Process process = Process.Current();
+        Process copy = process;
+
+        if (copy.Handle == process.Handle)
+            exitCode = 0;
         
         return exitCode;
     }
@@ -23,13 +27,12 @@ module Windows
 	/// @brief Native Windows Process
     export struct Process
     {
-        iptr handle = default;
-        i32 test = default;
+        public iptr Handle = default;
 
         /// @brief Closes the process
         public bool Close()
         {
-            return TerminateProcess(handle, 0);
+            return TerminateProcess(Handle, 0);
         }
 
         /// @brief Gets the current process
@@ -37,7 +40,7 @@ module Windows
         public static Process Current()
         {
             Process process = new Process();
-            process.handle = GetCurrentProcess();
+            process.Handle = GetCurrentProcess();
             return process;
         }
     }

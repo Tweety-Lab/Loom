@@ -50,6 +50,13 @@ internal class ExpressionGenerator
         _ => throw new Exception($"Unhandled addressable expression: {node.GetType().Name}")
     };
 
+    /// <summary> Emits <paramref name="node"/> as a value. </summary>
+    public LIRValue EmitValue(ExpressionNode node)
+    {
+        var value = Emit(node);
+        return node is ObjectCreationExpressionNode ? Generator.EmitLoad(value) : value;
+    }
+
     public LIRValue EmitDefault(TypeSymbol type) => type.KnownType switch
     {
         TypeSymbol.DefaultType.I32 => new LIRConstantIntValue(0),
@@ -174,7 +181,7 @@ internal class ExpressionGenerator
         if (target == null)
             throw new Exception($"Could not find function: {node.Callee}");
 
-        var args = node.Arguments.Select(Emit).ToArray();
+        var args = node.Arguments.Select(EmitValue).ToArray();
 
         if (self != null)
             return Generator.EmitCallInstanced(target, self, args);
