@@ -33,6 +33,7 @@ public class ASTGenerator
         {
             if (content is StructDeclarationNode structDeclaration)
                 DeclareStruct(structDeclaration);
+
             else if (content is MethodDeclarationNode method)
                 GenerateMethodDeclaration(method);
         }
@@ -41,6 +42,7 @@ public class ASTGenerator
         {
             if (content is StructDeclarationNode structDeclaration)
                 GenerateStructMethodBodies(structDeclaration);
+
             else if (content is MethodDeclarationNode method)
                 GenerateMethodBody(method);
         }
@@ -189,6 +191,7 @@ public class ASTGenerator
         TypeSymbol.DefaultType.Char => LIRType.Char,
         TypeSymbol.DefaultType.IPtr => LIRType.IntPtr,
         TypeSymbol.DefaultType.Struct => new LIRStructType(type.FullyQualifiedName),
+        TypeSymbol.DefaultType.Class => new LIRClassType(type.FullyQualifiedName),
         _ => throw new Exception($"Unknown type {type.KnownType}")
     };
 

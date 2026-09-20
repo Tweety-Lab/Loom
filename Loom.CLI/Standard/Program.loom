@@ -8,6 +8,8 @@ module Standard::Program
     export i32 Main()
     {
         i32 exitCode = 1;
+
+        TestClass myClass = new TestClass();
         
         WinProcess process = WinProcess.Current();
         WinProcess copy = process;
@@ -26,5 +28,10 @@ module Standard::Program
         }
         
         return exitCode;
+    }
+
+    export class TestClass
+    {
+        public i32 Val = default;
     }
 }

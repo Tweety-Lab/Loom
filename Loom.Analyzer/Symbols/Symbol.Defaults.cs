@@ -49,7 +49,8 @@ public record TypeSymbol(string Name, TypeSymbol.DefaultType KnownType) : Symbol
         IPtr,
         Bool,
         Char,
-        Struct
+        Struct,
+        Class
     }
 }
 

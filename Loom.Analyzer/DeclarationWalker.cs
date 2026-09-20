@@ -93,6 +93,20 @@ internal class DeclarationWalker : ASTVisitor
     }
 
     [Visitor]
+    public void Visit(ClassDeclarationNode node)
+    {
+        var symbol = new TypeSymbol(node.ClassName.Text, TypeSymbol.DefaultType.Class);
+        symbol.FullyQualifiedName = BuildQualifiedName(node.ClassName.Text);
+        symbol.IsExported = node.HasModifier(Parser.Tokenizer.Token.TokenType.Export);
+        symbol.DeclaringNode = node;
+        symbol.IsValueType = false;
+
+        CurrentTable.Define(symbol);
+
+        WithScope(node, () => VisitChildren(node), symbol);
+    }
+
+    [Visitor]
     public void Visit(FieldDeclarationNode node)
     {
         var symbol = new FieldSymbol(node.Variable.Name.Text);
