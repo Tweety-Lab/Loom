@@ -633,7 +633,7 @@ module Test
         var instructions = main!.Blocks.SelectMany(b => b.Instructions).ToList();
         var alloca = Assert.Single(instructions, i => i.OpCode == LIROpCode.Alloca);
         var pointer = Assert.IsType<LIRPointerType>(alloca.Result!.Type);
-        Assert.IsType<LIRDeclaredObjectType>(pointer.PointeeType);
+        Assert.IsType<LIRDeclaredTypeType>(pointer.PointeeType);
 
         Assert.DoesNotContain(instructions, i => i.OpCode == LIROpCode.Store);
         Assert.DoesNotContain(instructions, i => i.OpCode == LIROpCode.Call);

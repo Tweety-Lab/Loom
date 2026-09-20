@@ -15,6 +15,6 @@ public interface ILIRPrinterStyle
     string PrintFunctionFooter();
 
     string PrintField(LIRField field);
-    string PrintDeclaredObjectHeader(LIRDeclaredObject structObj);
-    string PrintDeclaredObjectFooter();
+    string PrintDeclaredTypeHeader(LIRDeclaredType structObj);
+    string PrintDeclaredTypeFooter();
 }

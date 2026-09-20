@@ -115,7 +115,7 @@ internal class ExpressionGenerator
     /// <summary> Emits the address of <paramref name="fieldSymbol"/> within an instance of <paramref name="objectTypeSymbol"/>. </summary>
     private LIRValue EmitFieldAddress(LIRValue instance, TypeSymbol objectTypeSymbol, FieldSymbol fieldSymbol)
     {
-        var structObj = unit.DeclaredObjects.FirstOrDefault(s => s.Type == new LIRDeclaredObjectType(objectTypeSymbol.FullyQualifiedName, true)) ?? throw new Exception($"Could not find struct: {objectTypeSymbol.FullyQualifiedName}");
+        var structObj = unit.DeclaredTypes.FirstOrDefault(s => s.Type == new LIRDeclaredTypeType(objectTypeSymbol.FullyQualifiedName, true)) ?? throw new Exception($"Could not find struct: {objectTypeSymbol.FullyQualifiedName}");
 
         var field = structObj.Fields.FirstOrDefault(f => f.Name == fieldSymbol.Name) ?? throw new Exception($"Could not find field: {fieldSymbol.Name}");
 

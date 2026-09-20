@@ -16,7 +16,7 @@ public record LIRVoidType() : LIRType;
 public record LIRBoolType() : LIRType;
 public record LIRCharType() : LIRType;
 public record LIRPointerType(LIRType PointeeType) : LIRType;
-public record LIRDeclaredObjectType(string Name, bool IsValueType) : LIRType;
+public record LIRDeclaredTypeType(string Name, bool IsValueType) : LIRType;
 
 public record LIRParameter(string Name, LIRType Type);
 public record LIRFunctionType(LIRType ReturnType, LIRParameter[] Parameters) : LIRType;

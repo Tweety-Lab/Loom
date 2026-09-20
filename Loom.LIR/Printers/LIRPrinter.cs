@@ -18,7 +18,7 @@ public class LIRPrinter
         sb.Append(PrintMeta(unit));
         sb.AppendLine();
 
-        foreach (var declaredObj in unit.DeclaredObjects)
+        foreach (var declaredObj in unit.DeclaredTypes)
         {
             sb.AppendLine(Print(declaredObj));
             sb.AppendLine();
@@ -33,13 +33,13 @@ public class LIRPrinter
         return sb.ToString();
     }
 
-    private string Print(LIRDeclaredObject declaredObj)
+    private string Print(LIRDeclaredType declaredObj)
     {
         var sb = new StringBuilder();
 
         sb.Append(PrintMeta(declaredObj));
 
-        sb.AppendLine(Style.PrintDeclaredObjectHeader(declaredObj));
+        sb.AppendLine(Style.PrintDeclaredTypeHeader(declaredObj));
 
         foreach (var field  in declaredObj.Fields)
         {
@@ -57,7 +57,7 @@ public class LIRPrinter
                 sb.AppendLine("  " + Style.PrintFunctionFooter());
         }
 
-        sb.AppendLine(Style.PrintDeclaredObjectFooter());
+        sb.AppendLine(Style.PrintDeclaredTypeFooter());
         return sb.ToString();
     }
 
