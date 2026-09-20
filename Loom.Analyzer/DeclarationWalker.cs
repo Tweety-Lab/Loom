@@ -81,8 +81,8 @@ internal class DeclarationWalker : ASTVisitor
     [Visitor]
     public void Visit(StructDeclarationNode node)
     {
-        var symbol = new TypeSymbol(node.StructName.Text, TypeSymbol.DefaultType.Struct);
-        symbol.FullyQualifiedName = BuildQualifiedName(node.StructName.Text);
+        var symbol = new TypeSymbol(node.Name.Text, TypeSymbol.DefaultType.Struct);
+        symbol.FullyQualifiedName = BuildQualifiedName(node.Name.Text);
         symbol.IsExported = node.HasModifier(Parser.Tokenizer.Token.TokenType.Export);
         symbol.DeclaringNode = node;
         symbol.IsValueType = true;
@@ -95,8 +95,8 @@ internal class DeclarationWalker : ASTVisitor
     [Visitor]
     public void Visit(ClassDeclarationNode node)
     {
-        var symbol = new TypeSymbol(node.ClassName.Text, TypeSymbol.DefaultType.Class);
-        symbol.FullyQualifiedName = BuildQualifiedName(node.ClassName.Text);
+        var symbol = new TypeSymbol(node.Name.Text, TypeSymbol.DefaultType.Class);
+        symbol.FullyQualifiedName = BuildQualifiedName(node.Name.Text);
         symbol.IsExported = node.HasModifier(Parser.Tokenizer.Token.TokenType.Export);
         symbol.DeclaringNode = node;
         symbol.IsValueType = false;

@@ -96,7 +96,7 @@ internal class ExpressionGenerator
     {
         var structNode = context.AnalysisContext.FirstAncestorOrSelf<StructDeclarationNode>(contextNode) ?? throw new Exception($"Could not find containing struct for field: {symbol.Name}");
 
-        var structTypeSymbol = (TypeSymbol)context.AnalysisContext.GetSymbol(structNode).Symbol ?? throw new Exception($"Could not find symbol for struct: {structNode.StructName}");
+        var structTypeSymbol = (TypeSymbol)context.AnalysisContext.GetSymbol(structNode).Symbol ?? throw new Exception($"Could not find symbol for struct: {structNode.Name}");
 
         return EmitFieldAddress(EmitSelfParameter(), structTypeSymbol, symbol);
     }

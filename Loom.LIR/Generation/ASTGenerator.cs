@@ -31,11 +31,8 @@ public class ASTGenerator
 
         foreach (var content in contents)
         {
-            if (content is ClassDeclarationNode classDeclaration)
-                DeclareClass(classDeclaration);
-
-            if (content is StructDeclarationNode structDeclaration)
-                DeclareStruct(structDeclaration);
+            if (content is ITypeDeclarationNode typeDeclaration)
+                DeclareDeclaredType(typeDeclaration);
 
             else if (content is MethodDeclarationNode method)
                 GenerateMethodDeclaration(method);
@@ -43,11 +40,8 @@ public class ASTGenerator
 
         foreach (var content in contents)
         {
-            if (content is ClassDeclarationNode classDeclaration)
-                GenerateClassMethodBodies(classDeclaration);
-
-            if (content is StructDeclarationNode structDeclaration)
-                GenerateStructMethodBodies(structDeclaration);
+            if (content is ITypeDeclarationNode typeDeclaration)
+                GenerateDeclaredTypeMethodBodies(typeDeclaration);
 
             else if (content is MethodDeclarationNode method)
                 GenerateMethodBody(method);
@@ -56,39 +50,23 @@ public class ASTGenerator
         return unit;
     }
 
-    public void DeclareStruct(StructDeclarationNode node)
+    public void DeclareDeclaredType(ITypeDeclarationNode node)
     {
-        TypeSymbol? symbol = (TypeSymbol?)context.AnalysisContext.GetSymbol(node).Symbol;
+        TypeSymbol? symbol = null;
+
+        if (node is StructDeclarationNode structNode)
+            symbol = (TypeSymbol?)context.AnalysisContext.GetSymbol(structNode).Symbol;
+
+        if (node is ClassDeclarationNode classNode)
+            symbol = (TypeSymbol?)context.AnalysisContext.GetSymbol(classNode).Symbol;
 
         if (symbol == null)
         {
-            Console.WriteLine($"Could not find symbol for {node.StructName}!");
+            Console.WriteLine($"Could not find symbol for {node.Name}!");
             return;
         }
 
-        LIRDeclaredType structObj = unit.DefineDeclaredType(symbol.FullyQualifiedName, true);
-
-        foreach (var content in node.Body.Contents)
-        {
-            if (content is MethodDeclarationNode method)
-                DeclareDeclaredTypeMethod(structObj, method);
-
-            if (content is FieldDeclarationNode field)
-                GenerateDeclaredTypeField(structObj, field);
-        }
-    }
-
-    public void DeclareClass(ClassDeclarationNode node)
-    {
-        TypeSymbol? symbol = (TypeSymbol?)context.AnalysisContext.GetSymbol(node).Symbol;
-
-        if (symbol == null)
-        {
-            Console.WriteLine($"Could not find symbol for {node.ClassName}!");
-            return;
-        }
-
-        LIRDeclaredType classObj = unit.DefineDeclaredType(symbol.FullyQualifiedName, false);
+        LIRDeclaredType classObj = unit.DefineDeclaredType(symbol.FullyQualifiedName, symbol.IsValueType);
 
         foreach (var content in node.Body.Contents)
         {
@@ -122,42 +100,29 @@ public class ASTGenerator
             declaredObj.DefineMethod(symbol.FullyQualifiedName, funcType);
     }
 
-    public void GenerateStructMethodBodies(StructDeclarationNode node)
+    public void GenerateDeclaredTypeMethodBodies(ITypeDeclarationNode node)
     {
-        TypeSymbol? symbol = (TypeSymbol?)context.AnalysisContext.GetSymbol(node).Symbol;
+        TypeSymbol? symbol = null;
+
+        if (node is StructDeclarationNode structNode)
+            symbol = (TypeSymbol?)context.AnalysisContext.GetSymbol(structNode).Symbol;
+
+        if (node is ClassDeclarationNode classNode)
+            symbol = (TypeSymbol?)context.AnalysisContext.GetSymbol(classNode).Symbol;
 
         if (symbol == null)
         {
-            Console.WriteLine($"Could not find symbol for {node.StructName}!");
+            Console.WriteLine($"Could not find symbol for {node.Name}!");
             return;
         }
 
-        LIRDeclaredType? structObj = unit.GetDeclaredType(symbol.FullyQualifiedName);
-        if (structObj == null)
+        LIRDeclaredType? declaredObj = unit.GetDeclaredType(symbol.FullyQualifiedName);
+        if (declaredObj == null)
             return;
 
         foreach (var content in node.Body.Contents)
             if (content is MethodDeclarationNode method && !method.HasModifier(Parser.Tokenizer.Token.TokenType.Extern))
-                GenerateDeclaredTypeMethodBody(structObj, method);
-    }
-
-    public void GenerateClassMethodBodies(ClassDeclarationNode node) // TODO: Merge this yuck
-    {
-        TypeSymbol? symbol = (TypeSymbol?)context.AnalysisContext.GetSymbol(node).Symbol;
-
-        if (symbol == null)
-        {
-            Console.WriteLine($"Could not find symbol for {node.ClassName}!");
-            return;
-        }
-
-        LIRDeclaredType? classObj = unit.GetDeclaredType(symbol.FullyQualifiedName);
-        if (classObj == null)
-            return;
-
-        foreach (var content in node.Body.Contents)
-            if (content is MethodDeclarationNode method && !method.HasModifier(Parser.Tokenizer.Token.TokenType.Extern))
-                GenerateDeclaredTypeMethodBody(classObj, method);
+                GenerateDeclaredTypeMethodBody(declaredObj, method);
     }
 
     public void GenerateDeclaredTypeMethodBody(LIRDeclaredType declaredObj, MethodDeclarationNode node)

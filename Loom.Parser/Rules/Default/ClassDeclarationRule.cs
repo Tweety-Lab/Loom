@@ -4,7 +4,7 @@ using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.Rules.Default;
 
-public record ClassDeclarationNode(Token ClassName, BlockNode Body, List<Token> Modifiers) : ASTNode
+public record ClassDeclarationNode(Token Name, BlockNode Body, List<Token> Modifiers) : ASTNode, ITypeDeclarationNode
 {
     /// <inheritdoc/>
     public override IEnumerable<ASTNode> Children => [Body];
