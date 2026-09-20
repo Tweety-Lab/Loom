@@ -1,4 +1,6 @@
 ﻿
+using Loom.Common.Diagnostics;
+
 namespace Loom.Parser.Tokenizer;
 
 /// <summary>
@@ -65,6 +67,8 @@ public readonly struct TokenLocation
 
     /// <inheritdoc/>
     public override string ToString() => $"({Line}, {Column})";
+
+    public static implicit operator DiagnosticPosition(TokenLocation location) => new(location.Line, location.Column);
 }
 
 public class Token

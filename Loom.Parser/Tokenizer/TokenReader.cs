@@ -56,7 +56,7 @@ public class TokenReader
     public Token Expect(TokenType type)
     {
         if (Current.Type != type)
-            DiagnosticContext?.Report(new Diagnostic(Diagnostic.DiagnosticLevel.Error, $"Expected {type}, got {Current.Type}"));
+            DiagnosticContext?.Report(new Diagnostic(Diagnostic.DiagnosticLevel.Error, $"Expected {type}, got {Current.Type}"), Current.Location);
 
         return Advance();
     }
@@ -64,7 +64,7 @@ public class TokenReader
     public Token ExpectAny(Func<Token, bool> predicate)
     {
         if (!predicate(Current))
-            DiagnosticContext?.Report(new Diagnostic(Diagnostic.DiagnosticLevel.Error, $"Expected {string.Join(" or ", predicate)}, got {Current.Type}"));
+            DiagnosticContext?.Report(new Diagnostic(Diagnostic.DiagnosticLevel.Error, $"Expected {string.Join(" or ", predicate)}, got {Current.Type}"), Current.Location);
 
         return Advance();
     }

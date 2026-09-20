@@ -62,7 +62,7 @@ protected void ParseUntil(TokenType until, Dictionary<TokenType, Action> handler
             else if (fallback != null)
                 fallback();
             else
-                Parser.DiagnosticContext?.Report(new Common.Diagnostics.Diagnostic(Common.Diagnostics.Diagnostic.DiagnosticLevel.Error, $"Unexpected token: {token.Text}"));
+                Parser.DiagnosticContext?.Report(new Common.Diagnostics.Diagnostic(Common.Diagnostics.Diagnostic.DiagnosticLevel.Error, $"Unexpected token: {token.Text}"), token.Location);
         }
     }
 }

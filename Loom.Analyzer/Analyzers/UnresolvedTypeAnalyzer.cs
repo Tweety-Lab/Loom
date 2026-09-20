@@ -21,7 +21,7 @@ public class UnresolvedTypeAnalyzer : Analyzer
             var symbol = TypeResolver.Resolve(Context, node, node.ReturnType.Text);
 
             if (symbol == null)
-                Context.DiagnosticContext?.Report(UnresolvedTypeDiagnostic, node.ReturnType.Text);
+                Context.DiagnosticContext?.Report(UnresolvedTypeDiagnostic, node.ReturnType.Location, node.ReturnType.Text);
         }
     }
 }

@@ -22,6 +22,6 @@ public class NotAllPathsReturnAnalyzer : Analyzer
             return;
 
         if (node.Body.Contents.All(x => x is not ReturnStatementNode))
-            Context.DiagnosticContext?.Report(NotAllPathsReturnDiagnostic);
+            Context.DiagnosticContext?.Report(NotAllPathsReturnDiagnostic, node.StartToken?.Location);
     }
 }

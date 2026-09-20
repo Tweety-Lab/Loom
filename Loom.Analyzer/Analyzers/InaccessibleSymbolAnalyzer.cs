@@ -41,7 +41,7 @@ public class InaccessibleSymbolAnalyzer : Analyzer
         var usageStruct = Context.FirstAncestorOrSelf<StructDeclarationNode>(node);
 
         if (declaringStruct != null && declaringStruct != usageStruct)
-            Context.DiagnosticContext?.Report(InaccessibleMemberDiagnostic, member.Name);
+            Context.DiagnosticContext?.Report(InaccessibleMemberDiagnostic, node.StartToken?.Location, member.Name);
     }
 
     [Visitor]
@@ -77,6 +77,6 @@ public class InaccessibleSymbolAnalyzer : Analyzer
             return;
 
         if (usageModule != symbolModule && !exportable.IsExported)
-            Context.DiagnosticContext?.Report(UnexportedSymbolDiagnostic, symbol.Name);
+            Context.DiagnosticContext?.Report(UnexportedSymbolDiagnostic, node.StartToken?.Location, symbol.Name);
     }
 }

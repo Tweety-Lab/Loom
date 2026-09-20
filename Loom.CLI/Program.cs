@@ -42,7 +42,9 @@ public class Program
                 _ => ConsoleColor.White
             };
 
-            Console.WriteLine($"[{diagnostic.Level}] {diagnostic.Message}");
+            var position = diagnostic.Position is { } p ? $" ({p.Line}, {p.Column})" : string.Empty;
+
+            Console.WriteLine($"[{diagnostic.Level}{position}] {diagnostic.Message}");
         }
 
         Console.ResetColor();

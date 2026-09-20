@@ -19,6 +19,6 @@ public class UnresolvedImportAnalyzer : Analyzer
         ModuleSymbol? symbol = Context.GetSymbol(node.ModuleName).Symbol as ModuleSymbol;
 
         if (symbol == null)
-            Context.DiagnosticContext?.Report(UnresolvedImportDiagnostic, node.ModuleName.BaseName);
+            Context.DiagnosticContext?.Report(UnresolvedImportDiagnostic, node.ModuleName.Token.Location, node.ModuleName.BaseName);
     }
 }
