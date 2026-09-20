@@ -32,7 +32,7 @@ public class ASTGenerator
         foreach (var content in contents)
         {
             if (content is ITypeDeclarationNode typeDeclaration)
-                DeclareDeclaredType(typeDeclaration);
+                DeclareTypeDeclaration(typeDeclaration);
 
             else if (content is MethodDeclarationNode method)
                 GenerateMethodDeclaration(method);
@@ -41,7 +41,7 @@ public class ASTGenerator
         foreach (var content in contents)
         {
             if (content is ITypeDeclarationNode typeDeclaration)
-                GenerateDeclaredTypeMethodBodies(typeDeclaration);
+                GenerateTypeDeclarationMethodBodies(typeDeclaration);
 
             else if (content is MethodDeclarationNode method)
                 GenerateMethodBody(method);
@@ -50,7 +50,7 @@ public class ASTGenerator
         return unit;
     }
 
-    public void DeclareDeclaredType(ITypeDeclarationNode node)
+    public void DeclareTypeDeclaration(ITypeDeclarationNode node)
     {
         TypeSymbol? symbol = null;
 
@@ -66,19 +66,19 @@ public class ASTGenerator
             return;
         }
 
-        LIRDeclaredType classObj = unit.DefineDeclaredType(symbol.FullyQualifiedName, symbol.IsValueType);
+        LIRTypeDeclaration classObj = unit.DefineTypeDeclaration(symbol.FullyQualifiedName, symbol.IsValueType);
 
         foreach (var content in node.Body.Contents)
         {
             if (content is MethodDeclarationNode method)
-                DeclareDeclaredTypeMethod(classObj, method);
+                DeclareTypeDeclarationMethod(classObj, method);
 
             if (content is FieldDeclarationNode field)
-                GenerateDeclaredTypeField(classObj, field);
+                GenerateTypeDeclarationField(classObj, field);
         }
     }
 
-    public void DeclareDeclaredTypeMethod(LIRDeclaredType declaredObj, MethodDeclarationNode node)
+    public void DeclareTypeDeclarationMethod(LIRTypeDeclaration declaredObj, MethodDeclarationNode node)
     {
         MethodSymbol? symbol = (MethodSymbol?)context.AnalysisContext.GetSymbol(node).Symbol;
 
@@ -100,7 +100,7 @@ public class ASTGenerator
             declaredObj.DefineMethod(symbol.FullyQualifiedName, funcType);
     }
 
-    public void GenerateDeclaredTypeMethodBodies(ITypeDeclarationNode node)
+    public void GenerateTypeDeclarationMethodBodies(ITypeDeclarationNode node)
     {
         TypeSymbol? symbol = null;
 
@@ -116,16 +116,16 @@ public class ASTGenerator
             return;
         }
 
-        LIRDeclaredType? declaredObj = unit.GetDeclaredType(symbol.FullyQualifiedName);
+        LIRTypeDeclaration? declaredObj = unit.GetTypeDeclaration(symbol.FullyQualifiedName);
         if (declaredObj == null)
             return;
 
         foreach (var content in node.Body.Contents)
             if (content is MethodDeclarationNode method && !method.HasModifier(Parser.Tokenizer.Token.TokenType.Extern))
-                GenerateDeclaredTypeMethodBody(declaredObj, method);
+                GenerateTypeDeclarationMethodBody(declaredObj, method);
     }
 
-    public void GenerateDeclaredTypeMethodBody(LIRDeclaredType declaredObj, MethodDeclarationNode node)
+    public void GenerateTypeDeclarationMethodBody(LIRTypeDeclaration declaredObj, MethodDeclarationNode node)
     {
         MethodSymbol? symbol = (MethodSymbol?)context.AnalysisContext.GetSymbol(node).Symbol;
 
@@ -144,7 +144,7 @@ public class ASTGenerator
                 statementGen.EmitStatement(statementNode);
     }
 
-    public void GenerateDeclaredTypeField(LIRDeclaredType declaredObj, FieldDeclarationNode node)
+    public void GenerateTypeDeclarationField(LIRTypeDeclaration declaredObj, FieldDeclarationNode node)
     {
         FieldSymbol? symbol = (FieldSymbol?)context.AnalysisContext.GetSymbol(node).Symbol;
 
@@ -202,8 +202,8 @@ public class ASTGenerator
         TypeSymbol.DefaultType.I32 => LIRType.Int32,
         TypeSymbol.DefaultType.Char => LIRType.Char,
         TypeSymbol.DefaultType.IPtr => LIRType.IntPtr,
-        TypeSymbol.DefaultType.Struct => new LIRDeclaredTypeType(type.FullyQualifiedName, true),
-        TypeSymbol.DefaultType.Class => new LIRDeclaredTypeType(type.FullyQualifiedName, false),
+        TypeSymbol.DefaultType.Struct => new LIRTypeDeclarationType(type.FullyQualifiedName, true),
+        TypeSymbol.DefaultType.Class => new LIRTypeDeclarationType(type.FullyQualifiedName, false),
         _ => throw new Exception($"Unknown type {type.KnownType}")
     };
 

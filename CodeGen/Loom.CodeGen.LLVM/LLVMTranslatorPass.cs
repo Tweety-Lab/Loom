@@ -42,11 +42,11 @@ public class LLVMTranslatorPass : LIRLayeredPass
         };
 
         // Register struct types so alloca/load/store can resolve them
-        foreach (var structObj in unit.DeclaredTypes)
+        foreach (var structObj in unit.TypeDeclarations)
             translationContext.TypeMap[structObj.Type] = llvmContext.CreateNamedStruct(structObj.Name);
 
         // Set struct bodies once every struct type is registered so field access (getelementptr) is valid.
-        foreach (var structObj in unit.DeclaredTypes)
+        foreach (var structObj in unit.TypeDeclarations)
         {
             LLVMTypeRef structType = translationContext.TypeMap[structObj.Type];
             LLVMTypeRef[] fieldTypes = structObj.Fields.Select(f => translationContext.ResolveType(f.Type)).ToArray();

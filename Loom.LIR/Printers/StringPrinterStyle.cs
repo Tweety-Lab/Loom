@@ -12,10 +12,10 @@ internal class StringPrinterStyle : ILIRPrinterStyle
     public string PrintFunctionFooter() => "}";
 
     /// <inheritdoc/>
-    public string PrintDeclaredTypeHeader(LIRDeclaredType s) => s.Type.IsValueType ? $"struct {s.Name}" : $"class {s.Name}";
+    public string PrintTypeDeclarationHeader(LIRTypeDeclaration s) => s.Type.IsValueType ? $"struct {s.Name}" : $"class {s.Name}";
 
     /// <inheritdoc/>
-    public string PrintDeclaredTypeFooter() => "}";
+    public string PrintTypeDeclarationFooter() => "}";
 
     /// <inheritdoc/>
     public string PrintField(LIRField field) => $"field {PrintType(field.Type)} {field.Name}";
@@ -86,7 +86,7 @@ internal class StringPrinterStyle : ILIRPrinterStyle
         LIRVoidType => "void",
         LIRBoolType => "bool",
         LIRPointerType p => $"{PrintType(p.PointeeType)}*",
-        LIRDeclaredTypeType s => s.Name,
+        LIRTypeDeclarationType s => s.Name,
         _ => type.ToString()
     };
 
