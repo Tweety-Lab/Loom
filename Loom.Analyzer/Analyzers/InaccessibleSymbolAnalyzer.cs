@@ -73,14 +73,10 @@ public class InaccessibleSymbolAnalyzer : Analyzer
         ModuleNode? usageModule = Context.FirstAncestorOrSelf<ModuleNode>(node);
         ModuleNode? symbolModule = Context.FirstAncestorOrSelf<ModuleNode>(symbol.DeclaringNode);
 
-        if (usageModule != symbolModule && !IsExported(symbol))
+        if (symbol is not IExportable exportable)
+            return;
+
+        if (usageModule != symbolModule && !exportable.IsExported)
             Context.DiagnosticContext?.Report(UnexportedSymbolDiagnostic, symbol.Name);
     }
-
-    private static bool IsExported(Symbol symbol) => symbol switch
-    {
-        MethodSymbol method => method.IsExported,
-        TypeSymbol type => type.IsExported,
-        _ => true
-    };
 }

@@ -10,14 +10,23 @@ public enum MemberAccessibility
     Private
 }
 
+/// <summary>
+/// Represents a symbol that can be exported.
+/// </summary>
+public interface IExportable
+{
+    /// <summary> Whether this symbol is exported for use beyond it's owning module. </summary>
+    bool IsExported { get; set; }
+}
+
 public record ModuleSymbol(string Name) : Symbol(Name);
 
-public record TypeSymbol(string Name, TypeSymbol.DefaultType KnownType) : Symbol(Name)
+public record TypeSymbol(string Name, TypeSymbol.DefaultType KnownType) : Symbol(Name), IExportable
 {
     /// <summary> The members declared by this type. </summary>
     public List<Symbol> Members { get; } = new();
 
-    /// <summary> Whether this type is exported for use beyond it's owning module. </summary>
+    /// <inheritdoc/>
     public bool IsExported { get; set; }
 
     /// <summary> Whether this type uses value semantics. </summary>
@@ -35,7 +44,7 @@ public record TypeSymbol(string Name, TypeSymbol.DefaultType KnownType) : Symbol
     }
 }
 
-public record MethodSymbol(string Name, List<ParameterSymbol> Parameters) : Symbol(Name)
+public record MethodSymbol(string Name, List<ParameterSymbol> Parameters) : Symbol(Name), IExportable
 {
     /// <summary> The resolved return type, bound after all declarations. </summary>
     public TypeSymbol? ReturnType { get; set; }
@@ -43,7 +52,7 @@ public record MethodSymbol(string Name, List<ParameterSymbol> Parameters) : Symb
     /// <summary> Whether this method is static. </summary>
     public bool IsStatic { get; set; }
 
-    /// <summary> Whether this method is exported for use beyond it's owning module. </summary>
+    /// <inheritdoc/>
     public bool IsExported { get; set; }
 
     /// <summary> The accessibility of this method. </summary>
