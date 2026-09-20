@@ -33,7 +33,7 @@ public class InaccessibleSymbolAnalyzer : Analyzer
         if (receiverType?.Members.FirstOrDefault(m => m.Name == node.Name.BaseName) is not Symbol member)
             return;
 
-        MemberAccessibility? accessibility = (member as MethodSymbol)?.Accessibility ?? (member as FieldSymbol)?.Accessibility;
+        MemberAccessibility? accessibility = (member as IAccessibleSymbol)?.Accessibility;
         if (accessibility != MemberAccessibility.Private)
             return;
 
@@ -73,7 +73,7 @@ public class InaccessibleSymbolAnalyzer : Analyzer
         ModuleNode? usageModule = Context.FirstAncestorOrSelf<ModuleNode>(node);
         ModuleNode? symbolModule = Context.FirstAncestorOrSelf<ModuleNode>(symbol.DeclaringNode);
 
-        if (symbol is not IExportable exportable)
+        if (symbol is not IExportableSymbol exportable)
             return;
 
         if (usageModule != symbolModule && !exportable.IsExported)
