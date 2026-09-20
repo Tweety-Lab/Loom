@@ -31,6 +31,9 @@ public class ASTGenerator
 
         foreach (var content in contents)
         {
+            if (content is ClassDeclarationNode classDeclaration)
+                DeclareClass(classDeclaration);
+
             if (content is StructDeclarationNode structDeclaration)
                 DeclareStruct(structDeclaration);
 
@@ -40,6 +43,9 @@ public class ASTGenerator
 
         foreach (var content in contents)
         {
+            if (content is ClassDeclarationNode classDeclaration)
+                GenerateClassMethodBodies(classDeclaration);
+
             if (content is StructDeclarationNode structDeclaration)
                 GenerateStructMethodBodies(structDeclaration);
 
@@ -60,19 +66,41 @@ public class ASTGenerator
             return;
         }
 
-        LIRStruct structObj = unit.DefineStruct(symbol.FullyQualifiedName);
+        LIRDeclaredObject structObj = unit.DefineDeclaredObject(symbol.FullyQualifiedName, true);
 
         foreach (var content in node.Body.Contents)
         {
             if (content is MethodDeclarationNode method)
-                DeclareStructMethod(structObj, method);
+                DeclareDeclaredObjectMethod(structObj, method);
 
             if (content is FieldDeclarationNode field)
-                GenerateStructField(structObj, field);
+                GenerateDeclaredObjectField(structObj, field);
         }
     }
 
-    public void DeclareStructMethod(LIRStruct structObj, MethodDeclarationNode node)
+    public void DeclareClass(ClassDeclarationNode node)
+    {
+        TypeSymbol? symbol = (TypeSymbol?)context.AnalysisContext.GetSymbol(node).Symbol;
+
+        if (symbol == null)
+        {
+            Console.WriteLine($"Could not find symbol for {node.ClassName}!");
+            return;
+        }
+
+        LIRDeclaredObject classObj = unit.DefineDeclaredObject(symbol.FullyQualifiedName, false);
+
+        foreach (var content in node.Body.Contents)
+        {
+            if (content is MethodDeclarationNode method)
+                DeclareDeclaredObjectMethod(classObj, method);
+
+            if (content is FieldDeclarationNode field)
+                GenerateDeclaredObjectField(classObj, field);
+        }
+    }
+
+    public void DeclareDeclaredObjectMethod(LIRDeclaredObject declaredObj, MethodDeclarationNode node)
     {
         MethodSymbol? symbol = (MethodSymbol?)context.AnalysisContext.GetSymbol(node).Symbol;
 
@@ -84,14 +112,14 @@ public class ASTGenerator
 
         bool isStatic = node.HasModifier(Parser.Tokenizer.Token.TokenType.Static);
 
-        var funcType = BuildFunctionType(symbol, isStatic ? null : new LIRPointerType(structObj.Type));
+        var funcType = BuildFunctionType(symbol, isStatic ? null : new LIRPointerType(declaredObj.Type));
 
         bool isExtern = node.HasModifier(Parser.Tokenizer.Token.TokenType.Extern);
 
         if (isExtern)
-            structObj.DeclareMethod(symbol.FullyQualifiedName, funcType);
+            declaredObj.DeclareMethod(symbol.FullyQualifiedName, funcType);
         else
-            structObj.DefineMethod(symbol.FullyQualifiedName, funcType);
+            declaredObj.DefineMethod(symbol.FullyQualifiedName, funcType);
     }
 
     public void GenerateStructMethodBodies(StructDeclarationNode node)
@@ -104,16 +132,35 @@ public class ASTGenerator
             return;
         }
 
-        LIRStruct? structObj = unit.GetStruct(symbol.FullyQualifiedName);
+        LIRDeclaredObject? structObj = unit.GetDeclaredObject(symbol.FullyQualifiedName);
         if (structObj == null)
             return;
 
         foreach (var content in node.Body.Contents)
             if (content is MethodDeclarationNode method && !method.HasModifier(Parser.Tokenizer.Token.TokenType.Extern))
-                GenerateStructMethodBody(structObj, method);
+                GenerateDeclaredObjectMethodBody(structObj, method);
     }
 
-    public void GenerateStructMethodBody(LIRStruct structObj, MethodDeclarationNode node)
+    public void GenerateClassMethodBodies(ClassDeclarationNode node) // TODO: Merge this yuck
+    {
+        TypeSymbol? symbol = (TypeSymbol?)context.AnalysisContext.GetSymbol(node).Symbol;
+
+        if (symbol == null)
+        {
+            Console.WriteLine($"Could not find symbol for {node.ClassName}!");
+            return;
+        }
+
+        LIRDeclaredObject? classObj = unit.GetDeclaredObject(symbol.FullyQualifiedName);
+        if (classObj == null)
+            return;
+
+        foreach (var content in node.Body.Contents)
+            if (content is MethodDeclarationNode method && !method.HasModifier(Parser.Tokenizer.Token.TokenType.Extern))
+                GenerateDeclaredObjectMethodBody(classObj, method);
+    }
+
+    public void GenerateDeclaredObjectMethodBody(LIRDeclaredObject declaredObj, MethodDeclarationNode node)
     {
         MethodSymbol? symbol = (MethodSymbol?)context.AnalysisContext.GetSymbol(node).Symbol;
 
@@ -123,7 +170,7 @@ public class ASTGenerator
             return;
         }
 
-        LIRFunction func = structObj.Methods.FirstOrDefault(m => m.Name == symbol.FullyQualifiedName) ?? throw new Exception($"Could not find function {symbol.FullyQualifiedName}!");
+        LIRFunction func = declaredObj.Methods.FirstOrDefault(m => m.Name == symbol.FullyQualifiedName) ?? throw new Exception($"Could not find function {symbol.FullyQualifiedName}!");
 
         StatementGenerator statementGen = new StatementGenerator(context, unit, func);
 
@@ -132,7 +179,7 @@ public class ASTGenerator
                 statementGen.EmitStatement(statementNode);
     }
 
-    public void GenerateStructField(LIRStruct structObj, FieldDeclarationNode node)
+    public void GenerateDeclaredObjectField(LIRDeclaredObject declaredObj, FieldDeclarationNode node)
     {
         FieldSymbol? symbol = (FieldSymbol?)context.AnalysisContext.GetSymbol(node).Symbol;
 
@@ -142,7 +189,7 @@ public class ASTGenerator
             return;
         }
 
-        structObj.DeclareField(symbol.Name, ConvertType(symbol.Type!));
+        declaredObj.DeclareField(symbol.Name, ConvertType(symbol.Type!));
     }
 
     public void GenerateMethodDeclaration(MethodDeclarationNode node)
@@ -190,8 +237,8 @@ public class ASTGenerator
         TypeSymbol.DefaultType.I32 => LIRType.Int32,
         TypeSymbol.DefaultType.Char => LIRType.Char,
         TypeSymbol.DefaultType.IPtr => LIRType.IntPtr,
-        TypeSymbol.DefaultType.Struct => new LIRStructType(type.FullyQualifiedName),
-        TypeSymbol.DefaultType.Class => new LIRClassType(type.FullyQualifiedName),
+        TypeSymbol.DefaultType.Struct => new LIRDeclaredObjectType(type.FullyQualifiedName, true),
+        TypeSymbol.DefaultType.Class => new LIRDeclaredObjectType(type.FullyQualifiedName, false),
         _ => throw new Exception($"Unknown type {type.KnownType}")
     };
 

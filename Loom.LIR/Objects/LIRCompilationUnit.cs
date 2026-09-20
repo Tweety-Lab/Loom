@@ -6,13 +6,13 @@ public class LIRCompilationUnit : ILIRObject
     public Dictionary<string, string> MetaData { get; init; } = new();
 
     /// <summary> All functions owned by this <see cref="LIRCompilationUnit"/>, including methods declared in types. </summary>
-    public IEnumerable<LIRFunction> AllFunctions => Functions.Concat(Structs.SelectMany(s => s.Methods));
+    public IEnumerable<LIRFunction> AllFunctions => Functions.Concat(DeclaredObjects.SelectMany(o => o.Methods));
 
     /// <summary> All functions owned by this <see cref="LIRCompilationUnit"/>. </summary>
     public List<LIRFunction> Functions { get; } = new List<LIRFunction>();
 
-    /// <summary> All structs declared by this <see cref="LIRCompilationUnit"/>. </summary>
-    public List<LIRStruct> Structs { get; } = new List<LIRStruct>();
+    /// <summary> All <see cref="LIRDeclaredObject"/>s declared by this <see cref="LIRCompilationUnit"/>. </summary>
+    public List<LIRDeclaredObject> DeclaredObjects { get; } = new List<LIRDeclaredObject>();
 
     /// <summary> The name of this <see cref="LIRCompilationUnit"/>. </summary>
     public string Name => MetaData["Name"];
@@ -33,16 +33,16 @@ public class LIRCompilationUnit : ILIRObject
         return function;
     }
 
-    /// <summary> Adds a struct to this <see cref="LIRCompilationUnit"/>. </summary>
-    public LIRStruct DefineStruct(string name)
+    /// <summary> Adds a <see cref="LIRDeclaredObject"/> to this <see cref="LIRCompilationUnit"/>. </summary>
+    public LIRDeclaredObject DefineDeclaredObject(string name, bool isValueType)
     {
-        var structObj = LIRStruct.Define(name);
-        Structs.Add(structObj);
-        return structObj;
+        var declaredObj = LIRDeclaredObject.Define(name, isValueType);
+        DeclaredObjects.Add(declaredObj);
+        return declaredObj;
     }
 
-    /// <summary> Gets a struct by name. </summary>
-    public LIRStruct? GetStruct(string name) => Structs.FirstOrDefault(s => s.Name == name);
+    /// <summary> Gets a <see cref="LIRDeclaredObject"/> by name. </summary>
+    public LIRDeclaredObject? GetDeclaredObject(string name) => DeclaredObjects.FirstOrDefault(s => s.Name == name);
 
     /// <summary> Gets a function by name. </summary>
     public LIRFunction? GetFunction(string name) => Functions.FirstOrDefault(f => f.Name == name);

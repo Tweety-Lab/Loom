@@ -18,9 +18,9 @@ public class LIRPrinter
         sb.Append(PrintMeta(unit));
         sb.AppendLine();
 
-        foreach (var structObj in unit.Structs)
+        foreach (var declaredObj in unit.DeclaredObjects)
         {
-            sb.AppendLine(Print(structObj));
+            sb.AppendLine(Print(declaredObj));
             sb.AppendLine();
         }
 
@@ -33,21 +33,21 @@ public class LIRPrinter
         return sb.ToString();
     }
 
-    private string Print(LIRStruct structObj)
+    private string Print(LIRDeclaredObject declaredObj)
     {
         var sb = new StringBuilder();
 
-        sb.Append(PrintMeta(structObj));
+        sb.Append(PrintMeta(declaredObj));
 
-        sb.AppendLine(Style.PrintStructHeader(structObj));
+        sb.AppendLine(Style.PrintDeclaredObjectHeader(declaredObj));
 
-        foreach (var field  in structObj.Fields)
+        foreach (var field  in declaredObj.Fields)
         {
             sb.AppendLine("  " + Style.PrintField(field).Replace("\n", "\n  "));
             sb.AppendLine();
         }
 
-        foreach (var method in structObj.Methods)
+        foreach (var method in declaredObj.Methods)
         {
             sb.AppendLine("  " + Style.PrintFunctionHeader(method).Replace("\n", "\n  "));
             foreach (var block in method.Blocks)
@@ -57,7 +57,7 @@ public class LIRPrinter
                 sb.AppendLine("  " + Style.PrintFunctionFooter());
         }
 
-        sb.AppendLine(Style.PrintStructFooter());
+        sb.AppendLine(Style.PrintDeclaredObjectFooter());
         return sb.ToString();
     }
 

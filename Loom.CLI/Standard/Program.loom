@@ -9,7 +9,7 @@ module Standard::Program
     {
         i32 exitCode = 1;
 
-        TestClass myClass = new TestClass();
+        MyClass instance = new MyClass();
         
         WinProcess process = WinProcess.Current();
         WinProcess copy = process;
@@ -27,11 +27,14 @@ module Standard::Program
             Sleep(2000);
         }
         
-        return exitCode;
+        return instance.Number();
     }
 
-    export class TestClass
+    export class MyClass
     {
-        public i32 Val = default;
+        i32 Number()
+        {
+            return 13;
+        }
     }
 }
