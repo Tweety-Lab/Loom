@@ -100,6 +100,11 @@ public class AnalysisContext
         foreach (var root in rootList)
             typeWalker.Dispatch(root);
 
+        // Resolve Ownership flow
+        var ownershipWalker = new OwnershipWalker(this);
+        foreach (var root in rootList)
+            ownershipWalker.Dispatch(root);
+
         // Run analyzers
         foreach (var analyzer in Analyzers)
         {
