@@ -19,7 +19,6 @@ public class TypeMismatchAnalyzer : Analyzer
     public void Visit(ReturnStatementNode node)
     {
         var method = Context.FirstAncestorOrSelf<MethodDeclarationNode>(node);
-
         if (method == null)
             return;
 

@@ -121,6 +121,8 @@ public class Token
         [Keyword("extern"), Modifier] Extern,
         [Keyword("static"), Modifier] Static,
 
+        [Keyword("unique"), Modifier] Unique,
+
         [Keyword("true")] True,
         [Keyword("false")] False,
         [Keyword("default")] Default,

@@ -9,7 +9,7 @@ module Standard::Program
     {
         i32 exitCode = 1;
 
-        MyClass instance = new MyClass();
+        unique MyClass instance = new MyClass();
         
         WinProcess process = WinProcess.Current();
         WinProcess copy = process;

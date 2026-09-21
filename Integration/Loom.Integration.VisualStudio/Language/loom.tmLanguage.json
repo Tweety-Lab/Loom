@@ -28,6 +28,9 @@
       "include": "#structs"
     },
     {
+      "include": "#classes"
+    },
+    {
       "include": "#functions"
     },
     {
@@ -152,6 +155,22 @@
       ]
     },
 
+    "classes": {
+      "patterns": [
+
+        {
+          "name": "keyword.declaration.class.loom",
+          "match": "\\bclass\\b"
+        },
+
+        {
+          "name": "entity.name.type.class.loom",
+          "match": "(?<=\\bclass\\s+)[A-Za-z_][A-Za-z0-9_]*"
+        }
+
+      ]
+    },
+
     "functions": {
       "patterns": [
 
@@ -188,7 +207,7 @@
 
         {
           "name": "storage.modifier.loom",
-          "match": "\\b(?:export|extern|unsafe|static|public|private)\\b"
+          "match": "\\b(?:export|extern|unsafe|static|public|private|unique|shared|weak)\\b"
         },
 
         {

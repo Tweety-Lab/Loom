@@ -132,6 +132,10 @@ internal class DeclarationWalker : ASTVisitor
     {
         var symbol = new LocalVariableSymbol(node.Variable.Name.Text);
         symbol.FullyQualifiedName = BuildQualifiedName(node.Variable.Name.Text);
+
+        if (node.HasModifier(Parser.Tokenizer.Token.TokenType.Unique))
+            symbol.PointerType = PointerType.Unique;
+
         symbol.DeclaringNode = node;
         CurrentTable.Define(symbol);
         Context.BoundSymbols[node] = symbol;

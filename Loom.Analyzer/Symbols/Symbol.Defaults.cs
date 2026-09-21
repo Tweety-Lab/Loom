@@ -10,6 +10,15 @@ public enum MemberAccessibility
     Private
 }
 
+public enum PointerType
+{
+    None,
+
+    Unique,
+    Shared,
+    Weak
+}
+
 /// <summary>
 /// Represents a symbol that can be exported.
 /// </summary>
@@ -56,7 +65,7 @@ public record TypeSymbol(string Name, TypeSymbol.DefaultType KnownType) : Symbol
 
 public record MethodSymbol(string Name, List<ParameterSymbol> Parameters) : Symbol(Name), IExportableSymbol, IAccessibleSymbol
 {
-    /// <summary> The resolved return type, bound after all declarations. </summary>
+    /// <summary> The resolved return type. </summary>
     public TypeSymbol? ReturnType { get; set; }
 
     /// <summary> Whether this method is static. </summary>
@@ -71,13 +80,16 @@ public record MethodSymbol(string Name, List<ParameterSymbol> Parameters) : Symb
 
 public record LocalVariableSymbol(string Name) : Symbol(Name)
 {
-    /// <summary> The resolved type, bound after all declarations. </summary>
+    /// <summary> The resolved type. </summary>
     public TypeSymbol? Type { get; set; }
+
+    /// <summary> The pointer type. </summary>
+    public PointerType PointerType { get; set; }
 }
 
 public record FieldSymbol(string Name) : Symbol(Name), IAccessibleSymbol
 {
-    /// <summary> The resolved type, bound after all declarations. </summary>
+    /// <summary> The resolved type. </summary>
     public TypeSymbol? Type { get; set; }
 
     /// <inheritdoc/>
@@ -86,6 +98,6 @@ public record FieldSymbol(string Name) : Symbol(Name), IAccessibleSymbol
 
 public record ParameterSymbol(string Name) : Symbol(Name)
 {
-    /// <summary> The resolved type, bound after all declarations. </summary>
+    /// <summary> The resolved type. </summary>
     public TypeSymbol? Type { get; set; }
 }
