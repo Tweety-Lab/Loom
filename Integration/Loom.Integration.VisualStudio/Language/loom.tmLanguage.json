@@ -176,12 +176,12 @@
 
         {
           "name": "entity.name.function.declaration.loom",
-          "match": "(?<=\\b(?:void|bool|i8|i16|i32|i64|u8|u16|u32|u64|char|iptr|uptr|f32|f64)\\s+)[A-Za-z_][A-Za-z0-9_]*(?=\\s*\\()"
+          "match": "(?<=\\b(?:void|bool|i8|i16|i32|i64|u8|u16|u32|u64|char|iptr|f32|f64)\\s+)[A-Za-z_][A-Za-z0-9_]*(?=\\s*\\()"
         },
 
         {
           "name": "entity.name.function.declaration.loom",
-          "match": "(?<=\\bexport\\s+(?:extern\\s+)?(?:void|bool|i8|i16|i32|i64|u8|u16|u32|u64|char|iptr|uptr|f32|f64)\\s+)[A-Za-z_][A-Za-z0-9_]*(?=\\s*\\()"
+          "match": "(?<=\\bexport\\s+(?:extern\\s+)?(?:void|bool|i8|i16|i32|i64|u8|u16|u32|u64|char|iptr|f32|f64)\\s+)[A-Za-z_][A-Za-z0-9_]*(?=\\s*\\()"
         },
 
         {
