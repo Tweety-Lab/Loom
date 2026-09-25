@@ -5,12 +5,14 @@ using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.Rules.Default;
 
-/// <summary> Parses the body of a type, whose members can be methods, fields, or nested structs. </summary>
+/// <summary>
+/// Parses the body of a type, whose members can be methods, fields, or nested structs.
+/// </summary>
 [ParserRule]
-public class TypeBlockRule : BlockRule
+public class TypeDeclarationBlockRule : BlockRule
 {
     /// <inheritdoc/>
-    public TypeBlockRule(LoomParser parser) : base(parser) { }
+    public TypeDeclarationBlockRule(LoomParser parser) : base(parser) { }
 
     /// <inheritdoc/>
     protected override bool TryParseMember([NotNullWhen(true)] out ASTNode? node)

@@ -26,7 +26,7 @@ public class ClassDeclarationRule : ParserRule<ClassDeclarationNode>
 
         var className = Parser.Reader.Expect(TokenType.Identifier); // name
 
-        BlockNode body = RunRule<TypeBlockRule, BlockNode>();
+        BlockNode body = RunRule<TypeDeclarationBlockRule, BlockNode>();
 
         return new ClassDeclarationNode(className, body, modifiers);
     }
