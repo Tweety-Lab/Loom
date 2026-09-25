@@ -9,7 +9,7 @@ public record ParameterNode(TypeNode Type, Token Name) : ASTNode
     public override IEnumerable<ASTNode> Children => Enumerable.Empty<ASTNode>();
 }
 
-public record MethodDeclarationNode(TypeNode ReturnType, Token MethodName, List<ParameterNode> Parameters, BlockNode Body, List<Token> Modifiers) : ASTNode, IModifiable
+public record MethodDeclarationNode(TypeNode ReturnType, Token MethodName, List<ParameterNode> Parameters, BlockNode Body, List<Token> Modifiers) : ASTNode, IModifiableNode
 {
     /// <inheritdoc/>
     public override IEnumerable<ASTNode> Children => [Body];

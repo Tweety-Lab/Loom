@@ -5,7 +5,7 @@ using static Loom.Parser.Tokenizer.Token;
 namespace Loom.Parser.Rules.Default;
 
 // TODO: Better place for this
-public interface ITypeDeclarationNode : IModifiable
+public interface ITypeDeclarationNode : IModifiableNode
 {
     Token Name { get; }
     BlockNode Body { get; }

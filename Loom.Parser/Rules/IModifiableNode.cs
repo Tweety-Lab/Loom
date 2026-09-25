@@ -8,7 +8,7 @@ namespace Loom.Parser.Rules;
 /// <summary>
 /// <see cref="ASTNode"/> that holds modifiers.
 /// </summary>
-public interface IModifiable
+public interface IModifiableNode
 {
     /// <summary> All applied modifiers. </summary>
     List<Token> Modifiers { get; }
@@ -17,7 +17,7 @@ public interface IModifiable
 // Kinda hacky?
 public static class ModifiableExtensions
 {
-    extension (IModifiable modifiable)
+    extension (IModifiableNode modifiable)
     {
         /// <summary> Returns true if the node has the specified modifier. </summary>
         public bool HasModifier(TokenType modifier) => modifiable.Modifiers.Any(m => m.Type == modifier);
