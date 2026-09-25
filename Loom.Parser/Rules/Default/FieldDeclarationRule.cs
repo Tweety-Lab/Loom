@@ -6,6 +6,7 @@ namespace Loom.Parser.Rules.Default;
 
 public record FieldDeclarationNode(List<Token> Modifiers, VariableDeclarationNode Variable) : ASTNode
 {
+    /// <inheritdoc/>
     public override IEnumerable<ASTNode> Children => [Variable];
 
     /// <summary> Returns true if the field has the specified modifier. </summary>

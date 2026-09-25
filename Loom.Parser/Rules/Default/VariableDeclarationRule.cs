@@ -4,8 +4,9 @@ using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.Rules.Default;
 
-public record VariableDeclarationNode(Token Type, Token Name, ExpressionNode Initializer) : ASTNode
+public record VariableDeclarationNode(TypeNode Type, Token Name, ExpressionNode Initializer) : ASTNode
 {
+    /// <inheritdoc/>
     public override IEnumerable<ASTNode> Children => [Initializer];
 }
 
@@ -18,7 +19,7 @@ public class VariableDeclarationRule : ParserRule<VariableDeclarationNode>
     /// <inheritdoc/>
     public override VariableDeclarationNode ParseNode()
     {
-        var type = Parser.Reader.ExpectAny(t => TokenRegistry.IsBuiltInType(t.Type) || t.Type == TokenType.Identifier); // type
+        var type = RunRule<TypeRule, TypeNode>(); // type
         var name = Parser.Reader.Expect(TokenType.Identifier); // name
 
         Parser.Reader.Expect(TokenType.Equals); // =

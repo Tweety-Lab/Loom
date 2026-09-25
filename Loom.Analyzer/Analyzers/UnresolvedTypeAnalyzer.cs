@@ -16,12 +16,12 @@ public class UnresolvedTypeAnalyzer : Analyzer
     [Visitor]
     public void Visit(MethodDeclarationNode node)
     {
-        if (node.ReturnType.Type == Token.TokenType.Identifier)
+        if (node.ReturnType.Base.Type == Token.TokenType.Identifier)
         {
-            var symbol = TypeResolver.Resolve(Context, node, node.ReturnType.Text);
+            var symbol = TypeResolver.Resolve(Context, node, node.ReturnType.Base.Text);
 
             if (symbol == null)
-                Context.DiagnosticContext?.Report(UnresolvedTypeDiagnostic, node.ReturnType.Location, node.ReturnType.Text);
+                Context.DiagnosticContext?.Report(UnresolvedTypeDiagnostic, node.ReturnType.Base.Location, node.ReturnType.Base.Text);
         }
     }
 }

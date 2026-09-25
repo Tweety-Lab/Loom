@@ -454,7 +454,7 @@ module Test
         var method = (MethodDeclarationNode)root.Modules[0].Body.Contents.First();
         var decl = Assert.IsType<VariableDeclarationNode>(method.Body.Contents.First());
         Assert.Equal("x", decl.Name.Text);
-        Assert.Equal("i32", decl.Type.Text);
+        Assert.Equal("i32", decl.Type.Base.Text);
         Assert.IsType<NumberLiteralNode>(decl.Initializer);
     }
 

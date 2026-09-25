@@ -45,18 +45,18 @@ public class InaccessibleSymbolAnalyzer : Analyzer
     }
 
     [Visitor]
-    public void Visit(LocalDeclarationStatementNode node) => CheckTypeAccess(node, node.Variable.Type.Text);
+    public void Visit(LocalDeclarationStatementNode node) => CheckTypeAccess(node, node.Variable.Type.Base.Text);
 
     [Visitor]
-    public void Visit(FieldDeclarationNode node) => CheckTypeAccess(node, node.Variable.Type.Text);
+    public void Visit(FieldDeclarationNode node) => CheckTypeAccess(node, node.Variable.Type.Base.Text);
 
     [Visitor]
     public void Visit(MethodDeclarationNode node)
     {
-        CheckTypeAccess(node, node.ReturnType.Text);
+        CheckTypeAccess(node, node.ReturnType.Base.Text);
 
         foreach (var parameter in node.Parameters)
-            CheckTypeAccess(node, parameter.Type.Text);
+            CheckTypeAccess(node, parameter.Type.Base.Text);
     }
 
     private void CheckTypeAccess(ASTNode node, string typeName)

@@ -81,6 +81,9 @@ public class Token
         [Character('{')] LBrace,
         [Character('}')] RBrace,
 
+        [Character('[')] LBracket,
+        [Character(']')] RBracket,
+
         [Character('(')] LParen,
         [Character(')')] RParen,
 

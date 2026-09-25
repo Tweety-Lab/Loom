@@ -22,7 +22,7 @@ internal class TypeWalker : ASTWalker
     public void Visit(DefaultLiteralNode node)
     {
         var declaration = Context.FirstAncestorOrSelf<VariableDeclarationNode>(node);
-        var type = declaration == null ? null : TypeResolver.Resolve(Context, declaration, declaration.Type.Text);
+        var type = declaration == null ? null : TypeResolver.Resolve(Context, declaration, declaration.Type.Base.Text);
 
         Context.ExpressionTypes[node] = type ?? (TypeSymbol)Context.Binders.First().Value.Lookup("i32")!.First();
     }

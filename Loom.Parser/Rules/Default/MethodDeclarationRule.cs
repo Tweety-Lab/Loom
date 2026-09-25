@@ -4,12 +4,12 @@ using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.Rules.Default;
 
-public record ParameterNode(Token Type, Token Name) : ASTNode
+public record ParameterNode(TypeNode Type, Token Name) : ASTNode
 {
     public override IEnumerable<ASTNode> Children => Enumerable.Empty<ASTNode>();
 }
 
-public record MethodDeclarationNode(Token ReturnType, Token MethodName, List<ParameterNode> Parameters, BlockNode Body, List<Token> Modifiers) : ASTNode
+public record MethodDeclarationNode(TypeNode ReturnType, Token MethodName, List<ParameterNode> Parameters, BlockNode Body, List<Token> Modifiers) : ASTNode
 {
     /// <inheritdoc/>
     public override IEnumerable<ASTNode> Children => [Body];
@@ -30,7 +30,7 @@ public class MethodDeclarationRule : ParserRule<MethodDeclarationNode>
     {
         var modifiers = Parser.Reader.ExpectMany(t => TokenRegistry.IsModifier(t.Type));
 
-        Token returnType = Parser.Reader.ExpectAny(t => TokenRegistry.IsBuiltInType(t.Type) || t.Type == TokenType.Identifier); // return type
+        var returnType = RunRule<TypeRule, TypeNode>(); // return type
         var methodName = Parser.Reader.Expect(TokenType.Identifier); // name
 
         Parser.Reader.Expect(TokenType.LParen); // (
@@ -41,7 +41,7 @@ public class MethodDeclarationRule : ParserRule<MethodDeclarationNode>
         {
             do
             {
-                var type = Parser.Reader.ExpectAny(t => TokenRegistry.IsBuiltInType(t.Type) || t.Type == TokenType.Identifier);
+                var type = RunRule<TypeRule, TypeNode>(); // type
                 var name = Parser.Reader.Expect(TokenType.Identifier);
 
                 parameters.Add(new ParameterNode(type, name));

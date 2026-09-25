@@ -23,25 +23,25 @@ internal class BindingWalker : ASTWalker
         if (symbol == null)
             return;
 
-        symbol.ReturnType = TypeResolver.Resolve(Context, node, node.ReturnType.Text);
+        symbol.ReturnType = TypeResolver.Resolve(Context, node, node.ReturnType.Base.Text);
 
         // Parameter declarations are not part of the AST child graph, so scope resolve through the method node.
         foreach (var (declaration, parameter) in node.Parameters.Zip(symbol.Parameters))
-            parameter.Type = TypeResolver.Resolve(Context, node, declaration.Type.Text);
+            parameter.Type = TypeResolver.Resolve(Context, node, declaration.Type.Base.Text);
     }
 
     [Visitor]
     public void Visit(FieldDeclarationNode node)
     {
         if (Context.GetSymbol(node).Symbol is FieldSymbol symbol)
-            symbol.Type = TypeResolver.Resolve(Context, node, node.Variable.Type.Text);
+            symbol.Type = TypeResolver.Resolve(Context, node, node.Variable.Type.Base.Text);
     }
 
     [Visitor]
     public void Visit(LocalDeclarationStatementNode node)
     {
         if (Context.GetSymbol(node).Symbol is LocalVariableSymbol symbol)
-            symbol.Type = TypeResolver.Resolve(Context, node, node.Variable.Type.Text);
+            symbol.Type = TypeResolver.Resolve(Context, node, node.Variable.Type.Base.Text);
     }
 
     [Visitor]
