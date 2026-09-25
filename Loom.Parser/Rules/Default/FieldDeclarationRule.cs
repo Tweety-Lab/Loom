@@ -22,7 +22,7 @@ public class FieldDeclarationRule : ParserRule<FieldDeclarationNode>
     /// <inheritdoc/>
     public override FieldDeclarationNode ParseNode()
     {
-        var modifiers = Parser.Reader.ExpectMany(t => TokenRegistry.IsModifier(t.Type));
+        var modifiers = Parser.Reader.ExpectMany(t => TokenRegistry.IsMemberModifier(t.Type));
 
         var variable = RunRule<VariableDeclarationRule, VariableDeclarationNode>();
         Parser.Reader.Expect(TokenType.Semicolon); // ;

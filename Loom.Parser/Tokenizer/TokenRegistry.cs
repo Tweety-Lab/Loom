@@ -19,6 +19,10 @@ public static class TokenRegistry
     /// <summary> All currently registered modifiers. </summary>
     public static IReadOnlySet<Token.TokenType> Modifiers => modifiers;
 
+    public static IReadOnlySet<Token.TokenType> MemberModifiers => memberModifiers;
+
+    public static IReadOnlySet<Token.TokenType> TypeModifiers => typeModifiers;
+
     /// <summary> All currently registered built-in types. </summary>
     public static IReadOnlySet<Token.TokenType> BuiltInTypes => builtInTypes;
 
@@ -26,6 +30,8 @@ public static class TokenRegistry
     private static readonly Dictionary<char, Token.TokenType> characters = new();
     private static readonly Dictionary<string, Token.TokenType> multiCharacters = new();
     private static readonly HashSet<Token.TokenType> modifiers = new();
+    private static readonly HashSet<Token.TokenType> memberModifiers = new();
+    private static readonly HashSet<Token.TokenType> typeModifiers = new();
     private static readonly HashSet<Token.TokenType> builtInTypes = new();
 
     static TokenRegistry()
@@ -43,8 +49,15 @@ public static class TokenRegistry
             if (field.GetCustomAttribute<MultiCharacterAttribute>() is { } mc)
                 multiCharacters[new string(mc.Characters)] = type;
 
-            if (field.IsDefined(typeof(ModifierAttribute)))
+            foreach (var modifier in field.GetCustomAttributes<ModifierAttribute>())
+            {
                 modifiers.Add(type);
+
+                if (modifier.Target == ModifierTarget.Member)
+                    memberModifiers.Add(type);
+                else
+                    typeModifiers.Add(type);
+            }
 
             if (field.IsDefined(typeof(TypeAttribute)))
                 builtInTypes.Add(type);
@@ -59,6 +72,10 @@ public static class TokenRegistry
 
     /// <summary> Checks if the given token type is a modifier. </summary>
     public static bool IsModifier(Token.TokenType type) => modifiers.Contains(type);
+
+    public static bool IsMemberModifier(Token.TokenType type) => memberModifiers.Contains(type);
+
+    public static bool IsTypeModifier(Token.TokenType type) => typeModifiers.Contains(type);
 
     /// <summary> Checks if the given token type is a built-in type. </summary>
     public static bool IsBuiltInType(Token.TokenType type) => builtInTypes.Contains(type);

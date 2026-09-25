@@ -28,7 +28,7 @@ public class MethodDeclarationRule : ParserRule<MethodDeclarationNode>
     /// <inheritdoc/>
     public override MethodDeclarationNode ParseNode()
     {
-        var modifiers = Parser.Reader.ExpectMany(t => TokenRegistry.IsModifier(t.Type));
+        var modifiers = Parser.Reader.ExpectMany(t => TokenRegistry.IsMemberModifier(t.Type));
 
         var returnType = RunRule<TypeRule, TypeNode>(); // return type
         var methodName = Parser.Reader.Expect(TokenType.Identifier); // name

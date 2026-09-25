@@ -3,11 +3,22 @@ using Loom.Common.Diagnostics;
 
 namespace Loom.Parser.Tokenizer;
 
+public enum ModifierTarget
+{
+    Member,
+    Type
+}
+
 /// <summary>
 /// Marks a <see cref="Token.TokenType"/> as a modifier.
 /// </summary>
-[AttributeUsage(AttributeTargets.Field)]
-public sealed class ModifierAttribute : Attribute { }
+[AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
+public sealed class ModifierAttribute : Attribute
+{
+    public ModifierTarget Target { get; }
+
+    public ModifierAttribute(ModifierTarget target = ModifierTarget.Member) => Target = target;
+}
 
 /// <summary>
 /// Marks a <see cref="Token.TokenType"/> as a built-in type.
@@ -124,7 +135,7 @@ public class Token
         [Keyword("extern"), Modifier] Extern,
         [Keyword("static"), Modifier] Static,
 
-        [Keyword("unique"), Modifier] Unique,
+        [Keyword("unique"), Modifier(ModifierTarget.Type)] Unique,
 
         [Keyword("true")] True,
         [Keyword("false")] False,

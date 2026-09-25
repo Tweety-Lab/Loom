@@ -4,10 +4,12 @@ using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.Rules.Default;
 
-public record TypeNode(Token Base) : ASTNode
+public record TypeNode(Token Base, List<Token> Modifiers) : ASTNode
 {
     /// <inheritdoc/>
     public override IEnumerable<ASTNode> Children => Enumerable.Empty<ASTNode>();
+
+    public bool HasModifier(TokenType type) => Modifiers.Any(m => m.Type == type);
 }
 
 [ParserRule]
@@ -19,8 +21,10 @@ public class TypeRule : ParserRule<TypeNode>
     /// <inheritdoc/>
     public override TypeNode ParseNode()
     {
+        var modifiers = Parser.Reader.ExpectMany(t => TokenRegistry.IsTypeModifier(t.Type));
+
         var type = Parser.Reader.ExpectAny(t => TokenRegistry.IsBuiltInType(t.Type) || t.Type == TokenType.Identifier); // type
 
-        return new TypeNode(type);
+        return new TypeNode(type, modifiers);
     }
 }

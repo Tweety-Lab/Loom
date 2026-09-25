@@ -31,7 +31,7 @@ public class StructDeclarationRule : ParserRule<StructDeclarationNode>
     /// <inheritdoc/>
     public override StructDeclarationNode ParseNode()
     {
-        var modifiers = Parser.Reader.ExpectMany(t => TokenRegistry.IsModifier(t.Type));
+        var modifiers = Parser.Reader.ExpectMany(t => TokenRegistry.IsMemberModifier(t.Type));
 
         Parser.Reader.Expect(TokenType.Struct); // struct
 

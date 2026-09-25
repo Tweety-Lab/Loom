@@ -23,7 +23,7 @@ public class ClassDeclarationRule : ParserRule<ClassDeclarationNode>
     /// <inheritdoc/>
     public override ClassDeclarationNode ParseNode()
     {
-        var modifiers = Parser.Reader.ExpectMany(t => TokenRegistry.IsModifier(t.Type));
+        var modifiers = Parser.Reader.ExpectMany(t => TokenRegistry.IsMemberModifier(t.Type));
 
         Parser.Reader.Expect(TokenType.Class); // class
 
