@@ -9,13 +9,10 @@ public record ParameterNode(TypeNode Type, Token Name) : ASTNode
     public override IEnumerable<ASTNode> Children => Enumerable.Empty<ASTNode>();
 }
 
-public record MethodDeclarationNode(TypeNode ReturnType, Token MethodName, List<ParameterNode> Parameters, BlockNode Body, List<Token> Modifiers) : ASTNode
+public record MethodDeclarationNode(TypeNode ReturnType, Token MethodName, List<ParameterNode> Parameters, BlockNode Body, List<Token> Modifiers) : ASTNode, IModifiable
 {
     /// <inheritdoc/>
     public override IEnumerable<ASTNode> Children => [Body];
-
-    /// <summary> Returns true if the method has the specified modifier. </summary>
-    public bool HasModifier(TokenType type) => Modifiers.Any(m => m.Type == type);
 }
 
 

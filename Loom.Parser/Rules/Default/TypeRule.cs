@@ -4,12 +4,10 @@ using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.Rules.Default;
 
-public record TypeNode(Token Base, List<Token> Modifiers) : ASTNode
+public record TypeNode(Token Base, List<Token> Modifiers) : ASTNode, IModifiable
 {
     /// <inheritdoc/>
     public override IEnumerable<ASTNode> Children => Enumerable.Empty<ASTNode>();
-
-    public bool HasModifier(TokenType type) => Modifiers.Any(m => m.Type == type);
 }
 
 [ParserRule]

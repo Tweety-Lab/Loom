@@ -2,6 +2,7 @@
 using Loom.Analyzer.Symbols;
 using Loom.Common;
 using Loom.LIR.Objects;
+using Loom.Parser.Rules;
 using Loom.Parser.Rules.Default;
 
 namespace Loom.LIR.Generation;

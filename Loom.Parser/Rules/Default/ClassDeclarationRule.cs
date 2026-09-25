@@ -8,9 +8,6 @@ public record ClassDeclarationNode(Token Name, BlockNode Body, List<Token> Modif
 {
     /// <inheritdoc/>
     public override IEnumerable<ASTNode> Children => [Body];
-
-    /// <summary> Returns true if the class has the specified modifier. </summary>
-    public bool HasModifier(TokenType type) => Modifiers.Any(m => m.Type == type);
 }
 
 
