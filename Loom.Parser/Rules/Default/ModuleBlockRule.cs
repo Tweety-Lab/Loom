@@ -15,9 +15,7 @@ public class ModuleBlockRule : BlockRule
     /// <inheritdoc/>
     protected override bool TryParseMember([NotNullWhen(true)] out ASTNode? node)
     {
-        var offset = 0;
-        while (TokenRegistry.IsModifier(Parser.Reader.Peek(offset).Type))
-            offset++;
+        var offset = TypeSyntax.SkipModifiers(Parser.Reader, 0);
 
         if (Parser.Reader.Peek(offset).Type == TokenType.Struct)
         {
@@ -31,10 +29,15 @@ public class ModuleBlockRule : BlockRule
             return true;
         }
 
-        if (IsTypeName(Parser.Reader.Peek(offset).Type) && Parser.Reader.Peek(offset + 1).Type == TokenType.Identifier && Parser.Reader.Peek(offset + 2).Type == TokenType.LParen)
+        if (TypeSyntax.IsTypeName(Parser.Reader.Peek(offset).Type))
         {
-            node = RunRule<MethodDeclarationRule, MethodDeclarationNode>();
-            return true;
+            offset = TypeSyntax.SkipType(Parser.Reader, offset);
+
+            if (Parser.Reader.Peek(offset).Type == TokenType.Identifier && Parser.Reader.Peek(offset + 1).Type == TokenType.LParen)
+            {
+                node = RunRule<MethodDeclarationRule, MethodDeclarationNode>();
+                return true;
+            }
         }
 
         node = null;

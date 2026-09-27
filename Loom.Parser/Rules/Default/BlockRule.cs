@@ -47,6 +47,4 @@ public abstract class BlockRule : ParserRule<BlockNode>
         node = null;
         return false;
     }
-
-    protected static bool IsTypeName(TokenType type) => type == TokenType.Identifier || TokenRegistry.IsBuiltInType(type);
 }

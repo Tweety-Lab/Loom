@@ -17,9 +17,7 @@ public class TypeDeclarationBlockRule : BlockRule
     /// <inheritdoc/>
     protected override bool TryParseMember([NotNullWhen(true)] out ASTNode? node)
     {
-        var offset = 0;
-        while (TokenRegistry.IsModifier(Parser.Reader.Peek(offset).Type))
-            offset++;
+        var offset = TypeSyntax.SkipModifiers(Parser.Reader, 0);
 
         if (Parser.Reader.Peek(offset).Type == TokenType.Struct)
         {
@@ -27,16 +25,30 @@ public class TypeDeclarationBlockRule : BlockRule
             return true;
         }
 
-        bool isTypeName = IsTypeName(Parser.Reader.Peek(offset).Type) && Parser.Reader.Peek(offset + 1).Type == TokenType.Identifier;
+        if (!TypeSyntax.IsTypeName(Parser.Reader.Peek(offset).Type))
+        {
+            node = null;
+            return false;
+        }
 
-        if (isTypeName && Parser.Reader.Peek(offset + 2).Type == TokenType.LParen)
+        offset = TypeSyntax.SkipType(Parser.Reader, offset);
+
+        if (Parser.Reader.Peek(offset).Type != TokenType.Identifier)
+        {
+            node = null;
+            return false;
+        }
+
+        var next = Parser.Reader.Peek(offset + 1).Type;
+
+        if (next == TokenType.LParen)
         {
             node = RunRule<MethodDeclarationRule, MethodDeclarationNode>();
             return true;
         }
 
         // A typed member followed by '=' is a field.
-        if (isTypeName && Parser.Reader.Peek(offset + 2).Type == TokenType.Equals)
+        if (next == TokenType.Equals)
         {
             node = RunRule<FieldDeclarationRule, FieldDeclarationNode>();
             return true;

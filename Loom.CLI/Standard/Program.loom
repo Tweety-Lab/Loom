@@ -9,6 +9,8 @@ module Standard::Program
     {
         i32 exitCode = 1;
 
+        i32[5] testArray = 1;
+
         unique MyClass instance = new MyClass();
         
         WinProcess process = WinProcess.Current();
