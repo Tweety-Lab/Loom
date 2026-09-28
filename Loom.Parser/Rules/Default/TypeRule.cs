@@ -16,10 +16,32 @@ public record TypeNode(Token Base, List<Token> Modifiers, ArraySizeSpecifierNode
     public override IEnumerable<ASTNode> Children => Enumerable.Empty<ASTNode>();
 }
 
-// Extensions to help with type parsing
-// TODO: Move?
-public static class TypeSyntax
+[ParserRule]
+public class TypeRule : ParserRule<TypeNode>
 {
+    /// <inheritdoc/>
+    public TypeRule(LoomParser parser) : base(parser) { }
+
+    /// <inheritdoc/>
+    public override TypeNode ParseNode()
+    {
+        var modifiers = Parser.Reader.ExpectMany(t => TokenRegistry.IsTypeModifier(t.Type));
+
+        var type = Parser.Reader.ExpectAny(t => IsTypeName(t.Type)); // type
+
+        ArraySizeSpecifierNode? arraySize = null;
+
+        if (Parser.Reader.Match(TokenType.LBracket)) // [
+        {
+            var size = Parser.Reader.Expect(TokenType.Number); // number
+            Parser.Reader.Expect(TokenType.RBracket); // ]
+
+            arraySize = new ArraySizeSpecifierNode(size);
+        }
+
+        return new TypeNode(type, modifiers, arraySize);
+    }
+
     public static bool IsTypeName(TokenType type) => type == TokenType.Identifier || TokenRegistry.IsBuiltInType(type);
 
     public static int SkipModifiers(TokenReader reader, int offset)
@@ -49,32 +71,5 @@ public static class TypeSyntax
         }
 
         return offset;
-    }
-}
-
-[ParserRule]
-public class TypeRule : ParserRule<TypeNode>
-{
-    /// <inheritdoc/>
-    public TypeRule(LoomParser parser) : base(parser) { }
-
-    /// <inheritdoc/>
-    public override TypeNode ParseNode()
-    {
-        var modifiers = Parser.Reader.ExpectMany(t => TokenRegistry.IsTypeModifier(t.Type));
-
-        var type = Parser.Reader.ExpectAny(t => TypeSyntax.IsTypeName(t.Type)); // type
-
-        ArraySizeSpecifierNode? arraySize = null;
-
-        if (Parser.Reader.Match(TokenType.LBracket)) // [
-        {
-            var size = Parser.Reader.Expect(TokenType.Number); // number
-            Parser.Reader.Expect(TokenType.RBracket); // ]
-
-            arraySize = new ArraySizeSpecifierNode(size);
-        }
-
-        return new TypeNode(type, modifiers, arraySize);
     }
 }

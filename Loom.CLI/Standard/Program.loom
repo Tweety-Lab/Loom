@@ -28,7 +28,7 @@ module Standard::Program
         {
             exitCode = 0;
 
-            putchar(testArray[5]);
+            putchar(testArray[0]);
 
             Sleep(2000);
         }

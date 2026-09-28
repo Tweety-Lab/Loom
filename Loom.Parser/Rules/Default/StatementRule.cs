@@ -25,7 +25,7 @@ public class StatementRule : ParserRule<StatementNode>
         var current = Parser.Reader.Current.Type;
         var next = Parser.Reader.Peek().Type;
 
-        bool isType = TypeSyntax.IsTypeName(current);
+        bool isType = TypeRule.IsTypeName(current);
 
         var statement = current switch
         {
@@ -55,12 +55,12 @@ public class StatementRule : ParserRule<StatementNode>
     // Hacky
     private bool IsLocalDeclaration()
     {
-        int offset = TypeSyntax.SkipModifiers(Parser.Reader, 0);
+        int offset = TypeRule.SkipModifiers(Parser.Reader, 0);
 
-        if (!TypeSyntax.IsTypeName(Parser.Reader.Peek(offset).Type))
+        if (!TypeRule.IsTypeName(Parser.Reader.Peek(offset).Type))
             return false;
 
-        offset = TypeSyntax.SkipType(Parser.Reader, offset);
+        offset = TypeRule.SkipType(Parser.Reader, offset);
         return Parser.Reader.Peek(offset).Type == TokenType.Identifier;
     }
 }

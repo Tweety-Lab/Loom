@@ -13,7 +13,7 @@ public class ArrayBoundsAnalyzer : Analyzer
 {
     public static Diagnostic NonArrayIndex = new(Diagnostic.DiagnosticLevel.Error, "Cannot index '{0}' because it is not an array.");
     public static Diagnostic InvalidIndexType = new(Diagnostic.DiagnosticLevel.Error, "Array indexes must be i32 values.");
-    public static Diagnostic IndexOutOfBounds = new(Diagnostic.DiagnosticLevel.Error, "Array index {0} is outside the bounds of array '{1}' with size {2}.");
+    public static Diagnostic IndexOutOfBounds = new(Diagnostic.DiagnosticLevel.Error, "Array index {0} is outside the bounds of array '{1}' of size {2}.");
 
     [Visitor]
     public void Visit(ArrayAccessExpressionNode node)
