@@ -68,6 +68,12 @@ internal class StringPrinterStyle : ILIRPrinterStyle
                     return $"{result}getfield {PrintType(ptrType.PointeeType)} {PrintValue(inst.Operands[0])}, {PrintValue(inst.Operands[1])}";
                 }
 
+            case var op when op == LIROpCode.GetElement:
+                {
+                    var ptrType = (LIRPointerType)inst.Result!.Type;
+                    return $"{result}getelement {PrintType(ptrType.PointeeType)} {PrintValue(inst.Operands[0])}, {PrintValue(inst.Operands[1])}";
+                }
+
             default:
                 {
                     var type = inst.Result is not null ? $"{PrintType(inst.Result.Type)} " : "";
@@ -86,6 +92,7 @@ internal class StringPrinterStyle : ILIRPrinterStyle
         LIRVoidType => "void",
         LIRBoolType => "bool",
         LIRPointerType p => $"{PrintType(p.PointeeType)}*",
+        LIRArrayType a => $"[{a.Size} x {PrintType(a.ElementType)}]",
         LIRTypeDeclarationType s => s.Name,
         _ => type.ToString()
     };
@@ -98,6 +105,7 @@ internal class StringPrinterStyle : ILIRPrinterStyle
             LIRConstantCharValue c => $"'{c.Value}'",
             LIRConstantIntValue c => $"{c.Value}",
             LIRConstantBoolValue c => c.Value ? "true" : "false",
+            LIRNullValue => "null",
             LIRTempValue t => $"%{t.ID}",
             LIRFunction f => $"@{f.Name}",
             LIRField field => field.Name,

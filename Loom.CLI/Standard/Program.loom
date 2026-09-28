@@ -9,7 +9,12 @@ module Standard::Program
     {
         i32 exitCode = 1;
 
-        i32[5] testArray = 1;
+        char[5] testArray = default;
+        testArray[0] = 'H';
+        testArray[1] = 'e';
+        testArray[2] = 'l';
+        testArray[3] = 'l';
+        testArray[4] = 'o';
 
         unique MyClass instance = new MyClass();
         
@@ -23,8 +28,7 @@ module Standard::Program
         {
             exitCode = 0;
 
-            char character = 'T';
-            putchar(character);
+            putchar(testArray[5]);
 
             Sleep(2000);
         }

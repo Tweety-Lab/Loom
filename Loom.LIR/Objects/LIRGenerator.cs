@@ -92,6 +92,13 @@ public class LIRGenerator
     /// <summary> Emits the address of <paramref name="field"/> within the instance pointed to by <paramref name="instancePointer"/>. </summary>
     public LIRTempValue EmitGetField(LIRValue instancePointer, LIRField field) => Emit(LIROpCode.GetField, new LIRPointerType(field.Type), instancePointer, field);
 
+    /// <summary> Emits the address of an element within an array. </summary>
+    public LIRTempValue EmitGetElement(LIRValue arrayPointer, LIRValue index)
+    {
+        var array = (LIRArrayType)((LIRPointerType)arrayPointer.Type).PointeeType;
+        return Emit(LIROpCode.GetElement, new LIRPointerType(array.ElementType), arrayPointer, index);
+    }
+
     public LIRTempValue EmitCall(LIRFunction function, params LIRValue[] arguments)
     {
         LIRValue[] operands = [function, .. arguments];

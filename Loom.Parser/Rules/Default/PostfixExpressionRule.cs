@@ -9,6 +9,12 @@ public record MemberAccessExpressionNode(ExpressionNode Receiver, IdentifierName
     public override IEnumerable<ASTNode> Children => [Receiver, Name];
 }
 
+public record ArrayAccessExpressionNode(ExpressionNode Receiver, ExpressionNode Index) : ExpressionNode
+{
+    /// <inheritdoc/>
+    public override IEnumerable<ASTNode> Children => [Receiver, Index];
+}
+
 [ParserRule]
 public class PostfixExpressionRule : ParserRule<ExpressionNode>
 {
@@ -30,6 +36,12 @@ public class PostfixExpressionRule : ParserRule<ExpressionNode>
             else if (Parser.Reader.Check(TokenType.LParen))
             {
                 expression = Parser.GetRule<CallExpressionRule>().Parse(expression);
+            }
+            else if (Parser.Reader.Match(TokenType.LBracket))
+            {
+                var index = RunRule<ExpressionRule, ExpressionNode>();
+                Parser.Reader.Expect(TokenType.RBracket);
+                expression = new ArrayAccessExpressionNode(expression, index);
             }
             else
             {

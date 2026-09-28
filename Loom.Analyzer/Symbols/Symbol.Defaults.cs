@@ -87,6 +87,23 @@ public record LocalVariableSymbol(string Name) : Symbol(Name)
     public PointerType PointerType { get; set; }
 }
 
+public record ArrayTypeSymbol : TypeSymbol
+{
+    /// <summary> The element type. </summary>
+    public TypeSymbol ElementType { get; }
+
+    /// <summary> The size of the array. </summary>
+    public int Size { get; }
+
+    public ArrayTypeSymbol(TypeSymbol elementType, int size) : base($"{elementType.Name}[{size}]", elementType.KnownType)
+    {
+        ElementType = elementType;
+        Size = size;
+        IsValueType = true;
+        FullyQualifiedName = $"{elementType.FullyQualifiedName}[{size}]";
+    }
+}
+
 public record FieldSymbol(string Name) : Symbol(Name), IAccessibleSymbol
 {
     /// <summary> The resolved type. </summary>

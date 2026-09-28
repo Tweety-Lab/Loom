@@ -37,6 +37,7 @@ internal class ExpressionGenerator
         DefaultLiteralNode @default => EmitDefault(context.AnalysisContext.ExpressionTypes[@default]),
         BinaryExpressionNode binary => EmitBinary(binary),
         CallExpressionNode call => EmitCall(call),
+        ArrayAccessExpressionNode array => Generator.EmitLoad(EmitAddress(array)),
         MemberAccessExpressionNode member => Generator.EmitLoad(EmitAddress(member)),
         ObjectCreationExpressionNode creation => Generator.EmitAlloca(ASTGenerator.ConvertType(context.AnalysisContext.ExpressionTypes[creation])),
         _ => throw new Exception($"Unhandled expression: {node.GetType().Name}")
@@ -47,6 +48,7 @@ internal class ExpressionGenerator
     {
         IdentifierNameNode ident => EmitIdentifierAddress(ident),
         MemberAccessExpressionNode member => EmitMemberAddress(member),
+        ArrayAccessExpressionNode array => EmitArrayElementAddress(array),
         ObjectCreationExpressionNode creation => Emit(creation),
         _ => throw new Exception($"Unhandled addressable expression: {node.GetType().Name}")
     };
@@ -55,17 +57,41 @@ internal class ExpressionGenerator
     public LIRValue EmitValue(ExpressionNode node)
     {
         var value = Emit(node);
-        return node is ObjectCreationExpressionNode ? Generator.EmitLoad(value) : value;
+        return node is ObjectCreationExpressionNode creation && context.AnalysisContext.ExpressionTypes[creation].IsValueType ? Generator.EmitLoad(value) : value;
     }
 
-    public LIRValue EmitDefault(TypeSymbol type) => type.KnownType switch
+    /// <summary> Emits the default value of <paramref name="type"/>. </summary>
+    public LIRValue EmitDefault(TypeSymbol type)
     {
-        TypeSymbol.DefaultType.Char => new LIRConstantCharValue('\0'),
-        TypeSymbol.DefaultType.I32 => new LIRConstantIntValue(0),
-        TypeSymbol.DefaultType.Bool => new LIRConstantBoolValue(false),
-        TypeSymbol.DefaultType.IPtr => new LIRConstantIntValue(0),
-        _ => throw new Exception($"Unhandled default value type: {type.KnownType}")
-    };
+        if (type is ArrayTypeSymbol)
+            throw new Exception("An array has no single default value; each of its elements is defaulted individually through EmitDefaultArray.");
+
+        if (!type.IsValueType)
+            return new LIRNullValue(new LIRPointerType(ASTGenerator.ConvertType(type)));
+
+        return type.KnownType switch
+        {
+            TypeSymbol.DefaultType.Char => new LIRConstantCharValue('\0'),
+            TypeSymbol.DefaultType.I32 => new LIRConstantIntValue(0),
+            TypeSymbol.DefaultType.Bool => new LIRConstantBoolValue(false),
+            TypeSymbol.DefaultType.IPtr => new LIRConstantIntValue(0),
+            _ => throw new Exception($"Unhandled default value type: {type.KnownType}")
+        };
+    }
+
+    /// <summary> Emits a store of the default value of <paramref name="type"/> into every element of the array at <paramref name="arrayAddress"/>. </summary>
+    public void EmitDefaultArray(LIRValue arrayAddress, ArrayTypeSymbol type)
+    {
+        for (int index = 0; index < type.Size; index++)
+        {
+            var elementAddress = Generator.EmitGetElement(arrayAddress, new LIRConstantIntValue(index));
+
+            if (type.ElementType is ArrayTypeSymbol nested)
+                EmitDefaultArray(elementAddress, nested);
+            else
+                Generator.EmitStore(EmitDefault(type.ElementType), elementAddress);
+        }
+    }
 
     private LIRValue EmitIdentifierAddress(IdentifierNameNode ident)
     {
@@ -89,6 +115,12 @@ internal class ExpressionGenerator
             ?? throw new Exception($"Could not resolve member field: {node.Name.BaseName}");
 
         return EmitFieldAddress(EmitReceiverAddress(node.Receiver), receiverType, fieldSymbol);
+    }
+
+    private LIRValue EmitArrayElementAddress(ArrayAccessExpressionNode node)
+    {
+        var arrayAddress = EmitAddress(node.Receiver);
+        return Generator.EmitGetElement(arrayAddress, EmitValue(node.Index));
     }
 
     /// <summary> Emits the address of a field referenced by bare name inside a method of the containing struct, accessed through the instance (self) parameter. </summary>

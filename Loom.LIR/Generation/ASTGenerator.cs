@@ -196,17 +196,28 @@ public class ASTGenerator
                 statementGen.EmitStatement(statementNode);
     }
     
-    public static LIRType ConvertType(TypeSymbol type) => type.KnownType switch
+    public static LIRType ConvertType(TypeSymbol type)
     {
-        TypeSymbol.DefaultType.Void => LIRType.Void,
-        TypeSymbol.DefaultType.Bool => LIRType.Boolean,
-        TypeSymbol.DefaultType.I32 => LIRType.Int32,
-        TypeSymbol.DefaultType.Char => LIRType.Char,
-        TypeSymbol.DefaultType.IPtr => LIRType.IntPtr,
-        TypeSymbol.DefaultType.Struct => new LIRTypeDeclarationType(type.FullyQualifiedName, true),
-        TypeSymbol.DefaultType.Class => new LIRTypeDeclarationType(type.FullyQualifiedName, false),
-        _ => throw new Exception($"Unknown type {type.KnownType}")
-    };
+        if (type is ArrayTypeSymbol array)
+        {
+            var arrayElementType = ConvertType(array.ElementType);
+            return new LIRArrayType(array.ElementType.IsValueType ? arrayElementType : new LIRPointerType(arrayElementType), array.Size);
+        }
+
+        LIRType elementType = type.KnownType switch
+        {
+            TypeSymbol.DefaultType.Void => LIRType.Void,
+            TypeSymbol.DefaultType.Bool => LIRType.Boolean,
+            TypeSymbol.DefaultType.I32 => LIRType.Int32,
+            TypeSymbol.DefaultType.Char => LIRType.Char,
+            TypeSymbol.DefaultType.IPtr => LIRType.IntPtr,
+            TypeSymbol.DefaultType.Struct => new LIRTypeDeclarationType(type.FullyQualifiedName, true),
+            TypeSymbol.DefaultType.Class => new LIRTypeDeclarationType(type.FullyQualifiedName, false),
+            _ => throw new Exception($"Unknown type {type.KnownType}")
+        };
+
+        return elementType;
+    }
 
     private static LIRFunctionType BuildFunctionType(MethodSymbol symbol, LIRType? instancePointerType = null)
     {

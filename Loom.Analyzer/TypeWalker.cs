@@ -21,10 +21,23 @@ internal class TypeWalker : ASTWalker
     [Visitor]
     public void Visit(DefaultLiteralNode node)
     {
-        var declaration = Context.FirstAncestorOrSelf<VariableDeclarationNode>(node);
-        var type = declaration == null ? null : TypeResolver.Resolve(Context, declaration, declaration.Type.Base.Text);
+        var type = ResolveDefaultType(node);
 
         Context.ExpressionTypes[node] = type ?? (TypeSymbol)Context.Binders.First().Value.Lookup("i32")!.First();
+    }
+
+    /// <summary> Resolves the type <c>default</c> takes on, i.e. the type it is being initialized as. </summary>
+    private TypeSymbol? ResolveDefaultType(ASTNode node)
+    {
+        var declaration = Context.FirstAncestorOrSelf<VariableDeclarationNode>(node);
+        if (declaration != null)
+            return TypeResolver.Resolve(Context, declaration, declaration.Type);
+
+        var assignment = Context.FirstAncestorOrSelf<AssignmentStatementNode>(node);
+        if (assignment != null && Context.ExpressionTypes.TryGetValue(assignment.Target, out var targetType))
+            return targetType;
+
+        return null;
     }
 
     [Visitor]
@@ -67,6 +80,23 @@ internal class TypeWalker : ASTWalker
 
         else if (receiverIsValue && member is FieldSymbol field && field.Type is { } fieldType)
             Context.ExpressionTypes[node] = fieldType;
+    }
+
+    [Visitor]
+    public void Visit(ArrayAccessExpressionNode node)
+    {
+        if (node.Receiver is not IdentifierNameNode receiver)
+            return;
+
+        var type = Context.GetSymbol(receiver).Symbol switch
+        {
+            LocalVariableSymbol { Type: ArrayTypeSymbol localType } => localType.ElementType,
+            FieldSymbol { Type: ArrayTypeSymbol fieldType } => fieldType.ElementType,
+            _ => null
+        };
+
+        if (type != null)
+            Context.ExpressionTypes[node] = type;
     }
 
     [Visitor]

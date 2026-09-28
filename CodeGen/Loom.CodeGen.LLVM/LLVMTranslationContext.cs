@@ -29,6 +29,9 @@ internal class LLVMTranslationContext
         if (type is LIRPointerType { PointeeType: var pointee })
             return LLVMTypeRef.CreatePointer(ResolveType(pointee), 0);
 
+        if (type is LIRArrayType { ElementType: var elementType, Size: var size })
+            return LLVMTypeRef.CreateArray(ResolveType(elementType), (uint)size);
+
         throw new InvalidOperationException($"Unhandled LIR type: {type.GetType().Name}");
     }
 
@@ -54,6 +57,13 @@ internal class LLVMTranslationContext
         if (value is LIRConstantBoolValue boolConst)
         {
             var llvmVal = LLVMValueRef.CreateConstInt(TypeMap[boolConst.Type], boolConst.Value ? 1UL : 0UL);
+            ValueMap[value] = llvmVal;
+            return llvmVal;
+        }
+
+        if (value is LIRNullValue nullValue)
+        {
+            var llvmVal = LLVMValueRef.CreateConstNull(ResolveType(nullValue.Type));
             ValueMap[value] = llvmVal;
             return llvmVal;
         }

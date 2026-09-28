@@ -56,6 +56,17 @@ public class LIRConstantBoolValue : LIRValue
     public LIRConstantBoolValue(bool value) => Value = value;
 }
 
+/// <summary> A null pointer, i.e. the default value of a reference type. </summary>
+public class LIRNullValue : LIRValue
+{
+    /// <inheritdoc/>
+    public override LIRType Type { get; }
+
+    /// <summary> Initializes a new instance of the <see cref="LIRNullValue"/> class. </summary>
+    /// <param name="type"> The type of the pointer this null value has. </param>
+    public LIRNullValue(LIRType type) => Type = type;
+}
+
 public class LIRBlockValue : LIRValue
 {
     public LIRBasicBlock Block { get; }

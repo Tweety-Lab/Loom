@@ -32,4 +32,14 @@ internal static class TypeResolver
 
         return null;
     }
+
+    /// <summary> Resolves a declared type, including its fixed array shape when present. </summary>
+    public static TypeSymbol? Resolve(AnalysisContext context, ASTNode node, TypeNode type)
+    {
+        var elementType = Resolve(context, node, type.Base.Text);
+        if (elementType == null || type.ArraySize?.Size is not { Text: var size } || !int.TryParse(size, out var arraySize))
+            return elementType;
+
+        return new ArrayTypeSymbol(elementType, arraySize);
+    }
 }

@@ -75,6 +75,13 @@ public class TypeMismatchAnalyzer : Analyzer
         Check(fieldSymbol.Type, initializer);
     }
 
+    [Visitor]
+    public void Visit(AssignmentStatementNode node)
+    {
+        if (Context.ExpressionTypes.TryGetValue(node.Target, out var targetType))
+            Check(targetType, node.Value);
+    }
+
     private void Check(TypeSymbol assignee, ExpressionNode assigned)
     {
         if (!Context.ExpressionTypes.TryGetValue(assigned, out var assignedType))
@@ -88,6 +95,13 @@ public class TypeMismatchAnalyzer : Analyzer
     {
         if (source == null || target == null)
             return false;
+
+        // Ugly
+        if (source is ArrayTypeSymbol sourceArray || target is ArrayTypeSymbol)
+            return source is ArrayTypeSymbol { ElementType: var sourceElement, Size: var sourceSize }
+                && target is ArrayTypeSymbol { ElementType: var targetElement, Size: var targetSize }
+                && sourceSize == targetSize
+                && CanImplicitlyConvert(sourceElement, targetElement);
 
         if (source.KnownType == target.KnownType)
             return true;

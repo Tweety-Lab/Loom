@@ -57,14 +57,27 @@ internal class StatementGenerator
         LocalVariableSymbol symbol = (LocalVariableSymbol)context.AnalysisContext.GetSymbol(node).Symbol!;
         var type = ASTGenerator.ConvertType(symbol.Type!);
 
-        LIRTempValue address = Generator.EmitAlloca(symbol.Type!.IsValueType ? type : new LIRPointerType(type));
+        LIRTempValue address = Generator.EmitAlloca(symbol.Type is ArrayTypeSymbol || symbol.Type!.IsValueType ? type : new LIRPointerType(type));
         locals[declaration.Name.Text] = address;
 
         if (declaration.Initializer is ObjectCreationExpressionNode)
             return;
 
-        var value = EmitValue(declaration.Initializer);
-        Generator.EmitStore(value, address);
+        Initialize(address, declaration.Initializer, symbol.Type!);
+    }
+
+    /// <summary> Emits the initialization of <paramref name="address"/>. </summary>
+    private void Initialize(LIRValue address, ExpressionNode initializer, TypeSymbol type)
+    {
+        var expressionGen = new ExpressionGenerator(context, unit, function, locals);
+
+        if (type is ArrayTypeSymbol array)
+        {
+            expressionGen.EmitDefaultArray(address, array);
+            return;
+        }
+
+        Generator.EmitStore(expressionGen.EmitValue(initializer), address);
     }
 
     private void EmitReturn(ReturnStatementNode node)
@@ -77,9 +90,16 @@ internal class StatementGenerator
 
     private void EmitAssignment(AssignmentStatementNode node)
     {
-        var value = EmitValue(node.Value);
         var address = new ExpressionGenerator(context, unit, function, locals).EmitAddress(node.Target);
-        Generator.EmitStore(value, address);
+
+        // Assigning to a whole array defaults each of its elements rather than storing a single value.
+        if (context.AnalysisContext.ExpressionTypes.TryGetValue(node.Target, out var targetType) && targetType is ArrayTypeSymbol)
+        {
+            Initialize(address, node.Value, targetType);
+            return;
+        }
+
+        Generator.EmitStore(EmitValue(node.Value), address);
     }
 
     private void EmitConditional(ConditionalNode node)
