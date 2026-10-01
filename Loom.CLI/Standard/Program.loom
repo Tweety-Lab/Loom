@@ -20,18 +20,15 @@ module Standard::Program
         str.currentChar = 0;
         
         WinProcess process = WinProcess.Current();
-        WinProcess copy = process;
 
-        if (copy.Handle != process.Handle)
-            process.Close();
-
-        if (copy.Handle == process.Handle)
+        if (process.Handle != default(iptr))
         {
             exitCode = 0;
 
             str.Print();
 
             Sleep(2000);
+            process.Close();
         }
         
         return exitCode;

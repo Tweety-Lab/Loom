@@ -24,4 +24,16 @@ public class UnresolvedTypeAnalyzer : Analyzer
                 Context.DiagnosticContext?.Report(UnresolvedTypeDiagnostic, node.ReturnType.Base.Location, node.ReturnType.Base.Text);
         }
     }
+
+    [Visitor]
+    public void Visit(DefaultLiteralNode node)
+    {
+        if (node.Type is { } type && type.Base.Type == Token.TokenType.Identifier)
+        {
+            var symbol = TypeResolver.Resolve(Context, node, type.Base.Text);
+
+            if (symbol == null)
+                Context.DiagnosticContext?.Report(UnresolvedTypeDiagnostic, type.Base.Location, type.Base.Text);
+        }
+    }
 }

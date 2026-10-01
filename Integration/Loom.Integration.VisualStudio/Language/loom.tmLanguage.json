@@ -186,7 +186,7 @@
 
         {
           "name": "entity.name.function.call.loom",
-          "match": "\\b(?!(?:if|else|while|for|break|continue|return)\\b)[A-Za-z_][A-Za-z0-9_]*(?=\\s*\\()"
+          "match": "\\b(?!(?:if|else|while|for|break|continue|return|default)\\b)[A-Za-z_][A-Za-z0-9_]*(?=\\s*\\()"
         },
 
         {
