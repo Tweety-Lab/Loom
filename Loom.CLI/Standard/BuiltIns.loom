@@ -1,7 +1,7 @@
 module Standard
 {
-    export struct String
+    export class String
     {
-
+        public char[256] Contents = default;
     }
 }

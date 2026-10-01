@@ -1,4 +1,11 @@
+import Standard;
+
 module Standard::IO
 {
 	export extern void putchar(char c);
+
+	export void print(String s)
+	{
+		putchar(s.Contents[0]);
+	}
 }

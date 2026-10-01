@@ -32,13 +32,13 @@ internal class ExpressionGenerator
     {
         CharacterLiteralNode character => new LIRConstantCharValue(character.Value),
         NumberLiteralNode num => new LIRConstantIntValue(num.Value),
-        IdentifierNameNode ident => Generator.EmitLoad(EmitAddress(ident)),
+        IdentifierNameNode ident => EmitVariableValue(ident),
         BooleanLiteralNode boolean => new LIRConstantBoolValue(boolean.Value),
         DefaultLiteralNode @default => EmitDefault(context.AnalysisContext.ExpressionTypes[@default]),
         BinaryExpressionNode binary => EmitBinary(binary),
         CallExpressionNode call => EmitCall(call),
-        ArrayAccessExpressionNode array => Generator.EmitLoad(EmitAddress(array)),
-        MemberAccessExpressionNode member => Generator.EmitLoad(EmitAddress(member)),
+        ArrayAccessExpressionNode array => EmitVariableValue(array),
+        MemberAccessExpressionNode member => EmitVariableValue(member),
         ObjectCreationExpressionNode creation => Generator.EmitAlloca(ASTGenerator.ConvertType(context.AnalysisContext.ExpressionTypes[creation])),
         _ => throw new Exception($"Unhandled expression: {node.GetType().Name}")
     };
@@ -93,7 +93,8 @@ internal class ExpressionGenerator
         }
     }
 
-    private LIRValue EmitIdentifierAddress(IdentifierNameNode ident)
+    // Emits a pointer to the storage of the local variable or field referenced by 'ident'.
+    private LIRValue EmitStorage(IdentifierNameNode ident)
     {
         if (locals.TryGetValue(ident.BaseName, out var address))
             return address;
@@ -105,6 +106,48 @@ internal class ExpressionGenerator
         throw new Exception($"Unhandled identifier: {ident.BaseName}");
     }
 
+    // Emits a pointer to the variable referenced by 'ident', which is the pointer it holds for a reference type.
+    private LIRValue EmitIdentifierAddress(IdentifierNameNode ident)
+    {
+        if (IsParameter(ident))
+        {
+            if (IsValueType(ident))
+                throw new Exception($"Cannot take the address of a value type parameter: {ident.BaseName}");
+
+            return EmitParameterValue(ident.BaseName);
+        }
+
+        var storage = EmitStorage(ident);
+        return IsValueType(ident) ? storage : Generator.EmitLoad(storage);
+    }
+
+    // Emits the value of the variable referenced by 'ident'.
+    private LIRValue EmitVariableValue(IdentifierNameNode ident) => IsParameter(ident) ? EmitParameterValue(ident.BaseName) : Generator.EmitLoad(EmitStorage(ident));
+
+    // Emits the value of the variable-like 'node', which is stored in memory.
+    private LIRValue EmitVariableValue(ExpressionNode node)
+    {
+        var address = EmitAddress(node);
+        return IsValueType(node) ? Generator.EmitLoad(address) : address;
+    }
+
+    // Determines whether 'ident' refers to a parameter rather than a local variable or a field.
+    private bool IsParameter(IdentifierNameNode ident) => !locals.ContainsKey(ident.BaseName) && context.AnalysisContext.GetSymbol(ident).Symbol is ParameterSymbol;
+
+    // Determines whether 'node' has a value type, defaulting to one when its type is unknown.
+    private bool IsValueType(ExpressionNode node) => !context.AnalysisContext.ExpressionTypes.TryGetValue(node, out var type) || type.IsValueType;
+
+    // Emits the value of the parameter named 'name'.
+    private LIRValue EmitParameterValue(string name)
+    {
+        var index = Array.FindIndex(function.Type.Parameters, p => p.Name == name);
+
+        if (index < 0)
+            throw new Exception($"Could not find parameter: {name}");
+
+        return function.ParameterValues[index];
+    }
+
     private LIRValue EmitMemberAddress(MemberAccessExpressionNode node)
     {
         var receiverType = context.AnalysisContext.ExpressionTypes.TryGetValue(node.Receiver, out var type) ? type : null;
@@ -114,7 +157,7 @@ internal class ExpressionGenerator
         var fieldSymbol = receiverType.Members.OfType<FieldSymbol>().FirstOrDefault(m => m.Name == node.Name.BaseName)
             ?? throw new Exception($"Could not resolve member field: {node.Name.BaseName}");
 
-        return EmitFieldAddress(EmitReceiverAddress(node.Receiver), receiverType, fieldSymbol);
+        return EmitFieldAddress(EmitAddress(node.Receiver), receiverType, fieldSymbol);
     }
 
     private LIRValue EmitArrayElementAddress(ArrayAccessExpressionNode node)
@@ -123,7 +166,7 @@ internal class ExpressionGenerator
         return Generator.EmitGetElement(arrayAddress, EmitValue(node.Index));
     }
 
-    /// <summary> Emits the address of a field referenced by bare name inside a method of the containing struct, accessed through the instance (self) parameter. </summary>
+    // Emits the address of a field referenced by bare name inside a struct, accessed through the instance (self) parameter.
     private LIRValue EmitBareFieldAddress(FieldSymbol symbol, ASTNode contextNode)
     {
         var structNode = context.AnalysisContext.FirstAncestorOrSelf<StructDeclarationNode>(contextNode) ?? throw new Exception($"Could not find containing struct for field: {symbol.Name}");
@@ -133,23 +176,22 @@ internal class ExpressionGenerator
         return EmitFieldAddress(EmitSelfParameter(), structTypeSymbol, symbol);
     }
 
-    /// <summary> Emits the value of the instance ('self') parameter of a struct method. </summary>
+    // Emits the value of the instance (self) parameter.
     private LIRValue EmitSelfParameter()
     {
-        var index = Array.FindIndex(function.Type.Parameters, p => p.Name == "self");
-
-        if (index < 0)
+        if (!function.Type.Parameters.Any(p => p.Name == "self"))
             throw new Exception($"Field access requires an instance method with a 'self' parameter ({function.Name}).");
 
-        return function.ParameterValues[index];
+        return EmitParameterValue("self");
     }
 
-    /// <summary> Emits the address of <paramref name="fieldSymbol"/> within an instance of <paramref name="objectTypeSymbol"/>. </summary>
+    // Emits the address of a field referenced by bare name inside a struct, accessed through the instance (self) parameter.
     private LIRValue EmitFieldAddress(LIRValue instance, TypeSymbol objectTypeSymbol, FieldSymbol fieldSymbol)
     {
-        var structObj = unit.TypeDeclarations.FirstOrDefault(s => s.Type == new LIRTypeDeclarationType(objectTypeSymbol.FullyQualifiedName, true)) ?? throw new Exception($"Could not find struct: {objectTypeSymbol.FullyQualifiedName}");
+        var declarationType = new LIRTypeDeclarationType(objectTypeSymbol.FullyQualifiedName, objectTypeSymbol.IsValueType);
+        var declaration = unit.TypeDeclarations.FirstOrDefault(s => s.Type == declarationType) ?? throw new Exception($"Could not find type: {objectTypeSymbol.FullyQualifiedName}");
 
-        var field = structObj.Fields.FirstOrDefault(f => f.Name == fieldSymbol.Name) ?? throw new Exception($"Could not find field: {fieldSymbol.Name}");
+        var field = declaration.Fields.FirstOrDefault(f => f.Name == fieldSymbol.Name) ?? throw new Exception($"Could not find field: {fieldSymbol.Name}");
 
         return Generator.EmitGetField(instance, field);
     }
@@ -197,7 +239,7 @@ internal class ExpressionGenerator
             target = unit.AllFunctions.FirstOrDefault(f => f.Name == method.FullyQualifiedName);
 
             if (receiverIsValue)
-                self = EmitReceiverAddress(member.Receiver);
+                self = EmitAddress(member.Receiver);
         }
         else if (node.Callee is IdentifierNameNode ident)
         {
@@ -222,12 +264,4 @@ internal class ExpressionGenerator
 
         return Generator.EmitCall(target, args);
     }
-
-    /// <summary> Emits the address of <paramref name="receiver"/> to be passed as the instance (self) argument of a member call. </summary>
-    private LIRValue EmitReceiverAddress(ExpressionNode receiver) => receiver switch
-    {
-        IdentifierNameNode ident => locals[ident.BaseName],
-        ObjectCreationExpressionNode => Emit(receiver),
-        _ => throw new Exception($"Unsupported member-access receiver: {receiver.GetType().Name}")
-    };
 }

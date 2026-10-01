@@ -1,6 +1,7 @@
 import Standard::Windows;
 import Standard::Time;
 import Standard::IO;
+import Standard;
 
 module Standard::Program
 {
@@ -9,16 +10,12 @@ module Standard::Program
     {
         i32 exitCode = 1;
 
-        char[6] testArray = default;
-        testArray[0] = 'H';
-        testArray[1] = 'e';
-        testArray[2] = 'l';
-        testArray[3] = 'l';
-        testArray[4] = 'o';
-        testArray[5] = '\0';
-
-
-        unique MyClass instance = new MyClass();
+        unique String str = new String();
+        str.Contents[0] = 'H';
+		str.Contents[1] = 'e';
+		str.Contents[2] = 'l';
+		str.Contents[3] = 'l';
+		str.Contents[4] = 'o';
         
         WinProcess process = WinProcess.Current();
         WinProcess copy = process;
@@ -30,23 +27,11 @@ module Standard::Program
         {
             exitCode = 0;
 
-            putchar(testArray[0]);
-            putchar(testArray[1]);
-			putchar(testArray[2]);
-			putchar(testArray[3]);
-			putchar(testArray[4]);
+            print(str);
 
             Sleep(2000);
         }
         
-        return instance.Number();
-    }
-
-    export class MyClass
-    {
-        i32 Number()
-        {
-            return 13;
-        }
+        return exitCode;
     }
 }

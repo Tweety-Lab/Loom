@@ -1,6 +1,7 @@
 ﻿using Loom.Analyzer.Symbols;
 using Loom.Parser.AST;
 using Loom.Parser.Rules.Default;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Loom.Analyzer;
 
@@ -56,6 +57,7 @@ internal class TypeWalker : ASTWalker
             LocalVariableSymbol local => local.Type,
             MethodSymbol method => method.ReturnType,
             FieldSymbol field => field.Type,
+            ParameterSymbol parameter => parameter.Type,
             _ => null
         };
 
@@ -85,18 +87,8 @@ internal class TypeWalker : ASTWalker
     [Visitor]
     public void Visit(ArrayAccessExpressionNode node)
     {
-        if (node.Receiver is not IdentifierNameNode receiver)
-            return;
-
-        var type = Context.GetSymbol(receiver).Symbol switch
-        {
-            LocalVariableSymbol { Type: ArrayTypeSymbol localType } => localType.ElementType,
-            FieldSymbol { Type: ArrayTypeSymbol fieldType } => fieldType.ElementType,
-            _ => null
-        };
-
-        if (type != null)
-            Context.ExpressionTypes[node] = type;
+        if (TryGetArrayType(node.Receiver, out var array))
+            Context.ExpressionTypes[node] = array.ElementType;
     }
 
     [Visitor]
@@ -118,5 +110,25 @@ internal class TypeWalker : ASTWalker
     {
         if (Context.GetSymbol(node.ObjectName).Symbol is TypeSymbol type && (type.KnownType == TypeSymbol.DefaultType.Struct || type.KnownType == TypeSymbol.DefaultType.Class))
             Context.ExpressionTypes[node] = type;
+    }
+
+    private bool TryGetArrayType(ExpressionNode node, [NotNullWhen(true)] out ArrayTypeSymbol? array)
+    {
+        array = null;
+
+        if (Context.ExpressionTypes.TryGetValue(node, out var type))
+            array = type as ArrayTypeSymbol;
+
+        // Bare field names are bound to their field, which may not have a resolved type yet.
+        else if (node is IdentifierNameNode identifier)
+            array = (Context.GetSymbol(identifier).Symbol switch
+            {
+                LocalVariableSymbol local => local.Type,
+                FieldSymbol field => field.Type,
+                ParameterSymbol parameter => parameter.Type,
+                _ => null
+            }) as ArrayTypeSymbol;
+
+        return array != null;
     }
 }

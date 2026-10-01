@@ -55,13 +55,19 @@ internal class StatementGenerator
     {
         var declaration = node.Variable;
         LocalVariableSymbol symbol = (LocalVariableSymbol)context.AnalysisContext.GetSymbol(node).Symbol!;
-        var type = ASTGenerator.ConvertType(symbol.Type!);
 
-        LIRTempValue address = Generator.EmitAlloca(symbol.Type is ArrayTypeSymbol || symbol.Type!.IsValueType ? type : new LIRPointerType(type));
+        LIRTempValue address = Generator.EmitAlloca(ASTGenerator.ConvertStorageType(symbol.Type!));
         locals[declaration.Name.Text] = address;
 
         if (declaration.Initializer is ObjectCreationExpressionNode)
+        {
+            // The storage of a value type is the new object itself, a reference type stores a pointer to it.
+            if (symbol.Type!.IsValueType)
+                return;
+
+            Generator.EmitStore(EmitExpression(declaration.Initializer), address);
             return;
+        }
 
         Initialize(address, declaration.Initializer, symbol.Type!);
     }

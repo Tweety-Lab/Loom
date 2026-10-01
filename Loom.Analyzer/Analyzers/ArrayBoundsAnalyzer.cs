@@ -18,17 +18,11 @@ public class ArrayBoundsAnalyzer : Analyzer
     [Visitor]
     public void Visit(ArrayAccessExpressionNode node)
     {
-        var array = node.Receiver is IdentifierNameNode identifier ? Context.GetSymbol(identifier).Symbol : null;
-        int? size = array switch
-        {
-            LocalVariableSymbol { Type: ArrayTypeSymbol type } => type.Size,
-            FieldSymbol { Type: ArrayTypeSymbol type } => type.Size,
-            _ => null
-        };
+        var name = Describe(node.Receiver);
 
-        if (size == null)
+        if (!Context.ExpressionTypes.TryGetValue(node.Receiver, out var receiverType) || receiverType is not ArrayTypeSymbol array)
         {
-            Context.DiagnosticContext?.Report(NonArrayIndex, node.Receiver.StartToken?.Location, node.Receiver);
+            Context.DiagnosticContext?.Report(NonArrayIndex, node.Receiver.StartToken?.Location, name);
             return;
         }
 
@@ -38,7 +32,15 @@ public class ArrayBoundsAnalyzer : Analyzer
             return;
         }
 
-        if (node.Index is NumberLiteralNode literal && literal.Value >= size)
-            Context.DiagnosticContext?.Report(IndexOutOfBounds, literal.StartToken?.Location, literal.Value, array!.Name, size);
+        if (node.Index is NumberLiteralNode literal && literal.Value >= array.Size)
+            Context.DiagnosticContext?.Report(IndexOutOfBounds, literal.StartToken?.Location, literal.Value, name, array.Size);
     }
+
+    private static string Describe(ExpressionNode node) => node switch
+    {
+        IdentifierNameNode identifier => identifier.BaseName,
+        MemberAccessExpressionNode member => $"{Describe(member.Receiver)}.{member.Name.BaseName}",
+        ArrayAccessExpressionNode array => $"{Describe(array.Receiver)}[...]",
+        _ => node.ToString() ?? string.Empty
+    };
 }

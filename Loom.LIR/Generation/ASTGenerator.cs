@@ -194,6 +194,9 @@ public class ASTGenerator
         foreach (var content in node.Body.Contents)
             if (content is StatementNode statementNode)
                 statementGen.EmitStatement(statementNode);
+
+        if (func.Type.ReturnType == LIRType.Void && func.LIRGenerator!.WritingBlock.Terminator == null)
+            func.LIRGenerator.EmitReturn();
     }
     
     public static LIRType ConvertType(TypeSymbol type)
@@ -226,8 +229,11 @@ public class ASTGenerator
         if (instancePointerType != null)
             parameters.Add(new LIRParameter("self", instancePointerType));
 
-        parameters.AddRange(symbol.Parameters.Select(p => new LIRParameter(p.Name, ConvertType(p.Type!))));
+        parameters.AddRange(symbol.Parameters.Select(p => new LIRParameter(p.Name, ConvertStorageType(p.Type!))));
 
-        return new LIRFunctionType(ConvertType(symbol.ReturnType!), parameters.ToArray());
+        return new LIRFunctionType(ConvertStorageType(symbol.ReturnType!), parameters.ToArray());
     }
+
+    /// <summary> Converts <paramref name="type"/> to the LIR type it is stored as. </summary>
+    public static LIRType ConvertStorageType(TypeSymbol type) => type is ArrayTypeSymbol || type.IsValueType || type.KnownType == TypeSymbol.DefaultType.Void ? ConvertType(type) : new LIRPointerType(ConvertType(type));
 }
