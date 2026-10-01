@@ -142,6 +142,7 @@ public class Token
         [Keyword("default")] Default,
 
         [Keyword("if")] If,
+        [Keyword("while")] While,
 
         [Keyword("return")] Return,
         [Keyword("new")] New,

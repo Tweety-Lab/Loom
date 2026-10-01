@@ -31,7 +31,8 @@ public class StatementRule : ParserRule<StatementNode>
         var statement = current switch
         {
             TokenType.Return => RunRule<ReturnStatementRule, ReturnStatementNode>(),
-            TokenType.If => RunRule<ConditionalRule, ConditionalNode>(),
+            TokenType.If => RunRule<IfStatementRule, IfStatementNode>(),
+            TokenType.While => RunRule<WhileStatementRule, WhileStatementNode>(),
             _ when isType && next == TokenType.Identifier => RunRule<LocalDeclarationStatementRule, LocalDeclarationStatementNode>(),
             _ when IsLocalDeclaration() => RunRule<LocalDeclarationStatementRule, LocalDeclarationStatementNode>(),
             _ => ParseExpressionOrAssignment()

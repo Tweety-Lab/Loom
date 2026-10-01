@@ -417,7 +417,7 @@ module Test
     {
         var (root, _) = ParseAndAnalyze(CONDITIONAL_COMPARISON_SOURCE);
         var method = (MethodDeclarationNode)root.Modules[0].Body.Contents.First();
-        var conditional = Assert.IsType<ConditionalNode>(method.Body.Contents[1]);
+        var conditional = Assert.IsType<IfStatementNode>(method.Body.Contents[1]);
 
         var binary = Assert.IsType<BinaryExpressionNode>(conditional.Expression);
         Assert.Equal(Token.TokenType.EqualEqual, binary.Operator.Type);

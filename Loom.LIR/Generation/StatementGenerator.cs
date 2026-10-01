@@ -42,7 +42,8 @@ internal class StatementGenerator
             case ReturnStatementNode ret: EmitReturn(ret); break;
             case LocalDeclarationStatementNode decl: EmitLocalDeclaration(decl); break;
             case AssignmentStatementNode assign: EmitAssignment(assign); break;
-            case ConditionalNode conditional: EmitConditional(conditional); break;
+            case IfStatementNode conditional: EmitIf(conditional); break;
+            case WhileStatementNode loop: EmitWhile(loop); break;
             case ExpressionStatementNode expression: EmitExpression(expression.Expression); break;
         }
     }
@@ -108,7 +109,7 @@ internal class StatementGenerator
         Generator.EmitStore(EmitValue(node.Value), address);
     }
 
-    private void EmitConditional(ConditionalNode node)
+    private void EmitIf(IfStatementNode node)
     {
         var condition = EmitExpression(node.Expression);
         var thenBlock = Generator.CreateBlock("if.then");
@@ -124,6 +125,30 @@ internal class StatementGenerator
         // The body may already end control flow
         if (Generator.WritingBlock.Terminator == null)
             Generator.EmitBr(continueBlock);
+
+        Generator.SwitchTo(continueBlock);
+    }
+
+    private void EmitWhile(WhileStatementNode node)
+    {
+        var conditionBlock = Generator.CreateBlock("while.condition");
+        var bodyBlock = Generator.CreateBlock("while.body");
+        var continueBlock = Generator.CreateBlock("while.continue");
+
+        Generator.EmitBr(conditionBlock);
+
+        Generator.SwitchTo(conditionBlock);
+        var condition = EmitExpression(node.Expression);
+        Generator.EmitCondBr(condition, bodyBlock, continueBlock);
+
+        Generator.SwitchTo(bodyBlock);
+
+        foreach (var content in node.Body.Contents)
+            if (content is StatementNode statementNode)
+                EmitStatement(statementNode);
+
+        if (Generator.WritingBlock.Terminator == null)
+            Generator.EmitBr(conditionBlock);
 
         Generator.SwitchTo(continueBlock);
     }
