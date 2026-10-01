@@ -38,7 +38,7 @@ public class StatementRule : ParserRule<StatementNode>
             _ => ParseExpressionOrAssignment()
         };
 
-        if (current != TokenType.If)
+        if (current is not (TokenType.If or TokenType.While))
             Parser.Reader.Expect(TokenType.Semicolon); // ;
 
         return statement;
