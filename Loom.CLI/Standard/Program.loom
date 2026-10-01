@@ -10,13 +10,14 @@ module Standard::Program
     {
         i32 exitCode = 1;
 
-        unique String str = new String();
-        str.Contents[0] = 'H';
-		str.Contents[1] = 'e';
-		str.Contents[2] = 'l';
-		str.Contents[3] = 'l';
-		str.Contents[4] = 'o';
-        str.Length = 5;
+        unique String myString = new String();
+        myString.Characters[0] = 'H';
+		myString.Characters[1] = 'e';
+		myString.Characters[2] = 'l';
+		myString.Characters[3] = 'l';
+		myString.Characters[4] = 'o';
+        myString.Characters[5] = '!';
+        myString.Length = 6;
         
         WinProcess process = WinProcess.Current();
 
@@ -24,7 +25,7 @@ module Standard::Program
         {
             exitCode = 0;
 
-            print(str);
+            println(myString); // "Hello!"
 
             Sleep(2000);
             process.Close();

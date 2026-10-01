@@ -2,16 +2,19 @@ import Standard;
 
 module Standard::IO
 {
-	export extern void putchar(char c);
+	extern void putchar(char c);
 
-    export void print(String s)
+    /// @brief Prints a string to stdout and appends a newline.
+    export void println(String s)
     {
         i32 currentChar = 0;
 
         while (currentChar < s.Length)
         {
-            putchar(s.Contents[currentChar]);
+            putchar(s.Characters[currentChar]);
             currentChar = currentChar + 1;
         }
+
+		putchar('\n');
     }
 }

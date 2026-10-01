@@ -4,7 +4,7 @@ module Standard
 {
     export class String
     {
-        public char[256] Contents = default;
+        public char[256] Characters = default;
         public i32 Length = default;
     }
 }
