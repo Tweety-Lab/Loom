@@ -143,6 +143,9 @@ public class ASTGenerator
         foreach (var content in node.Body.Contents)
             if (content is StatementNode statementNode)
                 statementGen.EmitStatement(statementNode);
+
+        if (func.Type.ReturnType == LIRType.Void && func.LIRGenerator!.WritingBlock.Terminator == null)
+            func.LIRGenerator.EmitReturn();
     }
 
     public void GenerateTypeDeclarationField(LIRTypeDeclaration declaredObj, FieldDeclarationNode node)

@@ -45,9 +45,13 @@ public class AnalysisContext
     public AnalysisContext(DiagnosticContext? diagnosticContext = null) => DiagnosticContext = diagnosticContext;
 
     /// <summary> Gets the first parent (or self) of the given type. </summary>
-    public T? FirstAncestorOrSelf<T>(ASTNode node) where T : ASTNode
+    /// <remarks> <typeparamref name="T"/> may be an interface, e.g. <see cref="ITypeDeclarationNode"/>. </remarks>
+    public T? FirstAncestorOrSelf<T>(ASTNode node) where T : class => node as T ?? FirstAncestor<T>(node);
+
+    /// <summary> Gets the first parent of the given type, excluding the node itself. </summary>
+    public T? FirstAncestor<T>(ASTNode node) where T : class
     {
-        var current = node;
+        var current = GetParent(node);
         while (current != null)
         {
             if (current is T match)

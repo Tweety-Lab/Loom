@@ -24,7 +24,7 @@ internal class StatementGenerator
 
         foreach (var (param, value) in function.Type.Parameters.Zip(function.ParameterValues))
         {
-            // The instance pointer is consumed directly by field access; it needs no addressable slot.
+            // The instance pointer is consumed directly by field access; it needs no addressable slot
             if (param.Name == "self")
                 continue;
 
@@ -121,7 +121,9 @@ internal class StatementGenerator
             if (content is StatementNode statementNode)
                 EmitStatement(statementNode);
 
-        Generator.EmitBr(continueBlock);
+        // The body may already end control flow
+        if (Generator.WritingBlock.Terminator == null)
+            Generator.EmitBr(continueBlock);
 
         Generator.SwitchTo(continueBlock);
     }

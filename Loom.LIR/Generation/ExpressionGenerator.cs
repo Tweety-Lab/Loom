@@ -166,14 +166,20 @@ internal class ExpressionGenerator
         return Generator.EmitGetElement(arrayAddress, EmitValue(node.Index));
     }
 
-    // Emits the address of a field referenced by bare name inside a struct, accessed through the instance (self) parameter.
+    // Emits the address of a field referenced by bare name inside a type, accessed through the instance (self) parameter.
     private LIRValue EmitBareFieldAddress(FieldSymbol symbol, ASTNode contextNode)
     {
-        var structNode = context.AnalysisContext.FirstAncestorOrSelf<StructDeclarationNode>(contextNode) ?? throw new Exception($"Could not find containing struct for field: {symbol.Name}");
+        var typeNode = context.AnalysisContext.FirstAncestorOrSelf<ITypeDeclarationNode>(contextNode);
 
-        var structTypeSymbol = (TypeSymbol)context.AnalysisContext.GetSymbol(structNode).Symbol ?? throw new Exception($"Could not find symbol for struct: {structNode.Name}");
+        if (typeNode == null)
+            throw new Exception($"Could not resolve field type: {symbol.Name}");
 
-        return EmitFieldAddress(EmitSelfParameter(), structTypeSymbol, symbol);
+        var typeSymbol = (TypeSymbol?)context.AnalysisContext.GetSymbol((ASTNode)typeNode).Symbol;
+
+        if (typeSymbol == null)
+            throw new Exception($"Could not resolve field type: {symbol.Name}");
+
+        return EmitFieldAddress(EmitSelfParameter(), typeSymbol, symbol);
     }
 
     // Emits the value of the instance (self) parameter.
@@ -185,7 +191,7 @@ internal class ExpressionGenerator
         return EmitParameterValue("self");
     }
 
-    // Emits the address of a field referenced by bare name inside a struct, accessed through the instance (self) parameter.
+    // Emits the address of a field referenced by bare name inside a type, accessed through the instance (self) parameter.
     private LIRValue EmitFieldAddress(LIRValue instance, TypeSymbol objectTypeSymbol, FieldSymbol fieldSymbol)
     {
         var declarationType = new LIRTypeDeclarationType(objectTypeSymbol.FullyQualifiedName, objectTypeSymbol.IsValueType);
@@ -236,7 +242,7 @@ internal class ExpressionGenerator
             if (!receiverIsValue && !method.IsStatic)
                 throw new Exception($"Member '{member.Name.BaseName}' is not static and cannot be called on type '{receiverType?.Name}'.");
 
-            target = unit.AllFunctions.FirstOrDefault(f => f.Name == method.FullyQualifiedName);
+            target = unit.GetFunction(method.FullyQualifiedName);
 
             if (receiverIsValue)
                 self = EmitAddress(member.Receiver);
@@ -256,6 +262,10 @@ internal class ExpressionGenerator
 
         if (target == null)
             throw new Exception($"Could not find function: {node.Callee}");
+
+        // An unqualified call to an instance method dispatches on the current instance
+        if (self == null && target.Type.Parameters.FirstOrDefault()?.Name == "self")
+            self = EmitSelfParameter();
 
         var args = node.Arguments.Select(EmitValue).ToArray();
 

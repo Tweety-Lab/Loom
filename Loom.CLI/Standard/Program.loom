@@ -16,6 +16,8 @@ module Standard::Program
 		str.Contents[2] = 'l';
 		str.Contents[3] = 'l';
 		str.Contents[4] = 'o';
+        str.Length = 5;
+        str.currentChar = 0;
         
         WinProcess process = WinProcess.Current();
         WinProcess copy = process;
@@ -27,7 +29,7 @@ module Standard::Program
         {
             exitCode = 0;
 
-            print(str);
+            str.Print();
 
             Sleep(2000);
         }

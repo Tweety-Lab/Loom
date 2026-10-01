@@ -1,7 +1,22 @@
+import Standard::IO;
+
 module Standard
 {
     export class String
     {
         public char[256] Contents = default;
+        public i32 Length = default;
+
+        public i32 currentChar = 0;
+
+        public void Print()
+        {
+            if (currentChar < Length)
+            {
+                putchar(Contents[currentChar]);
+                currentChar = currentChar + 1;
+                Print();
+            }
+        }
     }
 }

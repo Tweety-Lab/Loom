@@ -45,5 +45,5 @@ public class LIRCompilationUnit : ILIRObject
     public LIRTypeDeclaration? GetTypeDeclaration(string name) => TypeDeclarations.FirstOrDefault(s => s.Name == name);
 
     /// <summary> Gets a function by name. </summary>
-    public LIRFunction? GetFunction(string name) => Functions.FirstOrDefault(f => f.Name == name);
+    public LIRFunction? GetFunction(string name) => AllFunctions.FirstOrDefault(f => f.Name == name);
 }
