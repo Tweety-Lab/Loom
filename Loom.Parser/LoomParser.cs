@@ -1,7 +1,7 @@
 ﻿using Loom.Common.Diagnostics;
 using Loom.Common.Reflection;
-using Loom.Parser.Rules;
-using Loom.Parser.Rules.Default;
+using Loom.Parser.AST.Rules;
+using Loom.Parser.AST.Rules.Default;
 using Loom.Parser.Tokenizer;
 using System.Reflection;
 

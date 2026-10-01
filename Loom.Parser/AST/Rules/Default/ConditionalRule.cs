@@ -1,0 +1,34 @@
+﻿using Loom.Parser.AST;
+using Loom.Parser.AST.Rules;
+using Loom.Parser.Tokenizer;
+using static Loom.Parser.Tokenizer.Token;
+
+namespace Loom.Parser.AST.Rules.Default;
+
+public record ConditionalNode(ExpressionNode Expression, BlockNode Body) : StatementNode
+{
+    /// <inheritdoc/>
+    public override IEnumerable<ASTNode> Children => [Expression, Body];
+}
+
+[ParserRule]
+public class ConditionalRule : ParserRule<ConditionalNode>
+{
+    /// <inheritdoc/>
+    public ConditionalRule(LoomParser parser) : base(parser) { }
+
+    /// <inheritdoc/>
+    public override ConditionalNode ParseNode()
+    {
+        Parser.Reader.Expect(TokenType.If); // if
+
+        Parser.Reader.Expect(TokenType.LParen); // (
+        var condition = RunRule<ExpressionRule, ExpressionNode>();
+        Parser.Reader.Expect(TokenType.RParen); // )
+
+        if (!Parser.Reader.Check(TokenType.LBrace))
+            return new ConditionalNode(condition, new BlockNode([RunRule<StatementRule, StatementNode>()])); // Hacky single line conditionals
+
+        return new ConditionalNode(condition, RunRule<MethodBlockRule, BlockNode>());
+    }
+}

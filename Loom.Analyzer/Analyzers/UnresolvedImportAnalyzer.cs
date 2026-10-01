@@ -1,7 +1,7 @@
 ﻿using Loom.Analyzer.Symbols;
 using Loom.Common.Diagnostics;
 using Loom.Parser.AST;
-using Loom.Parser.Rules.Default;
+using Loom.Parser.AST.Rules.Default;
 
 namespace Loom.Analyzer.Analyzers;
 

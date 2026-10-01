@@ -8,8 +8,8 @@ using Loom.LIR.OpCodes;
 using Loom.LIR.Objects;
 using Loom.Parser;
 using Loom.Parser.AST;
-using Loom.Parser.Rules.Default;
 using Loom.Parser.Tokenizer;
+using Loom.Parser.AST.Rules.Default;
 
 namespace Loom.Tests;
 

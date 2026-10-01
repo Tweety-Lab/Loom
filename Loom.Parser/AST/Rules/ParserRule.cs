@@ -1,0 +1,68 @@
+﻿using Loom.Parser.AST;
+using static Loom.Parser.Tokenizer.Token;
+
+namespace Loom.Parser.AST.Rules;
+
+public interface IParserRule
+{
+    ASTNode? ParseUntyped(LoomParser parser);
+}
+
+public abstract class ParserRule<T> : IParserRule where T : ASTNode
+{
+    /// <summary> The underlying <see cref="LoomParser"/>. </summary>
+    protected LoomParser Parser { get; init; }
+
+    /// <summary> Initializes a new instance of the <see cref="ParserRule{T}"/> class. </summary>
+    public ParserRule(LoomParser parser) => Parser = parser;
+
+    /// <summary> Parses <typeparamref name="T"/>. </summary>
+    public abstract T ParseNode();
+
+    public T Parse()
+    {
+        var startToken = Parser.Reader.Current;
+        var node = ParseNode();
+        node.StartToken = startToken;
+        return node;
+    }
+
+    /// <inheritdoc/>
+    public ASTNode? ParseUntyped(LoomParser parser) => Parse();
+
+    /// <summary> Runs a <see cref="ParserRule{T}"/>. </summary>
+    protected TNode RunRule<TRule, TNode>() where TRule : ParserRule<TNode> where TNode : ASTNode => Parser.GetRule<TRule>().Parse();
+
+    // TODO: Improve this design
+    /// <summary> Loops until <paramref name="until"/> is matched, dispatching to handlers by token type. Throws diagnostics on unregistered tokens. </summary>
+protected void ParseUntil(TokenType until, Dictionary<TokenType, Action> handlers, Action? fallback = null)
+    {
+        var lastPosition = -1;
+        var stuckCount = 0;
+
+        while (!Parser.Reader.Check(until))
+        {
+            var position = Parser.Reader.Position;
+
+            if (position == lastPosition)
+            {
+                if (++stuckCount > 10_000)
+                    throw new InvalidOperationException($"Parser stuck at token '{Parser.Reader.Current.Text}' ({Parser.Reader.Current.Type}) position {position}");
+            }
+            else
+            {
+                stuckCount = 0;
+                lastPosition = position;
+            }
+
+            var token = Parser.Reader.Current;
+
+            if (handlers.TryGetValue(token.Type, out var handler))
+                handler();
+            else if (fallback != null)
+                fallback();
+            else
+                Parser.DiagnosticContext?.Report(new Common.Diagnostics.Diagnostic(Common.Diagnostics.Diagnostic.DiagnosticLevel.Error, $"Unexpected token: {token.Text}"), token.Location);
+        }
+    }
+}

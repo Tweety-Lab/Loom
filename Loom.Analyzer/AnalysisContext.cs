@@ -3,7 +3,7 @@ using Loom.Analyzer.Symbols;
 using Loom.Common.Diagnostics;
 using Loom.Common.Reflection;
 using Loom.Parser.AST;
-using Loom.Parser.Rules.Default;
+using Loom.Parser.AST.Rules.Default;
 using System.Reflection;
 
 namespace Loom.Analyzer;

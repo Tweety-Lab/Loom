@@ -1,5 +1,5 @@
 ﻿using Loom.Common;
-using Loom.Parser.Rules.Default;
+using Loom.Parser.AST.Rules.Default;
 using Loom.Parser.Tokenizer;
 
 namespace Loom.Parser;

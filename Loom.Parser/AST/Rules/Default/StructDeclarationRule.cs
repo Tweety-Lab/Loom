@@ -1,0 +1,41 @@
+﻿using Loom.Parser.AST;
+using Loom.Parser.AST.Rules;
+using Loom.Parser.Tokenizer;
+using static Loom.Parser.Tokenizer.Token;
+
+namespace Loom.Parser.AST.Rules.Default;
+
+// TODO: Better place for this
+public interface ITypeDeclarationNode : IModifiableNode
+{
+    Token Name { get; }
+    BlockNode Body { get; }
+}
+
+public record StructDeclarationNode(Token Name, BlockNode Body, List<Token> Modifiers) : ASTNode, ITypeDeclarationNode
+{
+    /// <inheritdoc/>
+    public override IEnumerable<ASTNode> Children => [Body];
+}
+
+
+[ParserRule]
+public class StructDeclarationRule : ParserRule<StructDeclarationNode>
+{
+    /// <inheritdoc/>
+    public StructDeclarationRule(LoomParser parser) : base(parser) { }
+
+    /// <inheritdoc/>
+    public override StructDeclarationNode ParseNode()
+    {
+        var modifiers = Parser.Reader.ExpectMany(t => TokenRegistry.IsMemberModifier(t.Type));
+
+        Parser.Reader.Expect(TokenType.Struct); // struct
+
+        var structName = Parser.Reader.Expect(TokenType.Identifier); // name
+
+        BlockNode body = RunRule<TypeDeclarationBlockRule, BlockNode>();
+
+        return new StructDeclarationNode(structName, body, modifiers);
+    }
+}

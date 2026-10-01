@@ -1,6 +1,6 @@
 ﻿using Loom.Analyzer.Symbols;
 using Loom.Parser.AST;
-using Loom.Parser.Rules.Default;
+using Loom.Parser.AST.Rules.Default;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Loom.Analyzer;
