@@ -38,7 +38,7 @@ public class ArrayBoundsAnalyzer : Analyzer
             return;
         }
 
-        if (node.Index is NumberLiteralNode literal && int.TryParse(literal.Value, out var index) && index >= size)
-            Context.DiagnosticContext?.Report(IndexOutOfBounds, literal.StartToken?.Location, index, array!.Name, size);
+        if (node.Index is NumberLiteralNode literal && literal.Value >= size)
+            Context.DiagnosticContext?.Report(IndexOutOfBounds, literal.StartToken?.Location, literal.Value, array!.Name, size);
     }
 }

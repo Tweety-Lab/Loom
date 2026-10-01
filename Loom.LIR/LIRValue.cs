@@ -34,15 +34,17 @@ public class LIRConstantIntValue : LIRValue
     public LIRConstantIntValue(int value) => Value = value;
 }
 
+/// <summary> A single Unicode scalar value, e.g. U+0041 ('A'). </summary>
 public class LIRConstantCharValue : LIRValue
 {
-    public char Value { get; }
+    /// <summary> The Unicode scalar value. </summary>
+    public int Value { get; }
 
     /// <inheritdoc/>
     public override LIRType Type => LIRType.Char;
 
     /// <summary> Initializes a new instance of the <see cref="LIRConstantCharValue"/> class. </summary>
-    public LIRConstantCharValue(char value) => Value = value;
+    public LIRConstantCharValue(int value) => Value = value;
 }
 
 public class LIRConstantBoolValue : LIRValue

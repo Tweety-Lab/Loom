@@ -88,6 +88,7 @@ public class Token
     {
         Identifier,
         Number,
+        CharacterLiteral,
 
         [Character('{')] LBrace,
         [Character('}')] RBrace,
@@ -110,7 +111,6 @@ public class Token
         [Character('>')] Greater,
 
         [Character('.')] Period,
-        [Character('\'')] SingleQuote,
 
         [MultiCharacter('=', '=')] EqualEqual,
         [MultiCharacter('!', '=')] NotEqual,

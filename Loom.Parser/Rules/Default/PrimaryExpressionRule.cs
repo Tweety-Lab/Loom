@@ -11,18 +11,6 @@ public abstract record ExpressionNode() : ASTNode
     public override IEnumerable<ASTNode> Children => Enumerable.Empty<ASTNode>();
 }
 
-public record NumberLiteralNode(string Value) : ExpressionNode
-{
-    /// <inheritdoc/>
-    public override IEnumerable<ASTNode> Children => Enumerable.Empty<ASTNode>();
-}
-
-public record BooleanLiteralNode(string Value) : ExpressionNode
-{
-    /// <inheritdoc/>
-    public override IEnumerable<ASTNode> Children => Enumerable.Empty<ASTNode>();
-}
-
 // Storing the token is a bit hacky, we don't really need to
 public record DefaultLiteralNode(Token Token) : ExpressionNode
 {
@@ -51,9 +39,9 @@ public class PrimaryExpressionRule : ParserRule<ExpressionNode>
     {
         return Parser.Reader.Current.Type switch
         {
-            TokenType.SingleQuote => RunRule<CharacterLiteralExpressionRule, CharacterLiteralNode>(),
-            TokenType.True or TokenType.False => new BooleanLiteralNode(Parser.Reader.Advance().Text),
-            TokenType.Number => new NumberLiteralNode(Parser.Reader.Advance().Text),
+            TokenType.CharacterLiteral => RunRule<CharacterLiteralExpressionRule, CharacterLiteralNode>(),
+            TokenType.True or TokenType.False => RunRule<BooleanLiteralExpressionRule, BooleanLiteralNode>(),
+            TokenType.Number => RunRule<NumberLiteralExpressionRule, NumberLiteralNode>(),
             TokenType.New => RunRule<ObjectCreationExpressionRule, ObjectCreationExpressionNode>(),
             TokenType.Identifier => new IdentifierNameNode(Parser.Reader.Advance()),
             TokenType.Default => new DefaultLiteralNode(Parser.Reader.Advance()),

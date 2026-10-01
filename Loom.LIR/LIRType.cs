@@ -14,7 +14,10 @@ public record LIRIntType(int Bits) : LIRType;
 
 public record LIRVoidType() : LIRType;
 public record LIRBoolType() : LIRType;
+
+/// <summary> A single Unicode scalar value (U+0000 to U+10FFFF, excluding surrogates). </summary>
 public record LIRCharType() : LIRType;
+
 public record LIRPointerType(LIRType PointeeType) : LIRType;
 public record LIRArrayType(LIRType ElementType, int Size) : LIRType;
 public record LIRTypeDeclarationType(string Name, bool IsValueType) : LIRType;

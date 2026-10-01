@@ -72,6 +72,8 @@ public class AnalysisContext
         rootTable.Define(new TypeSymbol("i32", TypeSymbol.DefaultType.I32) { IsValueType = true });
         rootTable.Define(new TypeSymbol("iptr", TypeSymbol.DefaultType.IPtr) { IsValueType = true });
         rootTable.Define(new TypeSymbol("bool", TypeSymbol.DefaultType.Bool) { IsValueType = true });
+
+        // A single Unicode scalar value, e.g. U+0041 ('A').
         rootTable.Define(new TypeSymbol("char", TypeSymbol.DefaultType.Char) { IsValueType = true });
 
         // Register all roots against the same root table

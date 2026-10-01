@@ -1,5 +1,6 @@
 ﻿using Loom.LIR.Objects;
 using Loom.LIR.OpCodes;
+using Loom.Parser.Literals;
 
 namespace Loom.LIR.Printers;
 
@@ -102,7 +103,7 @@ internal class StringPrinterStyle : ILIRPrinterStyle
     {
         return value switch
         {
-            LIRConstantCharValue c => $"'{c.Value}'",
+            LIRConstantCharValue c => CharacterLiteralParser.Format(c.Value),
             LIRConstantIntValue c => $"{c.Value}",
             LIRConstantBoolValue c => c.Value ? "true" : "false",
             LIRNullValue => "null",

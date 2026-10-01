@@ -1,9 +1,13 @@
-﻿using Loom.Parser.AST;
+using Loom.Common.Diagnostics;
+using Loom.Parser.AST;
+using Loom.Parser.Literals;
+using Loom.Parser.Tokenizer;
 using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.Rules.Default;
 
-public record CharacterLiteralNode(string Value) : ExpressionNode
+/// <summary> A character literal, holding the Unicode scalar value it represents. </summary>
+public record CharacterLiteralNode(int Value) : ExpressionNode
 {
     /// <inheritdoc/>
     public override IEnumerable<ASTNode> Children => Enumerable.Empty<ASTNode>();
@@ -12,18 +16,22 @@ public record CharacterLiteralNode(string Value) : ExpressionNode
 [ParserRule]
 public class CharacterLiteralExpressionRule : ParserRule<CharacterLiteralNode>
 {
+    private readonly CharacterLiteralParser literalParser = new CharacterLiteralParser();
+
     /// <inheritdoc/>
     public CharacterLiteralExpressionRule(LoomParser parser) : base(parser) { }
 
     /// <inheritdoc/>
     public override CharacterLiteralNode ParseNode()
     {
-        Parser.Reader.Expect(TokenType.SingleQuote); // '
-        var content = Parser.Reader.Advance().Text; // TODO: Parse multiple tokens (i.e., backslash + text)
-        Parser.Reader.Expect(TokenType.SingleQuote); // '
+        var token = Parser.Reader.Expect(TokenType.CharacterLiteral);
 
-        return new CharacterLiteralNode(content);
+        if (literalParser.TryParse(token, out var value, out var diagnostic))
+            return new CharacterLiteralNode(value);
+
+        if (diagnostic != null)
+            Parser.DiagnosticContext?.Report(diagnostic.Value);
+
+        return new CharacterLiteralNode(0);
     }
 }
-
-
