@@ -26,8 +26,7 @@ module Standard::Windows
         public static WinProcess Current()
         {
             iptr handle = GetCurrentProcess();
-            WinProcess process = new WinProcess(handle);
-            return process;
+            return new WinProcess(handle);
         }
     }
 }

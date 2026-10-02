@@ -60,13 +60,18 @@ internal class StatementGenerator
         LIRTempValue address = Generator.EmitAlloca(ASTGenerator.ConvertStorageType(symbol.Type!));
         locals[declaration.Name.Text] = address;
 
-        if (declaration.Initializer is InstanceCreationExpressionNode)
+        if (declaration.Initializer is InstanceCreationExpressionNode creation)
         {
-            // The storage of a value type is the new object itself, a reference type stores a pointer to it.
-            if (symbol.Type!.IsValueType)
-                return;
+            var expressionGen = new ExpressionGenerator(context, unit, function, locals);
 
-            Generator.EmitStore(EmitExpression(declaration.Initializer), address);
+            // The storage of a value type is the instance itself, so it is constructed in place; a reference type stores a pointer to it
+            if (symbol.Type!.IsValueType)
+            {
+                expressionGen.EmitInstanceCreation(creation, address);
+                return;
+            }
+
+            Generator.EmitStore(expressionGen.Emit(creation), address);
             return;
         }
 

@@ -79,13 +79,15 @@ internal class ExpressionGenerator
         };
     }
 
-    /// <summary> Allocates a new instance and calls its constructor. </summary>
-    public LIRValue EmitInstanceCreation(InstanceCreationExpressionNode node)
+/// <summary> Allocates a new instance and calls its constructor. </summary>
+    /// <param name="node"> The instance creation to emit. </param>
+    /// <param name="destination"> The address to construct into, or null to allocate a fresh instance. </param>
+    public LIRValue EmitInstanceCreation(InstanceCreationExpressionNode node, LIRValue? destination = null)
     {
-        Console.WriteLine($"Emitting instance creation: {node.TypeName.Token.Text}");
-
         var symbol = context.AnalysisContext.ExpressionTypes[node] ?? throw new Exception("Could not resolve instance creation type.");
-        var instance = Generator.EmitAlloca(ASTGenerator.ConvertType(symbol));
+
+        // A value type is constructed in place; a reference type needs storage for a pointer to the instance
+        var instance = destination ?? Generator.EmitAlloca(ASTGenerator.ConvertType(symbol));
         var constructor = symbol.Members.OfType<MethodSymbol>().FirstOrDefault(m => m.Kind == MethodSymbol.MethodKind.Constructor);
 
         LIRFunction? constructorFunc = null;
@@ -118,7 +120,7 @@ internal class ExpressionGenerator
         }
     }
 
-    // Emits a pointer to the storage of the local variable or field referenced by 'ident'.
+    // Emits a pointer to the storage of the local variable or field referenced by 'ident'
     private LIRValue EmitStorage(IdentifierNameNode ident)
     {
         if (locals.TryGetValue(ident.BaseName, out var address))
@@ -131,7 +133,7 @@ internal class ExpressionGenerator
         throw new Exception($"Unhandled identifier: {ident.BaseName}");
     }
 
-    // Emits a pointer to the variable referenced by 'ident', which is the pointer it holds for a reference type.
+    // Emits a pointer to the variable referenced by 'ident', which is the pointer it holds for a reference type
     private LIRValue EmitIdentifierAddress(IdentifierNameNode ident)
     {
         if (IsParameter(ident))
@@ -146,23 +148,23 @@ internal class ExpressionGenerator
         return IsValueType(ident) ? storage : Generator.EmitLoad(storage);
     }
 
-    // Emits the value of the variable referenced by 'ident'.
+    // Emits the value of the variable referenced by 'ident'
     private LIRValue EmitVariableValue(IdentifierNameNode ident) => IsParameter(ident) ? EmitParameterValue(ident.BaseName) : Generator.EmitLoad(EmitStorage(ident));
 
-    // Emits the value of the variable-like 'node', which is stored in memory.
+    // Emits the value of the variable-like 'node', which is stored in memory
     private LIRValue EmitVariableValue(ExpressionNode node)
     {
         var address = EmitAddress(node);
         return IsValueType(node) ? Generator.EmitLoad(address) : address;
     }
 
-    // Determines whether 'ident' refers to a parameter rather than a local variable or a field.
+    // Determines whether 'ident' refers to a parameter rather than a local variable or a field
     private bool IsParameter(IdentifierNameNode ident) => !locals.ContainsKey(ident.BaseName) && context.AnalysisContext.GetSymbol(ident).Symbol is ParameterSymbol;
 
-    // Determines whether 'node' has a value type, defaulting to one when its type is unknown.
+    // Determines whether 'node' has a value type, defaulting to one when its type is unknown
     private bool IsValueType(ExpressionNode node) => !context.AnalysisContext.ExpressionTypes.TryGetValue(node, out var type) || type.IsValueType;
 
-    // Emits the value of the parameter named 'name'.
+    // Emits the value of the parameter named 'name'
     private LIRValue EmitParameterValue(string name)
     {
         var index = Array.FindIndex(function.Type.Parameters, p => p.Name == name);
@@ -191,7 +193,7 @@ internal class ExpressionGenerator
         return Generator.EmitGetElement(arrayAddress, EmitValue(node.Index));
     }
 
-    // Emits the address of a field referenced by bare name inside a type, accessed through the instance (self) parameter.
+    // Emits the address of a field referenced by bare name inside a type, accessed through the instance (self) parameter
     private LIRValue EmitBareFieldAddress(FieldSymbol symbol, ASTNode contextNode)
     {
         var typeNode = context.AnalysisContext.FirstAncestorOrSelf<ITypeDeclarationNode>(contextNode);
@@ -207,7 +209,7 @@ internal class ExpressionGenerator
         return EmitFieldAddress(EmitSelfParameter(), typeSymbol, symbol);
     }
 
-    // Emits the value of the instance (self) parameter.
+    // Emits the value of the instance (self) parameter
     private LIRValue EmitSelfParameter()
     {
         if (!function.Type.Parameters.Any(p => p.Name == "self"))
@@ -216,7 +218,7 @@ internal class ExpressionGenerator
         return EmitParameterValue("self");
     }
 
-    // Emits the address of a field referenced by bare name inside a type, accessed through the instance (self) parameter.
+    // Emits the address of a field referenced by bare name inside a type, accessed through the instance (self) parameter
     private LIRValue EmitFieldAddress(LIRValue instance, TypeSymbol instanceTypeSymbol, FieldSymbol fieldSymbol)
     {
         var declarationType = new LIRTypeDeclarationType(instanceTypeSymbol.FullyQualifiedName, instanceTypeSymbol.IsValueType);

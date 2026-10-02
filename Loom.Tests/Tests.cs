@@ -486,7 +486,7 @@ module Test
     }
 
     [Fact]
-    public void EmitLIR_ObjectCreationExpression_EmitsSingleAlloca()
+    public void EmitLIR_ObjectCreationExpression_ConstructsInPlaceAndCallsConstructor()
     {
         CompilationContext context = new CompilationContext();
         context.Parse(OBJECT_CREATION_SOURCE).Analyze().EmitLIR();
@@ -496,12 +496,16 @@ module Test
         Assert.NotNull(main);
 
         var instructions = main!.Blocks.SelectMany(b => b.Instructions).ToList();
+
+        // A value type is constructed into the storage of the variable itself, so it is only allocated once.
         var alloca = Assert.Single(instructions, i => i.OpCode == LIROpCode.Alloca);
-        var pointer = Assert.IsType<LIRPointerType>(alloca.Result!.Type);
-        Assert.IsType<LIRTypeDeclarationType>(pointer.PointeeType);
+        Assert.IsType<LIRTypeDeclarationType>(alloca.Result!.Type);
 
         Assert.DoesNotContain(instructions, i => i.OpCode == LIROpCode.Store);
-        Assert.DoesNotContain(instructions, i => i.OpCode == LIROpCode.Call);
+
+        var call = Assert.Single(instructions, i => i.OpCode == LIROpCode.CallInstanced);
+        Assert.Equal("Test::TestStruct::.ctor", Assert.IsType<LIRFunction>(call.Operands[0]).Name);
+        Assert.Same(alloca.Result, call.Operands[1]);
     }
 
     [Fact]
