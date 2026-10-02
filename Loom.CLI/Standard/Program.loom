@@ -11,12 +11,7 @@ module Standard::Program
         i32 exitCode = 1;
 
         unique String myString = new String();
-        myString.Characters[0] = 'H';
-		myString.Characters[1] = 'e';
-		myString.Characters[2] = 'l';
-		myString.Characters[3] = 'l';
-		myString.Characters[4] = 'o';
-        myString.Characters[5] = '!';
+        myString.Characters = ['H', 'e', 'l', 'l', 'o', '!'];
         myString.Length = 6;
         
         WinProcess process = WinProcess.Current();

@@ -60,7 +60,7 @@ public class InaccessibleSymbolAnalyzer : Analyzer
     }
 
     [Visitor]
-    public void Visit(InstanceCreationExpressionNode node)
+    public void Visit(InstanceCreationNode node)
     {
         var type = Context.ExpressionTypes.TryGetValue(node, out var resolvedType) ? resolvedType : null;
 

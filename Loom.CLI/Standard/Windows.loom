@@ -5,24 +5,25 @@ module Standard::Windows
     extern bool TerminateProcess(iptr process, i32 exitCode);
 #endregion
     
-	/// @brief Native Windows Process
+	/// @brief Native Windows Process.
     export struct WinProcess
     {
+        /// @brief Pointer to the native process.
         public iptr Handle = default;
 
-        private WinProcess(iptr handle)
+        WinProcess(iptr handle)
         {
             Handle = handle;
         }
 
-        /// @brief Closes the process
+        /// @brief Closes the process.
         public bool Close()
         {
             return TerminateProcess(Handle, 0);
         }
 
-        /// @brief Gets the current process
-        /// @return The current process
+        /// @brief Gets the current process.
+        /// @return The current process.
         public static WinProcess Current()
         {
             return new WinProcess(GetCurrentProcess());
