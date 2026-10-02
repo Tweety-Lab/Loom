@@ -7,7 +7,7 @@ namespace Loom.Parser.AST.Rules.Default;
 public record InstanceCreationExpressionNode(IdentifierNameNode TypeName, List<ExpressionNode> Arguments) : ExpressionNode
 {
     /// <inheritdoc/>
-    public override IEnumerable<ASTNode> Children => [TypeName];
+    public override IEnumerable<ASTNode> Children => Arguments.Prepend(TypeName);
 }
 
 [ParserRule]
