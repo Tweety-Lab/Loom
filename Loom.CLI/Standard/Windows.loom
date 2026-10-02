@@ -10,7 +10,7 @@ module Standard::Windows
     {
         public iptr Handle = default;
 
-        public WinProcess(iptr handle)
+        private WinProcess(iptr handle)
         {
             Handle = handle;
         }

@@ -22,7 +22,7 @@ public class InaccessibleSymbolAnalyzer : Analyzer
         if (symbol is null or ModuleSymbol)
             return;
 
-        CheckAccessible(node, symbol);
+        CheckExported(node, symbol);
     }
 
     [Visitor]
@@ -59,13 +59,36 @@ public class InaccessibleSymbolAnalyzer : Analyzer
             CheckTypeAccess(node, parameter.Type.Base.Text);
     }
 
+    [Visitor]
+    public void Visit(InstanceCreationExpressionNode node)
+    {
+        var type = Context.ExpressionTypes.TryGetValue(node, out var resolvedType) ? resolvedType : null;
+
+        if (type == null)
+            return;
+
+        var constructor = type.Members.OfType<MethodSymbol>().FirstOrDefault(m => m.Kind == MethodSymbol.MethodKind.Constructor);
+
+        if (constructor == null)
+            return;
+
+        if ((constructor as IAccessibleSymbol)?.Accessibility == MemberAccessibility.Private)
+        {
+            var declaringType = Context.FirstAncestorOrSelf<ITypeDeclarationNode>(constructor.DeclaringNode!);
+            var usageType = Context.FirstAncestorOrSelf<ITypeDeclarationNode>(node);
+
+            if (declaringType != null && declaringType != usageType)
+                Context.DiagnosticContext?.Report(InaccessibleMemberDiagnostic, node.StartToken?.Location, constructor.Name);
+        }
+    }
+
     private void CheckTypeAccess(ASTNode node, string typeName)
     {
         if (TypeResolver.Resolve(Context, node, typeName) is { } type)
-            CheckAccessible(node, type);
+            CheckExported(node, type);
     }
 
-    private void CheckAccessible(ASTNode node, Symbol symbol)
+    private void CheckExported(ASTNode node, Symbol symbol)
     {
         if (symbol.DeclaringNode == null)
             return;
