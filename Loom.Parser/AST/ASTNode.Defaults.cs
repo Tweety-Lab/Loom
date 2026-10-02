@@ -5,10 +5,18 @@ using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.AST;
 
-public abstract record NameNode : ExpressionNode;
-
-public record IdentifierNameNode(Token Token) : NameNode
+/// <summary>
+/// An <see cref="ASTNode"/> that names an entity, such as a variable, type, module or type parameter.
+/// </summary>
+public interface INameNode
 {
+    /// <summary> The text this name refers to. </summary>
+    string BaseName { get; }
+}
+
+public record IdentifierNameNode(Token Token) : ExpressionNode, INameNode
+{
+    /// <inheritdoc/>
     public string BaseName => Token.Text;
 }
 
