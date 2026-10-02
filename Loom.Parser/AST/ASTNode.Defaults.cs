@@ -12,6 +12,12 @@ public record IdentifierNameNode(Token Token) : NameNode
     public string BaseName => Token.Text;
 }
 
+public interface ITypeDeclarationNode : IModifiableNode
+{
+    Token Name { get; }
+    BlockNode Body { get; }
+}
+
 /// <summary>
 /// <see cref="ASTNode"/> that holds modifiers.
 /// </summary>

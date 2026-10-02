@@ -5,13 +5,6 @@ using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.AST.Rules.Default;
 
-// TODO: Better place for this
-public interface ITypeDeclarationNode : IModifiableNode
-{
-    Token Name { get; }
-    BlockNode Body { get; }
-}
-
 public record StructDeclarationNode(Token Name, BlockNode Body, List<Token> Modifiers) : ASTNode, ITypeDeclarationNode
 {
     /// <inheritdoc/>
