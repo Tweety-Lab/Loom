@@ -79,7 +79,7 @@ internal class ExpressionGenerator
         };
     }
 
-/// <summary> Allocates a new instance and calls its constructor. </summary>
+    /// <summary> Allocates a new instance and calls its constructor. </summary>
     /// <param name="node"> The instance creation to emit. </param>
     /// <param name="destination"> The address to construct into, or null to allocate a fresh instance. </param>
     public LIRValue EmitInstanceCreation(InstanceCreationExpressionNode node, LIRValue? destination = null)
@@ -104,6 +104,39 @@ internal class ExpressionGenerator
         Generator.EmitCallInstanced(constructorFunc, instance, args);
 
         return instance;
+    }
+
+    /// <summary> Emits the declared initializer of every field of the type containing <paramref name="contextNode"/> into the instance being constructed. </summary>
+    /// <remarks> Fields declared without an initializer are defaulted. </remarks>
+    public void EmitFieldInitializers(ASTNode contextNode)
+    {
+        var typeNode = context.AnalysisContext.FirstAncestorOrSelf<ITypeDeclarationNode>(contextNode);
+
+        if (typeNode == null)
+            throw new Exception($"Could not resolve declaring type: {contextNode.GetType().Name}");
+
+        if (context.AnalysisContext.GetSymbol((ASTNode)typeNode).Symbol is not TypeSymbol instanceType)
+            throw new Exception($"Could not resolve declaring type: {contextNode.GetType().Name}");
+
+        var self = EmitSelfParameter();
+
+        foreach (var field in instanceType.Members.OfType<FieldSymbol>())
+        {
+            if (field.Type == null)
+                continue;
+
+            var address = EmitFieldAddress(self, instanceType, field);
+
+            if (field.Type is ArrayTypeSymbol array)
+            {
+                EmitDefaultArray(address, array);
+                continue;
+            }
+
+            var initializer = (field.DeclaringNode as FieldDeclarationNode)?.Variable.Initializer;
+
+            Generator.EmitStore(initializer != null ? EmitValue(initializer) : EmitDefault(field.Type), address);
+        }
     }
 
     /// <summary> Emits a store of the default value of <paramref name="type"/> into every element of the array at <paramref name="arrayAddress"/>. </summary>

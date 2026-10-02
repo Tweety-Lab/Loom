@@ -2,6 +2,7 @@
 using Loom.Analyzer.Symbols;
 using Loom.Common;
 using Loom.LIR.Objects;
+using Loom.Parser.AST;
 using Loom.Parser.AST.Rules.Default;
 
 namespace Loom.LIR.Generation;
@@ -33,6 +34,9 @@ internal class StatementGenerator
             locals[param.Name] = address;
         }
     }
+
+    /// <summary> Emits the declared initializer of every field of the type containing <paramref name="node"/>. </summary>
+    public void EmitFieldInitializers(ASTNode node) => new ExpressionGenerator(context, unit, function, locals).EmitFieldInitializers(node);
 
     /// <summary> Emits a statement for the given node. </summary>
     public void EmitStatement(StatementNode node)
