@@ -39,7 +39,7 @@ internal class ExpressionGenerator
         CallExpressionNode call => EmitCall(call),
         ArrayAccessExpressionNode array => EmitVariableValue(array),
         MemberAccessExpressionNode member => EmitVariableValue(member),
-        ObjectCreationExpressionNode creation => EmitObjectCreation(creation),
+        InstanceCreationExpressionNode creation => EmitInstanceCreation(creation),
         _ => throw new Exception($"Unhandled expression: {node.GetType().Name}")
     };
 
@@ -49,7 +49,7 @@ internal class ExpressionGenerator
         IdentifierNameNode ident => EmitIdentifierAddress(ident),
         MemberAccessExpressionNode member => EmitMemberAddress(member),
         ArrayAccessExpressionNode array => EmitArrayElementAddress(array),
-        ObjectCreationExpressionNode creation => Emit(creation),
+        InstanceCreationExpressionNode creation => Emit(creation),
         _ => throw new Exception($"Unhandled addressable expression: {node.GetType().Name}")
     };
 
@@ -57,7 +57,7 @@ internal class ExpressionGenerator
     public LIRValue EmitValue(ExpressionNode node)
     {
         var value = Emit(node);
-        return node is ObjectCreationExpressionNode creation && context.AnalysisContext.ExpressionTypes[creation].IsValueType ? Generator.EmitLoad(value) : value;
+        return node is InstanceCreationExpressionNode creation && context.AnalysisContext.ExpressionTypes[creation].IsValueType ? Generator.EmitLoad(value) : value;
     }
 
     /// <summary> Emits the default value of <paramref name="type"/>. </summary>
@@ -79,10 +79,12 @@ internal class ExpressionGenerator
         };
     }
 
-    /// <summary> Allocates a new object and calls its constructor. </summary>
-    public LIRValue EmitObjectCreation(ObjectCreationExpressionNode node)
+    /// <summary> Allocates a new instance and calls its constructor. </summary>
+    public LIRValue EmitInstanceCreation(InstanceCreationExpressionNode node)
     {
-        var symbol = context.AnalysisContext.ExpressionTypes[node] ?? throw new Exception("Could not resolve object creation type.");
+        Console.WriteLine($"Emitting instance creation: {node.TypeName.Token.Text}");
+
+        var symbol = context.AnalysisContext.ExpressionTypes[node] ?? throw new Exception("Could not resolve instance creation type.");
         var instance = Generator.EmitAlloca(ASTGenerator.ConvertType(symbol));
         var constructor = symbol.Members.OfType<MethodSymbol>().FirstOrDefault(m => m.Kind == MethodSymbol.MethodKind.Constructor);
 
@@ -94,6 +96,7 @@ internal class ExpressionGenerator
 
         if (constructorFunc == null)
             throw new Exception($"Could not find constructor for {symbol.FullyQualifiedName}!");
+
 
         var args = node.Arguments.Select(EmitValue).ToArray();
         Generator.EmitCallInstanced(constructorFunc, instance, args);
@@ -214,10 +217,10 @@ internal class ExpressionGenerator
     }
 
     // Emits the address of a field referenced by bare name inside a type, accessed through the instance (self) parameter.
-    private LIRValue EmitFieldAddress(LIRValue instance, TypeSymbol objectTypeSymbol, FieldSymbol fieldSymbol)
+    private LIRValue EmitFieldAddress(LIRValue instance, TypeSymbol instanceTypeSymbol, FieldSymbol fieldSymbol)
     {
-        var declarationType = new LIRTypeDeclarationType(objectTypeSymbol.FullyQualifiedName, objectTypeSymbol.IsValueType);
-        var declaration = unit.TypeDeclarations.FirstOrDefault(s => s.Type == declarationType) ?? throw new Exception($"Could not find type: {objectTypeSymbol.FullyQualifiedName}");
+        var declarationType = new LIRTypeDeclarationType(instanceTypeSymbol.FullyQualifiedName, instanceTypeSymbol.IsValueType);
+        var declaration = unit.TypeDeclarations.FirstOrDefault(s => s.Type == declarationType) ?? throw new Exception($"Could not find type: {instanceTypeSymbol.FullyQualifiedName}");
 
         var field = declaration.Fields.FirstOrDefault(f => f.Name == fieldSymbol.Name) ?? throw new Exception($"Could not find field: {fieldSymbol.Name}");
 

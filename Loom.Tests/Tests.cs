@@ -461,8 +461,8 @@ module Test
         var method = (MethodDeclarationNode)root.Modules[0].Body.Contents[1];
         var decl = Assert.IsType<VariableDeclarationNode>(method.Body.Contents.First());
 
-        var creation = Assert.IsType<ObjectCreationExpressionNode>(decl.Initializer);
-        Assert.Equal("TestStruct", creation.ObjectName.BaseName);
+        var creation = Assert.IsType<InstanceCreationExpressionNode>(decl.Initializer);
+        Assert.Equal("TestStruct", creation.TypeName.BaseName);
     }
 
     [Fact]
@@ -471,7 +471,7 @@ module Test
         var (root, context) = ParseAndAnalyze(OBJECT_CREATION_SOURCE);
         var method = (MethodDeclarationNode)root.Modules[0].Body.Contents[1];
         var decl = (VariableDeclarationNode)method.Body.Contents.First();
-        var creation = Assert.IsType<ObjectCreationExpressionNode>(decl.Initializer);
+        var creation = Assert.IsType<InstanceCreationExpressionNode>(decl.Initializer);
 
         var type = context.AnalysisContext.ExpressionTypes[creation];
         Assert.Equal(TypeSymbol.DefaultType.Struct, type.KnownType);

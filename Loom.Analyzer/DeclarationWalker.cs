@@ -90,7 +90,7 @@ internal class DeclarationWalker : ASTVisitor
         symbol.IsExported = node.HasModifier(Parser.Tokenizer.Token.TokenType.Export);
         symbol.IsExtern = node.HasModifier(Parser.Tokenizer.Token.TokenType.Extern);
 
-        // A constructor initializes the instance it is passed, so it never returns a value.
+        // Constructors implicitly return void
         symbol.ReturnType = CurrentTable.Lookup("void")?.OfType<TypeSymbol>().FirstOrDefault(t => t.KnownType == TypeSymbol.DefaultType.Void);
 
         // TODO:

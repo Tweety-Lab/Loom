@@ -4,23 +4,23 @@ using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.AST.Rules.Default;
 
-public record ObjectCreationExpressionNode(IdentifierNameNode ObjectName, List<ExpressionNode> Arguments) : ExpressionNode
+public record InstanceCreationExpressionNode(IdentifierNameNode TypeName, List<ExpressionNode> Arguments) : ExpressionNode
 {
     /// <inheritdoc/>
-    public override IEnumerable<ASTNode> Children => [ObjectName];
+    public override IEnumerable<ASTNode> Children => [TypeName];
 }
 
 [ParserRule]
-public class ObjectCreationExpressionRule : ParserRule<ObjectCreationExpressionNode>
+public class InstanceCreationExpressionRule : ParserRule<InstanceCreationExpressionNode>
 {
     /// <inheritdoc/>
-    public ObjectCreationExpressionRule(LoomParser parser) : base(parser) { }
+    public InstanceCreationExpressionRule(LoomParser parser) : base(parser) { }
 
     /// <inheritdoc/>
-    public override ObjectCreationExpressionNode ParseNode()
+    public override InstanceCreationExpressionNode ParseNode()
     {
         Parser.Reader.Expect(TokenType.New); // new
-        var objectName = Parser.Reader.Expect(TokenType.Identifier); // name
+        var typeName = Parser.Reader.Expect(TokenType.Identifier); // name
 
         Parser.Reader.Expect(TokenType.LParen); // (
 
@@ -36,7 +36,7 @@ public class ObjectCreationExpressionRule : ParserRule<ObjectCreationExpressionN
 
         Parser.Reader.Expect(TokenType.RParen); // )
 
-        return new ObjectCreationExpressionNode(new IdentifierNameNode(objectName), args);
+        return new InstanceCreationExpressionNode(new IdentifierNameNode(typeName), args);
     }
 }
 

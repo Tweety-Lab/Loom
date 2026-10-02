@@ -105,9 +105,9 @@ internal class TypeWalker : ASTWalker
     }
 
     [Visitor]
-    public void Visit(ObjectCreationExpressionNode node)
+    public void Visit(InstanceCreationExpressionNode node)
     {
-        if (Context.GetSymbol(node.ObjectName).Symbol is TypeSymbol type && (type.KnownType == TypeSymbol.DefaultType.Struct || type.KnownType == TypeSymbol.DefaultType.Class))
+        if (Context.GetSymbol(node.TypeName).Symbol is TypeSymbol type && (type.KnownType == TypeSymbol.DefaultType.Struct || type.KnownType == TypeSymbol.DefaultType.Class))
             Context.ExpressionTypes[node] = type;
     }
 
