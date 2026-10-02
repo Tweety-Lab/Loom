@@ -4,20 +4,20 @@ using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.AST.Rules.Default;
 
-public record InstanceCreationNode(IdentifierNameNode TypeName, List<ExpressionNode> Arguments) : ExpressionNode
+public record InstanceCreationExpresssionNode(IdentifierNameNode TypeName, List<ExpressionNode> Arguments) : ExpressionNode
 {
     /// <inheritdoc/>
     public override IEnumerable<ASTNode> Children => Arguments.Prepend(TypeName);
 }
 
 [ParserRule]
-public class InstanceCreationExpressionRule : ParserRule<InstanceCreationNode>
+public class InstanceCreationExpressionRule : ParserRule<InstanceCreationExpresssionNode>
 {
     /// <inheritdoc/>
     public InstanceCreationExpressionRule(LoomParser parser) : base(parser) { }
 
     /// <inheritdoc/>
-    public override InstanceCreationNode ParseNode()
+    public override InstanceCreationExpresssionNode ParseNode()
     {
         Parser.Reader.Expect(TokenType.New); // new
         var typeName = Parser.Reader.Expect(TokenType.Identifier); // name
@@ -36,7 +36,7 @@ public class InstanceCreationExpressionRule : ParserRule<InstanceCreationNode>
 
         Parser.Reader.Expect(TokenType.RParen); // )
 
-        return new InstanceCreationNode(new IdentifierNameNode(typeName), args);
+        return new InstanceCreationExpresssionNode(new IdentifierNameNode(typeName), args);
     }
 }
 

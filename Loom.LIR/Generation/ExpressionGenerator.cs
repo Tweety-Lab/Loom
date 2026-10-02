@@ -39,7 +39,7 @@ internal class ExpressionGenerator
         CallExpressionNode call => EmitCall(call),
         ArrayAccessExpressionNode array => EmitVariableValue(array),
         MemberAccessExpressionNode member => EmitVariableValue(member),
-        InstanceCreationNode creation => EmitInstanceCreation(creation),
+        InstanceCreationExpresssionNode creation => EmitInstanceCreation(creation),
         _ => throw new Exception($"Unhandled expression: {node.GetType().Name}")
     };
 
@@ -49,7 +49,7 @@ internal class ExpressionGenerator
         IdentifierNameNode ident => EmitIdentifierAddress(ident),
         MemberAccessExpressionNode member => EmitMemberAddress(member),
         ArrayAccessExpressionNode array => EmitArrayElementAddress(array),
-        InstanceCreationNode creation => Emit(creation),
+        InstanceCreationExpresssionNode creation => Emit(creation),
         _ => throw new Exception($"Unhandled addressable expression: {node.GetType().Name}")
     };
 
@@ -57,7 +57,7 @@ internal class ExpressionGenerator
     public LIRValue EmitValue(ExpressionNode node)
     {
         var value = Emit(node);
-        return node is InstanceCreationNode creation && context.AnalysisContext.ExpressionTypes[creation].IsValueType ? Generator.EmitLoad(value) : value;
+        return node is InstanceCreationExpresssionNode creation && context.AnalysisContext.ExpressionTypes[creation].IsValueType ? Generator.EmitLoad(value) : value;
     }
 
     /// <summary> Emits the default value of <paramref name="type"/>. </summary>
@@ -82,7 +82,7 @@ internal class ExpressionGenerator
     /// <summary> Allocates a new instance and calls its constructor. </summary>
     /// <param name="node"> The instance creation to emit. </param>
     /// <param name="destination"> The address to construct into, or null to allocate a fresh instance. </param>
-    public LIRValue EmitInstanceCreation(InstanceCreationNode node, LIRValue? destination = null)
+    public LIRValue EmitInstanceCreation(InstanceCreationExpresssionNode node, LIRValue? destination = null)
     {
         var symbol = context.AnalysisContext.ExpressionTypes[node] ?? throw new Exception("Could not resolve instance creation type.");
 

@@ -37,7 +37,7 @@ public class PrimaryExpressionRule : ParserRule<ExpressionNode>
             TokenType.CharacterLiteral => RunRule<CharacterLiteralExpressionRule, CharacterLiteralNode>(),
             TokenType.True or TokenType.False => RunRule<BooleanLiteralExpressionRule, BooleanLiteralNode>(),
             TokenType.Number => RunRule<NumberLiteralExpressionRule, NumberLiteralNode>(),
-            TokenType.New => RunRule<InstanceCreationExpressionRule, InstanceCreationNode>(),
+            TokenType.New => RunRule<InstanceCreationExpressionRule, InstanceCreationExpresssionNode>(),
             TokenType.Identifier => new IdentifierNameNode(Parser.Reader.Advance()),
             TokenType.Default => RunRule<DefaultExpressionRule, DefaultLiteralNode>(),
             _ => throw new Exception($"Unexpected token: '{Parser.Reader.Current.Text}' type={Parser.Reader.Current.Type} at {Parser.Reader.Current.Location}")

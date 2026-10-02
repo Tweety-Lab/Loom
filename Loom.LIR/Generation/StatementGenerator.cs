@@ -64,7 +64,7 @@ internal class StatementGenerator
         LIRTempValue address = Generator.EmitAlloca(ASTGenerator.ConvertStorageType(symbol.Type!));
         locals[declaration.Name.Text] = address;
 
-        if (declaration.Initializer is InstanceCreationNode creation)
+        if (declaration.Initializer is InstanceCreationExpresssionNode creation)
         {
             var expressionGen = new ExpressionGenerator(context, unit, function, locals);
 
