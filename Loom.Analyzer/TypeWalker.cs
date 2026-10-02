@@ -22,12 +22,13 @@ internal class TypeWalker : ASTWalker
     [Visitor]
     public void Visit(DefaultLiteralNode node)
     {
-        var type = node.Type is { } declared ? TypeResolver.Resolve(Context, node, declared) ?? ResolveDefaultType(node) : ResolveDefaultType(node);
+        var type = node.Type is { } declared ? TypeResolver.Resolve(Context, node, declared) ?? ResolveContextualType(node) : ResolveContextualType(node);
         Context.ExpressionTypes[node] = type ?? (TypeSymbol)Context.Binders.First().Value.Lookup("i32")!.First();
     }
 
-    /// <summary> Resolves the type <c>default</c> takes on, i.e. the type it is being initialized as. </summary>
-    private TypeSymbol? ResolveDefaultType(ASTNode node)
+    /// <summary> Resolves the contextual type of <paramref name="node"/>, i.e. the type it is being initialized as. </summary>
+    /// <remarks> This is what <c>default</c> literals resolve to. </remarks>
+    public TypeSymbol? ResolveContextualType(ASTNode node)
     {
         var declaration = Context.FirstAncestorOrSelf<VariableDeclarationNode>(node);
         if (declaration != null)
@@ -88,6 +89,23 @@ internal class TypeWalker : ASTWalker
     {
         if (TryGetArrayType(node.Receiver, out var array))
             Context.ExpressionTypes[node] = array.ElementType;
+    }
+
+    [Visitor]
+    public void Visit(ArrayLiteralNode node)
+    {
+        if (ResolveContextualType(node) is ArrayTypeSymbol contextual)
+        {
+            Context.ExpressionTypes[node] = contextual;
+            return;
+        }
+
+        var elementType = node.Elements.Select(e => Context.ExpressionTypes.TryGetValue(e, out var type) ? type : null).FirstOrDefault(t => t != null);
+
+        if (elementType == null)
+            return;
+
+        Context.ExpressionTypes[node] = new ArrayTypeSymbol(elementType, node.Elements.Count);
     }
 
     [Visitor]

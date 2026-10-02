@@ -84,17 +84,7 @@ internal class StatementGenerator
 
     /// <summary> Emits the initialization of <paramref name="address"/>. </summary>
     private void Initialize(LIRValue address, ExpressionNode initializer, TypeSymbol type)
-    {
-        var expressionGen = new ExpressionGenerator(context, unit, function, locals);
-
-        if (type is ArrayTypeSymbol array)
-        {
-            expressionGen.EmitDefaultArray(address, array);
-            return;
-        }
-
-        Generator.EmitStore(expressionGen.EmitValue(initializer), address);
-    }
+        => new ExpressionGenerator(context, unit, function, locals).Initialize(address, initializer, type);
 
     private void EmitReturn(ReturnStatementNode node)
     {
@@ -108,7 +98,7 @@ internal class StatementGenerator
     {
         var address = new ExpressionGenerator(context, unit, function, locals).EmitAddress(node.Target);
 
-        // Assigning to a whole array defaults each of its elements rather than storing a single value.
+        // Assigning to a whole array defaults each of its elements rather than storing a single value
         if (context.AnalysisContext.ExpressionTypes.TryGetValue(node.Target, out var targetType) && targetType is ArrayTypeSymbol)
         {
             Initialize(address, node.Value, targetType);

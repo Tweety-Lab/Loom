@@ -13,6 +13,8 @@ module Standard::Program
         unique String myString = new String();
         myString.Characters = ['H', 'e', 'l', 'l', 'o', '!'];
         myString.Length = 6;
+
+        myString.Characters[6] = '\0';
         
         WinProcess process = WinProcess.Current();
 

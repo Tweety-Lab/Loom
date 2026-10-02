@@ -14,6 +14,7 @@ public class ArrayBoundsAnalyzer : Analyzer
     public static Diagnostic NonArrayIndex = new(Diagnostic.DiagnosticLevel.Error, "Cannot index '{0}' because it is not an array.");
     public static Diagnostic InvalidIndexType = new(Diagnostic.DiagnosticLevel.Error, "Array indexes must be i32 values.");
     public static Diagnostic IndexOutOfBounds = new(Diagnostic.DiagnosticLevel.Error, "Array index {0} is outside the bounds of array '{1}' of size {2}.");
+    public static Diagnostic TooManyElements = new(Diagnostic.DiagnosticLevel.Error, "Array literal with {0} elements is outside the bounds of array '{1}' of size {2}.");
 
     [Visitor]
     public void Visit(ArrayAccessExpressionNode node)
@@ -34,6 +35,16 @@ public class ArrayBoundsAnalyzer : Analyzer
 
         if (node.Index is NumberLiteralNode literal && literal.Value >= array.Size)
             Context.DiagnosticContext?.Report(IndexOutOfBounds, literal.StartToken?.Location, literal.Value, name, array.Size);
+    }
+
+    [Visitor]
+    public void Visit(ArrayLiteralNode node)
+    {
+        if (!Context.ExpressionTypes.TryGetValue(node, out var type) || type is not ArrayTypeSymbol array)
+            return;
+
+        if (node.Elements.Count > array.Size)
+            Context.DiagnosticContext?.Report(TooManyElements, node.StartToken?.Location, node.Elements.Count, array.Name, array.Size);
     }
 
     private static string Describe(ExpressionNode node) => node switch

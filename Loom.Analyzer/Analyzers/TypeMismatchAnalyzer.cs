@@ -82,6 +82,14 @@ public class TypeMismatchAnalyzer : Analyzer
             Check(targetType, node.Value);
     }
 
+    [Visitor]
+    public void Visit(ArrayLiteralNode node)
+    {
+        if (Context.ExpressionTypes.TryGetValue(node, out var type) && type is ArrayTypeSymbol array)
+            foreach (var element in node.Elements)
+                Check(array.ElementType, element);
+    }
+
     private void Check(TypeSymbol assignee, ExpressionNode assigned)
     {
         if (!Context.ExpressionTypes.TryGetValue(assigned, out var assignedType))

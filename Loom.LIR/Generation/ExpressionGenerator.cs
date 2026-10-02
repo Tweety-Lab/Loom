@@ -37,6 +37,7 @@ internal class ExpressionGenerator
         DefaultLiteralNode @default => EmitDefault(context.AnalysisContext.ExpressionTypes[@default]),
         BinaryExpressionNode binary => EmitBinary(binary),
         CallExpressionNode call => EmitCall(call),
+        ArrayLiteralNode literal => EmitArrayLiteral(literal),
         ArrayAccessExpressionNode array => EmitVariableValue(array),
         MemberAccessExpressionNode member => EmitVariableValue(member),
         InstanceCreationExpresssionNode creation => EmitInstanceCreation(creation),
@@ -49,6 +50,7 @@ internal class ExpressionGenerator
         IdentifierNameNode ident => EmitIdentifierAddress(ident),
         MemberAccessExpressionNode member => EmitMemberAddress(member),
         ArrayAccessExpressionNode array => EmitArrayElementAddress(array),
+        ArrayLiteralNode literal => EmitArrayLiteral(literal),
         InstanceCreationExpresssionNode creation => Emit(creation),
         _ => throw new Exception($"Unhandled addressable expression: {node.GetType().Name}")
     };
@@ -58,6 +60,33 @@ internal class ExpressionGenerator
     {
         var value = Emit(node);
         return node is InstanceCreationExpresssionNode creation && context.AnalysisContext.ExpressionTypes[creation].IsValueType ? Generator.EmitLoad(value) : value;
+    }
+
+    /// <summary> Emits the initialization of <paramref name="address"/> from <paramref name="initializer"/>, defaulting the storage when there is no initializer. </summary>
+    public void Initialize(LIRValue address, ExpressionNode? initializer, TypeSymbol type)
+    {
+        if (type is ArrayTypeSymbol array)
+        {
+            if (initializer is ArrayLiteralNode literal)
+                EmitArrayLiteralInto(address, array, literal.Elements);
+            else
+                EmitDefaultArray(address, array);
+
+            return;
+        }
+
+        Generator.EmitStore(initializer != null ? EmitValue(initializer) : EmitDefault(type), address);
+    }
+
+    /// <summary> Emits the storage of a new array literal, or initializes <paramref name="destination"/> when one is given. </summary>
+    /// <param name="node"> The array literal to emit. </param>
+    /// <param name="destination"> The storage to initialize, or null to allocate a new array. </param>
+    public LIRValue EmitArrayLiteral(ArrayLiteralNode node, LIRValue? destination = null)
+    {
+        if (context.AnalysisContext.ExpressionTypes.TryGetValue(node, out var resolved) && resolved is ArrayTypeSymbol type)
+            return destination ?? EmitArrayLiteralInto(Generator.EmitAlloca(ASTGenerator.ConvertType(type)), type, node.Elements);
+
+        throw new Exception($"Could not resolve the type of an array literal of {node.Elements.Count} element(s).");
     }
 
     /// <summary> Emits the default value of <paramref name="type"/>. </summary>
@@ -126,23 +155,16 @@ internal class ExpressionGenerator
                 continue;
 
             var address = EmitFieldAddress(self, instanceType, field);
-
-            if (field.Type is ArrayTypeSymbol array)
-            {
-                EmitDefaultArray(address, array);
-                continue;
-            }
-
             var initializer = (field.DeclaringNode as FieldDeclarationNode)?.Variable.Initializer;
 
-            Generator.EmitStore(initializer != null ? EmitValue(initializer) : EmitDefault(field.Type), address);
+            Initialize(address, initializer, field.Type);
         }
     }
 
-    /// <summary> Emits a store of the default value of <paramref name="type"/> into every element of the array at <paramref name="arrayAddress"/>. </summary>
-    public void EmitDefaultArray(LIRValue arrayAddress, ArrayTypeSymbol type)
+    /// <summary> Emits a store of the default value of <paramref name="type"/> into every element of the array at <paramref name="arrayAddress"/> from <paramref name="from"/> onwards. </summary>
+    public void EmitDefaultArray(LIRValue arrayAddress, ArrayTypeSymbol type, int from = 0)
     {
-        for (int index = 0; index < type.Size; index++)
+        for (int index = from; index < type.Size; index++)
         {
             var elementAddress = Generator.EmitGetElement(arrayAddress, new LIRConstantIntValue(index));
 
@@ -189,6 +211,16 @@ internal class ExpressionGenerator
     {
         var address = EmitAddress(node);
         return IsValueType(node) ? Generator.EmitLoad(address) : address;
+    }
+
+    private LIRValue EmitArrayLiteralInto(LIRValue arrayAddress, ArrayTypeSymbol type, IReadOnlyList<ExpressionNode> elements)
+    {
+        for (int index = 0; index < Math.Min(elements.Count, type.Size); index++)
+            Generator.EmitStore(EmitValue(elements[index]), Generator.EmitGetElement(arrayAddress, new LIRConstantIntValue(index)));
+
+        EmitDefaultArray(arrayAddress, type, elements.Count);
+
+        return arrayAddress;
     }
 
     // Determines whether 'ident' refers to a parameter rather than a local variable or a field

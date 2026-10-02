@@ -21,7 +21,7 @@ public class ArrayLiteralExpressionRule : ParserRule<ArrayLiteralNode>
 
         // elements
         var elements = new List<ExpressionNode>();
-        if (Parser.Reader.Peek(0).Type != TokenType.RParen)
+        if (Parser.Reader.Peek(0).Type != TokenType.RBracket)
         {
             elements.Add(Parser.GetRule<ExpressionRule>().ParseNode());
 
