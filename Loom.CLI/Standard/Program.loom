@@ -1,4 +1,3 @@
-import Standard::Windows;
 import Standard::Time;
 import Standard::IO;
 import Standard;
@@ -13,18 +12,8 @@ module Standard::Program
         unique String myString = new String();
         myString.Characters = ['H', 'e', 'l', 'l', 'o', '!'];
         myString.Length = 6;
-        
-        WinProcess process = WinProcess.Current();
 
-        if (process.Handle != default(iptr))
-        {
-            exitCode = 0;
-
-            println(myString); // "Hello!"
-
-            Sleep(2000);
-            process.Close();
-        }
+        println(myString); // "Hello!"
         
         return exitCode;
     }
