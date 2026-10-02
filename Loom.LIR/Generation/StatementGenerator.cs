@@ -167,7 +167,7 @@ internal class StatementGenerator
 
         Generator.SwitchTo(conditionBlock);
         var condition = EmitExpression(node.Condition);
-        Generator.EmitCondBr(condition, bodyBlock, incrementorBlock);
+        Generator.EmitCondBr(condition, bodyBlock, continueBlock);
 
         Generator.SwitchTo(bodyBlock);
 

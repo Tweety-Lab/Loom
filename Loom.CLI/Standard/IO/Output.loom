@@ -8,9 +8,7 @@ module Standard::IO
     export void println(String s)
     {
         for (i32 i = 0; i < s.Length; i = i + 1)
-        {
             putchar(s.Characters[i]);
-        }
 
 		putchar('\n');
     }
