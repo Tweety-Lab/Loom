@@ -45,6 +45,7 @@ internal class DeclarationWalker : ASTVisitor
         var symbol = new MethodSymbol(node.MethodName.Text, parameters);
         symbol.IsStatic = node.HasModifier(Parser.Tokenizer.Token.TokenType.Static);
         symbol.IsExported = node.HasModifier(Parser.Tokenizer.Token.TokenType.Export);
+        symbol.IsExtern = node.HasModifier(Parser.Tokenizer.Token.TokenType.Extern);
 
         // TODO:
         // Non member methods should be MemberAccessibility.None
@@ -55,7 +56,7 @@ internal class DeclarationWalker : ASTVisitor
 
         symbol.DeclaringNode = node;
 
-        if (node.HasModifier(Parser.Tokenizer.Token.TokenType.Extern))
+        if (symbol.IsExtern)
             symbol.FullyQualifiedName = node.MethodName.Text;
         else
             symbol.FullyQualifiedName = BuildQualifiedName(node.MethodName.Text);

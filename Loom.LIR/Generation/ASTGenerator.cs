@@ -2,6 +2,7 @@
 using Loom.Analyzer.Symbols;
 using Loom.Common;
 using Loom.LIR.Objects;
+using Loom.Parser.AST;
 using Loom.Parser.AST.Rules;
 using Loom.Parser.AST.Rules.Default;
 
@@ -89,11 +90,10 @@ public class ASTGenerator
             return;
         }
 
-        bool isStatic = node.HasModifier(Parser.Tokenizer.Token.TokenType.Static);
+        bool isStatic = symbol.IsStatic;
+        bool isExtern = symbol.IsExtern;
 
         var funcType = BuildFunctionType(symbol, isStatic ? null : new LIRPointerType(declaredObj.Type));
-
-        bool isExtern = node.HasModifier(Parser.Tokenizer.Token.TokenType.Extern);
 
         if (isExtern)
             declaredObj.DeclareMethod(symbol.FullyQualifiedName, funcType);
@@ -122,8 +122,13 @@ public class ASTGenerator
             return;
 
         foreach (var content in node.Body.Contents)
-            if (content is MethodDeclarationNode method && !method.HasModifier(Parser.Tokenizer.Token.TokenType.Extern))
-                GenerateTypeDeclarationMethodBody(declaredObj, method);
+        {
+            if (content is not MethodDeclarationNode methodNode)
+                continue;
+
+            if (context.AnalysisContext.GetSymbol(methodNode).Symbol is MethodSymbol methodSymbol && !methodSymbol.IsExtern)
+                GenerateTypeDeclarationMethodBody(declaredObj, methodNode);
+        }
     }
 
     public void GenerateTypeDeclarationMethodBody(LIRTypeDeclaration declaredObj, MethodDeclarationNode node)
@@ -140,7 +145,7 @@ public class ASTGenerator
 
         StatementGenerator statementGen = new StatementGenerator(context, unit, func);
 
-        foreach (var content in node.Body.Contents)
+        foreach (var content in node.Body?.Contents ?? Enumerable.Empty<ASTNode>())
             if (content is StatementNode statementNode)
                 statementGen.EmitStatement(statementNode);
 
@@ -194,7 +199,7 @@ public class ASTGenerator
         LIRFunction func = unit.GetFunction(symbol.FullyQualifiedName) ?? throw new Exception($"Could not find function {symbol.FullyQualifiedName}!");
         StatementGenerator statementGen = new StatementGenerator(context, unit, func);
 
-        foreach (var content in node.Body.Contents)
+        foreach (var content in node.Body?.Contents ?? Enumerable.Empty<ASTNode>())
             if (content is StatementNode statementNode)
                 statementGen.EmitStatement(statementNode);
 

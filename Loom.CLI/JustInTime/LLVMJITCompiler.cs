@@ -55,7 +55,6 @@ public sealed class LLVMJITCompiler : IJITCompiler
     }
 }
 
-
 public readonly struct LLVMJITResult : IJITResult
 {
     public LLVMGenericValueRef Value { get; init; }

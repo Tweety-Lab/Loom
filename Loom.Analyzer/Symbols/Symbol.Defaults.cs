@@ -71,6 +71,9 @@ public record MethodSymbol(string Name, List<ParameterSymbol> Parameters) : Symb
     /// <summary> Whether this method is static. </summary>
     public bool IsStatic { get; set; }
 
+    /// <summary> Whether this method is extern. </summary>
+    public bool IsExtern { get; set; }
+
     /// <inheritdoc/>
     public bool IsExported { get; set; }
 

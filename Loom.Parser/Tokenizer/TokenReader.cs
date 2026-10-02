@@ -43,6 +43,8 @@ public class TokenReader
         return index < Tokens.Count ? Tokens[index] : Tokens[^1];
     }
 
+    /// <summary> Advances to the next token. </summary>
+    /// <returns> The consumed <see cref="Token"/>. </returns>
     public Token Advance()
     {
         var token = Current;
@@ -53,6 +55,8 @@ public class TokenReader
         return token;
     }
 
+    /// <summary> Consumes the current <see cref="Token"/> if it matches the specified type. Reports an error otherwise. </summary>
+    /// <returns> The consumed <see cref="Token"/>. </returns>
     public Token Expect(TokenType type)
     {
         if (Current.Type != type)
@@ -79,6 +83,8 @@ public class TokenReader
         return result;
     }
 
+    /// <summary> Consumes the current token only if it matches the specified type. </summary>
+    /// <returns> <see langword="true"/> if the token matched; otherwise, <see langword="false"/>. </returns>
     public bool Match(TokenType type)
     {
         if (Current.Type == type)
@@ -90,5 +96,6 @@ public class TokenReader
         return false;
     }
 
+    /// <summary> Checks if the current token matches the specified type without consuming. </summary>
     public bool Check(TokenType type) => Current.Type == type;
 }

@@ -2,9 +2,17 @@ import Standard::IO;
 
 module Standard
 {
+    /// @brief Placeholder String type that uses a char array.
     export class String
     {
         public char[256] Characters = default;
         public i32 Length = default;
+    }
+
+	/// @brief Immutable unowning slice of contiguous memory.
+    export struct Slice
+    {
+        iptr pointer = default;
+        i32 length = default;
     }
 }

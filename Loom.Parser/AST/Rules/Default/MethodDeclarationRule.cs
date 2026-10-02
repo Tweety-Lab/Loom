@@ -10,10 +10,10 @@ public record ParameterNode(TypeNode Type, Token Name) : ASTNode
     public override IEnumerable<ASTNode> Children => Enumerable.Empty<ASTNode>();
 }
 
-public record MethodDeclarationNode(TypeNode ReturnType, Token MethodName, List<ParameterNode> Parameters, BlockNode Body, List<Token> Modifiers) : ASTNode, IModifiableNode
+public record MethodDeclarationNode(TypeNode ReturnType, Token MethodName, List<ParameterNode> Parameters, List<Token> Modifiers, BlockNode? Body) : ASTNode, IModifiableNode
 {
     /// <inheritdoc/>
-    public override IEnumerable<ASTNode> Children => [Body];
+    public override IEnumerable<ASTNode> Children => Body is not null ? [Body] : Enumerable.Empty<ASTNode>();
 }
 
 
@@ -49,17 +49,12 @@ public class MethodDeclarationRule : ParserRule<MethodDeclarationNode>
 
         Parser.Reader.Expect(TokenType.RParen); // )
 
-        
-        bool needsBody = true;
-        if (modifiers.Any(m => m.Type == TokenType.Extern))
-            needsBody = false;
-
-        BlockNode body = new BlockNode(new List<ASTNode>());
-        if (needsBody)
-            body = RunRule<MethodBlockRule, BlockNode>();
+        BlockNode? body;
+        if (Parser.Reader.Match(TokenType.Semicolon))
+            body = null;
         else
-            Parser.Reader.Expect(TokenType.Semicolon); // ;
+            body = RunRule<MethodBlockRule, BlockNode>();
 
-        return new MethodDeclarationNode(returnType, methodName, parameters, body, modifiers);
+        return new MethodDeclarationNode(returnType, methodName, parameters, modifiers, body);
     }
 }

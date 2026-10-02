@@ -6,7 +6,7 @@ namespace Loom.Parser.AST.Rules.Default;
 public record ReturnStatementNode(ExpressionNode? Expression = null) : StatementNode
 {
     /// <inheritdoc/>
-    public override IEnumerable<ASTNode> Children => Expression is not null ? new[] { Expression } : Enumerable.Empty<ASTNode>();
+    public override IEnumerable<ASTNode> Children => Expression is not null ? [Expression] : Enumerable.Empty<ASTNode>();
 }
 
 [ParserRule]
