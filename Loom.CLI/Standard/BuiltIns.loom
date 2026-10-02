@@ -5,7 +5,7 @@ module Standard
     /// @brief Placeholder String type that uses a char array.
     export class String
     {
-        public char[5] Characters = default;
+        public char[128] Characters = default;
         public i32 Length = default;
     }
 

@@ -7,12 +7,9 @@ module Standard::IO
     /// @brief Prints a string to stdout and appends a newline.
     export void println(String s)
     {
-        i32 currentChar = 0;
-
-        while (currentChar < s.Length)
+        for (i32 i = 0; i < s.Length; i = i + 1)
         {
-            putchar(s.Characters[currentChar]);
-            currentChar = currentChar + 1;
+            putchar(s.Characters[i]);
         }
 
 		putchar('\n');

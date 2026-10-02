@@ -48,6 +48,7 @@ internal class StatementGenerator
             case AssignmentStatementNode assign: EmitAssignment(assign); break;
             case IfStatementNode conditional: EmitIf(conditional); break;
             case WhileStatementNode loop: EmitWhile(loop); break;
+            case ForStatementNode forLoop: EmitFor(forLoop); break;
             case ExpressionStatementNode expression: EmitExpression(expression.Expression); break;
         }
     }
@@ -145,6 +146,40 @@ internal class StatementGenerator
         foreach (var content in node.Body.Contents)
             if (content is StatementNode statementNode)
                 EmitStatement(statementNode);
+
+        if (Generator.WritingBlock.Terminator == null)
+            Generator.EmitBr(conditionBlock);
+
+        Generator.SwitchTo(continueBlock);
+    }
+
+    private void EmitFor(ForStatementNode node)
+    {
+        EmitStatement(node.Initializer);
+
+        var conditionBlock = Generator.CreateBlock("for.condition");
+        var bodyBlock = Generator.CreateBlock("for.body");
+
+        var incrementorBlock = Generator.CreateBlock("for.increment");
+        var continueBlock = Generator.CreateBlock("for.continue");
+
+        Generator.EmitBr(conditionBlock);
+
+        Generator.SwitchTo(conditionBlock);
+        var condition = EmitExpression(node.Condition);
+        Generator.EmitCondBr(condition, bodyBlock, incrementorBlock);
+
+        Generator.SwitchTo(bodyBlock);
+
+        foreach (var content in node.Body.Contents)
+            if (content is StatementNode statementNode)
+                EmitStatement(statementNode);
+
+        if (Generator.WritingBlock.Terminator == null)
+            Generator.EmitBr(incrementorBlock);
+
+        Generator.SwitchTo(incrementorBlock);
+        EmitStatement(node.Incrementor);
 
         if (Generator.WritingBlock.Terminator == null)
             Generator.EmitBr(conditionBlock);
