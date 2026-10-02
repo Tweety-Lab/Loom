@@ -31,6 +31,18 @@ internal class BindingWalker : ASTWalker
     }
 
     [Visitor]
+    public void Visit(ConstructorDeclarationNode node)
+    {
+        var symbol = Context.GetSymbol(node).Symbol as MethodSymbol;
+        if (symbol == null)
+            return;
+
+        // Parameter declarations are not part of the AST child graph, so scope resolve through the constructor node.
+        foreach (var (declaration, parameter) in node.Parameters.Zip(symbol.Parameters))
+            parameter.Type = TypeResolver.Resolve(Context, node, declaration.Type);
+    }
+
+    [Visitor]
     public void Visit(FieldDeclarationNode node)
     {
         if (Context.GetSymbol(node).Symbol is FieldSymbol symbol)

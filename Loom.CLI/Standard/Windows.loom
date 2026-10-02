@@ -10,6 +10,11 @@ module Standard::Windows
     {
         public iptr Handle = default;
 
+        public WinProcess(iptr handle)
+        {
+            Handle = handle;
+        }
+
         /// @brief Closes the process
         public bool Close()
         {
@@ -20,8 +25,8 @@ module Standard::Windows
         /// @return The current process
         public static WinProcess Current()
         {
-            WinProcess process = new WinProcess();
-            process.Handle = GetCurrentProcess();
+            iptr handle = GetCurrentProcess();
+            WinProcess process = new WinProcess(handle);
             return process;
         }
     }

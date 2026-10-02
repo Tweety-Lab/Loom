@@ -42,7 +42,7 @@ internal class DeclarationWalker : ASTVisitor
     {
         var parameters = new List<ParameterSymbol>();
 
-        var symbol = new MethodSymbol(node.MethodName.Text, parameters);
+        var symbol = new MethodSymbol(node.MethodName.Text, parameters, MethodSymbol.MethodKind.Method);
         symbol.IsStatic = node.HasModifier(Parser.Tokenizer.Token.TokenType.Static);
         symbol.IsExported = node.HasModifier(Parser.Tokenizer.Token.TokenType.Export);
         symbol.IsExtern = node.HasModifier(Parser.Tokenizer.Token.TokenType.Extern);
@@ -60,6 +60,52 @@ internal class DeclarationWalker : ASTVisitor
             symbol.FullyQualifiedName = node.MethodName.Text;
         else
             symbol.FullyQualifiedName = BuildQualifiedName(node.MethodName.Text);
+
+        CurrentTable.Define(symbol);
+
+        if (CurrentSymbol is TypeSymbol type)
+            type.Members.Add(symbol);
+
+        WithScope(node, () =>
+        {
+            foreach (var param in node.Parameters)
+            {
+                var paramSymbol = new ParameterSymbol(param.Name.Text);
+                parameters.Add(paramSymbol);
+                CurrentTable.Define(paramSymbol);
+                Context.BoundSymbols[param] = paramSymbol;
+            }
+
+            VisitChildren(node);
+        }, symbol);
+    }
+
+    [Visitor]
+    public void Visit(ConstructorDeclarationNode node)
+    {
+        var parameters = new List<ParameterSymbol>();
+
+        var symbol = new MethodSymbol(".ctor", parameters, MethodSymbol.MethodKind.Constructor);
+        symbol.IsStatic = node.HasModifier(Parser.Tokenizer.Token.TokenType.Static);
+        symbol.IsExported = node.HasModifier(Parser.Tokenizer.Token.TokenType.Export);
+        symbol.IsExtern = node.HasModifier(Parser.Tokenizer.Token.TokenType.Extern);
+
+        // A constructor initializes the instance it is passed, so it never returns a value.
+        symbol.ReturnType = CurrentTable.Lookup("void")?.OfType<TypeSymbol>().FirstOrDefault(t => t.KnownType == TypeSymbol.DefaultType.Void);
+
+        // TODO:
+        // Non member methods should be MemberAccessibility.None
+        if (node.HasModifier(Parser.Tokenizer.Token.TokenType.Public))
+            symbol.Accessibility = MemberAccessibility.Public;
+        else
+            symbol.Accessibility = MemberAccessibility.Private;
+
+        symbol.DeclaringNode = node;
+
+        if (symbol.IsExtern)
+            symbol.FullyQualifiedName = node.Name.Text;
+        else
+            symbol.FullyQualifiedName = BuildQualifiedName(".ctor");
 
         CurrentTable.Define(symbol);
 
@@ -145,6 +191,9 @@ internal class DeclarationWalker : ASTVisitor
         VisitChildren(node);
     }
 
+    /// <inheritdoc/>
+    protected override void OnUnhandled(ASTNode node) => VisitChildren(node);
+
     private void WithScope(ASTNode node, Action body, Symbol? symbol = null)
     {
         var parentTable = CurrentTable;
@@ -164,9 +213,6 @@ internal class DeclarationWalker : ASTVisitor
         CurrentTable = parentTable;
         CurrentSymbol = previousSymbol;
     }
-
-    /// <inheritdoc/>
-    protected override void OnUnhandled(ASTNode node) => VisitChildren(node);
 
     private string BuildQualifiedName(string name)
     {

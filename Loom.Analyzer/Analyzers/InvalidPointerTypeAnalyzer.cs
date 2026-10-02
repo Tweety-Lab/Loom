@@ -18,8 +18,7 @@ public class InvalidPointerTypeAnalyzer : Analyzer
     [Visitor]
     public void Visit(LocalDeclarationStatementNode node)
     {
-        LocalVariableSymbol? symbol = Context.GetSymbol(node).Symbol as LocalVariableSymbol;
-        if (symbol == null || symbol.Type == null)
+        if (Context.GetSymbol(node).Symbol is not LocalVariableSymbol symbol || symbol.Type == null)
             return;
 
         if (symbol.Type.IsValueType && symbol.PointerType != PointerType.None)

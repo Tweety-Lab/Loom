@@ -39,7 +39,7 @@ internal class ExpressionGenerator
         CallExpressionNode call => EmitCall(call),
         ArrayAccessExpressionNode array => EmitVariableValue(array),
         MemberAccessExpressionNode member => EmitVariableValue(member),
-        ObjectCreationExpressionNode creation => Generator.EmitAlloca(ASTGenerator.ConvertType(context.AnalysisContext.ExpressionTypes[creation])),
+        ObjectCreationExpressionNode creation => EmitObjectCreation(creation),
         _ => throw new Exception($"Unhandled expression: {node.GetType().Name}")
     };
 
@@ -77,6 +77,28 @@ internal class ExpressionGenerator
             TypeSymbol.DefaultType.IPtr => new LIRConstantIntValue(0),
             _ => throw new Exception($"Unhandled default value type: {type.KnownType}")
         };
+    }
+
+    /// <summary> Allocates a new object and calls its constructor. </summary>
+    public LIRValue EmitObjectCreation(ObjectCreationExpressionNode node)
+    {
+        var symbol = context.AnalysisContext.ExpressionTypes[node] ?? throw new Exception("Could not resolve object creation type.");
+        var instance = Generator.EmitAlloca(ASTGenerator.ConvertType(symbol));
+        var constructor = symbol.Members.OfType<MethodSymbol>().FirstOrDefault(m => m.Kind == MethodSymbol.MethodKind.Constructor);
+
+        LIRFunction? constructorFunc = null;
+        if (constructor != null)
+            constructorFunc = unit.GetFunction(constructor.FullyQualifiedName);
+        else
+            constructorFunc = unit.GetFunction(symbol.FullyQualifiedName + "::.ctor"); // Default
+
+        if (constructorFunc == null)
+            throw new Exception($"Could not find constructor for {symbol.FullyQualifiedName}!");
+
+        var args = node.Arguments.Select(EmitValue).ToArray();
+        Generator.EmitCallInstanced(constructorFunc, instance, args);
+
+        return instance;
     }
 
     /// <summary> Emits a store of the default value of <paramref name="type"/> into every element of the array at <paramref name="arrayAddress"/>. </summary>

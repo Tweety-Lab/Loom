@@ -70,8 +70,15 @@ public class ASTGenerator
 
         LIRTypeDeclaration classObj = unit.DefineTypeDeclaration(symbol.FullyQualifiedName, symbol.IsValueType);
 
+        // Default constructor
+        if (!node.Body.Contents.Any(c => c is ConstructorDeclarationNode))
+            DeclareTypeDeclarationConstructor(classObj);
+
         foreach (var content in node.Body.Contents)
         {
+            if (content is ConstructorDeclarationNode constructor)
+                DeclareTypeDeclarationConstructor(classObj, constructor);
+
             if (content is MethodDeclarationNode method)
                 DeclareTypeDeclarationMethod(classObj, method);
 
@@ -79,6 +86,9 @@ public class ASTGenerator
                 GenerateTypeDeclarationField(classObj, field);
         }
     }
+
+    /// <summary> The name every constructor is declared under, i.e. "MyModule::MyType::.ctor". </summary>
+    public const string CONSTRUCTOR_NAME = ".ctor";
 
     public void DeclareTypeDeclarationMethod(LIRTypeDeclaration declaredObj, MethodDeclarationNode node)
     {
@@ -99,6 +109,33 @@ public class ASTGenerator
             declaredObj.DeclareMethod(symbol.FullyQualifiedName, funcType);
         else
             declaredObj.DefineMethod(symbol.FullyQualifiedName, funcType);
+    }
+
+    /// <summary> Declares the <c>.ctor</c> of a type, or the implicit default one when <paramref name="node"/> is null. </summary>
+    public void DeclareTypeDeclarationConstructor(LIRTypeDeclaration declaredObj, ConstructorDeclarationNode? node = null)
+    {
+        // A constructor initializes the instance it is given, so it always receives one and never returns a value.
+        var selfType = new LIRPointerType(declaredObj.Type);
+
+        if (node == null)
+        {
+            var funcType = new LIRFunctionType(LIRType.Void, [new LIRParameter("self", selfType)]);
+            declaredObj.DefineMethod($"{declaredObj.Name}::{CONSTRUCTOR_NAME}", funcType).LIRGenerator!.EmitReturn();
+            return;
+        }
+
+        MethodSymbol? symbol = (MethodSymbol?)context.AnalysisContext.GetSymbol(node).Symbol;
+
+        if (symbol == null)
+        {
+            Console.WriteLine($"Could not find symbol for {node.Name}!");
+            return;
+        }
+
+        var parameters = new List<LIRParameter> { new("self", selfType) };
+        parameters.AddRange(symbol.Parameters.Select(p => new LIRParameter(p.Name, ConvertStorageType(p.Type!))));
+
+        declaredObj.DefineMethod(symbol.FullyQualifiedName, new LIRFunctionType(LIRType.Void, [.. parameters]));
     }
 
     public void GenerateTypeDeclarationMethodBodies(ITypeDeclarationNode node)
@@ -123,11 +160,17 @@ public class ASTGenerator
 
         foreach (var content in node.Body.Contents)
         {
-            if (content is not MethodDeclarationNode methodNode)
-                continue;
+            if (content is MethodDeclarationNode methodNode)
+            {
+                if (context.AnalysisContext.GetSymbol(methodNode).Symbol is MethodSymbol methodSymbol && !methodSymbol.IsExtern)
+                    GenerateTypeDeclarationMethodBody(declaredObj, methodNode);
+            }
 
-            if (context.AnalysisContext.GetSymbol(methodNode).Symbol is MethodSymbol methodSymbol && !methodSymbol.IsExtern)
-                GenerateTypeDeclarationMethodBody(declaredObj, methodNode);
+            if (content is ConstructorDeclarationNode constructorNode)
+            {
+                if (context.AnalysisContext.GetSymbol(constructorNode).Symbol is MethodSymbol methodSymbol && !methodSymbol.IsExtern)
+                    GenerateTypeDeclarationConstructorBody(declaredObj, constructorNode);
+            }
         }
     }
 
@@ -138,6 +181,28 @@ public class ASTGenerator
         if (symbol == null)
         {
             Console.WriteLine($"Could not find symbol for {node.MethodName}!");
+            return;
+        }
+
+        LIRFunction func = declaredObj.Methods.FirstOrDefault(m => m.Name == symbol.FullyQualifiedName) ?? throw new Exception($"Could not find function {symbol.FullyQualifiedName}!");
+
+        StatementGenerator statementGen = new StatementGenerator(context, unit, func);
+
+        foreach (var content in node.Body?.Contents ?? Enumerable.Empty<ASTNode>())
+            if (content is StatementNode statementNode)
+                statementGen.EmitStatement(statementNode);
+
+        if (func.Type.ReturnType == LIRType.Void && func.LIRGenerator!.WritingBlock.Terminator == null)
+            func.LIRGenerator.EmitReturn();
+    }
+
+    public void GenerateTypeDeclarationConstructorBody(LIRTypeDeclaration declaredObj, ConstructorDeclarationNode node)
+    {
+        MethodSymbol? symbol = (MethodSymbol?)context.AnalysisContext.GetSymbol(node).Symbol;
+
+        if (symbol == null)
+        {
+            Console.WriteLine($"Could not find symbol for {node.Name}!");
             return;
         }
 

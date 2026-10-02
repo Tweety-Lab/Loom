@@ -63,7 +63,7 @@ public record TypeSymbol(string Name, TypeSymbol.DefaultType KnownType) : Symbol
     }
 }
 
-public record MethodSymbol(string Name, List<ParameterSymbol> Parameters) : Symbol(Name), IExportableSymbol, IAccessibleSymbol
+public record MethodSymbol(string Name, List<ParameterSymbol> Parameters, MethodSymbol.MethodKind Kind) : Symbol(Name), IExportableSymbol, IAccessibleSymbol
 {
     /// <summary> The resolved return type. </summary>
     public TypeSymbol? ReturnType { get; set; }
@@ -79,6 +79,12 @@ public record MethodSymbol(string Name, List<ParameterSymbol> Parameters) : Symb
 
     /// <inheritdoc/>
     public MemberAccessibility Accessibility { get; set; }
+
+    public enum MethodKind
+    {
+        Constructor,
+        Method
+    }
 }
 
 public record LocalVariableSymbol(string Name) : Symbol(Name)

@@ -18,14 +18,21 @@ public class TypeDeclarationBlockRule : BlockRule
     protected override bool TryParseMember([NotNullWhen(true)] out ASTNode? node)
     {
         var offset = TypeRule.SkipModifiers(Parser.Reader, 0);
+        var token = Parser.Reader.Peek(offset).Type;
 
-        if (Parser.Reader.Peek(offset).Type == TokenType.Struct)
+        if (token == TokenType.Struct)
         {
             node = RunRule<StructDeclarationRule, StructDeclarationNode>();
             return true;
         }
 
-        if (!TypeRule.IsTypeName(Parser.Reader.Peek(offset).Type))
+        if (token == TokenType.Identifier && Parser.Reader.Peek(offset + 1).Type == TokenType.LParen)
+        {
+            node = RunRule<ConstructorDeclarationRule, ConstructorDeclarationNode>();
+            return true;
+        }
+
+        if (!TypeRule.IsTypeName(token))
         {
             node = null;
             return false;
