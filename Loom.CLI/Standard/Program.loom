@@ -13,6 +13,9 @@ module Standard::Program
         myString.Characters = ['H', 'e', 'l', 'l', 'o', '!'];
         myString.Length = 6;
 
+        Slice test = new Slice(0, 0);
+        test.ElementAt<i32>(0);
+
         println(myString); // "Hello!"
         
         return exitCode;

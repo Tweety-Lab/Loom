@@ -414,8 +414,7 @@ module Test
 
     [Fact]
     public void Parse_Conditional_WithComparison()
-    {
-        var (root, _) = ParseAndAnalyze(CONDITIONAL_COMPARISON_SOURCE);
+    {        var (root, _) = ParseAndAnalyze(CONDITIONAL_COMPARISON_SOURCE);
         var method = (MethodDeclarationNode)root.Modules[0].Body.Contents.First();
         var conditional = Assert.IsType<IfStatementNode>(method.Body.Contents[1]);
 

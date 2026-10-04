@@ -15,7 +15,7 @@ module Standard
         iptr pointer = default;
         i32 length = default;
 
-        private Slice(iptr _pointer, i32 _length)
+        public Slice(iptr _pointer, i32 _length)
         {
             pointer = _pointer;
 			length = _length;

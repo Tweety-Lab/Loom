@@ -34,7 +34,7 @@ public class PostfixExpressionRule : ParserRule<ExpressionNode>
                 var name = new IdentifierNameNode(Parser.Reader.Expect(TokenType.Identifier));
                 expression = new MemberAccessExpressionNode(expression, name);
             }
-            else if (Parser.Reader.Check(TokenType.LParen))
+            else if (CallExpressionRule.CanParse(Parser.Reader))
             {
                 expression = Parser.GetRule<CallExpressionRule>().Parse(expression);
             }
