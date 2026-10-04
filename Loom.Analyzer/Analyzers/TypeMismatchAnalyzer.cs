@@ -104,6 +104,9 @@ public class TypeMismatchAnalyzer : Analyzer
         if (source == null || target == null)
             return false;
 
+        if (source.IsGeneric || target.IsGeneric)
+            return true;
+
         // Ugly
         if (source is ArrayTypeSymbol sourceArray || target is ArrayTypeSymbol)
             return source is ArrayTypeSymbol { ElementType: var sourceElement, Size: var sourceSize }

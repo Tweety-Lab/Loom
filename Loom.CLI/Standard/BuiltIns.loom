@@ -22,9 +22,9 @@ module Standard
         }
 
         /// @brief Returns the element at the given index.
-        public void ElementAt<T>(i32 i)
+        public T ElementAt<T>(i32 i)
         {
-            return;
+            return default(T);
         }
     }
 }

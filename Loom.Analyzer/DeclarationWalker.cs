@@ -71,6 +71,7 @@ internal class DeclarationWalker : ASTVisitor
     public void Visit(TypeParameterNode node)
     {
         var symbol = new TypeParameterSymbol(node.BaseName);
+        symbol.DeclaringNode = node;
 
         CurrentTable.Define(symbol);
 

@@ -50,6 +50,14 @@ public record TypeSymbol(string Name, TypeSymbol.DefaultType KnownType) : Symbol
     /// <summary> Whether this type uses value semantics. </summary>
     public bool IsValueType { get; set; }
 
+    /// <summary> Whether this type is a generic. </summary>
+    public bool IsGeneric => this switch
+    {
+        TypeParameterSymbol => true,
+        ArrayTypeSymbol array => array.ElementType.IsGeneric,
+        _ => false
+    };
+
     public enum DefaultType
     {
         Func,
@@ -59,11 +67,13 @@ public record TypeSymbol(string Name, TypeSymbol.DefaultType KnownType) : Symbol
         Bool,
         Char,
         Struct,
-        Class
+        Class,
+        TypeParameter
     }
 }
 
-public record TypeParameterSymbol(string Name) : Symbol(Name);
+/// <summary> A type declared by a method's type parameter list. </summary>
+public record TypeParameterSymbol(string Name) : TypeSymbol(Name, TypeSymbol.DefaultType.TypeParameter);
 
 public record MethodSymbol(string Name, MethodSymbol.MethodKind Kind) : Symbol(Name), IExportableSymbol, IAccessibleSymbol
 {

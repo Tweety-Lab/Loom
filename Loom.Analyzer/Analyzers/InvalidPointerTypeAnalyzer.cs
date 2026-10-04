@@ -21,6 +21,9 @@ public class InvalidPointerTypeAnalyzer : Analyzer
         if (Context.GetSymbol(node).Symbol is not LocalVariableSymbol symbol || symbol.Type == null)
             return;
 
+        if (symbol.Type.IsGeneric)
+            return;
+
         if (symbol.Type.IsValueType && symbol.PointerType != PointerType.None)
             Context.DiagnosticContext?.Report(ValueTypePointer, node.Variable.StartToken?.Location, symbol.PointerType, symbol.Type.Name);
 

@@ -19,45 +19,29 @@ internal class BindingWalker : ASTWalker
     [Visitor]
     public void Visit(MethodDeclarationNode node)
     {
-        var symbol = Context.GetSymbol(node).Symbol as MethodSymbol;
-        if (symbol == null)
-            return;
-
-        symbol.ReturnType = TypeResolver.Resolve(Context, node, node.ReturnType);
-
-        // Parameter declarations are not part of the AST child graph, so scope resolve through the method node.
-        foreach (var (declaration, parameter) in node.Parameters.Zip(symbol.Parameters))
-            parameter.Type = TypeResolver.Resolve(Context, node, declaration.Type);
+        if (Context.GetSymbol(node).Symbol is MethodSymbol symbol)
+            symbol.ReturnType = TypeResolver.Resolve(Context, node, node.ReturnType);
     }
 
     [Visitor]
-    public void Visit(ConstructorDeclarationNode node)
+    public void Visit(ParameterNode node)
     {
-        var symbol = Context.GetSymbol(node).Symbol as MethodSymbol;
-        if (symbol == null)
-            return;
-
-        // Parameter declarations are not part of the AST child graph, so scope resolve through the constructor node.
-        foreach (var (declaration, parameter) in node.Parameters.Zip(symbol.Parameters))
-            parameter.Type = TypeResolver.Resolve(Context, node, declaration.Type);
+        if (Context.GetSymbol(node).Symbol is ParameterSymbol symbol)
+            symbol.Type = TypeResolver.Resolve(Context, node, node.Type);
     }
 
     [Visitor]
     public void Visit(FieldDeclarationNode node)
     {
         if (Context.GetSymbol(node).Symbol is FieldSymbol symbol)
-        {
             symbol.Type = TypeResolver.Resolve(Context, node, node.Variable.Type);
-        }
     }
 
     [Visitor]
     public void Visit(LocalDeclarationStatementNode node)
     {
         if (Context.GetSymbol(node).Symbol is LocalVariableSymbol symbol)
-        {
             symbol.Type = TypeResolver.Resolve(Context, node, node.Variable.Type);
-        }
     }
 
     [Visitor]
