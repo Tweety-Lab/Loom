@@ -8,7 +8,7 @@ namespace Loom.Parser.AST.Rules.Default;
 public record MethodDeclarationNode(TypeNode ReturnType, Token MethodName, List<ParameterNode> Parameters, List<TypeParameterNode> TypeParameters, List<Token> Modifiers, BlockNode? Body) : ASTNode, IModifiableNode, ITypeParameterizableNode
 {
     /// <inheritdoc/>
-    public override IEnumerable<ASTNode> Children => Body is not null ? [Body] : Enumerable.Empty<ASTNode>();
+    public override IEnumerable<ASTNode> Children => Parameters.Concat(TypeParameters.Concat(Body is not null ? [Body] : Enumerable.Empty<ASTNode>()));
 }
 
 

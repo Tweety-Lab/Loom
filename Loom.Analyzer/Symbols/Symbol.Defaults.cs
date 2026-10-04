@@ -63,10 +63,18 @@ public record TypeSymbol(string Name, TypeSymbol.DefaultType KnownType) : Symbol
     }
 }
 
-public record MethodSymbol(string Name, List<ParameterSymbol> Parameters, MethodSymbol.MethodKind Kind) : Symbol(Name), IExportableSymbol, IAccessibleSymbol
+public record TypeParameterSymbol(string Name) : Symbol(Name);
+
+public record MethodSymbol(string Name, MethodSymbol.MethodKind Kind) : Symbol(Name), IExportableSymbol, IAccessibleSymbol
 {
     /// <summary> The resolved return type. </summary>
     public TypeSymbol? ReturnType { get; set; }
+
+    /// <summary> All type parameters used by this method. </summary>
+    public List<TypeParameterSymbol> TypeParameters { get; set; } = new List<TypeParameterSymbol>();
+
+    /// <summary> All parameters used by this method. </summary>
+    public List<ParameterSymbol> Parameters { get; set; } = new List<ParameterSymbol>();
 
     /// <summary> Whether this method is static. </summary>
     public bool IsStatic { get; set; }

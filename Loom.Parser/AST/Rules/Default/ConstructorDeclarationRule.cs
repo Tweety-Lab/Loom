@@ -8,7 +8,7 @@ namespace Loom.Parser.AST.Rules.Default;
 public record ConstructorDeclarationNode(Token Name, List<ParameterNode> Parameters, BlockNode Body, List<Token> Modifiers) : ASTNode, IModifiableNode
 {
     /// <inheritdoc/>
-    public override IEnumerable<ASTNode> Children => [Body];
+    public override IEnumerable<ASTNode> Children => Parameters.Cast<ASTNode>().Prepend(Body);
 }
 
 

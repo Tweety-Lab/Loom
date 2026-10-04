@@ -40,9 +40,7 @@ internal class DeclarationWalker : ASTVisitor
     [Visitor]
     public void Visit(MethodDeclarationNode node)
     {
-        var parameters = new List<ParameterSymbol>();
-
-        var symbol = new MethodSymbol(node.MethodName.Text, parameters, MethodSymbol.MethodKind.Method);
+        var symbol = new MethodSymbol(node.MethodName.Text, MethodSymbol.MethodKind.Method);
         symbol.IsStatic = node.HasModifier(Parser.Tokenizer.Token.TokenType.Static);
         symbol.IsExported = node.HasModifier(Parser.Tokenizer.Token.TokenType.Export);
         symbol.IsExtern = node.HasModifier(Parser.Tokenizer.Token.TokenType.Extern);
@@ -66,26 +64,42 @@ internal class DeclarationWalker : ASTVisitor
         if (CurrentSymbol is TypeSymbol type)
             type.Members.Add(symbol);
 
-        WithScope(node, () =>
-        {
-            foreach (var param in node.Parameters)
-            {
-                var paramSymbol = new ParameterSymbol(param.Name.Text);
-                parameters.Add(paramSymbol);
-                CurrentTable.Define(paramSymbol);
-                Context.BoundSymbols[param] = paramSymbol;
-            }
+        WithScope(node, () => VisitChildren(node), symbol);
+    }
 
-            VisitChildren(node);
-        }, symbol);
+    [Visitor]
+    public void Visit(TypeParameterNode node)
+    {
+        var symbol = new TypeParameterSymbol(node.BaseName);
+
+        CurrentTable.Define(symbol);
+
+        if (CurrentSymbol is MethodSymbol method)
+            method.TypeParameters.Add(symbol);
+
+        Context.BoundSymbols[node] = symbol;
+
+        VisitChildren(node);
+    }
+
+    [Visitor]
+    public void Visit(ParameterNode node)
+    {
+        var paramSymbol = new ParameterSymbol(node.Name.Text);
+
+        CurrentTable.Define(paramSymbol);
+        Context.BoundSymbols[node] = paramSymbol;
+
+        if (CurrentSymbol is MethodSymbol method)
+            method.Parameters.Add(paramSymbol);
+
+        VisitChildren(node);
     }
 
     [Visitor]
     public void Visit(ConstructorDeclarationNode node)
     {
-        var parameters = new List<ParameterSymbol>();
-
-        var symbol = new MethodSymbol(".ctor", parameters, MethodSymbol.MethodKind.Constructor);
+        var symbol = new MethodSymbol(".ctor", MethodSymbol.MethodKind.Constructor);
         symbol.IsStatic = node.HasModifier(Parser.Tokenizer.Token.TokenType.Static);
         symbol.IsExported = node.HasModifier(Parser.Tokenizer.Token.TokenType.Export);
         symbol.IsExtern = node.HasModifier(Parser.Tokenizer.Token.TokenType.Extern);
@@ -102,28 +116,14 @@ internal class DeclarationWalker : ASTVisitor
 
         symbol.DeclaringNode = node;
 
-        if (symbol.IsExtern)
-            symbol.FullyQualifiedName = node.Name.Text;
-        else
-            symbol.FullyQualifiedName = BuildQualifiedName(".ctor");
+        symbol.FullyQualifiedName = BuildQualifiedName(".ctor");
 
         CurrentTable.Define(symbol);
 
         if (CurrentSymbol is TypeSymbol type)
             type.Members.Add(symbol);
 
-        WithScope(node, () =>
-        {
-            foreach (var param in node.Parameters)
-            {
-                var paramSymbol = new ParameterSymbol(param.Name.Text);
-                parameters.Add(paramSymbol);
-                CurrentTable.Define(paramSymbol);
-                Context.BoundSymbols[param] = paramSymbol;
-            }
-
-            VisitChildren(node);
-        }, symbol);
+        WithScope(node, () => VisitChildren(node), symbol);
     }
 
     [Visitor]

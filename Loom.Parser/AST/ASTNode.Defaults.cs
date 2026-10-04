@@ -31,10 +31,13 @@ public record IdentifierNameNode(Token Token) : ExpressionNode, INameNode
     public string BaseName => Token.Text;
 }
 
-public record TypeParameterNode(Token Token) : INameNode
+public record TypeParameterNode(Token Token) : ASTNode
 {
     /// <inheritdoc/>
     public string BaseName => Token.Text;
+
+    /// <inheritdoc/>
+    public override IEnumerable<ASTNode> Children => Enumerable.Empty<ASTNode>();
 }
 
 public record ParameterNode(TypeNode Type, Token Name) : ASTNode
