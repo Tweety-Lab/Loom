@@ -14,5 +14,17 @@ module Standard
     {
         iptr pointer = default;
         i32 length = default;
+
+        private Slice(iptr _pointer, i32 _length)
+        {
+            pointer = _pointer;
+			length = _length;
+        }
+
+        /// @brief Returns the element at the given index.
+        public void ElementAt<T>(i32 i)
+        {
+            return;
+        }
     }
 }

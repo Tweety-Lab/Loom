@@ -14,16 +14,33 @@ public interface INameNode
     string BaseName { get; }
 }
 
+public interface ITypeDeclarationNode : IModifiableNode
+{
+    Token Name { get; }
+    BlockNode Body { get; }
+}
+
+public interface ITypeParameterizableNode
+{
+    List<TypeParameterNode> TypeParameters { get; }
+}
+
 public record IdentifierNameNode(Token Token) : ExpressionNode, INameNode
 {
     /// <inheritdoc/>
     public string BaseName => Token.Text;
 }
 
-public interface ITypeDeclarationNode : IModifiableNode
+public record TypeParameterNode(Token Token) : INameNode
 {
-    Token Name { get; }
-    BlockNode Body { get; }
+    /// <inheritdoc/>
+    public string BaseName => Token.Text;
+}
+
+public record ParameterNode(TypeNode Type, Token Name) : ASTNode
+{
+    /// <inheritdoc/>
+    public override IEnumerable<ASTNode> Children => Enumerable.Empty<ASTNode>();
 }
 
 /// <summary>

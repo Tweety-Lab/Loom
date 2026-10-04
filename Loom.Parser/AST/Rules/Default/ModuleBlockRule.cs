@@ -33,10 +33,15 @@ public class ModuleBlockRule : BlockRule
         {
             offset = TypeRule.SkipType(Parser.Reader, offset);
 
-            if (Parser.Reader.Peek(offset).Type == TokenType.Identifier && Parser.Reader.Peek(offset + 1).Type == TokenType.LParen)
+            if (Parser.Reader.Peek(offset).Type == TokenType.Identifier)
             {
-                node = RunRule<MethodDeclarationRule, MethodDeclarationNode>();
-                return true;
+                offset = MethodDeclarationRule.SkipTypeParameters(Parser.Reader, offset + 1);
+
+                if (Parser.Reader.Peek(offset).Type == TokenType.LParen)
+                {
+                    node = RunRule<MethodDeclarationRule, MethodDeclarationNode>();
+                    return true;
+                }
             }
         }
 

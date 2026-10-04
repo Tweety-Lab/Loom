@@ -48,6 +48,12 @@ public class TypeDeclarationBlockRule : BlockRule
 
         var next = Parser.Reader.Peek(offset + 1).Type;
 
+        if (next == TokenType.Less)
+        {
+            offset = MethodDeclarationRule.SkipTypeParameters(Parser.Reader, offset + 1);
+            next = Parser.Reader.Peek(offset).Type;
+        }
+
         if (next == TokenType.LParen)
         {
             node = RunRule<MethodDeclarationRule, MethodDeclarationNode>();
