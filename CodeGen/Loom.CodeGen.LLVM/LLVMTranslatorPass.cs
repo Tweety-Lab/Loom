@@ -23,7 +23,7 @@ public class LLVMTranslatorPass : LIRLayeredPass
     /// <inheritdoc />
     public override void Run(LIRCompilationUnit unit)
     {
-        LLVMContextRef llvmContext = LLVMContextRef.Create();
+        LLVMContextRef llvmContext = LLVMContextRef.Global;
 
         translationContext = new LLVMTranslationContext()
         {
@@ -31,6 +31,7 @@ public class LLVMTranslatorPass : LIRLayeredPass
             {
                 [LIRType.Void] = LLVMTypeRef.Void,
                 [LIRType.Int32] = LLVMTypeRef.Int32,
+                [LIRType.Int64] = LLVMTypeRef.Int64,
                 [LIRType.Boolean] = LLVMTypeRef.Int1,
                 [LIRType.Char] = LLVMTypeRef.Int32,
                 [LIRType.IntPtr] = LLVMTypeRef.CreateIntPtr(LLVMTargetDataRef.FromStringRepresentation($"p:{System.IntPtr.Size * 8}:{System.IntPtr.Size * 8}:{System.IntPtr.Size * 8}")),

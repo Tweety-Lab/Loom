@@ -83,11 +83,62 @@ public class TypeMismatchAnalyzer : Analyzer
     }
 
     [Visitor]
+    public void Visit(InstanceCreationExpresssionNode node)
+    {
+        if (!Context.ExpressionTypes.TryGetValue(node, out var type))
+            return;
+
+        var constructor = type.Members.OfType<MethodSymbol>().FirstOrDefault(member => member.Kind == MethodSymbol.MethodKind.Constructor);
+
+        CheckArguments(constructor?.Parameters, node.Arguments);
+    }
+
+    [Visitor]
+    public void Visit(CallExpressionNode node)
+    {
+        MethodSymbol? method = null;
+
+        if (node.Callee is MemberAccessExpressionNode member)
+        {
+            if (!Context.ExpressionTypes.TryGetValue(member.Receiver, out var receiverType))
+                receiverType = Context.GetSymbol(member.Receiver).Symbol as TypeSymbol;
+
+            method = receiverType?.Members.OfType<MethodSymbol>().FirstOrDefault(candidate => candidate.Name == member.Name.BaseName);
+        }
+        else if (node.Callee is IdentifierNameNode identifier)
+        {
+            var symbol = Context.GetSymbol(identifier).Symbol;
+
+            method = symbol as MethodSymbol
+                ?? (symbol as TypeSymbol)?.Members.OfType<MethodSymbol>().FirstOrDefault(candidate => candidate.Name == identifier.BaseName);
+        }
+
+        CheckArguments(method?.Parameters, node.Arguments);
+    }
+
+    [Visitor]
     public void Visit(ArrayLiteralNode node)
     {
         if (Context.ExpressionTypes.TryGetValue(node, out var type) && type is ArrayTypeSymbol array)
             foreach (var element in node.Elements)
                 Check(array.ElementType, element);
+    }
+
+    private void CheckArguments(IEnumerable<ParameterSymbol>? parameters, List<ExpressionNode> arguments)
+    {
+        if (parameters == null)
+            return;
+
+        var expected = parameters.ToArray();
+
+        for (int index = 0; index < arguments.Count; index++)
+        {
+            // Extra arguments are reported separately, and missing ones are reported by the binding stage
+            if (index >= expected.Length || expected[index].Type == null)
+                continue;
+
+            Check(expected[index].Type!, arguments[index]);
+        }
     }
 
     private void Check(TypeSymbol assignee, ExpressionNode assigned)

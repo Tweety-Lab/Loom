@@ -7,6 +7,12 @@ module Standard
     {
         public char[128] Characters = default;
         public i32 Length = default;
+
+        public String(char[128] characters, i32 length)
+        {
+			Characters = characters;
+			Length = length;
+        }
     }
 
 	/// @brief Immutable unowning slice of contiguous memory.

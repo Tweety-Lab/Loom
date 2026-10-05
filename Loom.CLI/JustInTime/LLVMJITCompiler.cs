@@ -42,14 +42,20 @@ public sealed class LLVMJITCompiler : IJITCompiler
         LLVMTranslatorPass translator = new LLVMTranslatorPass();
         translator.Run(unit);
 
+        Console.WriteLine("===== LLVM IR =====");
+        Console.WriteLine(translator.Result.ToString());
+
+        if (!translator.Result.TryVerify(LLVMVerifierFailureAction.LLVMPrintMessageAction, out string message))
+        {
+            Console.WriteLine($"Failed to verify the generated LLVM module: {message}");
+            return false;
+        }
+
         LLVMExecutionEngineRef engine = translator.Result.CreateExecutionEngine();
         LLVMValueRef main = translator.Result.GetNamedFunction(method.FullyQualifiedName);
         LLVMGenericValueRef result = engine.RunFunction(main, []);
 
         jitResult = new LLVMJITResult { Value = result };
-
-        Console.WriteLine("===== LLVM IR =====");
-        Console.WriteLine(translator.Result.ToString());
 
         return true;
     }

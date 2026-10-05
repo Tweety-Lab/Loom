@@ -60,7 +60,7 @@ internal class ExpressionGenerator
     public LIRValue EmitValue(ExpressionNode node)
     {
         var value = Emit(node);
-        return node is InstanceCreationExpresssionNode creation && context.AnalysisContext.ExpressionTypes[creation].IsValueType ? Generator.EmitLoad(value) : value;
+        return value.Type is LIRPointerType pointer && IsValueType(pointer.PointeeType) ? Generator.EmitLoad(value) : value;
     }
 
     /// <summary> Emits the initialization of <paramref name="address"/> from <paramref name="initializer"/>, defaulting the storage when there is no initializer. </summary>
@@ -70,6 +70,8 @@ internal class ExpressionGenerator
         {
             if (initializer is ArrayLiteralNode literal)
                 EmitArrayLiteralInto(address, array, literal.Elements);
+            else if (initializer is not DefaultExpressionNode && initializer != null && context.AnalysisContext.ExpressionTypes.TryGetValue(initializer, out var initializerType) && initializerType is ArrayTypeSymbol)
+                Generator.EmitStore(EmitValue(initializer), address); // Copies the whole value, element by element
             else
                 EmitDefaultArray(address, array);
 
@@ -239,6 +241,14 @@ internal class ExpressionGenerator
 
     // Determines whether 'node' has a value type, defaulting to one when its type is unknown
     private bool IsValueType(ExpressionNode node) => !context.AnalysisContext.ExpressionTypes.TryGetValue(node, out var type) || type.IsValueType;
+
+    // Determines whether a value of 'type' is held directly rather than behind a pointer
+    private static bool IsValueType(LIRType type) => type switch
+    {
+        LIRArrayType => true,
+        LIRTypeDeclarationType declaration => declaration.IsValueType,
+        _ => false
+    };
 
     // Emits the value of the parameter named 'name'
     private LIRValue EmitParameterValue(string name)

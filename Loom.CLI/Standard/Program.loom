@@ -9,11 +9,9 @@ module Standard::Program
     {
         i32 exitCode = 1;
 
-        unique String myString = new String();
-        myString.Characters = ['H', 'e', 'l', 'l', 'o', '!'];
-        myString.Length = 6;
+        char[128] contents = ['H', 'e', 'l', 'l', 'o', '!'];
 
-        Slice test = new Slice(0, 0);
+        unique String myString = new String(contents, 6);
         // test.ElementAt<i32>(0);
 
         println(myString); // "Hello!"
