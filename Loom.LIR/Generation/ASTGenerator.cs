@@ -254,6 +254,9 @@ public class ASTGenerator
             return;
         }
 
+        if (symbol.TypeParameters.Count > 0)
+            return;
+
         var funcType = BuildFunctionType(symbol);
 
         bool isExtern = node.HasModifier(Parser.Tokenizer.Token.TokenType.Extern);
@@ -271,7 +274,10 @@ public class ASTGenerator
             return;
         }
 
-        if (node.HasModifier(Parser.Tokenizer.Token.TokenType.Extern))
+        if (symbol.IsExtern)
+            return;
+
+        if (symbol.TypeParameters.Count > 0)
             return;
 
         LIRFunction func = unit.GetFunction(symbol.FullyQualifiedName) ?? throw new Exception($"Could not find function {symbol.FullyQualifiedName}!");

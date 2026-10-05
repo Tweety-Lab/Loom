@@ -44,21 +44,22 @@ public class StatementRule : ParserRule<StatementNode>
 
     private StatementNode ParseStatement()
     {
-        var current = Parser.Reader.Current.Type;
-        var next = Parser.Reader.Peek().Type;
+        if (TryRunRule<ReturnStatementRule, ReturnStatementNode>(out var returnStatement))
+            return returnStatement;
 
-        bool isType = TypeRule.IsTypeName(current);
+        if (TryRunRule<IfStatementRule, IfStatementNode>(out var ifStatement))
+            return ifStatement;
 
-        return current switch
-        {
-            TokenType.Return => RunRule<ReturnStatementRule, ReturnStatementNode>(),
-            TokenType.If => RunRule<IfStatementRule, IfStatementNode>(),
-            TokenType.While => RunRule<WhileStatementRule, WhileStatementNode>(),
-            TokenType.For => RunRule<ForStatementRule, ForStatementNode>(),
-            _ when isType && next == TokenType.Identifier => RunRule<LocalDeclarationStatementRule, LocalDeclarationStatementNode>(),
-            _ when IsLocalDeclaration() => RunRule<LocalDeclarationStatementRule, LocalDeclarationStatementNode>(),
-            _ => ParseExpressionOrAssignment()
-        };
+        if (TryRunRule<WhileStatementRule, WhileStatementNode>(out var whileStatement))
+            return whileStatement;
+
+        if (TryRunRule<ForStatementRule, ForStatementNode>(out var forStatement))
+            return forStatement;
+
+        if (TryRunRule<LocalDeclarationStatementRule, LocalDeclarationStatementNode>(out var localDeclarationStatement))
+            return localDeclarationStatement;
+
+        return ParseExpressionOrAssignment();
     }
 
     private StatementNode ParseExpressionOrAssignment()
@@ -69,17 +70,5 @@ public class StatementRule : ParserRule<StatementNode>
             return new ExpressionStatementNode(expression);
 
         return Parser.GetRule<AssignmentStatementRule>().Parse(expression);
-    }
-
-    // Hacky
-    private bool IsLocalDeclaration()
-    {
-        int offset = TypeRule.SkipModifiers(Parser.Reader, 0);
-
-        if (!TypeRule.IsTypeName(Parser.Reader.Peek(offset).Type))
-            return false;
-
-        offset = TypeRule.SkipType(Parser.Reader, offset);
-        return Parser.Reader.Peek(offset).Type == TokenType.Identifier;
     }
 }

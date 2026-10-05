@@ -14,7 +14,7 @@ module Standard::Program
         myString.Length = 6;
 
         Slice test = new Slice(0, 0);
-        test.ElementAt<i32>(0);
+        // test.ElementAt<i32>(0);
 
         println(myString); // "Hello!"
         

@@ -31,17 +31,28 @@ public class PrimaryExpressionRule : ParserRule<ExpressionNode>
     /// <inheritdoc/>
     public override ExpressionNode ParseNode()
     {
-        return Parser.Reader.Current.Type switch
-        {
-            TokenType.LBracket => RunRule<ArrayLiteralExpressionRule, ArrayLiteralNode>(),
-            TokenType.CharacterLiteral => RunRule<CharacterLiteralExpressionRule, CharacterLiteralNode>(),
-            TokenType.True or TokenType.False => RunRule<BooleanLiteralExpressionRule, BooleanLiteralNode>(),
-            TokenType.Number => RunRule<NumberLiteralExpressionRule, NumberLiteralNode>(),
-            TokenType.New => RunRule<InstanceCreationExpressionRule, InstanceCreationExpresssionNode>(),
-            TokenType.Identifier => new IdentifierNameNode(Parser.Reader.Advance()),
-            TokenType.Default => RunRule<DefaultExpressionRule, DefaultLiteralNode>(),
-            _ => throw new Exception($"Unexpected token: '{Parser.Reader.Current.Text}' type={Parser.Reader.Current.Type} at {Parser.Reader.Current.Location}")
-        };
+        if (TryRunRule<ArrayLiteralExpressionRule, ArrayLiteralNode>(out var arrayLiteral))
+            return arrayLiteral;
+
+        if (TryRunRule<CharacterLiteralExpressionRule, CharacterLiteralNode>(out var characterLiteral))
+            return characterLiteral;
+
+        if (TryRunRule<BooleanLiteralExpressionRule, BooleanLiteralNode>(out var booleanLiteral))
+            return booleanLiteral;
+
+        if (TryRunRule<NumberLiteralExpressionRule, NumberLiteralNode>(out var numberLiteral))
+            return numberLiteral;
+
+        if (TryRunRule<InstanceCreationExpressionRule, InstanceCreationExpresssionNode>(out var instanceCreation))
+            return instanceCreation;
+
+        if (TryRunRule<DefaultExpressionRule, DefaultLiteralNode>(out var defaultLiteral))
+            return defaultLiteral;
+
+        if (Parser.Reader.Current.Type is TokenType.Identifier)
+            return new IdentifierNameNode(Parser.Reader.Advance());
+
+        throw new ParseFailureException(Parser.Reader.Current, $"Unexpected token: '{Parser.Reader.Current.Text}' type={Parser.Reader.Current.Type}");
     }
 }
 

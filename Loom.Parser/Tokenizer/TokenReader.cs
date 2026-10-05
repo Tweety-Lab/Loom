@@ -13,7 +13,7 @@ public class TokenReader
     public List<Token> Tokens { get; }
 
     /// <summary> The current position in the token list. </summary>
-    public int Position { get; private set; }
+    public int Position { get; set; }
 
     /// <summary> The current token. </summary>
     public Token Current => Tokens[Math.Min(Position, Tokens.Count - 1)];
@@ -55,22 +55,33 @@ public class TokenReader
         return token;
     }
 
-    /// <summary> Consumes the current <see cref="Token"/> if it matches the specified type. Reports an error otherwise. </summary>
+    /// <summary> Consumes the current <see cref="Token"/>, which must match the specified type. Reports an error and throws <see cref="ParseFailureException"/> otherwise. </summary>
     /// <returns> The consumed <see cref="Token"/>. </returns>
+    /// <exception cref="ParseFailureException"> <paramref name="type"/> did not match the current token. </exception>
     public Token Expect(TokenType type)
     {
         if (Current.Type != type)
-            DiagnosticContext?.Report(new Diagnostic(Diagnostic.DiagnosticLevel.Error, $"Expected {type}, got {Current.Type}"), Current.Location);
+            Fail($"Expected {type}, got {Current.Type}");
 
         return Advance();
     }
 
+    /// <summary> Consumes the current <see cref="Token"/>, which must satisfy the specified predicate. Reports an error and throws <see cref="ParseFailureException"/> otherwise. </summary>
+    /// <returns> The consumed <see cref="Token"/>. </returns>
+    /// <exception cref="ParseFailureException"> <paramref name="predicate"/> rejected the current token. </exception>
     public Token ExpectAny(Func<Token, bool> predicate)
     {
         if (!predicate(Current))
-            DiagnosticContext?.Report(new Diagnostic(Diagnostic.DiagnosticLevel.Error, $"Expected {string.Join(" or ", predicate)}, got {Current.Type}"), Current.Location);
+            Fail($"Expected {string.Join(" or ", predicate)}, got {Current.Type}");
 
         return Advance();
+    }
+
+    /// <summary> Reports <paramref name="message"/> at the current token, then aborts the calling rule. </summary>
+    private void Fail(string message)
+    {
+        DiagnosticContext?.Report(new Diagnostic(Diagnostic.DiagnosticLevel.Error, message), Current.Location);
+        throw new ParseFailureException(Current, message);
     }
 
     public List<Token> ExpectMany(Func<Token, bool> predicate)

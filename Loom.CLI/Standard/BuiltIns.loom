@@ -20,11 +20,5 @@ module Standard
             pointer = _pointer;
 			length = _length;
         }
-
-        /// @brief Returns the element at the given index.
-        public T ElementAt<T>(i32 i)
-        {
-            return default(T);
-        }
     }
 }
