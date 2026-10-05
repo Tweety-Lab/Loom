@@ -12,7 +12,9 @@ module Standard::Program
         char[128] contents = ['H', 'e', 'l', 'l', 'o', '!'];
 
         unique String myString = new String(contents, 6);
-        // test.ElementAt<i32>(0);
+
+        Slice test = new Slice();
+        test.ElementAt<i32>(0);
 
         println(myString); // "Hello!"
         

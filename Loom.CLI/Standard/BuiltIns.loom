@@ -19,12 +19,6 @@ module Standard
         iptr pointer = default;
         i32 length = default;
 
-        public Slice(iptr _pointer, i32 _length)
-        {
-            pointer = _pointer;
-			length = _length;
-        }
-
         public T ElementAt<T>(i32 index)
         {
 			return default(T);

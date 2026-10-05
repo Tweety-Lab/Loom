@@ -173,27 +173,35 @@
 
     "functions": {
       "patterns": [
-
         {
           "name": "entity.name.function.declaration.loom",
-          "match": "(?<=\\b(?:void|bool|i8|i16|i32|i64|u8|u16|u32|u64|char|iptr|f32|f64)\\s+)[A-Za-z_][A-Za-z0-9_]*(?=\\s*\\()"
-        },
-
-        {
-          "name": "entity.name.function.declaration.loom",
-          "match": "(?<=\\bexport\\s+(?:extern\\s+)?(?:void|bool|i8|i16|i32|i64|u8|u16|u32|u64|char|iptr|f32|f64)\\s+)[A-Za-z_][A-Za-z0-9_]*(?=\\s*\\()"
+          "match": "\\b[A-Za-z_][A-Za-z0-9_]*(?=\\s*(?:<[^<>]+>)?\\s*\\()"
         },
 
         {
           "name": "entity.name.function.call.loom",
-          "match": "\\b(?!(?:if|else|while|for|break|continue|return|default|sizeof)\\b)[A-Za-z_][A-Za-z0-9_]*(?=\\s*\\()"
+          "match": "\\b(?!(?:if|else|while|for|break|continue|return|default|sizeof)\\b)[A-Za-z_][A-Za-z0-9_]*(?=\\s*(?:<[^<>]+>)?\\s*\\()"
+        },
+
+        {
+          "name": "punctuation.definition.type-parameters.begin.loom",
+          "match": "<(?=[A-Za-z_])"
+        },
+
+        {
+          "name": "punctuation.definition.type-parameters.end.loom",
+          "match": "(?<=[A-Za-z0-9_>])>"
+        },
+
+        {
+          "name": "entity.name.type.parameter.loom",
+          "match": "(?<=<|,)\\s*[A-Za-z_][A-Za-z0-9_]*\\b"
         },
 
         {
           "name": "variable.parameter.loom",
-          "match": "\\b[A-Za-z_][A-Za-z0-9_]*\\b(?=\\s*,|\\s*\\))"
+          "match": "\\b[A-Za-z_][A-Za-z0-9_]*\\b(?=\\s*(?:,|\\)))"
         }
-
       ]
     },
 
