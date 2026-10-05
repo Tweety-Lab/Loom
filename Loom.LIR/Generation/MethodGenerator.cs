@@ -22,7 +22,7 @@ internal class MethodGenerator
         this.unit = unit;
     }
 
-    public void GenerateMethodDeclaration(MethodDeclarationNode node)
+    public void GenerateMethodDeclaration(MethodDeclarationNode node, LIRTypeDeclaration? owningType = null)
     {
         MethodSymbol? symbol = (MethodSymbol?)context.AnalysisContext.GetSymbol(node).Symbol;
 
@@ -35,9 +35,14 @@ internal class MethodGenerator
         if (symbol.IsGeneric)
             return;
 
-        var funcType = ASTGenerator.BuildFunctionType(symbol);
+        bool isStatic = symbol.IsStatic;
+        bool isExtern = symbol.IsExtern;
 
-        bool isExtern = node.HasModifier(Parser.Tokenizer.Token.TokenType.Extern);
+        LIRFunctionType? funcType = null;
+        if (owningType != null)
+            funcType = ASTGenerator.BuildFunctionType(symbol, isStatic ? null : new LIRPointerType(owningType.Type));
+        else
+            funcType = ASTGenerator.BuildFunctionType(symbol);
 
         unit.DefineFunction(symbol.FullyQualifiedName, funcType, !isExtern);
     }
