@@ -84,6 +84,9 @@ public record MethodSymbol(string Name, MethodSymbol.MethodKind Kind) : Symbol(N
     /// <summary> All type parameters used by this method. </summary>
     public List<TypeParameterSymbol> TypeParameters { get; set; } = new List<TypeParameterSymbol>();
 
+    /// <summary> Whether this method is generic (has type parameters). </summary>
+    public bool IsGeneric => TypeParameters.Count > 0;
+
     /// <summary> All parameters used by this method. </summary>
     public List<ParameterSymbol> Parameters { get; set; } = new List<ParameterSymbol>();
 

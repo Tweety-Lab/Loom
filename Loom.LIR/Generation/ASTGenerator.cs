@@ -97,6 +97,9 @@ public class ASTGenerator
             return;
         }
 
+        if (symbol.IsGeneric)
+            return;
+
         bool isStatic = symbol.IsStatic;
         bool isExtern = symbol.IsExtern;
 
@@ -159,7 +162,7 @@ public class ASTGenerator
         {
             if (content is MethodDeclarationNode methodNode)
             {
-                if (context.AnalysisContext.GetSymbol(methodNode).Symbol is MethodSymbol methodSymbol && !methodSymbol.IsExtern)
+                if (context.AnalysisContext.GetSymbol(methodNode).Symbol is MethodSymbol methodSymbol && !methodSymbol.IsExtern && !methodSymbol.IsGeneric)
                     GenerateTypeDeclarationMethodBody(declaredObj, methodNode);
             }
 
@@ -194,6 +197,9 @@ public class ASTGenerator
             Console.WriteLine($"Could not find symbol for {node.MethodName}!");
             return;
         }
+
+        if (symbol.IsGeneric)
+            return;
 
         LIRFunction func = declaredObj.Methods.FirstOrDefault(m => m.Name == symbol.FullyQualifiedName) ?? throw new Exception($"Could not find function {symbol.FullyQualifiedName}!");
 
@@ -254,7 +260,7 @@ public class ASTGenerator
             return;
         }
 
-        if (symbol.TypeParameters.Count > 0)
+        if (symbol.IsGeneric)
             return;
 
         var funcType = BuildFunctionType(symbol);
@@ -274,10 +280,10 @@ public class ASTGenerator
             return;
         }
 
-        if (symbol.IsExtern)
+        if (symbol.IsGeneric)
             return;
 
-        if (symbol.TypeParameters.Count > 0)
+        if (symbol.IsExtern)
             return;
 
         LIRFunction func = unit.GetFunction(symbol.FullyQualifiedName) ?? throw new Exception($"Could not find function {symbol.FullyQualifiedName}!");
