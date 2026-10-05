@@ -26,7 +26,7 @@ public class Program
                 if (result == null)
                     return;
 
-                Console.WriteLine($"Result: {result.ToInt32()}");
+                Console.WriteLine($"Result: {result.ToInt64()}");
             }
         }
     }

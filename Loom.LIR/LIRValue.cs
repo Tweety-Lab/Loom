@@ -79,3 +79,10 @@ public class LIRBlockValue : LIRValue
     /// <summary> Initializes a new instance of the <see cref="LIRBlockValue"/> class. </summary>
     public LIRBlockValue(LIRBasicBlock block) => Block = block;
 }
+
+/// <summary> A type used as an instruction operand for operations directed by a type rather than a value, i.e. sizeof. </summary>
+public class LIRTypeValue(LIRType type) : LIRValue
+{
+    /// <inheritdoc/>
+    public override LIRType Type { get; } = type;
+}

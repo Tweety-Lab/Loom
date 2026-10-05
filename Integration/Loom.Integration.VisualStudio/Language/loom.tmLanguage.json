@@ -186,7 +186,7 @@
 
         {
           "name": "entity.name.function.call.loom",
-          "match": "\\b(?!(?:if|else|while|for|break|continue|return|default)\\b)[A-Za-z_][A-Za-z0-9_]*(?=\\s*\\()"
+          "match": "\\b(?!(?:if|else|while|for|break|continue|return|default|sizeof)\\b)[A-Za-z_][A-Za-z0-9_]*(?=\\s*\\()"
         },
 
         {
@@ -222,7 +222,7 @@
       "patterns": [
         {
           "name": "storage.type.primitive.loom",
-          "match": "\\b(?:void|bool|i8|i16|i32|i64|u8|u16|u32|u64|char|iptr|f32|f64|default)\\b"
+          "match": "\\b(?:void|bool|i8|i16|i32|i64|u8|u16|u32|u64|char|iptr|f32|f64|default|sizeof)\\b"
         },
 
         {

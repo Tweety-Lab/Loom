@@ -7,4 +7,5 @@ namespace Loom.CLI.JustInTime;
 public interface IJITResult
 {
     int ToInt32();
+    long ToInt64();
 }

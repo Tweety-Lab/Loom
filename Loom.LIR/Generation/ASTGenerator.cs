@@ -304,6 +304,7 @@ public class ASTGenerator
             TypeSymbol.DefaultType.Void => LIRType.Void,
             TypeSymbol.DefaultType.Bool => LIRType.Boolean,
             TypeSymbol.DefaultType.I32 => LIRType.Int32,
+            TypeSymbol.DefaultType.I64 => LIRType.Int64,
             TypeSymbol.DefaultType.Char => LIRType.Char,
             TypeSymbol.DefaultType.IPtr => LIRType.IntPtr,
             TypeSymbol.DefaultType.Struct => new LIRTypeDeclarationType(type.FullyQualifiedName, true),

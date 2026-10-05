@@ -16,16 +16,6 @@ internal class TypeWalker : ASTWalker
     /// <summary> Initializes a new instance of the <see cref="TypeWalker"/> class. </summary>
     public TypeWalker(AnalysisContext context) => Context = context;
 
-    [Visitor]
-    public void Visit(NumberLiteralNode node) => Context.ExpressionTypes[node] = (TypeSymbol)Context.Binders.First().Value.Lookup("i32")!.First();
-
-    [Visitor]
-    public void Visit(DefaultExpressionNode node)
-    {
-        var type = node.Type is { } declared ? TypeResolver.Resolve(Context, node, declared) ?? ResolveContextualType(node) : ResolveContextualType(node);
-        Context.ExpressionTypes[node] = type ?? (TypeSymbol)Context.Binders.First().Value.Lookup("i32")!.First();
-    }
-
     /// <summary> Resolves the contextual type of <paramref name="node"/>, i.e. the type it is being initialized as. </summary>
     /// <remarks> This is what <c>default</c> literals resolve to. </remarks>
     public TypeSymbol? ResolveContextualType(ASTNode node)
@@ -39,6 +29,23 @@ internal class TypeWalker : ASTWalker
             return targetType;
 
         return null;
+    }
+
+    [Visitor]
+    public void Visit(NumberLiteralNode node) => Context.ExpressionTypes[node] = (TypeSymbol)Context.Binders.First().Value.Lookup("i32")!.First();
+
+    [Visitor]
+    public void Visit(DefaultExpressionNode node)
+    {
+        var type = node.Type is { } declared ? TypeResolver.Resolve(Context, node, declared) ?? ResolveContextualType(node) : ResolveContextualType(node);
+        Context.ExpressionTypes[node] = type ?? (TypeSymbol)Context.Binders.First().Value.Lookup("void")!.First();
+    }
+
+    [Visitor]
+    public void Visit(SizeOfExpressionNode node)
+    {
+        TypeResolver.Resolve(Context, node, node.Type);
+        Context.ExpressionTypes[node] = (TypeSymbol)Context.Binders.First().Value.Lookup("i64")!.First();
     }
 
     [Visitor]

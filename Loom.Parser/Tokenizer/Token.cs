@@ -140,6 +140,7 @@ public class Token
         [Keyword("true")] True,
         [Keyword("false")] False,
         [Keyword("default")] Default,
+        [Keyword("sizeof")] SizeOf,
 
         [Keyword("if")] If,
         [Keyword("while")] While,
@@ -150,6 +151,7 @@ public class Token
 
         [Keyword("void"), Type] Void,
         [Keyword("i32"), Type] I32,
+        [Keyword("i64"), Type] I64,
         [Keyword("iptr"), Type] IPtr,
         [Keyword("bool"), Type] Bool,
         [Keyword("char"), Type] Char,

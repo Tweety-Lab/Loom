@@ -61,4 +61,7 @@ public readonly struct LLVMJITResult : IJITResult
 
     /// <inheritdoc/>
     public unsafe int ToInt32() => (int)LLVM.GenericValueToInt(Value, 1);
+
+    /// <inheritdoc/>
+    public unsafe long ToInt64() => (long)LLVM.GenericValueToInt(Value, 1);
 }

@@ -99,6 +99,9 @@ public class LIRGenerator
         return Emit(LIROpCode.GetElement, new LIRPointerType(array.ElementType), arrayPointer, index);
     }
 
+    /// <summary> Emits the size of <paramref name="type"/> in bytes. </summary>
+    public LIRTempValue EmitSizeOf(LIRType type) => Emit(LIROpCode.SizeOf, LIRType.Int64, new LIRTypeValue(type));
+
     public LIRTempValue EmitCall(LIRFunction function, params LIRValue[] arguments)
     {
         LIRValue[] operands = [function, .. arguments];

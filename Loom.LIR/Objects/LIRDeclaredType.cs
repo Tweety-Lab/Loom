@@ -8,14 +8,14 @@ public sealed class LIRTypeDeclaration : LIRValueObject
     /// <summary> The fully qualified name of the <see cref="LIRTypeDeclaration"/>, i.e. "Consumer::TestStruct". </summary>
     public string Name { get; }
 
-    /// <inheritdoc/>
-    public override LIRTypeDeclarationType Type { get; }
-
     /// <summary> The methods declared by this <see cref="LIRTypeDeclaration"/>. </summary>
     public List<LIRFunction> Methods { get; } = new List<LIRFunction>();
 
     /// <summary> The fields declared by this <see cref="LIRTypeDeclaration"/>. </summary>
     public List<LIRField> Fields { get; } = new List<LIRField>();
+
+    /// <inheritdoc/>
+    public override LIRTypeDeclarationType Type { get; }
 
     /// <summary> Initializes a new instance of the <see cref="LIRTypeDeclaration"/> class. </summary>
     private LIRTypeDeclaration(string name, bool isValue)

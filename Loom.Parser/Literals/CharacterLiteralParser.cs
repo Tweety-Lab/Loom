@@ -13,7 +13,6 @@ public class CharacterLiteralParser : ILiteralParser<int>
     public const int MAX_SCALAR_VALUE = 0x10FFFF;
 
     /// <inheritdoc/>
-    /// <inheritdoc/>
     public bool TryParse(Token token, [NotNullWhen(true)] out int result, out Diagnostic? diagnostic)
     {
         result = 0;

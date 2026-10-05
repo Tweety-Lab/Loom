@@ -48,6 +48,9 @@ public class PrimaryExpressionRule : ParserRule<ExpressionNode>
         if (TryRunRule<DefaultExpressionRule, DefaultExpressionNode>(out var defaultLiteral))
             return defaultLiteral;
 
+        if (TryRunRule<SizeOfExpressionRule, SizeOfExpressionNode>(out var sizeOfExpression))
+            return sizeOfExpression;
+
         if (Parser.Reader.Current.Type is TokenType.Identifier)
             return new IdentifierNameNode(Parser.Reader.Advance());
 

@@ -43,6 +43,7 @@ public readonly struct LIROpCode : IEquatable<LIROpCode>
     public static readonly LIROpCode GetField = new LIROpCode("getfield", CodeType.Memory, true);
     public static readonly LIROpCode GetElement = new LIROpCode("getelement", CodeType.Memory, true);
     public static readonly LIROpCode Store = new LIROpCode("store", CodeType.Memory, false);
+    public static readonly LIROpCode SizeOf = new("sizeof", CodeType.Memory, true);
 
     public static readonly LIROpCode Return = new LIROpCode("return", CodeType.Control, false);
 

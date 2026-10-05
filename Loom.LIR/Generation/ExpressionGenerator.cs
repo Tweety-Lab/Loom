@@ -41,6 +41,7 @@ internal class ExpressionGenerator
         ArrayAccessExpressionNode array => EmitVariableValue(array),
         MemberAccessExpressionNode member => EmitVariableValue(member),
         InstanceCreationExpresssionNode creation => EmitInstanceCreation(creation),
+        SizeOfExpressionNode sizeOf => EmitSizeOf(sizeOf),
         _ => throw new Exception($"Unhandled expression: {node.GetType().Name}")
     };
 
@@ -76,6 +77,16 @@ internal class ExpressionGenerator
         }
 
         Generator.EmitStore(initializer != null ? EmitValue(initializer) : EmitDefault(type), address);
+    }
+
+    public LIRValue EmitSizeOf(SizeOfExpressionNode node)
+    {
+        TypeSymbol? type = (TypeSymbol?)context.AnalysisContext.GetSymbol(node.Type).Symbol;
+
+        if (type == null)
+            throw new Exception($"Could not resolve size of type {node.Type}.");
+
+        return Generator.EmitSizeOf(ASTGenerator.ConvertType(type));
     }
 
     /// <summary> Emits the storage of a new array literal, or initializes <paramref name="destination"/> when one is given. </summary>
