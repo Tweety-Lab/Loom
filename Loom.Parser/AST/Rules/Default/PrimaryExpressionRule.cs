@@ -5,7 +5,6 @@ using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.AST.Rules.Default;
 
-
 public abstract record ExpressionNode() : ASTNode
 {
     /// <inheritdoc/>
@@ -46,7 +45,7 @@ public class PrimaryExpressionRule : ParserRule<ExpressionNode>
         if (TryRunRule<InstanceCreationExpressionRule, InstanceCreationExpresssionNode>(out var instanceCreation))
             return instanceCreation;
 
-        if (TryRunRule<DefaultExpressionRule, DefaultLiteralNode>(out var defaultLiteral))
+        if (TryRunRule<DefaultExpressionRule, DefaultExpressionNode>(out var defaultLiteral))
             return defaultLiteral;
 
         if (Parser.Reader.Current.Type is TokenType.Identifier)

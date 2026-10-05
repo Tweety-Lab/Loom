@@ -20,7 +20,7 @@ internal class TypeWalker : ASTWalker
     public void Visit(NumberLiteralNode node) => Context.ExpressionTypes[node] = (TypeSymbol)Context.Binders.First().Value.Lookup("i32")!.First();
 
     [Visitor]
-    public void Visit(DefaultLiteralNode node)
+    public void Visit(DefaultExpressionNode node)
     {
         var type = node.Type is { } declared ? TypeResolver.Resolve(Context, node, declared) ?? ResolveContextualType(node) : ResolveContextualType(node);
         Context.ExpressionTypes[node] = type ?? (TypeSymbol)Context.Binders.First().Value.Lookup("i32")!.First();

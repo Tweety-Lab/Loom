@@ -26,7 +26,7 @@ public class UnresolvedTypeAnalyzer : Analyzer
     }
 
     [Visitor]
-    public void Visit(DefaultLiteralNode node)
+    public void Visit(DefaultExpressionNode node)
     {
         if (node.Type is { } type && type.Base.Type == Token.TokenType.Identifier)
         {

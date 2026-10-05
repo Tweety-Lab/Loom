@@ -5,20 +5,20 @@ using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.AST.Rules.Default;
 
-public record DefaultLiteralNode(TypeNode? Type = null) : ExpressionNode
+public record DefaultExpressionNode(TypeNode? Type = null) : ExpressionNode
 {
     /// <inheritdoc/>
     public override IEnumerable<ASTNode> Children => Enumerable.Empty<ASTNode>();
 }
 
 [ParserRule]
-public class DefaultExpressionRule : ParserRule<DefaultLiteralNode>
+public class DefaultExpressionRule : ParserRule<DefaultExpressionNode>
 {
     /// <inheritdoc/>
     public DefaultExpressionRule(LoomParser parser) : base(parser) { }
 
     /// <inheritdoc/>
-    public override DefaultLiteralNode ParseNode()
+    public override DefaultExpressionNode ParseNode()
     {
         Parser.Reader.Expect(TokenType.Default); // default
 
@@ -30,6 +30,6 @@ public class DefaultExpressionRule : ParserRule<DefaultLiteralNode>
             Parser.Reader.Expect(TokenType.RParen); // )
         }
 
-        return new DefaultLiteralNode(type);
+        return new DefaultExpressionNode(type);
     }
 }

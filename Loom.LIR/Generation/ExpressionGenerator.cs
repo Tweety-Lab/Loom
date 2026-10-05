@@ -34,7 +34,7 @@ internal class ExpressionGenerator
         NumberLiteralNode num => new LIRConstantIntValue(num.Value),
         IdentifierNameNode ident => EmitVariableValue(ident),
         BooleanLiteralNode boolean => new LIRConstantBoolValue(boolean.Value),
-        DefaultLiteralNode @default => EmitDefault(context.AnalysisContext.ExpressionTypes[@default]),
+        DefaultExpressionNode @default => EmitDefault(context.AnalysisContext.ExpressionTypes[@default]),
         BinaryExpressionNode binary => EmitBinary(binary),
         CallExpressionNode call => EmitCall(call),
         ArrayLiteralNode literal => EmitArrayLiteral(literal),
