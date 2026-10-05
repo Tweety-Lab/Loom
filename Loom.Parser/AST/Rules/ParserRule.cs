@@ -1,4 +1,5 @@
 ﻿using Loom.Parser.AST;
+using System.Diagnostics.CodeAnalysis;
 using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.AST.Rules;
@@ -33,9 +34,25 @@ public abstract class ParserRule<T> : IParserRule where T : ASTNode
     /// <summary> Runs a <see cref="ParserRule{T}"/>. </summary>
     protected TNode RunRule<TRule, TNode>() where TRule : ParserRule<TNode> where TNode : ASTNode => Parser.GetRule<TRule>().Parse();
 
+    /// <summary> Attempts to run a <see cref="ParserRule{T}"/>. </summary>
+    /// <returns> <see langword="true"/> if the rule was successfully run; otherwise, <see langword="false"/>. </returns>
+    protected bool TryRunRule<TRule, TNode>([NotNullWhen(true)] out TNode? node) where TRule : ParserRule<TNode> where TNode : ASTNode
+    {
+        try
+        {
+            node = RunRule<TRule, TNode>();
+            return true;
+        }
+        catch
+        {
+            node = default!;
+            return false;
+        }
+    }
+
     // TODO: Improve this design
     /// <summary> Loops until <paramref name="until"/> is matched, dispatching to handlers by token type. Throws diagnostics on unregistered tokens. </summary>
-protected void ParseUntil(TokenType until, Dictionary<TokenType, Action> handlers, Action? fallback = null)
+    protected void ParseUntil(TokenType until, Dictionary<TokenType, Action> handlers, Action? fallback = null)
     {
         var lastPosition = -1;
         var stuckCount = 0;
