@@ -8,35 +8,28 @@ using Loom.Parser.AST.Rules.Default;
 namespace Loom.LIR.Generation;
 
 /// <summary>
-/// Generates the Loom Intermediate Representation (LIR) of the methods declared by a type.
+/// Generates the Loom Intermediate Representation (LIR) of the types declared by a program.
 /// </summary>
 internal class TypeDeclarationGenerator
 {
     private CompilationContext context;
     private LIRCompilationUnit unit;
+    private MethodGenerator methodGenerator;
 
     /// <summary> Initializes a new instance of the <see cref="TypeDeclarationGenerator"/> class. </summary>
     public TypeDeclarationGenerator(CompilationContext context, LIRCompilationUnit unit)
     {
         this.context = context;
         this.unit = unit;
+        methodGenerator = new MethodGenerator(context, unit);
     }
 
     public void DeclareTypeDeclaration(ITypeDeclarationNode node)
     {
-        TypeSymbol? symbol = null;
-
-        if (node is StructDeclarationNode structNode)
-            symbol = (TypeSymbol?)context.AnalysisContext.GetSymbol(structNode).Symbol;
-
-        if (node is ClassDeclarationNode classNode)
-            symbol = (TypeSymbol?)context.AnalysisContext.GetSymbol(classNode).Symbol;
+        TypeSymbol? symbol = GetTypeSymbol(node);
 
         if (symbol == null)
-        {
-            Console.WriteLine($"Could not find symbol for {node.Name}!");
             return;
-        }
 
         LIRTypeDeclaration classObj = unit.DefineTypeDeclaration(symbol.FullyQualifiedName, symbol.IsValueType);
 
@@ -50,35 +43,11 @@ internal class TypeDeclarationGenerator
                 DeclareTypeDeclarationConstructor(classObj, constructor);
 
             if (content is MethodDeclarationNode method)
-                DeclareTypeDeclarationMethod(classObj, method);
+                methodGenerator.GenerateMethodDeclaration(method, classObj);
 
             if (content is FieldDeclarationNode field)
                 GenerateTypeDeclarationField(classObj, field);
         }
-    }
-
-    public void DeclareTypeDeclarationMethod(LIRTypeDeclaration declaredObj, MethodDeclarationNode node)
-    {
-        MethodSymbol? symbol = (MethodSymbol?)context.AnalysisContext.GetSymbol(node).Symbol;
-
-        if (symbol == null)
-        {
-            Console.WriteLine($"Could not find symbol for {node.MethodName}!");
-            return;
-        }
-
-        if (symbol.IsGeneric)
-            return;
-
-        bool isStatic = symbol.IsStatic;
-        bool isExtern = symbol.IsExtern;
-
-        var funcType = ASTGenerator.BuildFunctionType(symbol, isStatic ? null : new LIRPointerType(declaredObj.Type));
-
-        if (isExtern)
-            declaredObj.DeclareMethod(symbol.FullyQualifiedName, funcType);
-        else
-            declaredObj.DefineMethod(symbol.FullyQualifiedName, funcType);
     }
 
     /// <summary> Declares the <c>.ctor</c> of a type, or the implicit default one when <paramref name="node"/> is null. </summary>
@@ -110,19 +79,10 @@ internal class TypeDeclarationGenerator
 
     public void GenerateTypeDeclarationMethodBodies(ITypeDeclarationNode node)
     {
-        TypeSymbol? symbol = null;
-
-        if (node is StructDeclarationNode structNode)
-            symbol = (TypeSymbol?)context.AnalysisContext.GetSymbol(structNode).Symbol;
-
-        if (node is ClassDeclarationNode classNode)
-            symbol = (TypeSymbol?)context.AnalysisContext.GetSymbol(classNode).Symbol;
+        TypeSymbol? symbol = GetTypeSymbol(node);
 
         if (symbol == null)
-        {
-            Console.WriteLine($"Could not find symbol for {node.Name}!");
             return;
-        }
 
         LIRTypeDeclaration? declaredObj = unit.GetTypeDeclaration(symbol.FullyQualifiedName);
         if (declaredObj == null)
@@ -131,10 +91,7 @@ internal class TypeDeclarationGenerator
         foreach (var content in node.Body.Contents)
         {
             if (content is MethodDeclarationNode methodNode)
-            {
-                if (context.AnalysisContext.GetSymbol(methodNode).Symbol is MethodSymbol methodSymbol && !methodSymbol.IsExtern && !methodSymbol.IsGeneric)
-                    GenerateTypeDeclarationMethodBody(declaredObj, methodNode);
-            }
+                methodGenerator.GenerateMethodBody(methodNode, declaredObj);
 
             if (content is ConstructorDeclarationNode constructorNode)
             {
@@ -156,31 +113,6 @@ internal class TypeDeclarationGenerator
 
         if (defaultConstructor.LIRGenerator!.WritingBlock.Terminator == null)
             defaultConstructor.LIRGenerator.EmitReturn();
-    }
-
-    public void GenerateTypeDeclarationMethodBody(LIRTypeDeclaration declaredObj, MethodDeclarationNode node)
-    {
-        MethodSymbol? symbol = (MethodSymbol?)context.AnalysisContext.GetSymbol(node).Symbol;
-
-        if (symbol == null)
-        {
-            Console.WriteLine($"Could not find symbol for {node.MethodName}!");
-            return;
-        }
-
-        if (symbol.IsGeneric)
-            return;
-
-        LIRFunction func = declaredObj.Methods.FirstOrDefault(m => m.Name == symbol.FullyQualifiedName) ?? throw new Exception($"Could not find function {symbol.FullyQualifiedName}!");
-
-        StatementGenerator statementGen = new StatementGenerator(context, unit, func);
-
-        foreach (var content in node.Body?.Contents ?? Enumerable.Empty<ASTNode>())
-            if (content is StatementNode statementNode)
-                statementGen.EmitStatement(statementNode);
-
-        if (func.Type.ReturnType == LIRType.Void && func.LIRGenerator!.WritingBlock.Terminator == null)
-            func.LIRGenerator.EmitReturn();
     }
 
     public void GenerateTypeDeclarationConstructorBody(LIRTypeDeclaration declaredObj, ConstructorDeclarationNode node)
@@ -218,5 +150,22 @@ internal class TypeDeclarationGenerator
         }
 
         declaredObj.DeclareField(symbol.Name, ASTGenerator.ConvertType(symbol.Type!));
+    }
+
+    /// <summary> Gets the symbol of the type declared by <paramref name="node"/>, or null when it has none. </summary>
+    private TypeSymbol? GetTypeSymbol(ITypeDeclarationNode node)
+    {
+        TypeSymbol? symbol = null;
+
+        if (node is StructDeclarationNode structNode)
+            symbol = (TypeSymbol?)context.AnalysisContext.GetSymbol(structNode).Symbol;
+
+        if (node is ClassDeclarationNode classNode)
+            symbol = (TypeSymbol?)context.AnalysisContext.GetSymbol(classNode).Symbol;
+
+        if (symbol == null)
+            Console.WriteLine($"Could not find symbol for {node.Name}!");
+
+        return symbol;
     }
 }

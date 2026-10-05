@@ -8,7 +8,8 @@ using Loom.Parser.AST.Rules.Default;
 namespace Loom.LIR.Generation;
 
 /// <summary>
-/// Generates the Loom Intermediate Representation (LIR) of the methods declared outside of a type.
+/// Generates the Loom Intermediate Representation (LIR) of the methods declared by a program, whether they are declared
+/// inside a type or outside of one.
 /// </summary>
 internal class MethodGenerator
 {
@@ -22,6 +23,9 @@ internal class MethodGenerator
         this.unit = unit;
     }
 
+    /// <summary> Declares the signature of the method declared by <paramref name="node"/>. </summary>
+    /// <param name="node"> The node declaring the method. </param>
+    /// <param name="owningType"> The type owning the method, or null when the method is declared outside of a type. </param>
     public void GenerateMethodDeclaration(MethodDeclarationNode node, LIRTypeDeclaration? owningType = null)
     {
         MethodSymbol? symbol = (MethodSymbol?)context.AnalysisContext.GetSymbol(node).Symbol;
@@ -35,19 +39,25 @@ internal class MethodGenerator
         if (symbol.IsGeneric)
             return;
 
-        bool isStatic = symbol.IsStatic;
         bool isExtern = symbol.IsExtern;
 
-        LIRFunctionType? funcType = null;
-        if (owningType != null)
-            funcType = ASTGenerator.BuildFunctionType(symbol, isStatic ? null : new LIRPointerType(owningType.Type));
-        else
-            funcType = ASTGenerator.BuildFunctionType(symbol);
+        // An instance method receives a pointer to the instance it belongs to as its first parameter
+        LIRType? selfType = owningType != null && !symbol.IsStatic ? new LIRPointerType(owningType.Type) : null;
 
-        unit.DefineFunction(symbol.FullyQualifiedName, funcType, !isExtern);
+        var funcType = ASTGenerator.BuildFunctionType(symbol, selfType);
+
+        if (owningType == null)
+            unit.DefineFunction(symbol.FullyQualifiedName, funcType, !isExtern);
+        else if (isExtern)
+            owningType.DeclareMethod(symbol.FullyQualifiedName, funcType);
+        else
+            owningType.DefineMethod(symbol.FullyQualifiedName, funcType);
     }
 
-    public void GenerateMethodBody(MethodDeclarationNode node)
+    /// <summary> Emits the body of the method declared by <paramref name="node"/>. </summary>
+    /// <param name="node"> The node declaring the method. </param>
+    /// <param name="owningType"> The type owning the method, or null when the method is declared outside of a type. </param>
+    public void GenerateMethodBody(MethodDeclarationNode node, LIRTypeDeclaration? owningType = null)
     {
         MethodSymbol? symbol = (MethodSymbol?)context.AnalysisContext.GetSymbol(node).Symbol;
 
@@ -63,14 +73,21 @@ internal class MethodGenerator
         if (symbol.IsExtern)
             return;
 
-        LIRFunction func = unit.GetFunction(symbol.FullyQualifiedName) ?? throw new Exception($"Could not find function {symbol.FullyQualifiedName}!");
-        StatementGenerator statementGen = new StatementGenerator(context, unit, func);
+        LIRFunction function = GetFunction(symbol.FullyQualifiedName, owningType);
+
+        StatementGenerator statementGen = new StatementGenerator(context, unit, function);
 
         foreach (var content in node.Body?.Contents ?? Enumerable.Empty<ASTNode>())
             if (content is StatementNode statementNode)
                 statementGen.EmitStatement(statementNode);
 
-        if (func.Type.ReturnType == LIRType.Void && func.LIRGenerator!.WritingBlock.Terminator == null)
-            func.LIRGenerator.EmitReturn();
+        if (function.Type.ReturnType == LIRType.Void && function.LIRGenerator!.WritingBlock.Terminator == null)
+            function.LIRGenerator.EmitReturn();
+    }
+
+    private LIRFunction GetFunction(string name, LIRTypeDeclaration? owningType)
+    {
+        LIRFunction? function = owningType != null ? owningType.Methods.FirstOrDefault(m => m.Name == name) : unit.GetFunction(name);
+        return function ?? throw new Exception($"Could not find function {name}!");
     }
 }

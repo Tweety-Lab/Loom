@@ -15,7 +15,7 @@ public abstract class LIRLayeredPass : ICompilationPass
     /// <inheritdoc/>
     public virtual void Run(LIRCompilationUnit unit)
     {
-        var allFunctions = unit.AllFunctions.ToList();
+        var allFunctions = unit.AllFunctions.ToList(); // Prevent enumeration issues
 
         foreach (var func in allFunctions)
             RunOnFunction(func);
