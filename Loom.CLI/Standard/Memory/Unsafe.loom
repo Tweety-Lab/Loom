@@ -1,0 +1,27 @@
+module Standard::Memory
+{
+    /// @brief Provides unsafe memory operations.
+    export class Unsafe
+    {
+        /// @brief Allocates memory of the given size.
+        public static iptr Allocate(i64 size)
+        {
+            return malloc(size);
+        }
+
+		/// @brief Frees the memory at the given address.
+        public static void Free(iptr address)
+        {
+			free(address);
+        }
+
+        /// @brief Returns the memory address of the given value.
+        public static extern iptr AddressOf<T>(T value);
+
+        /// @brief Reads the value at the given address.
+        public static extern T Read<T>(iptr address);
+    }
+
+    extern iptr malloc(i64 size);
+	extern void free(iptr address);
+}

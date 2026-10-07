@@ -30,6 +30,9 @@
     <None Update="Standard\IO\Output.loom">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Standard\Memory\Unsafe.loom">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Standard\Time\Time.loom">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -43,6 +46,7 @@
 
   <ItemGroup>
     <Folder Include="Standard\IO\" />
+    <Folder Include="Standard\Memory\" />
   </ItemGroup>
 
 </Project>
