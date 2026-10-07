@@ -1,6 +1,7 @@
 using Loom.Analyzer;
 using Loom.Analyzer.Symbols;
 using Loom.Common;
+using Loom.LIR.Intrinsics;
 using Loom.LIR.Objects;
 using Loom.Parser.AST;
 using Loom.Parser.AST.Rules.Default;
@@ -64,10 +65,12 @@ internal class MethodGenerator
             return;
         }
 
+        LIRFunction function = GetFunction(symbol.FullyQualifiedName, owningType);
+
         if (symbol.IsExtern)
             return;
 
-        LIRFunction function = GetFunction(symbol.FullyQualifiedName, owningType);
+        IIntrinsicEmitter.EmitIntrinsic(symbol, function);
 
         GenerateBody(node, function, null);
     }
