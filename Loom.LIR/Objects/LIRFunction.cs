@@ -16,7 +16,7 @@ public sealed class LIRFunction : LIRValueObject
     public IReadOnlyList<LIRValue> ParameterValues { get; }
 
     /// <summary> The LIR generator used for this function. </summary>
-    public LIRGenerator? LIRGenerator { get; }
+    public LIRGenerator? LIRGenerator { get; private set; }
 
     /// <inheritdoc />
     public override LIRFunctionType Type {  get; }
@@ -36,6 +36,15 @@ public sealed class LIRFunction : LIRValueObject
 
         if (!isDeclaration)
             LIRGenerator = new LIRGenerator(this);
+    }
+
+    /// <summary> Converts this declaration into a definition, creating the body generator on demand. </summary>
+    public void StartBody()
+    {
+        if (LIRGenerator == null)
+            LIRGenerator = new LIRGenerator(this);
+
+        IsDeclaration = false;
     }
 
     /// <summary> Creates a new <see cref="LIRFunction"/> that only declares a signature (e.g. extern), with no body. </summary>

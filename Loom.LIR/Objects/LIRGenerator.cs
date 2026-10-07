@@ -102,6 +102,9 @@ public class LIRGenerator
     /// <summary> Emits the size of <paramref name="type"/> in bytes. </summary>
     public LIRTempValue EmitSizeOf(LIRType type) => Emit(LIROpCode.SizeOf, LIRType.Int64, new LIRTypeValue(type));
 
+    /// <summary> Emits the integer representation of the address held by <paramref name="value"/>. </summary>
+    public LIRTempValue EmitPtrToInt(LIRValue value) => Emit(LIROpCode.PtrToInt, LIRType.IntPtr, value);
+
     public LIRTempValue EmitCall(LIRFunction function, params LIRValue[] arguments)
     {
         LIRValue[] operands = [function, .. arguments];

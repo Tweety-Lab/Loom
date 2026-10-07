@@ -33,9 +33,6 @@
     <None Update="Standard\Memory\Unsafe.loom">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Standard\Time\Time.loom">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="Standard\Program.loom">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

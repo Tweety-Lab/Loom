@@ -16,8 +16,6 @@ module Standard::Memory
         }
 
 #region Intrinsics
-        public static i64 TestIntrinsic() { }
-
         /// @brief Returns the memory address of the given value.
         public static iptr AddressOf<T>(T value) { }
 

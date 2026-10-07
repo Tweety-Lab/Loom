@@ -1,5 +1,5 @@
-import Standard::Time;
 import Standard::IO;
+import Standard::Memory;
 import Standard;
 
 module Standard::Program
@@ -13,8 +13,7 @@ module Standard::Program
 
         unique String myString = new String(contents, 6);
 
-        Slice test = new Slice();
-        test.ElementAt<i32>(0);
+        iptr addr = Unsafe.AddressOf<String>(myString);
 
         println(myString); // "Hello!"
         

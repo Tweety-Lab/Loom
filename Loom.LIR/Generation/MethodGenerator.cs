@@ -67,10 +67,11 @@ internal class MethodGenerator
 
         LIRFunction function = GetFunction(symbol.FullyQualifiedName, owningType);
 
-        if (symbol.IsExtern)
+        if (IIntrinsicEmitter.TryEmitIntrinsic(symbol, function))
             return;
 
-        IIntrinsicEmitter.EmitIntrinsic(symbol, function);
+        if (symbol.IsExtern)
+            return;
 
         GenerateBody(node, function, null);
     }
@@ -101,9 +102,10 @@ internal class MethodGenerator
         var functionType = ASTGenerator.BuildFunctionType(symbol, selfType, substitution);
 
         // Register the instance before generating its body so recursive calls resolve to it
-        instance = owningType == null
-            ? unit.DefineFunction(instanceName, functionType, !symbol.IsExtern)
-            : symbol.IsExtern ? owningType.DeclareMethod(instanceName, functionType) : owningType.DefineMethod(instanceName, functionType);
+        instance = owningType == null ? unit.DefineFunction(instanceName, functionType, !symbol.IsExtern) : symbol.IsExtern ? owningType.DeclareMethod(instanceName, functionType) : owningType.DefineMethod(instanceName, functionType);
+
+        if (IIntrinsicEmitter.TryEmitIntrinsic(symbol, instance))
+            return instance;
 
         if (!symbol.IsExtern)
             GenerateBody(node, instance, substitution);
@@ -119,8 +121,13 @@ internal class MethodGenerator
             if (content is StatementNode statementNode)
                 statementGen.EmitStatement(statementNode);
 
-        if (function.Type.ReturnType == LIRType.Void && function.LIRGenerator!.WritingBlock.Terminator == null)
-            function.LIRGenerator.EmitReturn();
+        MethodSymbol? symbol = (MethodSymbol?)context.AnalysisContext.GetSymbol(node).Symbol;
+
+        // Intrinsic methods define their own return
+        if (symbol != null && IIntrinsicEmitter.HasIntrinsicEmitter(symbol))
+            return;
+
+        EmitImplicitReturn(function);
     }
 
     public void GenerateConstructorDeclaration(LIRTypeDeclaration owningType)
