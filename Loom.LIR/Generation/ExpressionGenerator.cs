@@ -272,6 +272,9 @@ internal class ExpressionGenerator
         _ => false
     };
 
+    // Determines whether an integer type holds more than 32 bits
+    private static bool IsWide(LIRType type) => type is LIRIntPtrType or LIRIntType { Bits: > 32 };
+
     // Emits the value of the parameter named 'name'
     private LIRValue EmitParameterValue(string name)
     {
@@ -289,8 +292,7 @@ internal class ExpressionGenerator
         if (receiverType == null)
             throw new Exception($"Could not resolve receiver type: {node.Receiver}");
 
-        var fieldSymbol = receiverType.Members.OfType<FieldSymbol>().FirstOrDefault(m => m.Name == node.Name.BaseName)
-            ?? throw new Exception($"Could not resolve member field: {node.Name.BaseName}");
+        var fieldSymbol = receiverType.Members.OfType<FieldSymbol>().FirstOrDefault(m => m.Name == node.Name.BaseName) ?? throw new Exception($"Could not resolve member field: {node.Name.BaseName}");
 
         return EmitFieldAddress(EmitAddress(node.Receiver), receiverType, fieldSymbol);
     }
@@ -341,6 +343,14 @@ internal class ExpressionGenerator
     {
         var left = Emit(node.Left);
         var right = Emit(node.Right);
+
+        if (left.Type != right.Type && LIRGenerator.IsIntegerType(left.Type) && LIRGenerator.IsIntegerType(right.Type))
+        {
+            LIRType common = IsWide(left.Type) || !IsWide(right.Type) ? left.Type : right.Type;
+
+            left = Generator.EmitConvert(left, common);
+            right = Generator.EmitConvert(right, common);
+        }
 
         return node.Operator.Type switch
         {

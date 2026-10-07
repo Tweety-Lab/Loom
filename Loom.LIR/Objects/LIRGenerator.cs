@@ -71,7 +71,7 @@ public class LIRGenerator
         if (value == null)
             Emit(LIROpCode.Return, null);
         else
-            Emit(LIROpCode.Return, null, value);
+            Emit(LIROpCode.Return, null, EmitConvert(value, function.Type.ReturnType));
     }
 
     public LIRTempValue EmitAdd(LIRValue left, LIRValue right) => Emit(LIROpCode.Add, left.Type, left, right);
@@ -85,7 +85,13 @@ public class LIRGenerator
         return Emit(LIROpCode.Load, pointeeType, pointer);
     }
 
-    public void EmitStore(LIRValue value, LIRValue address) => Emit(LIROpCode.Store, null, value, address);
+    public void EmitStore(LIRValue value, LIRValue address)
+    {
+        if (address.Type is LIRPointerType pointer)
+            value = EmitConvert(value, pointer.PointeeType);
+
+        Emit(LIROpCode.Store, null, value, address);
+    }
 
     public LIRTempValue EmitAlloca(LIRType type) => Emit(LIROpCode.Alloca, new LIRPointerType(type));
 
@@ -108,9 +114,30 @@ public class LIRGenerator
     /// <summary> Emits the pointer of type <paramref name="type"/> holding the integer address held by <paramref name="value"/>. </summary>
     public LIRTempValue EmitIntToPtr(LIRValue value, LIRPointerType type) => Emit(LIROpCode.IntToPtr, type, value);
 
+    /// <summary> Emits <paramref name="value"/> converted to <paramref name="type"/>, or the value itself when no conversion is needed. </summary>
+    public LIRValue EmitConvert(LIRValue value, LIRType type)
+    {
+        if (value.Type == type)
+            return value;
+
+        if (IsIntegerType(value.Type) && IsIntegerType(type))
+            return Emit(LIROpCode.IntCast, type, value);
+
+        if (value.Type is LIRPointerType && type is LIRIntPtrType)
+            return Emit(LIROpCode.PtrToInt, type, value);
+
+        if (value.Type is LIRIntPtrType && type is LIRPointerType)
+            return Emit(LIROpCode.IntToPtr, type, value);
+
+        return value;
+    }
+
+    /// <summary> Whether <paramref name="type"/> is one of the built-in integer types. </summary>
+    public static bool IsIntegerType(LIRType type) => type is LIRIntType or LIRIntPtrType or LIRCharType;
+
     public LIRTempValue EmitCall(LIRFunction function, params LIRValue[] arguments)
     {
-        LIRValue[] operands = [function, .. arguments];
+        LIRValue[] operands = [function, .. CoerceArguments(function.Type.Parameters, arguments)];
         var returnType = function.Type.ReturnType;
 
         if (returnType == LIRType.Void)
@@ -125,7 +152,8 @@ public class LIRGenerator
     /// <summary> Emits an instance call to <paramref name="function"/> where <paramref name="receiver"/> is passed as the instance (this) argument. </summary>
     public LIRTempValue EmitCallInstanced(LIRFunction function, LIRValue receiver, params LIRValue[] arguments)
     {
-        LIRValue[] operands = [function, receiver, .. arguments];
+        // The instance is passed as the receiver, so the formal parameters start at the one after 'self'
+        LIRValue[] operands = [function, receiver, .. CoerceArguments(function.Type.Parameters, arguments, 1)];
         var returnType = function.Type.ReturnType;
 
         if (returnType == LIRType.Void)
@@ -135,6 +163,19 @@ public class LIRGenerator
         }
 
         return Emit(LIROpCode.CallInstanced, returnType, operands);
+    }
+
+    private LIRValue[] CoerceArguments(LIRParameter[] parameters, LIRValue[] arguments, int skip = 0)
+    {
+        var coerced = new LIRValue[arguments.Length];
+
+        for (int index = 0; index < arguments.Length; index++)
+        {
+            int parameter = index + skip;
+            coerced[index] = parameter < parameters.Length ? EmitConvert(arguments[index], parameters[parameter].Type) : arguments[index];
+        }
+
+        return coerced;
     }
 
     public LIRTempValue EmitCmpEq(LIRValue left, LIRValue right) => Emit(LIROpCode.CmpEq, LIRType.Boolean, left, right);

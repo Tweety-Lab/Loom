@@ -176,6 +176,16 @@ public class TypeMismatchAnalyzer : Analyzer
 
         // Casting check here
 
+        // The built-in integer types convert implicitly between one another
+        if (IsIntegerType(source.KnownType) && IsIntegerType(target.KnownType))
+            return true;
+
         return false;
     }
+
+    private static bool IsIntegerType(TypeSymbol.DefaultType type) => type switch
+    {
+        TypeSymbol.DefaultType.I32 or TypeSymbol.DefaultType.I64 or TypeSymbol.DefaultType.IPtr or TypeSymbol.DefaultType.Char => true,
+        _ => false
+    };
 }
