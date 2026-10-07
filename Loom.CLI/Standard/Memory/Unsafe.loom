@@ -3,6 +3,9 @@ module Standard::Memory
     /// @brief Provides unsafe memory operations.
     export class Unsafe
     {
+        public static extern i32 TestIntrisnic();
+
+
         /// @brief Allocates memory of the given size.
         public static iptr Allocate(i64 size)
         {

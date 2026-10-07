@@ -16,16 +16,20 @@ internal class ExpressionGenerator
     private LIRCompilationUnit unit;
     private LIRFunction function;
     private Dictionary<string, LIRTempValue> locals;
+    private MethodGenerator methodGenerator;
+    private TypeSubstitution? substitution;
 
     private LIRGenerator Generator => function.LIRGenerator!;
 
     /// <summary> Initializes a new instance of the <see cref="ExpressionGenerator"/> class. </summary>
-    public ExpressionGenerator(CompilationContext context, LIRCompilationUnit unit, LIRFunction function, Dictionary<string, LIRTempValue> locals)
+    public ExpressionGenerator(CompilationContext context, LIRCompilationUnit unit, LIRFunction function, Dictionary<string, LIRTempValue> locals, MethodGenerator methodGenerator, TypeSubstitution? substitution = null)
     {
         this.context = context;
         this.unit = unit;
         this.function = function;
         this.locals = locals;
+        this.methodGenerator = methodGenerator;
+        this.substitution = substitution;
     }
 
     public LIRValue Emit(ExpressionNode node) => node switch
@@ -88,7 +92,7 @@ internal class ExpressionGenerator
         if (type == null)
             throw new Exception($"Could not resolve size of type {node.Type}.");
 
-        return Generator.EmitSizeOf(ASTGenerator.ConvertType(type));
+        return Generator.EmitSizeOf(ASTGenerator.ConvertType(type, substitution));
     }
 
     /// <summary> Emits the storage of a new array literal, or initializes <paramref name="destination"/> when one is given. </summary>
@@ -97,7 +101,7 @@ internal class ExpressionGenerator
     public LIRValue EmitArrayLiteral(ArrayLiteralNode node, LIRValue? destination = null)
     {
         if (context.AnalysisContext.ExpressionTypes.TryGetValue(node, out var resolved) && resolved is ArrayTypeSymbol type)
-            return destination ?? EmitArrayLiteralInto(Generator.EmitAlloca(ASTGenerator.ConvertType(type)), type, node.Elements);
+            return destination ?? EmitArrayLiteralInto(Generator.EmitAlloca(ASTGenerator.ConvertType(type, substitution)), type, node.Elements);
 
         throw new Exception($"Could not resolve the type of an array literal of {node.Elements.Count} element(s).");
     }
@@ -105,11 +109,18 @@ internal class ExpressionGenerator
     /// <summary> Emits the default value of <paramref name="type"/>. </summary>
     public LIRValue EmitDefault(TypeSymbol type)
     {
+        if (substitution != null)
+            type = substitution.Resolve(type);
+
         if (type is ArrayTypeSymbol)
             throw new Exception("An array has no single default value; each of its elements is defaulted individually through EmitDefaultArray.");
 
+        // An unsubstituted type parameter has no concrete default yet; its instantiation supplies one
+        if (type is TypeParameterSymbol)
+            return new LIRDefaultValue(ASTGenerator.ConvertType(type));
+
         if (!type.IsValueType)
-            return new LIRNullValue(new LIRPointerType(ASTGenerator.ConvertType(type)));
+            return new LIRNullValue(new LIRPointerType(ASTGenerator.ConvertType(type, substitution)));
 
         return type.KnownType switch
         {
@@ -117,7 +128,7 @@ internal class ExpressionGenerator
             TypeSymbol.DefaultType.I32 => new LIRConstantIntValue(0),
             TypeSymbol.DefaultType.Bool => new LIRConstantBoolValue(false),
             TypeSymbol.DefaultType.IPtr => new LIRConstantIntValue(0),
-            _ => throw new Exception($"Unhandled default value type: {type.KnownType}")
+            _ => new LIRDefaultValue(ASTGenerator.ConvertType(type, substitution))
         };
     }
 
@@ -129,7 +140,7 @@ internal class ExpressionGenerator
         var symbol = context.AnalysisContext.ExpressionTypes[node] ?? throw new Exception("Could not resolve instance creation type.");
 
         // A value type is constructed in place; a reference type needs storage for a pointer to the instance
-        var instance = destination ?? Generator.EmitAlloca(ASTGenerator.ConvertType(symbol));
+        var instance = destination ?? Generator.EmitAlloca(ASTGenerator.ConvertType(symbol, substitution));
         var constructor = symbol.Members.OfType<MethodSymbol>().FirstOrDefault(m => m.Kind == MethodSymbol.MethodKind.Constructor);
 
         LIRFunction? constructorFunc = null;
@@ -240,12 +251,23 @@ internal class ExpressionGenerator
     private bool IsParameter(IdentifierNameNode ident) => !locals.ContainsKey(ident.BaseName) && context.AnalysisContext.GetSymbol(ident).Symbol is ParameterSymbol;
 
     // Determines whether 'node' has a value type, defaulting to one when its type is unknown
-    private bool IsValueType(ExpressionNode node) => !context.AnalysisContext.ExpressionTypes.TryGetValue(node, out var type) || type.IsValueType;
+    private bool IsValueType(ExpressionNode node)
+    {
+        if (!context.AnalysisContext.ExpressionTypes.TryGetValue(node, out var type))
+            return true;
+
+        if (substitution != null)
+            type = substitution.Resolve(type);
+
+        // An unsubstituted type parameter is stored like a value type; its instantiation decides the real storage
+        return type is TypeParameterSymbol || type.IsValueType;
+    }
 
     // Determines whether a value of 'type' is held directly rather than behind a pointer
     private static bool IsValueType(LIRType type) => type switch
     {
         LIRArrayType => true,
+        LIRTypeParameter => true,
         LIRTypeDeclarationType declaration => declaration.IsValueType,
         _ => false
     };
@@ -340,6 +362,7 @@ internal class ExpressionGenerator
     {
         LIRFunction? target = null;
         LIRValue? self = null;
+        MethodSymbol? methodSymbol = null;
 
         if (node.Callee is MemberAccessExpressionNode member)
         {
@@ -355,6 +378,7 @@ internal class ExpressionGenerator
             if (!receiverIsValue && !method.IsStatic)
                 throw new Exception($"Member '{member.Name.BaseName}' is not static and cannot be called on type '{receiverType?.Name}'.");
 
+            methodSymbol = method;
             target = unit.GetFunction(method.FullyQualifiedName);
 
             if (receiverIsValue)
@@ -366,6 +390,7 @@ internal class ExpressionGenerator
             if (symbol == null)
                 throw new Exception($"Could not resolve call: {ident.Token.Text}");
 
+            methodSymbol = symbol as MethodSymbol;
             target = unit.GetFunction(symbol.FullyQualifiedName);
         }
         else
@@ -375,6 +400,11 @@ internal class ExpressionGenerator
 
         if (target == null)
             throw new Exception($"Could not find function: {node.Callee}");
+
+        // Calls made from a concrete function instantiate the generic target; calls inside a generic template stay symbolic
+        // and are instantiated when a body is generated for each type argument.
+        if (methodSymbol is { IsGeneric: true } generic && function.Type.TypeParameters.Length == 0)
+            target = methodGenerator.GetOrCreateInstance(generic, ResolveTypeArguments(node, generic), node);
 
         // An unqualified call to an instance method dispatches on the current instance
         if (self == null && target.Type.Parameters.FirstOrDefault()?.Name == "self")
@@ -386,5 +416,20 @@ internal class ExpressionGenerator
             return Generator.EmitCallInstanced(target, self, args);
 
         return Generator.EmitCall(target, args);
+    }
+
+    // Resolves the type arguments of 'node', expressed in terms of the type parameters of the caller, to concrete types
+    private TypeSymbol[] ResolveTypeArguments(CallExpressionNode node, MethodSymbol method)
+    {
+        if (node.TypeArguments.Count != method.TypeParameters.Count)
+            throw new Exception($"Expected {method.TypeParameters.Count} type argument(s) when calling {method.FullyQualifiedName}, got {node.TypeArguments.Count}.");
+
+        return node.TypeArguments.Select(typeArgument =>
+        {
+            var resolved = context.AnalysisContext.GetSymbol(typeArgument).Symbol as TypeSymbol
+                ?? throw new Exception($"Could not resolve type argument of {method.FullyQualifiedName}.");
+
+            return substitution?.Resolve(resolved) ?? resolved;
+        }).ToArray();
     }
 }

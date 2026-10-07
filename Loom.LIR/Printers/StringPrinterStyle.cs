@@ -112,6 +112,7 @@ internal class StringPrinterStyle : ILIRPrinterStyle
             LIRConstantIntValue c => $"{c.Value}",
             LIRConstantBoolValue c => c.Value ? "true" : "false",
             LIRNullValue => "null",
+            LIRDefaultValue d => $"default({PrintType(d.Type)})",
             LIRTempValue t => $"%{t.ID}",
             LIRFunction f => $"@{f.Name}",
             LIRField field => field.Name,

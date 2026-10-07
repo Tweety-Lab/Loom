@@ -32,7 +32,7 @@ internal class LLVMTranslationContext
         if (type is LIRArrayType { ElementType: var elementType, Size: var size })
             return LLVMTypeRef.CreateArray(ResolveType(elementType), (uint)size);
 
-        throw new InvalidOperationException($"Unhandled LIR type: {type.GetType().Name}");
+        throw type is LIRTypeParameter ? new InvalidOperationException($"Generic template containing '{type}' reached code generation; only instantiations may be translated.") : new InvalidOperationException($"Unhandled LIR type: {type.GetType().Name}");
     }
 
     public LLVMValueRef ResolveValue(LIRValue value)
@@ -64,6 +64,13 @@ internal class LLVMTranslationContext
         if (value is LIRNullValue nullValue)
         {
             var llvmVal = LLVMValueRef.CreateConstNull(ResolveType(nullValue.Type));
+            ValueMap[value] = llvmVal;
+            return llvmVal;
+        }
+
+        if (value is LIRDefaultValue defaultValue)
+        {
+            var llvmVal = LLVMValueRef.CreateConstNull(ResolveType(defaultValue.Type));
             ValueMap[value] = llvmVal;
             return llvmVal;
         }

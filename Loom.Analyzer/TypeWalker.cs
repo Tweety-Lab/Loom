@@ -118,15 +118,33 @@ internal class TypeWalker : ASTWalker
     [Visitor]
     public void Visit(CallExpressionNode node)
     {
-        var returnType = node.Callee switch
+        // Type arguments are not children of the call, so they must be resolved against the call's scope explicitly
+        foreach (var typeArgument in node.TypeArguments)
+            TypeResolver.Resolve(Context, node, typeArgument);
+
+        var method = node.Callee switch
         {
-            IdentifierNameNode ident => (Context.GetSymbol(ident).Symbol as MethodSymbol)?.ReturnType,
-            MemberAccessExpressionNode member => Context.ExpressionTypes.TryGetValue(member, out var type) ? type : null,
+            IdentifierNameNode ident => Context.GetSymbol(ident).Symbol as MethodSymbol,
+            MemberAccessExpressionNode member => ResolveMemberMethod(member),
             _ => null
         };
 
-        if (returnType != null)
-            Context.ExpressionTypes[node] = returnType;
+        if (method?.ReturnType is not { } returnType)
+            return;
+
+        // A generic call evaluates to its return type with the call's type arguments bound
+        if (method.IsGeneric && node.TypeArguments.Count == method.TypeParameters.Count)
+        {
+            var arguments = node.TypeArguments.Select(t => Context.GetSymbol(t).Symbol as TypeSymbol).ToList();
+
+            if (arguments.All(a => a != null))
+            {
+                var substitution = new TypeSubstitution(method.TypeParameters.Select((p, i) => new KeyValuePair<string, TypeSymbol>(p.Name, arguments[i]!)));
+                returnType = substitution.Resolve(returnType);
+            }
+        }
+
+        Context.ExpressionTypes[node] = returnType;
     }
 
     [Visitor]
@@ -134,6 +152,16 @@ internal class TypeWalker : ASTWalker
     {
         if (Context.GetSymbol(node.TypeName).Symbol is TypeSymbol type && (type.KnownType == TypeSymbol.DefaultType.Struct || type.KnownType == TypeSymbol.DefaultType.Class))
             Context.ExpressionTypes[node] = type;
+    }
+
+    // Resolves the method a member access expression invokes
+    private MethodSymbol? ResolveMemberMethod(MemberAccessExpressionNode node)
+    {
+        var receiverIsValue = Context.ExpressionTypes.TryGetValue(node.Receiver, out var receiverType);
+        if (!receiverIsValue)
+            receiverType = Context.GetSymbol(node.Receiver).Symbol as TypeSymbol;
+
+        return receiverType?.Members.OfType<MethodSymbol>().FirstOrDefault(m => m.Name == node.Name.BaseName);
     }
 
     private bool TryGetArrayType(ExpressionNode node, [NotNullWhen(true)] out ArrayTypeSymbol? array)

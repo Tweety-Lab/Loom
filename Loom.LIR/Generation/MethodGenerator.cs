@@ -69,7 +69,48 @@ internal class MethodGenerator
 
         LIRFunction function = GetFunction(symbol.FullyQualifiedName, owningType);
 
-        StatementGenerator statementGen = new StatementGenerator(context, unit, function);
+        GenerateBody(node, function, null);
+    }
+
+    /// <summary> Gets the instantiation of the generic method <paramref name="symbol"/> for <paramref name="typeArguments"/>, generating it on first use. </summary>
+    /// <param name="symbol"> The generic method to instantiate. </param>
+    /// <param name="typeArguments"> The concrete type arguments to bind the method's type parameters to. </param>
+    /// <param name="callSite"> The node requesting the instantiation. </param>
+    public LIRFunction GetOrCreateInstance(MethodSymbol symbol, IReadOnlyList<TypeSymbol> typeArguments, ASTNode callSite)
+    {
+        var substitution = TypeSubstitution.Zip(symbol, typeArguments);
+        string instanceName = $"{symbol.FullyQualifiedName}<{string.Join(", ", typeArguments.Select(t => t.FullyQualifiedName))}>";
+
+        LIRFunction? instance = unit.GetFunction(instanceName);
+        if (instance != null)
+            return instance;
+
+        if (symbol.DeclaringNode is not MethodDeclarationNode node)
+            throw new Exception($"Could not find the declaration of generic method {symbol.FullyQualifiedName}.");
+
+        LIRTypeDeclaration? owningType = null;
+        var typeNode = context.AnalysisContext.FirstAncestorOrSelf<ITypeDeclarationNode>(node);
+
+        if (typeNode != null && context.AnalysisContext.GetSymbol((ASTNode)typeNode).Symbol is TypeSymbol owningSymbol)
+            owningType = unit.GetTypeDeclaration(owningSymbol.FullyQualifiedName);
+
+        LIRType? selfType = owningType != null && !symbol.IsStatic ? new LIRPointerType(owningType.Type) : null;
+        var functionType = ASTGenerator.BuildFunctionType(symbol, selfType, substitution);
+
+        // Register the instance before generating its body so recursive calls resolve to it
+        instance = owningType == null
+            ? unit.DefineFunction(instanceName, functionType, !symbol.IsExtern)
+            : symbol.IsExtern ? owningType.DeclareMethod(instanceName, functionType) : owningType.DefineMethod(instanceName, functionType);
+
+        if (!symbol.IsExtern)
+            GenerateBody(node, instance, substitution);
+
+        return instance;
+    }
+
+    private void GenerateBody(MethodDeclarationNode node, LIRFunction function, TypeSubstitution? substitution)
+    {
+        StatementGenerator statementGen = new(context, unit, function, this, substitution);
 
         foreach (var content in node.Body?.Contents ?? Enumerable.Empty<ASTNode>())
             if (content is StatementNode statementNode)
@@ -134,7 +175,7 @@ internal class MethodGenerator
 
         LIRFunction function = GetFunction(symbol.FullyQualifiedName, owningType);
 
-        StatementGenerator statementGenerator = new StatementGenerator(context, unit, function);
+        StatementGenerator statementGenerator = new StatementGenerator(context, unit, function, this);
 
         statementGenerator.EmitFieldInitializers(node);
 
@@ -151,7 +192,7 @@ internal class MethodGenerator
         if (constructor == null)
             return;
 
-        StatementGenerator statementGenerator = new StatementGenerator(context, unit, constructor);
+        StatementGenerator statementGenerator = new StatementGenerator(context, unit, constructor, this);
 
         statementGenerator.EmitFieldInitializers(typeNode);
 

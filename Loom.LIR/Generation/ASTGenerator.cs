@@ -55,12 +55,16 @@ public class ASTGenerator
         return unit;
     }
 
-    public static LIRType ConvertType(TypeSymbol type)
+    public static LIRType ConvertType(TypeSymbol type, TypeSubstitution? substitution = null)
     {
+        if (substitution != null)
+            type = substitution.Resolve(type);
+
         if (type is ArrayTypeSymbol array)
         {
-            var arrayElementType = ConvertType(array.ElementType);
-            return new LIRArrayType(array.ElementType.IsValueType ? arrayElementType : new LIRPointerType(arrayElementType), array.Size);
+            var arrayElementType = ConvertType(array.ElementType, substitution);
+            bool elementIsValue = array.ElementType is TypeParameterSymbol || array.ElementType.IsValueType;
+            return new LIRArrayType(elementIsValue ? arrayElementType : new LIRPointerType(arrayElementType), array.Size);
         }
 
         LIRType elementType = type.KnownType switch
@@ -80,20 +84,32 @@ public class ASTGenerator
         return elementType;
     }
 
-    public static LIRFunctionType BuildFunctionType(MethodSymbol symbol, LIRType? instancePointerType = null)
+    public static LIRFunctionType BuildFunctionType(MethodSymbol symbol, LIRType? instancePointerType = null, TypeSubstitution? substitution = null)
     {
         var parameters = new List<LIRParameter>();
 
         if (instancePointerType != null)
             parameters.Add(new LIRParameter("self", instancePointerType));
 
-        parameters.AddRange(symbol.Parameters.Select(p => new LIRParameter(p.Name, ConvertStorageType(p.Type!))));
+        parameters.AddRange(symbol.Parameters.Select(p => new LIRParameter(p.Name, ConvertStorageType(p.Type!, substitution))));
 
-        var typeParameters = symbol.TypeParameters.Select(tp => new LIRTypeParameter(tp.Name)).ToArray();
+        // An instantiation binds every type parameter, leaving none behind on its signature
+        var typeParameters = substitution == null
+            ? symbol.TypeParameters.Select(tp => new LIRTypeParameter(tp.Name)).ToArray()
+            : [];
 
-        return new LIRFunctionType(ConvertStorageType(symbol.ReturnType!), parameters.ToArray(), typeParameters);
+        return new LIRFunctionType(ConvertStorageType(symbol.ReturnType!, substitution), parameters.ToArray(), typeParameters);
     }
 
     /// <summary> Converts <paramref name="type"/> to the LIR type it is stored as. </summary>
-    public static LIRType ConvertStorageType(TypeSymbol type) => type is ArrayTypeSymbol || type.IsValueType || type.KnownType == TypeSymbol.DefaultType.Void ? ConvertType(type) : new LIRPointerType(ConvertType(type));
+    public static LIRType ConvertStorageType(TypeSymbol type, TypeSubstitution? substitution = null)
+    {
+        if (substitution != null)
+            type = substitution.Resolve(type);
+
+        // An unsubstituted type parameter is stored like a value type; its instantiation decides the real storage
+        return type is ArrayTypeSymbol || type is TypeParameterSymbol || type.IsValueType || type.KnownType == TypeSymbol.DefaultType.Void
+            ? ConvertType(type, substitution)
+            : new LIRPointerType(ConvertType(type, substitution));
+    }
 }

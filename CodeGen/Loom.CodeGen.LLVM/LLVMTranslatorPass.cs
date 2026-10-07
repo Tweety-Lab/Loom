@@ -64,11 +64,30 @@ public class LLVMTranslatorPass : LIRLayeredPass
     }
 
     /// <inheritdoc/>
-    protected override void RunOnFunction(LIRFunction func) => functionEmitter.Emit(func);
+    protected override void RunOnFunction(LIRFunction func)
+    {
+        if (func.Type.TypeParameters.Length > 0)
+            return;
+
+        functionEmitter.Emit(func);
+    }
 
     /// <inheritdoc/>
-    protected override void RunOnBlock(LIRBasicBlock block) => blockEmitter.Emit(block);
+    protected override void RunOnBlock(LIRBasicBlock block)
+    {
+        if (block.Parent.Type.TypeParameters.Length > 0)
+            return;
+
+        blockEmitter.Emit(block);
+    }
 
     /// <inheritdoc/>
-    protected override void RunOnInstruction(LIRBasicBlock block, LIRInstruction inst) => instructionEmitter.Emit(block, inst);
+    protected override void RunOnInstruction(LIRBasicBlock block, LIRInstruction inst)
+    {
+        if (block.Parent.Type.TypeParameters.Length > 0)
+            return;
+
+        instructionEmitter.Emit(block, inst);
+    }
+
 }

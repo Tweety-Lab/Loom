@@ -69,6 +69,17 @@ public class LIRNullValue : LIRValue
     public LIRNullValue(LIRType type) => Type = type;
 }
 
+/// <summary> The default (zero) value of an arbitrary type, e.g. the value of default(T). </summary>
+public class LIRDefaultValue : LIRValue
+{
+    /// <inheritdoc/>
+    public override LIRType Type { get; }
+
+    /// <summary> Initializes a new instance of the <see cref="LIRDefaultValue"/> class. </summary>
+    /// <param name="type"> The type this default value has. </param>
+    public LIRDefaultValue(LIRType type) => Type = type;
+}
+
 public class LIRBlockValue : LIRValue
 {
     public LIRBasicBlock Block { get; }
