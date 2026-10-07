@@ -15,9 +15,10 @@ module Standard::Program
 
         iptr addr = Unsafe.AddressOf<char[128]>(contents);
         Slice slice = new Slice(addr, 6);
+        putchar(slice.ElementAt<char>(0));
 
         println(myString); // "Hello!"
-
+        
         return 0;
     }
 }

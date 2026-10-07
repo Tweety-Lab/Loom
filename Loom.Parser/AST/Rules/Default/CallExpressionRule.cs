@@ -29,6 +29,9 @@ public class CallExpressionRule : ParserRule<CallExpressionNode>
     /// <inheritdoc/>
     public override CallExpressionNode ParseNode()
     {
+        // Snapshot the callee before parsing children
+        // Nested calls reuse this rule instance and overwrite the field
+        var target = callee;
         var typeArgs = new List<TypeNode>();
 
         // Type Arguments
@@ -61,7 +64,7 @@ public class CallExpressionRule : ParserRule<CallExpressionNode>
 
         Parser.Reader.Expect(TokenType.RParen); // )
 
-        return new CallExpressionNode(callee, typeArgs, args);
+        return new CallExpressionNode(target, typeArgs, args);
     }
 
     // hacky hacky fix now
