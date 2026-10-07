@@ -45,6 +45,7 @@ public readonly struct LIROpCode : IEquatable<LIROpCode>
     public static readonly LIROpCode Store = new LIROpCode("store", CodeType.Memory, false);
     public static readonly LIROpCode SizeOf = new("sizeof", CodeType.Memory, true);
     public static readonly LIROpCode PtrToInt = new LIROpCode("ptrtoint", CodeType.Memory, true);
+    public static readonly LIROpCode IntToPtr = new LIROpCode("inttoptr", CodeType.Memory, true);
 
     public static readonly LIROpCode Return = new LIROpCode("return", CodeType.Control, false);
 

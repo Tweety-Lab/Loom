@@ -105,6 +105,9 @@ public class LIRGenerator
     /// <summary> Emits the integer representation of the address held by <paramref name="value"/>. </summary>
     public LIRTempValue EmitPtrToInt(LIRValue value) => Emit(LIROpCode.PtrToInt, LIRType.IntPtr, value);
 
+    /// <summary> Emits the pointer of type <paramref name="type"/> holding the integer address held by <paramref name="value"/>. </summary>
+    public LIRTempValue EmitIntToPtr(LIRValue value, LIRPointerType type) => Emit(LIROpCode.IntToPtr, type, value);
+
     public LIRTempValue EmitCall(LIRFunction function, params LIRValue[] arguments)
     {
         LIRValue[] operands = [function, .. arguments];

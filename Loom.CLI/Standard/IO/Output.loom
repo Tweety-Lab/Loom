@@ -2,7 +2,7 @@ import Standard;
 
 module Standard::IO
 {
-	extern void putchar(char c);
+	export extern void putchar(char c);
 
     /// @brief Prints a string to stdout and appends a newline.
     export void println(String s)

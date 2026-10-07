@@ -1,3 +1,5 @@
+import Standard::Memory;
+
 module Standard
 {
     /// @brief Placeholder String type that uses a char array.
@@ -19,9 +21,16 @@ module Standard
         iptr pointer = default;
         i32 length = default;
 
-        public T ElementAt<T>(i32 index)
+        public Slice(iptr _pointer, i32 _length)
         {
-			return default(T);
+            pointer = _pointer;
+			length = _length;
+        }
+
+        /// @brief Returns the element at the given index.
+        public T ElementAt<T>(i64 index)
+        {
+			return Unsafe.Read<T>(pointer + index * sizeof(T));
         }
     }
 }
