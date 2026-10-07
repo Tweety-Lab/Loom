@@ -46,7 +46,7 @@ public class ASTGenerator
         foreach (var content in contents)
         {
             if (content is ITypeDeclarationNode typeDeclaration)
-                typeGenerator.GenerateTypeDeclarationMethodBodies(typeDeclaration);
+                typeGenerator.GenerateTypeDeclarationBodies(typeDeclaration);
 
             else if (content is MethodDeclarationNode method)
                 methodGenerator.GenerateMethodBody(method);

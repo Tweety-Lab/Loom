@@ -85,9 +85,92 @@ internal class MethodGenerator
             function.LIRGenerator.EmitReturn();
     }
 
+    public void GenerateConstructorDeclaration(LIRTypeDeclaration owningType)
+    {
+        var selfType = new LIRPointerType(owningType.Type);
+        var functionType = new LIRFunctionType(LIRType.Void, [new LIRParameter("self", selfType)]);
+
+        owningType.DefineMethod($"{owningType.Name}::.ctor", functionType);
+    }
+
+    public void GenerateConstructorDeclaration(ConstructorDeclarationNode node, LIRTypeDeclaration owningType)
+    {
+        MethodSymbol? symbol = (MethodSymbol?)context.AnalysisContext.GetSymbol(node).Symbol;
+
+        if (symbol == null)
+        {
+            Console.WriteLine($"Could not find symbol for {node.Name}!");
+            return;
+        }
+
+        if (symbol.IsGeneric)
+            return;
+
+        var selfType = new LIRPointerType(owningType.Type);
+
+        var parameters = new List<LIRParameter>
+        {
+            new("self", selfType)
+        };
+
+        parameters.AddRange(symbol.Parameters.Select(parameter => new LIRParameter(parameter.Name, ASTGenerator.ConvertStorageType(parameter.Type!))));
+
+        var functionType = new LIRFunctionType(LIRType.Void, [.. parameters]);
+
+        if (symbol.IsExtern)
+            owningType.DeclareMethod(symbol.FullyQualifiedName, functionType);
+        else
+            owningType.DefineMethod(symbol.FullyQualifiedName, functionType);
+    }
+
+    public void GenerateConstructorBody(ConstructorDeclarationNode node, LIRTypeDeclaration owningType)
+    {
+        MethodSymbol? symbol = (MethodSymbol?)context.AnalysisContext.GetSymbol(node).Symbol;
+
+        if (symbol == null)
+        {
+            Console.WriteLine($"Could not find symbol for {node.Name}!");
+            return;
+        }
+
+        if (symbol.IsGeneric || symbol.IsExtern)
+            return;
+
+        LIRFunction function = GetFunction(symbol.FullyQualifiedName, owningType);
+
+        StatementGenerator statementGenerator = new StatementGenerator(context, unit, function);
+
+        statementGenerator.EmitFieldInitializers(node);
+
+        foreach (var content in node.Body?.Contents ?? Enumerable.Empty<ASTNode>())
+            if (content is StatementNode statement)
+                statementGenerator.EmitStatement(statement);
+
+        EmitImplicitReturn(function);
+    }
+
+    public void GenerateDefaultConstructorBody(ASTNode typeNode, LIRTypeDeclaration owningType)
+    {
+        LIRFunction? constructor = owningType.Methods.FirstOrDefault(method => method.Name == $"{owningType.Name}::.ctor");
+        if (constructor == null)
+            return;
+
+        StatementGenerator statementGenerator = new StatementGenerator(context, unit, constructor);
+
+        statementGenerator.EmitFieldInitializers(typeNode);
+
+        EmitImplicitReturn(constructor);
+    }
+
     private LIRFunction GetFunction(string name, LIRTypeDeclaration? owningType)
     {
         LIRFunction? function = owningType != null ? owningType.Methods.FirstOrDefault(m => m.Name == name) : unit.GetFunction(name);
         return function ?? throw new Exception($"Could not find function {name}!");
+    }
+
+    private static void EmitImplicitReturn(LIRFunction function)
+    {
+        if (function.Type.ReturnType == LIRType.Void && function.LIRGenerator!.WritingBlock.Terminator == null)
+            function.LIRGenerator.EmitReturn();
     }
 }
