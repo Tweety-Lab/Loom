@@ -36,9 +36,6 @@ internal class MethodGenerator
             return;
         }
 
-        if (symbol.IsGeneric)
-            return;
-
         bool isExtern = symbol.IsExtern;
 
         // An instance method receives a pointer to the instance it belongs to as its first parameter
@@ -67,9 +64,6 @@ internal class MethodGenerator
             return;
         }
 
-        if (symbol.IsGeneric)
-            return;
-
         if (symbol.IsExtern)
             return;
 
@@ -88,7 +82,7 @@ internal class MethodGenerator
     public void GenerateConstructorDeclaration(LIRTypeDeclaration owningType)
     {
         var selfType = new LIRPointerType(owningType.Type);
-        var functionType = new LIRFunctionType(LIRType.Void, [new LIRParameter("self", selfType)]);
+        var functionType = new LIRFunctionType(LIRType.Void, [new LIRParameter("self", selfType)], []);
 
         owningType.DefineMethod($"{owningType.Name}::.ctor", functionType);
     }
@@ -115,7 +109,9 @@ internal class MethodGenerator
 
         parameters.AddRange(symbol.Parameters.Select(parameter => new LIRParameter(parameter.Name, ASTGenerator.ConvertStorageType(parameter.Type!))));
 
-        var functionType = new LIRFunctionType(LIRType.Void, [.. parameters]);
+        List<LIRTypeParameter> typeParameters = symbol.TypeParameters.Select(tp => new LIRTypeParameter(tp.Name)).ToList();
+
+        var functionType = new LIRFunctionType(LIRType.Void, [.. parameters], typeParameters.ToArray());
 
         if (symbol.IsExtern)
             owningType.DeclareMethod(symbol.FullyQualifiedName, functionType);

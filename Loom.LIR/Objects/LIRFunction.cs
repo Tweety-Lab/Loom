@@ -3,15 +3,19 @@ namespace Loom.LIR.Objects;
 
 public sealed class LIRFunction : LIRValueObject
 {
+    /// <summary> The name of the function. </summary>
     public string Name { get; }
 
     /// <summary> Whether this function is only a declaration (e.g. extern) with no body to emit. </summary>
     public bool IsDeclaration { get; set; }
 
+    /// <summary> The basic blocks of this function. </summary>
     public List<LIRBasicBlock> Blocks { get; } = new List<LIRBasicBlock>();
 
+    /// <summary> The parameters (as values) of this function. </summary>
     public IReadOnlyList<LIRValue> ParameterValues { get; }
 
+    /// <summary> The LIR generator used for this function. </summary>
     public LIRGenerator? LIRGenerator { get; }
 
     /// <inheritdoc />

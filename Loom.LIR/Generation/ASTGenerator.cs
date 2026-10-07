@@ -73,6 +73,7 @@ public class ASTGenerator
             TypeSymbol.DefaultType.IPtr => LIRType.IntPtr,
             TypeSymbol.DefaultType.Struct => new LIRTypeDeclarationType(type.FullyQualifiedName, true),
             TypeSymbol.DefaultType.Class => new LIRTypeDeclarationType(type.FullyQualifiedName, false),
+            TypeSymbol.DefaultType.TypeParameter => new LIRTypeParameter(type.Name),
             _ => throw new Exception($"Unknown type {type.KnownType}")
         };
 
@@ -88,7 +89,9 @@ public class ASTGenerator
 
         parameters.AddRange(symbol.Parameters.Select(p => new LIRParameter(p.Name, ConvertStorageType(p.Type!))));
 
-        return new LIRFunctionType(ConvertStorageType(symbol.ReturnType!), parameters.ToArray());
+        var typeParameters = symbol.TypeParameters.Select(tp => new LIRTypeParameter(tp.Name)).ToArray();
+
+        return new LIRFunctionType(ConvertStorageType(symbol.ReturnType!), parameters.ToArray(), typeParameters);
     }
 
     /// <summary> Converts <paramref name="type"/> to the LIR type it is stored as. </summary>

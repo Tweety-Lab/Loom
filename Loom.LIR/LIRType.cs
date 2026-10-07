@@ -24,4 +24,5 @@ public record LIRArrayType(LIRType ElementType, int Size) : LIRType;
 public record LIRTypeDeclarationType(string Name, bool IsValueType) : LIRType;
 
 public record LIRParameter(string Name, LIRType Type);
-public record LIRFunctionType(LIRType ReturnType, LIRParameter[] Parameters) : LIRType;
+public record LIRTypeParameter(string Name) : LIRType;
+public record LIRFunctionType(LIRType ReturnType, LIRParameter[] Parameters, LIRTypeParameter[] TypeParameters) : LIRType;

@@ -28,9 +28,12 @@ internal class StringPrinterStyle : ILIRPrinterStyle
     public string PrintFunctionHeader(LIRFunction f)
     {
         var sig = f.Type;
+        var typeParameters = string.Join(", ", sig.TypeParameters.Select(tp => tp.Name));
+        var typeParameterSuffix = typeParameters.Length > 0 ? $"<{typeParameters}>" : "";
         var parameters = string.Join(", ", sig.Parameters.Select(p => $"{PrintType(p.Type)} %{p.Name}"));
         var keyword = f.IsDeclaration ? "declare" : "define";
-        return $"{keyword} {f.Name}({parameters}) -> {PrintType(sig.ReturnType)}";
+
+        return $"{keyword} {f.Name}{typeParameterSuffix}({parameters}) -> {PrintType(sig.ReturnType)}";
     }
 
     /// <inheritdoc/>
@@ -96,6 +99,7 @@ internal class StringPrinterStyle : ILIRPrinterStyle
         LIRPointerType p => $"{PrintType(p.PointeeType)}*",
         LIRArrayType a => $"[{a.Size} x {PrintType(a.ElementType)}]",
         LIRTypeDeclarationType s => s.Name,
+        LIRTypeParameter p => p.Name,
         _ => type.ToString()
     };
 
