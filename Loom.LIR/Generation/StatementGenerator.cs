@@ -51,6 +51,7 @@ internal class StatementGenerator
             case LocalDeclarationStatementNode decl: EmitLocalDeclaration(decl); break;
             case AssignmentStatementNode assign: EmitAssignment(assign); break;
             case IfStatementNode conditional: EmitIf(conditional); break;
+            case UnsafeStatementNode unsafeStatement: EmitUnsafe(unsafeStatement); break;
             case WhileStatementNode loop: EmitWhile(loop); break;
             case ForStatementNode forLoop: EmitFor(forLoop); break;
             case ExpressionStatementNode expression: EmitExpression(expression.Expression); break;
@@ -89,8 +90,7 @@ internal class StatementGenerator
     }
 
     /// <summary> Emits the initialization of <paramref name="address"/>. </summary>
-    private void Initialize(LIRValue address, ExpressionNode initializer, TypeSymbol type)
-        => new ExpressionGenerator(context, unit, function, locals, methodGenerator, substitution).Initialize(address, initializer, type);
+    private void Initialize(LIRValue address, ExpressionNode initializer, TypeSymbol type) => new ExpressionGenerator(context, unit, function, locals, methodGenerator, substitution).Initialize(address, initializer, type);
 
     private void EmitReturn(ReturnStatementNode node)
     {
@@ -132,6 +132,13 @@ internal class StatementGenerator
             Generator.EmitBr(continueBlock);
 
         Generator.SwitchTo(continueBlock);
+    }
+
+    private void EmitUnsafe(UnsafeStatementNode node)
+    {
+        foreach (var content in node.Body.Contents)
+            if (content is StatementNode statementNode)
+                EmitStatement(statementNode);
     }
 
     private void EmitWhile(WhileStatementNode node)

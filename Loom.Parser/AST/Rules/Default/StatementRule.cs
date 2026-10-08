@@ -26,7 +26,7 @@ public class StatementRule : ParserRule<StatementNode>
         var current = Parser.Reader.Current.Type;
         var statement = ParseStatement();
 
-        if (current is not (TokenType.If or TokenType.While or TokenType.For))
+        if (current is not (TokenType.If or TokenType.While or TokenType.For or TokenType.Unsafe)) // TODO: Statements should probably own whether they have a terminator
             Parser.Reader.Expect(TokenType.Semicolon); // ;
 
         return statement;
@@ -46,6 +46,9 @@ public class StatementRule : ParserRule<StatementNode>
     {
         if (TryRunRule<ReturnStatementRule, ReturnStatementNode>(out var returnStatement))
             return returnStatement;
+
+        if (TryRunRule<UnsafeStatementRule, UnsafeStatementNode>(out var unsafeStatement))
+            return unsafeStatement;
 
         if (TryRunRule<IfStatementRule, IfStatementNode>(out var ifStatement))
             return ifStatement;
