@@ -11,7 +11,7 @@ namespace Loom.Analyzer.Analyzers;
 [LoomAnalyzer]
 public class UnresolvedImportAnalyzer : Analyzer
 {
-    public static Diagnostic UnresolvedImportDiagnostic = new(Diagnostic.DiagnosticLevel.Error, "The module '{0}' could not be resolved.");
+    public static Diagnostic UnresolvedImport = new(Diagnostic.DiagnosticLevel.Error, "The module '{0}' could not be resolved.");
 
     [Visitor]
     public void Visit(ImportNode node)
@@ -19,6 +19,6 @@ public class UnresolvedImportAnalyzer : Analyzer
         ModuleSymbol? symbol = Context.GetSymbol(node.ModuleName).Symbol as ModuleSymbol;
 
         if (symbol == null)
-            Context.DiagnosticContext?.Report(UnresolvedImportDiagnostic, node.ModuleName.Token.Location, node.ModuleName.BaseName);
+            Context.DiagnosticContext?.Report(UnresolvedImport, node.ModuleName.Token.Location, node.ModuleName.BaseName);
     }
 }

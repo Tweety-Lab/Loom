@@ -11,7 +11,7 @@ namespace Loom.Analyzer.Analyzers;
 [LoomAnalyzer]
 public class UnresolvedTypeAnalyzer : Analyzer
 {
-    public static Diagnostic UnresolvedTypeDiagnostic = new(Diagnostic.DiagnosticLevel.Error, "The type '{0}' could not be found.");
+    public static Diagnostic UnresolvedType = new(Diagnostic.DiagnosticLevel.Error, "The type '{0}' could not be found.");
 
     [Visitor]
     public void Visit(MethodDeclarationNode node)
@@ -21,7 +21,7 @@ public class UnresolvedTypeAnalyzer : Analyzer
             var symbol = TypeResolver.Resolve(Context, node, node.ReturnType.Base.Text);
 
             if (symbol == null)
-                Context.DiagnosticContext?.Report(UnresolvedTypeDiagnostic, node.ReturnType.Base.Location, node.ReturnType.Base.Text);
+                Context.DiagnosticContext?.Report(UnresolvedType, node.ReturnType.Base.Location, node.ReturnType.Base.Text);
         }
     }
 
@@ -33,7 +33,7 @@ public class UnresolvedTypeAnalyzer : Analyzer
             var symbol = TypeResolver.Resolve(Context, node, type.Base.Text);
 
             if (symbol == null)
-                Context.DiagnosticContext?.Report(UnresolvedTypeDiagnostic, type.Base.Location, type.Base.Text);
+                Context.DiagnosticContext?.Report(UnresolvedType, type.Base.Location, type.Base.Text);
         }
     }
 }

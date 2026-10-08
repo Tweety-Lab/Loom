@@ -135,6 +135,7 @@ public class Token
         [Keyword("export"), Modifier] Export,
         [Keyword("extern"), Modifier] Extern,
         [Keyword("static"), Modifier] Static,
+        [Keyword("stack"), Modifier] Stack,
 
         [Keyword("unique"), Modifier(ModifierTarget.Type)] Unique,
 

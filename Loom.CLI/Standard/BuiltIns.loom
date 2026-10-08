@@ -3,7 +3,7 @@ import Standard::Memory;
 module Standard
 {
 	/// @brief Immutable unowning slice of contiguous memory.
-    export struct Slice
+    export stack struct Slice
     {
         /// @brief The number of elements in the slice.
         public i32 Length = default;

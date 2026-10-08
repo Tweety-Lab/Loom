@@ -50,6 +50,9 @@ public record TypeSymbol(string Name, TypeSymbol.DefaultType KnownType) : Symbol
     /// <summary> Whether this type uses value semantics. </summary>
     public bool IsValueType { get; set; }
 
+    /// <summary> Whether this type can only exist on the stack. </summary>
+    public bool IsStackOnly { get; set; }
+
     /// <summary> Whether this type is a generic. </summary>
     public bool IsGeneric => this switch
     {

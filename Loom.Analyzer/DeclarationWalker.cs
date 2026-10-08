@@ -133,6 +133,7 @@ internal class DeclarationWalker : ASTVisitor
         var symbol = new TypeSymbol(node.Name.Text, TypeSymbol.DefaultType.Struct);
         symbol.FullyQualifiedName = BuildQualifiedName(node.Name.Text);
         symbol.IsExported = node.HasModifier(Parser.Tokenizer.Token.TokenType.Export);
+        symbol.IsStackOnly = node.HasModifier(Parser.Tokenizer.Token.TokenType.Stack);
         symbol.DeclaringNode = node;
         symbol.IsValueType = true;
 
