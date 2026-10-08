@@ -2,19 +2,6 @@ import Standard::Memory;
 
 module Standard
 {
-    /// @brief Placeholder String type that uses a char array.
-    export class String
-    {
-        public char[128] Characters = default;
-        public i32 Length = default;
-
-        public String(char[128] characters, i32 length)
-        {
-			Characters = characters;
-			Length = length;
-        }
-    }
-
 	/// @brief Immutable unowning slice of contiguous memory.
     export struct Slice
     {
@@ -26,7 +13,10 @@ module Standard
         /// @brief Returns the element at the given index.
         public T ElementAt<T>(i64 index)
         {
-			return Unsafe.Read<T>(pointer + index * sizeof(T));
+            unsafe
+            {
+                return Unsafe.Read<T>(pointer + index * sizeof(T));
+            }
         }
     }
 }
