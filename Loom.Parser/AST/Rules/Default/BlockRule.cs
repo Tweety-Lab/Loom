@@ -27,7 +27,7 @@ public abstract class BlockRule : ParserRule<BlockNode>
         var dispatch = new Dictionary<TokenType, Action>
         {
             [TokenType.Module] = () => body.Add(RunRule<ModuleDeclarationRule, ModuleNode>()),
-            [TokenType.Unsafe] = () => body.Add(RunRule<UnsafeRule, UnsafeNode>()),
+            [TokenType.Unsafe] = () => body.Add(RunRule<UnsafeRule, UnsafeStatementNode>()),
         };
 
         ParseUntil(TokenType.RBrace, dispatch, () =>

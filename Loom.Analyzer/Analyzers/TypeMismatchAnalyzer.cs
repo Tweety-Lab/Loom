@@ -109,8 +109,7 @@ public class TypeMismatchAnalyzer : Analyzer
         {
             var symbol = Context.GetSymbol(identifier).Symbol;
 
-            method = symbol as MethodSymbol
-                ?? (symbol as TypeSymbol)?.Members.OfType<MethodSymbol>().FirstOrDefault(candidate => candidate.Name == identifier.BaseName);
+            method = symbol as MethodSymbol ?? (symbol as TypeSymbol)?.Members.OfType<MethodSymbol>().FirstOrDefault(candidate => candidate.Name == identifier.BaseName);
         }
 
         CheckArguments(method?.Parameters, node.Arguments);

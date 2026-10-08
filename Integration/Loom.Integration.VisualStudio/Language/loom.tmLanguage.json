@@ -124,7 +124,7 @@
         },
         {
           "name": "storage.modifier.loom",
-          "match": "\\b(?:export|extern|unsafe|static|public|private|unique|shared|weak)\\b"
+          "match": "\\b(?:export|extern|unsafe|static|stack|public|private|unique|shared|weak)\\b"
         },
         {
           "name": "keyword.operator.expression.loom",
@@ -170,10 +170,6 @@
         {
           "name": "punctuation.separator.comma.loom",
           "match": ","
-        },
-        {
-          "name": "storage.modifier.pointer.loom",
-          "match": "\\*"
         },
         {
           "name": "entity.name.type.loom",
