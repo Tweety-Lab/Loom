@@ -14,6 +14,9 @@ public class LIRCompilationUnit : ILIRObject
     /// <summary> All <see cref="LIRTypeDeclaration"/>s declared by this <see cref="LIRCompilationUnit"/>. </summary>
     public List<LIRTypeDeclaration> TypeDeclarations { get; } = new List<LIRTypeDeclaration>();
 
+    /// <summary> All <see cref="LIRGlobal"/>s declared by this <see cref="LIRCompilationUnit"/>. </summary>
+    public List<LIRGlobal> Globals { get; } = new List<LIRGlobal>();
+
     /// <summary> The name of this <see cref="LIRCompilationUnit"/>. </summary>
     public string Name => MetaData["Name"];
 
@@ -43,6 +46,17 @@ public class LIRCompilationUnit : ILIRObject
 
     /// <summary> Gets a <see cref="LIRTypeDeclaration"/> by name. </summary>
     public LIRTypeDeclaration? GetTypeDeclaration(string name) => TypeDeclarations.FirstOrDefault(s => s.Name == name);
+
+    /// <summary> Defines a new global inside this <see cref="LIRCompilationUnit"/>. </summary>
+    public LIRGlobal DefineGlobal(string name, LIRType valueType, LIRValue initializer, bool isConstant = true)
+    {
+        LIRGlobal global = LIRGlobal.Define(name, valueType, initializer, isConstant);
+        Globals.Add(global);
+        return global;
+    }
+
+    /// <summary> Gets a global by name. </summary>
+    public LIRGlobal? GetGlobal(string name) => Globals.FirstOrDefault(g => g.Name == name);
 
     /// <summary> Gets a function by name. </summary>
     public LIRFunction? GetFunction(string name) => AllFunctions.FirstOrDefault(f => f.Name == name);

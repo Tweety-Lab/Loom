@@ -61,6 +61,14 @@ internal class LLVMTranslationContext
             return llvmVal;
         }
 
+        if (value is LIRConstantArrayValue arrayConst)
+        {
+            var llvmElementType = ResolveType(((LIRArrayType)arrayConst.Type).ElementType);
+            var llvmVal = LLVMValueRef.CreateConstArray(llvmElementType, arrayConst.Elements.Select(ResolveValue).ToArray());
+            ValueMap[value] = llvmVal;
+            return llvmVal;
+        }
+
         if (value is LIRNullValue nullValue)
         {
             var llvmVal = LLVMValueRef.CreateConstNull(ResolveType(nullValue.Type));

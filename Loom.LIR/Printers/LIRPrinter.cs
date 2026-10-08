@@ -18,6 +18,13 @@ public class LIRPrinter
         sb.Append(PrintMeta(unit));
         sb.AppendLine();
 
+        foreach (var global in unit.Globals)
+        {
+            sb.Append(PrintMeta(global));
+            sb.AppendLine(Style.PrintGlobal(global));
+            sb.AppendLine();
+        }
+
         foreach (var declaredObj in unit.TypeDeclarations)
         {
             sb.AppendLine(Print(declaredObj));

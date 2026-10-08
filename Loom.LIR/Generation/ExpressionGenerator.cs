@@ -77,7 +77,7 @@ internal class ExpressionGenerator
             if (initializer is ArrayLiteralNode literal)
                 EmitArrayLiteralInto(address, array, literal.Elements);
             else if (initializer is not DefaultExpressionNode && initializer != null && context.AnalysisContext.ExpressionTypes.TryGetValue(initializer, out var initializerType) && initializerType is ArrayTypeSymbol)
-                Generator.EmitStore(EmitValue(initializer), address); // Copies the whole value, element by element
+                Generator.EmitStore(EmitValue(initializer), address);
             else
                 EmitDefaultArray(address, array);
 
@@ -108,19 +108,12 @@ internal class ExpressionGenerator
         throw new Exception($"Could not resolve the type of an array literal of {node.Elements.Count} element(s).");
     }
 
-    /// <summary> Emits a string literal as a new slice whose pointer points at the literal's storage and whose length is its number of characters. </summary>
+    /// <summary> Emits a string literal as a new slice whose pointer points at the literal's constant storage and whose length is its number of characters. </summary>
     public LIRValue EmitStringLiteral(StringLiteralNode node)
     {
-        // TODO: Store strings as constants (when applicable)
         if (context.AnalysisContext.ExpressionTypes.TryGetValue(node, out var sliceType) && sliceType.IsValueType)
         {
-            var charType = (TypeSymbol)context.AnalysisContext.Binders.First().Value.Lookup("char")!.First();
-            var stringType = new ArrayTypeSymbol(charType, Math.Max(1, node.Value.Length));
-
-            var stringAddress = Generator.EmitAlloca(ASTGenerator.ConvertType(stringType, substitution));
-
-            for (int index = 0; index < node.Value.Length; index++)
-                Generator.EmitStore(new LIRConstantCharValue(node.Value[index]), Generator.EmitGetElement(stringAddress, new LIRConstantIntValue(index)));
+            var stringAddress = EmitStringConstant(node.Value);
 
             var declarationType = new LIRTypeDeclarationType(sliceType.FullyQualifiedName, sliceType.IsValueType);
             var declaration = unit.TypeDeclarations.FirstOrDefault(t => t.Type == declarationType) ?? throw new Exception($"Could not find type: {sliceType.FullyQualifiedName}");
@@ -133,6 +126,23 @@ internal class ExpressionGenerator
         }
 
         throw new Exception($"Could not resolve the type of a string literal of {node.Value.Length} character(s).");
+    }
+
+    // Emits the constant global holding the characters of a string literal, reusing an identical one when the unit already declares it
+    private LIRGlobal EmitStringConstant(int[] characters)
+    {
+        var charType = (TypeSymbol)context.AnalysisContext.Binders.First().Value.Lookup("char")!.First();
+
+        var elements = new List<LIRValue>(characters.Select(character => (LIRValue)new LIRConstantCharValue(character)));
+
+        // An empty literal still holds one element so that its address is valid to index
+        if (elements.Count == 0)
+            elements.Add(new LIRConstantCharValue(0));
+
+        var initializer = new LIRConstantArrayValue(ASTGenerator.ConvertType(charType, substitution), elements);
+
+        return unit.Globals.FirstOrDefault(g => g.IsConstant && g.Initializer.Equals(initializer))
+            ?? unit.DefineGlobal($".str.{unit.Globals.Count}", initializer.Type, initializer);
     }
 
     /// <summary> Emits the default value of <paramref name="type"/>. </summary>

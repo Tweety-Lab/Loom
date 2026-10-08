@@ -22,6 +22,9 @@ internal class StringPrinterStyle : ILIRPrinterStyle
     public string PrintField(LIRField field) => $"field {PrintType(field.Type)} {field.Name}";
 
     /// <inheritdoc/>
+    public string PrintGlobal(LIRGlobal global) => $"{(global.IsConstant ? "constant" : "global")} {PrintType(global.ValueType)} @{global.Name} = {PrintValue(global.Initializer)}";
+
+    /// <inheritdoc/>
     public string PrintMeta(string key, string value) => $"[{key}: {value}]";
 
     /// <inheritdoc/>
@@ -109,14 +112,17 @@ internal class StringPrinterStyle : ILIRPrinterStyle
         return value switch
         {
             LIRConstantCharValue c => CharacterLiteralParser.Format(c.Value),
+            LIRConstantArrayValue a => $"[{string.Join(", ", a.Elements.Select(PrintValue))}]",
             LIRConstantIntValue c => $"{c.Value}",
             LIRConstantBoolValue c => c.Value ? "true" : "false",
             LIRNullValue => "null",
             LIRDefaultValue d => $"default({PrintType(d.Type)})",
             LIRTempValue t => $"%{t.ID}",
             LIRFunction f => $"@{f.Name}",
+            LIRGlobal g => $"@{g.Name}",
             LIRField field => field.Name,
             LIRBlockValue b => $"%{b.Block.Name}",
+            LIRTypeValue p => PrintType(p.Type),
             null => "%null",
             _ => $"%unknown:{value.Type}"
         };

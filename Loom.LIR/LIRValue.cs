@@ -47,6 +47,60 @@ public class LIRConstantCharValue : LIRValue
     public LIRConstantCharValue(int value) => Value = value;
 }
 
+/// <summary> A constant array of values, e.g. the initializer of a global. </summary>
+public class LIRConstantArrayValue : LIRValue
+{
+    /// <summary> The elements of the array. </summary>
+    public IReadOnlyList<LIRValue> Elements { get; }
+
+    /// <inheritdoc/>
+    public override LIRType Type { get; }
+
+    /// <summary> Initializes a new instance of the <see cref="LIRConstantArrayValue"/> class. </summary>
+    public LIRConstantArrayValue(LIRType elementType, IReadOnlyList<LIRValue> elements)
+    {
+        Elements = elements;
+        Type = new LIRArrayType(elementType, elements.Count);
+    }
+
+    /// <inheritdoc/>
+    public override bool Equals(object? obj)
+    {
+        if (obj is not LIRConstantArrayValue other || Type != other.Type || Elements.Count != other.Elements.Count)
+            return false;
+
+        for (int index = 0; index < Elements.Count; index++)
+            if (!AreEqual(Elements[index], other.Elements[index]))
+                return false;
+
+        return true;
+    }
+
+    /// <inheritdoc/>
+    public override int GetHashCode()
+    {
+        HashCode hash = new HashCode();
+        hash.Add(Type);
+
+        foreach (var element in Elements)
+            hash.Add(ElementKey(element));
+
+        return hash.ToHashCode();
+    }
+
+    // Constants compare by value; anything else falls back to identity
+    private static bool AreEqual(LIRValue left, LIRValue right) => ElementKey(left).Equals(ElementKey(right));
+
+    private static object ElementKey(LIRValue element) => element switch
+    {
+        LIRConstantArrayValue array => array,
+        LIRConstantCharValue character => character.Value,
+        LIRConstantIntValue integer => integer.Value,
+        LIRConstantBoolValue boolean => boolean.Value,
+        _ => element
+    };
+}
+
 public class LIRConstantBoolValue : LIRValue
 {
     public bool Value { get; }
