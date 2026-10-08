@@ -33,6 +33,9 @@ public class PrimaryExpressionRule : ParserRule<ExpressionNode>
         if (TryRunRule<ArrayLiteralExpressionRule, ArrayLiteralNode>(out var arrayLiteral))
             return arrayLiteral;
 
+        if (TryRunRule<StringLiteralExpressionRule, StringLiteralNode>(out var stringLiteral))
+            return stringLiteral;
+
         if (TryRunRule<CharacterLiteralExpressionRule, CharacterLiteralNode>(out var characterLiteral))
             return characterLiteral;
 

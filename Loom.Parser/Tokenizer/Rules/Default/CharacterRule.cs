@@ -41,7 +41,8 @@ public class CharacterRule : TokenizerRule
             var c = (char)Reader.Read();
 
             if (c == '\\' && !Reader.IsEnd)
-                Reader.Read(); // The escaped character can never close the literal, not even a quote.
+                Reader.Read(); // an escaped character can never close the literal
+
             else if (c == QUOTE)
                 break;
         }

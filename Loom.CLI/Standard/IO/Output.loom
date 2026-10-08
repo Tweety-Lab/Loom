@@ -4,12 +4,17 @@ module Standard::IO
 {
 	export extern void putchar(char c);
 
-    /// @brief Prints a string to stdout and appends a newline.
-    export void println(String s)
+    /// @brief Prints a char slice to the console and appends a newline.
+    export void println(Slice s)
+    {
+        print(s);
+		putchar('\n');
+    }
+
+    /// @brief Prints a char slice to the console.
+    export void print(Slice s)
     {
         for (i32 i = 0; i < s.Length; i = i + 1)
-            putchar(s.Characters[i]);
-
-		putchar('\n');
+            putchar(s.ElementAt<char>(i));
     }
 }

@@ -18,14 +18,10 @@ module Standard
 	/// @brief Immutable unowning slice of contiguous memory.
     export struct Slice
     {
-        iptr pointer = default;
-        i32 length = default;
+        /// @brief The number of elements in the slice.
+        public i32 Length = default;
 
-        public Slice(iptr _pointer, i32 _length)
-        {
-            pointer = _pointer;
-			length = _length;
-        }
+        iptr pointer = default;
 
         /// @brief Returns the element at the given index.
         public T ElementAt<T>(i64 index)

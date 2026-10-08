@@ -52,6 +52,13 @@ internal class TypeWalker : ASTWalker
     public void Visit(CharacterLiteralNode node) => Context.ExpressionTypes[node] = (TypeSymbol)Context.Binders.First().Value.Lookup("char")!.First();
 
     [Visitor]
+    public void Visit(StringLiteralNode node)
+    {
+        if (TypeResolver.Resolve(Context, node, "Slice") is { } slice)
+            Context.ExpressionTypes[node] = slice;
+    }
+
+    [Visitor]
     public void Visit(BooleanLiteralNode node) => Context.ExpressionTypes[node] = (TypeSymbol)Context.Binders.First().Value.Lookup("bool")!.First();
 
     [Visitor]

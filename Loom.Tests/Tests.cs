@@ -224,6 +224,38 @@ module Test
 }
 ";
 
+    public const string STRING_LITERAL_SOURCE = @"
+module Test
+{
+    struct Slice
+    {
+        iptr pointer = default;
+        i32 length = default;
+    }
+
+    void MyMethod()
+    {
+        Slice s = ""Hello!"";
+    }
+}
+";
+
+    public const string STRING_LITERAL_ESCAPE_SOURCE = @"
+module Test
+{
+    struct Slice
+    {
+        iptr pointer = default;
+        i32 length = default;
+    }
+
+    void MyMethod()
+    {
+        Slice s = ""a\u{1F600}😀"";
+    }
+}
+";
+
     public const string MEMBER_CALL_SOURCE = @"
 module Test
 {
@@ -505,6 +537,72 @@ module Test
         var call = Assert.Single(instructions, i => i.OpCode == LIROpCode.CallInstanced);
         Assert.Equal("Test::TestStruct::.ctor", Assert.IsType<LIRFunction>(call.Operands[0]).Name);
         Assert.Same(alloca.Result, call.Operands[1]);
+    }
+
+    [Fact]
+    public void Parse_StringLiteral()
+    {
+        var (root, _) = ParseAndAnalyze(STRING_LITERAL_SOURCE);
+        var method = (MethodDeclarationNode)root.Modules[0].Body.Contents[1];
+        var statement = Assert.IsType<LocalDeclarationStatementNode>(method.Body.Contents.First());
+
+        var literal = Assert.IsType<StringLiteralNode>(statement.Variable.Initializer);
+        Assert.Equal(new[] { (int)'H', (int)'e', (int)'l', (int)'l', (int)'o', (int)'!' }, literal.Value);
+    }
+
+    [Fact]
+    public void Parse_StringLiteral_DecodesEscapesAndSurrogatesToScalars()
+    {
+        var (root, _) = ParseAndAnalyze(STRING_LITERAL_ESCAPE_SOURCE);
+        var method = (MethodDeclarationNode)root.Modules[0].Body.Contents[1];
+        var statement = Assert.IsType<LocalDeclarationStatementNode>(method.Body.Contents.First());
+        var literal = Assert.IsType<StringLiteralNode>(statement.Variable.Initializer);
+
+        // Escapes and surrogate pairs both decode to a single Unicode scalar value
+        Assert.Equal(new[] { (int)'a', 0x1F600, 0x1F600 }, literal.Value);
+    }
+
+    [Fact]
+    public void Analyze_StringLiteral_HasSliceType()
+    {
+        var (root, context) = ParseAndAnalyze(STRING_LITERAL_SOURCE);
+        var method = (MethodDeclarationNode)root.Modules[0].Body.Contents[1];
+        var statement = Assert.IsType<LocalDeclarationStatementNode>(method.Body.Contents.First());
+        var literal = Assert.IsType<StringLiteralNode>(statement.Variable.Initializer);
+
+        var type = context.AnalysisContext.ExpressionTypes[literal];
+        Assert.Equal(TypeSymbol.DefaultType.Struct, type.KnownType);
+        Assert.Equal("Slice", type.Name);
+        Assert.True(type.IsValueType);
+    }
+
+    [Fact]
+    public void Analyze_StringLiteral_NoDiagnostics()
+    {
+        var (_, context) = ParseAndAnalyze(STRING_LITERAL_SOURCE);
+        Assert.DoesNotContain(context.DiagnosticContext.Diagnostics, d => d.Level == Diagnostic.DiagnosticLevel.Error);
+    }
+
+    [Fact]
+    public void EmitLIR_StringLiteral_StoresCharactersAndBuildsSlice()
+    {
+        CompilationContext context = new CompilationContext();
+        context.Parse(STRING_LITERAL_SOURCE).Analyze().EmitLIR();
+
+        LIRCompilationUnit unit = context.CompilationUnits.First();
+        var main = unit.GetFunction("Test::MyMethod");
+        Assert.NotNull(main);
+
+        var instructions = main!.Blocks.SelectMany(b => b.Instructions).ToList();
+
+        // The literal's six characters are stored into its storage one by one
+        Assert.Equal(6, instructions.Count(i => i.Operands.Any(o => o is LIRConstantCharValue)));
+
+        // The slice's length is the number of characters
+        Assert.Contains(instructions, i => i.Operands.Any(o => o is LIRConstantIntValue c && c.Value == 6));
+
+        // The slice's pointer is the integer address of the stored characters
+        Assert.Contains(instructions, i => i.OpCode == LIROpCode.PtrToInt);
     }
 
     [Fact]

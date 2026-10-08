@@ -42,6 +42,7 @@ internal class ExpressionGenerator
         BinaryExpressionNode binary => EmitBinary(binary),
         CallExpressionNode call => EmitCall(call),
         ArrayLiteralNode literal => EmitArrayLiteral(literal),
+        StringLiteralNode str => EmitStringLiteral(str),
         ArrayAccessExpressionNode array => EmitVariableValue(array),
         MemberAccessExpressionNode member => EmitVariableValue(member),
         InstanceCreationExpresssionNode creation => EmitInstanceCreation(creation),
@@ -56,6 +57,7 @@ internal class ExpressionGenerator
         MemberAccessExpressionNode member => EmitMemberAddress(member),
         ArrayAccessExpressionNode array => EmitArrayElementAddress(array),
         ArrayLiteralNode literal => EmitArrayLiteral(literal),
+        StringLiteralNode str => EmitStringLiteral(str),
         InstanceCreationExpresssionNode creation => Emit(creation),
         _ => throw new Exception($"Unhandled addressable expression: {node.GetType().Name}")
     };
@@ -104,6 +106,33 @@ internal class ExpressionGenerator
             return destination ?? EmitArrayLiteralInto(Generator.EmitAlloca(ASTGenerator.ConvertType(type, substitution)), type, node.Elements);
 
         throw new Exception($"Could not resolve the type of an array literal of {node.Elements.Count} element(s).");
+    }
+
+    /// <summary> Emits a string literal as a new slice whose pointer points at the literal's storage and whose length is its number of characters. </summary>
+    public LIRValue EmitStringLiteral(StringLiteralNode node)
+    {
+        // TODO: Store strings as constants (when applicable)
+        if (context.AnalysisContext.ExpressionTypes.TryGetValue(node, out var sliceType) && sliceType.IsValueType)
+        {
+            var charType = (TypeSymbol)context.AnalysisContext.Binders.First().Value.Lookup("char")!.First();
+            var stringType = new ArrayTypeSymbol(charType, Math.Max(1, node.Value.Length));
+
+            var stringAddress = Generator.EmitAlloca(ASTGenerator.ConvertType(stringType, substitution));
+
+            for (int index = 0; index < node.Value.Length; index++)
+                Generator.EmitStore(new LIRConstantCharValue(node.Value[index]), Generator.EmitGetElement(stringAddress, new LIRConstantIntValue(index)));
+
+            var declarationType = new LIRTypeDeclarationType(sliceType.FullyQualifiedName, sliceType.IsValueType);
+            var declaration = unit.TypeDeclarations.FirstOrDefault(t => t.Type == declarationType) ?? throw new Exception($"Could not find type: {sliceType.FullyQualifiedName}");
+
+            var sliceAddress = Generator.EmitAlloca(ASTGenerator.ConvertType(sliceType, substitution));
+            Generator.EmitStore(stringAddress, Generator.EmitGetField(sliceAddress, declaration.Fields.First(f => f.Name == "pointer")));
+            Generator.EmitStore(new LIRConstantIntValue(node.Value.Length), Generator.EmitGetField(sliceAddress, declaration.Fields.First(f => f.Name == "Length")));
+
+            return sliceAddress;
+        }
+
+        throw new Exception($"Could not resolve the type of a string literal of {node.Value.Length} character(s).");
     }
 
     /// <summary> Emits the default value of <paramref name="type"/>. </summary>

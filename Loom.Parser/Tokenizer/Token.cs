@@ -89,6 +89,7 @@ public class Token
         Identifier,
         Number,
         CharacterLiteral,
+        StringLiteral,
 
         [Character('{')] LBrace,
         [Character('}')] RBrace,

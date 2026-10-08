@@ -9,13 +9,7 @@ module Standard::Program
     {
         i32 exitCode = 1;
 
-        char[128] contents = ['H', 'e', 'l', 'l', 'o', '!'];
-
-        unique String myString = new String(contents, 6);
-
-        iptr addr = Unsafe.AddressOf<char[128]>(contents);
-        Slice slice = new Slice(addr, 6);
-        putchar(slice.ElementAt<char>(0));
+        Slice myString = "Hello!";
 
         println(myString); // "Hello!"
         
