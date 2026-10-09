@@ -124,7 +124,7 @@
         },
         {
           "name": "storage.modifier.loom",
-          "match": "\\b(?:export|extern|unsafe|static|stack|public|private|unique|shared|weak)\\b"
+          "match": "\\b(?:export|extern|unsafe|static|stack|public|private|unique|shared|weak|ref|mut)\\b"
         },
         {
           "name": "keyword.operator.expression.loom",

@@ -138,6 +138,7 @@ public class Token
         [Keyword("stack"), Modifier] Stack,
 
         [Keyword("unique"), Modifier(ModifierTarget.Type)] Unique,
+        [Keyword("ref"), Modifier(ModifierTarget.Type)] Ref,
 
         [Keyword("true")] True,
         [Keyword("false")] False,

@@ -14,6 +14,7 @@ public class InvalidPointerTypeAnalyzer : Analyzer
 {
     public static Diagnostic ValueTypePointer = new(Diagnostic.DiagnosticLevel.Error, "'{0}' pointer type cannot be applied to value type '{1}'.");
     public static Diagnostic MissingPointer = new(Diagnostic.DiagnosticLevel.Error, "Reference type '{0}' must be initialized with a pointer type.");
+    public static Diagnostic MissingReturnPointer = new(Diagnostic.DiagnosticLevel.Error, "Return reference type '{0}' must have a pointer type.");
 
     [Visitor]
     public void Visit(LocalDeclarationStatementNode node)
@@ -30,5 +31,18 @@ public class InvalidPointerTypeAnalyzer : Analyzer
         if (symbol.Type is not ArrayTypeSymbol && !symbol.Type.IsValueType && symbol.PointerType == PointerType.None)
             Context.DiagnosticContext?.Report(MissingPointer, node.Variable.StartToken?.Location, symbol.Type.Name);
 
+    }
+
+    [Visitor]
+    public void Visit(MethodDeclarationNode node)
+    {
+        if (Context.GetSymbol(node).Symbol is not MethodSymbol symbol || symbol.ReturnType == null)
+            return;
+
+        if (symbol.ReturnType.KnownType == TypeSymbol.DefaultType.Void)
+            return;
+
+        if (!symbol.ReturnType.IsValueType && symbol.ReturnPointerType == PointerType.None)
+            Context.DiagnosticContext?.Report(MissingReturnPointer, node.StartToken?.Location, symbol.ReturnType.Name);
     }
 }

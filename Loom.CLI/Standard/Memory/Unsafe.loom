@@ -21,7 +21,7 @@ module Standard::Memory
         public static iptr AddressOf<T>(T value) { }
 
         /// @brief Reads the value at the given address.
-        public static T Read<T>(iptr address) { }
+        public static unique T Read<T>(iptr address) { }
 #endregion
     }
 

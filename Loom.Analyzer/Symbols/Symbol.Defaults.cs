@@ -84,6 +84,9 @@ public record MethodSymbol(string Name, MethodSymbol.MethodKind Kind) : Symbol(N
     /// <summary> The resolved return type. </summary>
     public TypeSymbol? ReturnType { get; set; }
 
+    /// <summary> The pointer type for the return value. </summary>
+    public PointerType ReturnPointerType { get; set; }
+
     /// <summary> All type parameters used by this method. </summary>
     public List<TypeParameterSymbol> TypeParameters { get; set; } = new List<TypeParameterSymbol>();
 

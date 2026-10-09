@@ -71,10 +71,10 @@ internal class OwnershipWalker : ASTVisitor
     }
 
     [Visitor]
-    public void Visit(IdentifierNameNode node)
+    public void Visit(CallExpressionNode node)
     {
-        if (TryGetState(node, out var state) && state == OwnershipState.Moved)
-            Context.DiagnosticContext?.Report(UseOfMovedValue, node.StartToken?.Location, node.BaseName);
+        foreach (var arg in node.Arguments)
+            MoveOut(arg);
     }
 
     private void MoveOut(ExpressionNode expr)

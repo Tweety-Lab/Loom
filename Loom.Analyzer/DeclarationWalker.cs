@@ -44,6 +44,9 @@ internal class DeclarationWalker : ASTVisitor
         symbol.IsStatic = node.HasModifier(Parser.Tokenizer.Token.TokenType.Static);
         symbol.IsExported = node.HasModifier(Parser.Tokenizer.Token.TokenType.Export);
         symbol.IsExtern = node.HasModifier(Parser.Tokenizer.Token.TokenType.Extern);
+        
+        if (node.ReturnType.HasModifier(Parser.Tokenizer.Token.TokenType.Unique))
+            symbol.ReturnPointerType = PointerType.Unique;
 
         // TODO:
         // Non member methods should be MemberAccessibility.None

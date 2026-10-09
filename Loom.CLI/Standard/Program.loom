@@ -9,9 +9,23 @@ module Standard::Program
     {
         i32 exitCode = 1;
 
+        unique String string = GetClass();
+        ConsumeClass(string);
+        ConsumeClass(string);
+
         Slice myString = "Hello!";
         println(myString); // "Hello!"
         
         return 0;
+    }
+
+    export unique String GetClass()
+	{
+		return new String();
+	}
+
+    export void ConsumeClass(ref String input)
+    {
+        // We own input
     }
 }

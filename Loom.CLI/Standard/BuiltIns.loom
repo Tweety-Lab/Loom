@@ -2,6 +2,11 @@ import Standard::Memory;
 
 module Standard
 {
+    export class String
+    {
+
+    }
+
 	/// @brief Immutable unowning slice of contiguous memory.
     export stack struct Slice
     {
@@ -11,7 +16,7 @@ module Standard
         iptr pointer = default;
 
         /// @brief Returns the element at the given index.
-        public T ElementAt<T>(i64 index)
+        public unique T ElementAt<T>(i64 index)
         {
             unsafe
             {
