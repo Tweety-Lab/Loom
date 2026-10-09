@@ -11,6 +11,7 @@ module Standard::Program
 
         unique String string = GetClass();
         ConsumeClass(string);
+        ConsumeClass(string);
 
         Slice myString = "Hello!";
         println(myString); // "Hello!"
@@ -25,6 +26,7 @@ module Standard::Program
 
     export void ConsumeClass(ref String input)
     {
-        // We own input
+        // We own a borrow to input
+        input.MutableField = 10;
     }
 }
