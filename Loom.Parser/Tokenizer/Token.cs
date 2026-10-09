@@ -139,6 +139,7 @@ public class Token
 
         [Keyword("unique"), Modifier(ModifierTarget.Type)] Unique,
         [Keyword("ref"), Modifier(ModifierTarget.Type)] Ref,
+        [Keyword("mut"), Modifier(ModifierTarget.Type)] Mut,
 
         [Keyword("true")] True,
         [Keyword("false")] False,

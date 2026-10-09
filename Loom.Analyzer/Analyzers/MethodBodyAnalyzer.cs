@@ -12,7 +12,7 @@ namespace Loom.Analyzer.Analyzers;
 [LoomAnalyzer]
 public class MethodBodyAnalyzer : Analyzer
 {
-    public static Diagnostic MethodNeedsBody = new(Diagnostic.DiagnosticLevel.Error, "Method {0} must declare a body because it is not marked extern.");
+    public static Diagnostic MethodNeedsBody = new(Diagnostic.DiagnosticLevel.Error, "Method '{0}' must declare a body because it is not marked extern.");
 
     [Visitor]
     public void Visit(MethodDeclarationNode node)

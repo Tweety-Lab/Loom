@@ -90,6 +90,17 @@ internal class DeclarationWalker : ASTVisitor
     public void Visit(ParameterNode node)
     {
         var paramSymbol = new ParameterSymbol(node.Name.Text);
+        paramSymbol.IsMutable = true;
+        
+        if (node.Type.HasModifier(Parser.Tokenizer.Token.TokenType.Ref))
+        {
+            paramSymbol.IsBorrow = true;
+
+            if (node.Type.HasModifier(Parser.Tokenizer.Token.TokenType.Mut))
+                paramSymbol.IsMutable = true;
+            else
+                paramSymbol.IsMutable = false;
+        }
 
         CurrentTable.Define(paramSymbol);
         Context.BoundSymbols[node] = paramSymbol;

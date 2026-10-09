@@ -154,4 +154,10 @@ public record ParameterSymbol(string Name) : Symbol(Name)
 {
     /// <summary> The resolved type. </summary>
     public TypeSymbol? Type { get; set; }
+
+    /// <summary> Whether this parameter is a borrow. </summary>
+    public bool IsBorrow { get; set; }
+
+    /// <summary> Whether this parameter is mutable. </summary>
+    public bool IsMutable { get; set; }
 }
