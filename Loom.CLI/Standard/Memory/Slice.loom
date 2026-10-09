@@ -1,6 +1,4 @@
-import Standard::Memory;
-
-module Standard
+module Standard::Memory
 {
 	/// @brief Immutable unowning slice of contiguous memory.
     export stack struct Slice

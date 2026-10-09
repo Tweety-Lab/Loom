@@ -29,12 +29,18 @@ internal class DeclarationWalker : ASTVisitor
     [Visitor]
     public void Visit(ModuleNode node)
     {
-        var symbol = new ModuleSymbol(node.Name.Text);
-        symbol.DeclaringNode = node;
+        var symbol = CurrentTable.Symbols.OfType<ModuleSymbol>().FirstOrDefault(s => s.Name == node.Name.Text);
 
-        CurrentTable.Define(symbol);
+        if (symbol == null)
+        {
+            symbol = new ModuleSymbol(node.Name.Text);
+            symbol.DeclaringNode = node;
+            CurrentTable.Define(symbol);
+        }
 
-        WithScope(node, () => VisitChildren(node), symbol);
+        var mergedScope = symbol.DeclaringNode is ModuleNode declaring && Context.Binders.TryGetValue(declaring, out var existing) ? existing : null;
+
+        WithScope(node, () => VisitChildren(node), symbol, mergedScope);
     }
 
     [Visitor]
@@ -210,12 +216,13 @@ internal class DeclarationWalker : ASTVisitor
     /// <inheritdoc/>
     protected override void OnUnhandled(ASTNode node) => VisitChildren(node);
 
-    private void WithScope(ASTNode node, Action body, Symbol? symbol = null)
+    private void WithScope(ASTNode node, Action body, Symbol? symbol = null, Binder? scope = null)
     {
         var parentTable = CurrentTable;
         var previousSymbol = CurrentSymbol;
 
-        CurrentTable = new Binder(parentTable);
+        // Merged module definitions share a single scope rather than opening a new one.
+        CurrentTable = scope ?? new Binder(parentTable);
         Context.Binders[node] = CurrentTable;
 
         if (symbol is not null)

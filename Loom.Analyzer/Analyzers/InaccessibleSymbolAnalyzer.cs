@@ -93,11 +93,14 @@ public class InaccessibleSymbolAnalyzer : Analyzer
         if (symbol.DeclaringNode == null)
             return;
 
-        ModuleNode? usageModule = Context.FirstAncestorOrSelf<ModuleNode>(node);
-        ModuleNode? symbolModule = Context.FirstAncestorOrSelf<ModuleNode>(symbol.DeclaringNode);
+        ModuleNode? usageModuleNode = Context.FirstAncestorOrSelf<ModuleNode>(node);
+        ModuleNode? symbolModuleNode = Context.FirstAncestorOrSelf<ModuleNode>(symbol.DeclaringNode);
 
         if (symbol is not IExportableSymbol exportable)
             return;
+
+        var usageModule = usageModuleNode is not null ? Context.GetSymbol(usageModuleNode).Symbol as ModuleSymbol : null;
+        var symbolModule = symbolModuleNode is not null ? Context.GetSymbol(symbolModuleNode).Symbol as ModuleSymbol : null;
 
         if (usageModule != symbolModule && !exportable.IsExported)
             Context.DiagnosticContext?.Report(UnexportedSymbolDiagnostic, node.StartToken?.Location, symbol.Name);

@@ -1,6 +1,5 @@
 import Standard::IO;
 import Standard::Memory;
-import Standard;
 
 module Standard::Program
 {

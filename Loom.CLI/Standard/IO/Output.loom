@@ -1,4 +1,4 @@
-import Standard;
+import Standard::Memory;
 
 module Standard::IO
 {

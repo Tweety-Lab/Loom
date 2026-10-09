@@ -24,9 +24,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Standard\BuiltIns.loom">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="Standard\IO\Output.loom">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
