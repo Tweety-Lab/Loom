@@ -14,6 +14,18 @@ public class UnresolvedTypeAnalyzer : Analyzer
     public static Diagnostic UnresolvedType = new(Diagnostic.DiagnosticLevel.Error, "The type '{0}' could not be found.");
 
     [Visitor]
+    public void Visit(ParameterNode node)
+    {
+        if (node.Type is { } type && type.Base.Type == Token.TokenType.Identifier)
+        {
+            var symbol = TypeResolver.Resolve(Context, node, type.Base.Text);
+
+            if (symbol == null)
+                Context.DiagnosticContext?.Report(UnresolvedType, type.Base.Location, type.Base.Text);
+        }
+    }
+
+    [Visitor]
     public void Visit(MethodDeclarationNode node)
     {
         if (node.ReturnType.Base.Type == Token.TokenType.Identifier)
