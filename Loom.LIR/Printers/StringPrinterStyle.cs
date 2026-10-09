@@ -1,4 +1,5 @@
-﻿using Loom.LIR.Objects;
+﻿using Loom.LIR.Metadata;
+using Loom.LIR.Objects;
 using Loom.LIR.OpCodes;
 using Loom.Parser.Literals;
 
@@ -10,6 +11,12 @@ namespace Loom.LIR.Printers;
 internal class StringPrinterStyle : ILIRPrinterStyle
 {
     /// <inheritdoc/>
+    public string PrintMetaType(MetadataType type) => $"META {type.ToString()}:";
+
+    /// <inheritdoc/>
+    public string PrintMeta(LIRMetadataValue meta) => $"{(meta.IsConstant ? "constant" : "meta")} {PrintType(meta.ValueType)} @{meta.Name} = {PrintValue(meta.Initializer)}";
+
+    /// <inheritdoc/>
     public string PrintFunctionFooter() => "}";
 
     /// <inheritdoc/>
@@ -20,12 +27,6 @@ internal class StringPrinterStyle : ILIRPrinterStyle
 
     /// <inheritdoc/>
     public string PrintField(LIRField field) => $"field {PrintType(field.Type)} {field.Name}";
-
-    /// <inheritdoc/>
-    public string PrintGlobal(LIRGlobal global) => $"{(global.IsConstant ? "constant" : "global")} {PrintType(global.ValueType)} @{global.Name} = {PrintValue(global.Initializer)}";
-
-    /// <inheritdoc/>
-    public string PrintMeta(string key, string value) => $"[{key}: {value}]";
 
     /// <inheritdoc/>
     public string PrintFunctionHeader(LIRFunction f)
@@ -119,7 +120,7 @@ internal class StringPrinterStyle : ILIRPrinterStyle
             LIRDefaultValue d => $"default({PrintType(d.Type)})",
             LIRTempValue t => $"%{t.ID}",
             LIRFunction f => $"@{f.Name}",
-            LIRGlobal g => $"@{g.Name}",
+            LIRMetadataValue g => $"@{g.Name}",
             LIRField field => field.Name,
             LIRBlockValue b => $"%{b.Block.Name}",
             LIRTypeValue p => PrintType(p.Type),

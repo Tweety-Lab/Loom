@@ -128,8 +128,8 @@ internal class ExpressionGenerator
         throw new Exception($"Could not resolve the type of a string literal of {node.Value.Length} character(s).");
     }
 
-    // Emits the constant global holding the characters of a string literal, reusing an identical one when the unit already declares it
-    private LIRGlobal EmitStringConstant(int[] characters)
+    // Emits the constant metadata value holding the characters of a string literal, reusing an identical one when the unit already declares it
+    private LIRMetadataValue EmitStringConstant(int[] characters)
     {
         var charType = (TypeSymbol)context.AnalysisContext.Binders.First().Value.Lookup("char")!.First();
 
@@ -141,8 +141,14 @@ internal class ExpressionGenerator
 
         var initializer = new LIRConstantArrayValue(ASTGenerator.ConvertType(charType, substitution), elements);
 
-        return unit.Globals.FirstOrDefault(g => g.IsConstant && g.Initializer.Equals(initializer))
-            ?? unit.DefineGlobal($".str.{unit.Globals.Count}", initializer.Type, initializer);
+        LIRMetadataValue? stringMetadata = unit.Metadata[Metadata.MetadataType.Strings].FirstOrDefault(g => g.IsConstant && g.Initializer.Equals(initializer));
+        if (stringMetadata == null)
+        {
+            stringMetadata = LIRMetadataValue.Define($".str.{unit.Metadata[Metadata.MetadataType.Strings].Count}", initializer.Type, initializer);
+            unit.Metadata[Metadata.MetadataType.Strings].Add(stringMetadata);
+        }
+
+        return stringMetadata;
     }
 
     /// <summary> Emits the default value of <paramref name="type"/>. </summary>

@@ -6,6 +6,4 @@ namespace Loom.LIR.Objects;
 /// </summary>
 public interface ILIRObject
 {
-    /// <summary> The metadata associated with the <see cref="ILIRObject"/>. </summary>
-    Dictionary<string, string> MetaData { get; init; }
 }

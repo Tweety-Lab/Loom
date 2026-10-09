@@ -18,13 +18,6 @@ public class LIRPrinter
         sb.Append(PrintMeta(unit));
         sb.AppendLine();
 
-        foreach (var global in unit.Globals)
-        {
-            sb.Append(PrintMeta(global));
-            sb.AppendLine(Style.PrintGlobal(global));
-            sb.AppendLine();
-        }
-
         foreach (var declaredObj in unit.TypeDeclarations)
         {
             sb.AppendLine(Print(declaredObj));
@@ -43,8 +36,6 @@ public class LIRPrinter
     private string Print(LIRTypeDeclaration declaredObj)
     {
         var sb = new StringBuilder();
-
-        sb.Append(PrintMeta(declaredObj));
 
         sb.AppendLine(Style.PrintTypeDeclarationHeader(declaredObj));
 
@@ -72,8 +63,6 @@ public class LIRPrinter
     {
         var sb = new StringBuilder();
 
-        sb.Append(PrintMeta(function));
-
         sb.AppendLine(Style.PrintFunctionHeader(function));
 
         if (!function.IsDeclaration)
@@ -100,12 +89,16 @@ public class LIRPrinter
         return sb.ToString();
     }
 
-    private string PrintMeta(ILIRObject obj)
+    private string PrintMeta(LIRCompilationUnit unit)
     {
         var sb = new StringBuilder();
 
-        foreach (var meta in obj.MetaData)
-            sb.AppendLine(Style.PrintMeta(meta.Key, meta.Value));
+        foreach (var meta in unit.Metadata)
+        {
+            sb.AppendLine(Style.PrintMetaType(meta.Key));
+            foreach (var value in meta.Value)
+                sb.AppendLine(Style.PrintMeta(value));
+        }
 
         return sb.ToString();
     }

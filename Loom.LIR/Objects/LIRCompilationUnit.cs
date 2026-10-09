@@ -1,9 +1,15 @@
-﻿namespace Loom.LIR.Objects;
+﻿using Loom.LIR.Metadata;
+
+namespace Loom.LIR.Objects;
 
 public class LIRCompilationUnit : ILIRObject
 {
-    /// <inheritdoc/>
-    public Dictionary<string, string> MetaData { get; init; } = new();
+    /// <summary> All metadata contained in this <see cref="LIRCompilationUnit"/>. </summary>
+    public Dictionary<MetadataType, List<LIRMetadataValue>> Metadata { get; } = new()
+    {
+        { MetadataType.Program, new() },
+        { MetadataType.Strings, new() }
+    };
 
     /// <summary> All functions owned by this <see cref="LIRCompilationUnit"/>, including methods declared in types. </summary>
     public IEnumerable<LIRFunction> AllFunctions => Functions.Concat(TypeDeclarations.SelectMany(o => o.Methods));
@@ -14,14 +20,11 @@ public class LIRCompilationUnit : ILIRObject
     /// <summary> All <see cref="LIRTypeDeclaration"/>s declared by this <see cref="LIRCompilationUnit"/>. </summary>
     public List<LIRTypeDeclaration> TypeDeclarations { get; } = new List<LIRTypeDeclaration>();
 
-    /// <summary> All <see cref="LIRGlobal"/>s declared by this <see cref="LIRCompilationUnit"/>. </summary>
-    public List<LIRGlobal> Globals { get; } = new List<LIRGlobal>();
-
     /// <summary> The name of this <see cref="LIRCompilationUnit"/>. </summary>
-    public string Name => MetaData["Name"];
+    public string Name { get; }
 
     /// <summary> Initializes a new instance of the <see cref="LIRCompilationUnit"/> class. </summary>
-    public LIRCompilationUnit(string name) => MetaData.Add("Name", name);
+    public LIRCompilationUnit(string name) => Name = name;
 
     /// <summary> Defines a new function inside this <see cref="LIRCompilationUnit"/>. </summary>
     public LIRFunction DefineFunction(string name, LIRFunctionType type, bool hasBody = true)
@@ -46,17 +49,6 @@ public class LIRCompilationUnit : ILIRObject
 
     /// <summary> Gets a <see cref="LIRTypeDeclaration"/> by name. </summary>
     public LIRTypeDeclaration? GetTypeDeclaration(string name) => TypeDeclarations.FirstOrDefault(s => s.Name == name);
-
-    /// <summary> Defines a new global inside this <see cref="LIRCompilationUnit"/>. </summary>
-    public LIRGlobal DefineGlobal(string name, LIRType valueType, LIRValue initializer, bool isConstant = true)
-    {
-        LIRGlobal global = LIRGlobal.Define(name, valueType, initializer, isConstant);
-        Globals.Add(global);
-        return global;
-    }
-
-    /// <summary> Gets a global by name. </summary>
-    public LIRGlobal? GetGlobal(string name) => Globals.FirstOrDefault(g => g.Name == name);
 
     /// <summary> Gets a function by name. </summary>
     public LIRFunction? GetFunction(string name) => AllFunctions.FirstOrDefault(f => f.Name == name);

@@ -1,4 +1,5 @@
-﻿using Loom.LIR.Objects;
+﻿using Loom.LIR.Metadata;
+using Loom.LIR.Objects;
 
 namespace Loom.LIR.Printers;
 
@@ -7,7 +8,9 @@ namespace Loom.LIR.Printers;
 /// </summary>
 public interface ILIRPrinterStyle
 {
-    string PrintMeta(string key, string value);
+    string PrintMetaType(MetadataType type);
+    string PrintMeta(LIRMetadataValue meta);
+
     string PrintType(LIRType type);
     string PrintValue(LIRValue value);
     string PrintInstruction(LIRInstruction inst);
@@ -15,7 +18,6 @@ public interface ILIRPrinterStyle
     string PrintFunctionFooter();
 
     string PrintField(LIRField field);
-    string PrintGlobal(LIRGlobal global);
     string PrintTypeDeclarationHeader(LIRTypeDeclaration structObj);
     string PrintTypeDeclarationFooter();
 }

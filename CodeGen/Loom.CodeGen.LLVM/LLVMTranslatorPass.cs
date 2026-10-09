@@ -54,9 +54,9 @@ public class LLVMTranslatorPass : LIRLayeredPass
             structType.StructSetBody(fieldTypes, false);
         }
 
-        GlobalEmitter globalEmitter = new GlobalEmitter(translationContext);
-        foreach (var global in unit.Globals)
-            globalEmitter.Emit(global);
+        MetadataEmitter metaEmitter = new MetadataEmitter(translationContext);
+        foreach (var metaType in unit.Metadata)
+            metaEmitter.Emit((metaType.Key, metaType.Value));
 
         functionEmitter = new FunctionEmitter(translationContext);
         blockEmitter = new BlockEmitter(translationContext);
