@@ -2,11 +2,6 @@ import Standard::Memory;
 
 module Standard
 {
-    export class String
-    {
-        public i32 MutableField = default;
-    }
-
 	/// @brief Immutable unowning slice of contiguous memory.
     export stack struct Slice
     {

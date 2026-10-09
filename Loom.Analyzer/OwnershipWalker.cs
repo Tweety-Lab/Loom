@@ -53,6 +53,9 @@ internal class OwnershipWalker : ASTVisitor
     }
 
     [Visitor]
+    public void Visit(MemberAccessExpressionNode node) => UseWithoutMove(node.Receiver);
+
+    [Visitor]
     public void Visit(AssignmentStatementNode node)
     {
         MoveOut(node.Value);
@@ -60,7 +63,7 @@ internal class OwnershipWalker : ASTVisitor
         if (node.Target is IdentifierNameNode target && ResolvePlace(target) is { } place)
             states[place] = OwnershipState.Owned;
         else
-            VisitChildren(node.Target);
+            Dispatch(node.Target);
     }
 
     [Visitor]
@@ -85,6 +88,17 @@ internal class OwnershipWalker : ASTVisitor
                 Context.DiagnosticContext?.Report(UseOfMovedValue, identifier.StartToken?.Location, identifier.BaseName);
             else
                 states[place] = OwnershipState.Moved;
+        }
+        else
+            Dispatch(expr);
+    }
+
+    private void UseWithoutMove(ExpressionNode expr)
+    {
+        if (expr is IdentifierNameNode identifier && ResolvePlace(identifier) is { } place)
+        {
+            if (TryGetState(identifier, out var state) && state == OwnershipState.Moved)
+                Context.DiagnosticContext?.Report(UseOfMovedValue, identifier.StartToken?.Location, identifier.BaseName);
         }
         else
             Dispatch(expr);

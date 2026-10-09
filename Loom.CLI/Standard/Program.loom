@@ -4,14 +4,19 @@ import Standard;
 
 module Standard::Program
 {
+    export class Object
+    {
+        public i32 MutableField = default;
+    }
+
     /// @brief Program Entry Point
     export i32 Main()
     {
         i32 exitCode = 1;
 
-        unique String string = GetClass();
-        ConsumeClass(string);
-        ConsumeClass(string);
+        unique Object obj = GetClass();
+        i32 value = GetFieldFromBorrow(obj);
+        SetFieldFromMutableBorrow(obj, value);
 
         Slice myString = "Hello!";
         println(myString); // "Hello!"
@@ -19,14 +24,18 @@ module Standard::Program
         return 0;
     }
 
-    export unique String GetClass()
+    export unique Object GetClass()
 	{
-		return new String();
+		return new Object();
 	}
 
-    export void ConsumeClass(ref String input)
+    export i32 GetFieldFromBorrow(ref Object input)
     {
-        // We own a borrow to input
-        input.MutableField = 10;
+        return input.MutableField;
+    }
+
+    export void SetFieldFromMutableBorrow(ref mut Object input, i32 val)
+    {
+        input.MutableField = val;
     }
 }
