@@ -93,10 +93,7 @@ public class ASTGenerator
 
         parameters.AddRange(symbol.Parameters.Select(p => new LIRParameter(p.Name, ConvertStorageType(p.Type!, substitution))));
 
-        // An instantiation binds every type parameter, leaving none behind on its signature
-        var typeParameters = substitution == null
-            ? symbol.TypeParameters.Select(tp => new LIRTypeParameter(tp.Name)).ToArray()
-            : [];
+        var typeParameters = substitution == null ? symbol.TypeParameters.Select(tp => new LIRTypeParameter(tp.Name)).ToArray() : [];
 
         return new LIRFunctionType(ConvertStorageType(symbol.ReturnType!, substitution), parameters.ToArray(), typeParameters);
     }
@@ -107,9 +104,6 @@ public class ASTGenerator
         if (substitution != null)
             type = substitution.Resolve(type);
 
-        // An unsubstituted type parameter is stored like a value type; its instantiation decides the real storage
-        return type is ArrayTypeSymbol || type is TypeParameterSymbol || type.IsValueType || type.KnownType == TypeSymbol.DefaultType.Void
-            ? ConvertType(type, substitution)
-            : new LIRPointerType(ConvertType(type, substitution));
+        return type is ArrayTypeSymbol || type is TypeParameterSymbol || type.IsValueType || type.KnownType == TypeSymbol.DefaultType.Void ? ConvertType(type, substitution) : new LIRPointerType(ConvertType(type, substitution));
     }
 }

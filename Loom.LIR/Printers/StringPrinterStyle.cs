@@ -17,13 +17,13 @@ internal class StringPrinterStyle : ILIRPrinterStyle
     public string PrintMeta(LIRMetadataValue meta) => $"{(meta.IsConstant ? "constant" : "meta")} {PrintType(meta.ValueType)} @{meta.Name} = {PrintValue(meta.Initializer)}";
 
     /// <inheritdoc/>
-    public string PrintFunctionFooter() => "}";
+    public string PrintFunctionFooter() => "}\n";
 
     /// <inheritdoc/>
     public string PrintTypeDeclarationHeader(LIRTypeDeclaration s) => s.Type.IsValueType ? $"struct {s.Name}" : $"class {s.Name}";
 
     /// <inheritdoc/>
-    public string PrintTypeDeclarationFooter() => "}";
+    public string PrintTypeDeclarationFooter() => "}\n";
 
     /// <inheritdoc/>
     public string PrintField(LIRField field) => $"field {PrintType(field.Type)} {field.Name}";

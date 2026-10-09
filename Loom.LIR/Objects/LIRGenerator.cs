@@ -159,7 +159,7 @@ public class LIRGenerator
         if (returnType == LIRType.Void)
         {
             WritingBlock.Emit(new LIRInstruction(LIROpCode.CallInstanced, operands.ToList()));
-            return null;
+            return null!;
         }
 
         return Emit(LIROpCode.CallInstanced, returnType, operands);

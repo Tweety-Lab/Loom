@@ -6,6 +6,5 @@ namespace Loom.LIR.Objects;
 /// </summary>
 public abstract class LIRValueObject : LIRValue, ILIRObject
 {
-    /// <inheritdoc/>
-    public Dictionary<string, string> MetaData { get; init; } = new();
+
 }

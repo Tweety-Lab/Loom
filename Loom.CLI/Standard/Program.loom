@@ -10,7 +10,6 @@ module Standard::Program
         i32 exitCode = 1;
 
         Slice myString = "Hello!";
-
         println(myString); // "Hello!"
         
         return 0;
