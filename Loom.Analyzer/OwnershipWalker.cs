@@ -76,8 +76,18 @@ internal class OwnershipWalker : ASTVisitor
     [Visitor]
     public void Visit(CallExpressionNode node)
     {
-        foreach (var arg in node.Arguments)
-            MoveOut(arg);
+        var parameters = ResolveCallee(node)?.Parameters;
+
+        for (int index = 0; index < node.Arguments.Count; index++)
+        {
+            var argument = node.Arguments[index];
+            var parameter = parameters is not null && index < parameters.Count ? parameters[index] : null;
+
+            if (parameter is { IsBorrow: true })
+                UseWithoutMove(argument);
+            else
+                MoveOut(argument);
+        }
     }
 
     private void MoveOut(ExpressionNode expr)
@@ -91,6 +101,27 @@ internal class OwnershipWalker : ASTVisitor
         }
         else
             Dispatch(expr);
+    }
+
+    private MethodSymbol? ResolveCallee(CallExpressionNode node)
+    {
+        if (node.Callee is MemberAccessExpressionNode member)
+        {
+            var receiverType = Context.ExpressionTypes.TryGetValue(member.Receiver, out var type) ? type : Context.GetSymbol(member.Receiver).Symbol as TypeSymbol;
+            return receiverType?.Members.OfType<MethodSymbol>().FirstOrDefault(m => m.Name == member.Name.BaseName);
+        }
+
+        if (node.Callee is IdentifierNameNode identifier)
+        {
+            return Context.GetSymbol(identifier).Symbol switch
+            {
+                MethodSymbol method => method,
+                TypeSymbol type => type.Members.OfType<MethodSymbol>().FirstOrDefault(m => m.Name == identifier.BaseName),
+                _ => null
+            };
+        }
+
+        return null;
     }
 
     private void UseWithoutMove(ExpressionNode expr)
