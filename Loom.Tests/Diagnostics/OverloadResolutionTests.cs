@@ -173,7 +173,7 @@ module Standard::Program
     {
         var context = ParseAndAnalyze(OVERLOADED_BY_PARAMETER_TYPE);
 
-        Assert.Equal(["(char)", "(i32)", "(Test::Point)"], InvokedSignatures(context));
+        Assert.Equal([".char", ".i32", ".Test::Point"], InvokedSignatures(context));
     }
 
     [Fact]
@@ -181,7 +181,7 @@ module Standard::Program
     {
         var context = ParseAndAnalyze(OVERLOADED_BY_ARITY);
 
-        Assert.Equal(["(i32, i32)"], InvokedSignatures(context));
+        Assert.Equal([".i32_i32"], InvokedSignatures(context));
     }
 
     [Fact]
@@ -201,7 +201,7 @@ module Standard::Program
     {
         var context = ParseAndAnalyze(OVERLOADED_MEMBER);
 
-        Assert.Equal(["(char)", "(i32)"], InvokedSignatures(context));
+        Assert.Equal([".char", ".i32"], InvokedSignatures(context));
     }
 
     [Fact]
@@ -209,7 +209,7 @@ module Standard::Program
     {
         var context = ParseAndAnalyze(GENERIC_AMONG_OVERLOADS);
 
-        Assert.Equal(["(char)", "(i32)", "(T)"], InvokedSignatures(context));
+        Assert.Equal([".char", ".i32", ".T"], InvokedSignatures(context));
         Assert.DoesNotContain(context.DiagnosticContext.Diagnostics, diagnostic => diagnostic.Message.Contains("implicitly cast"));
     }
 
@@ -218,7 +218,7 @@ module Standard::Program
     {
         var context = ParseAndAnalyze(EARLIER_ARGUMENT_DECIDES);
 
-        Assert.Equal(["(i32, i64)"], InvokedSignatures(context));
+        Assert.Equal([".i32_i64"], InvokedSignatures(context));
     }
 
     [Fact]
@@ -228,7 +228,7 @@ module Standard::Program
 
         Assert.Equal(2, overloads.Length);
         Assert.All(overloads, overload => Assert.Equal("Test::log", overload.FullyQualifiedName));
-        Assert.Equal(["Test::log(i32)", "Test::log(i32, i32)"], overloads.Select(overload => overload.LinkageName));
+        Assert.Equal(["Test::log.i32", "Test::log.i32_i32"], overloads.Select(overload => overload.LinkageName));
     }
 
     [Fact]
@@ -244,7 +244,7 @@ module Standard::Program
     {
         var context = ParseAndAnalyze(IMPORTING_MODULE, IMPORTED_OVERLOADS);
 
-        Assert.Equal(["Standard::IO::println(Standard::Memory::Slice)", "Standard::IO::println(char)"], context.DeclaredMethods("println").Select(method => method.LinkageName));
+        Assert.Equal(["Standard::IO::println.Standard::Memory::Slice", "Standard::IO::println.char"], context.DeclaredMethods("println").Select(method => method.LinkageName));
     }
 
     [Fact]
@@ -252,7 +252,7 @@ module Standard::Program
     {
         var context = ParseAndAnalyze(IMPORTING_MODULE, IMPORTED_OVERLOADS, IMPORTING_CALL_SITE);
 
-        Assert.Equal(["(Standard::Memory::Slice)", "(char)"], InvokedSignatures(context, "Standard::Program"));
+        Assert.Equal([".Standard::Memory::Slice", ".char"], InvokedSignatures(context, "Standard::Program"));
     }
 
     private static CompilationContext ParseAndAnalyze(params string[] sources)
