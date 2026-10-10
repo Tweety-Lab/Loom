@@ -126,29 +126,63 @@ public class UnresolvedImportAnalyzer : Analyzer
 Loom then compiles its AST higher representation down to a linear [Intermediate Representation](https://en.wikipedia.org/wiki/Intermediate_representation) called LIR. This lowered form makes cross-target compilation very easy, the same LIR can target both LLVM and .NET.
 
 ```LIR
-[Name: Test]
+META Program:
+META Strings:
+constant [14 x char] @.str.0 = ['S', 't', 'a', 'c', 'k', ' ', 'm', 'u', 't', 'a', 't', 'i', 'o', 'n']
+constant [6 x char] @.str.1 = ['H', 'e', 'l', 'l', 'o', '!']
 
-define Consumer::Main() -> i32 {
-entry:
-  %0 = alloca i32
-  %1 = call i32 @Consumer::Add, 2, 2
-  store i32 %1, %0
-  %2 = load i32, %0
-  return %2
+class Standard::Program::Object
+  field i32 MutableField
+
+  define Standard::Program::Object::.ctor(Standard::Program::Object* %self) -> void
+    entry:
+      %0 = getfield i32 %self, MutableField
+      store i32 0, %0
+      return
+
+  }
 
 }
 
-
-define Consumer::Add(i32 %a, i32 %b) -> i32 {
-entry:
-  %0 = alloca i32
-  store i32 %a, %0
-  %1 = alloca i32
-  store i32 %b, %1
-  %2 = load i32, %0
-  %3 = load i32, %1
-  %4 = add i32 %2, %3
-  return %4
+define Standard::Program::Main.() -> i32
+  entry:
+    %0 = alloca i32
+    store i32 1, %0
+    %1 = alloca Standard::Program::Object*
+    %2 = call Standard::Program::Object* @Standard::Program::GetClass.
+    store Standard::Program::Object* %2, %1
+    %3 = alloca Standard::Memory::Slice
+    %4 = getfield iptr %3, pointer
+    %5 = ptrtoint iptr @.str.0
+    store iptr %5, %4
+    %6 = getfield i32 %3, Length
+    store i32 14, %6
+    %7 = load Standard::Memory::Slice, %3
+    call @Standard::IO::println.Standard::Memory::Slice, %7
+    %8 = alloca i32
+    %9 = load Standard::Program::Object*, %1
+    %10 = call i32 @Standard::Program::GetFieldFromBorrow.Standard::Program::Object, %9
+    %11 = add i32 %10, 10
+    store i32 %11, %8
+    %12 = load Standard::Program::Object*, %1
+    %13 = load i32, %8
+    call @Standard::Program::SetFieldFromMutableBorrow.Standard::Program::Object_i32, %12, %13
+    %14 = alloca Standard::Memory::Slice
+    %15 = alloca Standard::Memory::Slice
+    %16 = getfield iptr %15, pointer
+    %17 = ptrtoint iptr @.str.1
+    store iptr %17, %16
+    %18 = getfield i32 %15, Length
+    store i32 6, %18
+    %19 = load Standard::Memory::Slice, %15
+    store Standard::Memory::Slice %19, %14
+    %20 = load Standard::Memory::Slice, %14
+    call @Standard::IO::println.Standard::Memory::Slice, %20
+    %21 = load i32, %8
+    %22 = load Standard::Program::Object*, %1
+    %23 = ptrtoint iptr %22
+    call @Standard::Memory::Unsafe::Free.iptr, %23
+    return %21
 
 }
 ```
