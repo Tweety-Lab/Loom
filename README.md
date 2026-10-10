@@ -187,7 +187,7 @@ define Standard::Program::Main.() -> i32
 }
 ```
 
-LIR is flattened, but still relatively high level. Unlike LLVM, concepts akin to classes and structs are retained.
+LIR is flattened, but still relatively high level. Unlike LLVM, concepts akin to classes and structs are retained and all code remains platform-agnostic.
 
 ### Loom.CodeGen
 The constructed LIR is then passed into a `Loom.CodeGen.*` project. The default implementation uses [LLVM](https://llvm.org/docs/LangRef.html) to support extreme portability and code optimisation.
