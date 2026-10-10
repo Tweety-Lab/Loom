@@ -16,10 +16,20 @@ module Standard::Program
         unique Object obj = new Object();
         SetFieldFromMutableBorrow(obj, 10);
 
-        // 'Slice' doesn't need to use pointers because it's a value type
+        // 'Slice' doesn't need to use pointers because it's a value type (struct)
         // Value types use copy semantics and typically live on the stack
         Slice myString = "Hello!";
         println(myString); // "Hello!"
+
+        // Loom also allows unsafe operations inside an 'unsafe' block via the 'Standard::Memory::Unsafe' class
+        unsafe
+        {
+            char[3] myArray = ['a', 'b', 'c'];
+            iptr addr = Unsafe.AddressOf<char[3]>(myArray);
+
+            char letter = Unsafe.Read<char>(addr + sizeof(char) * 2);
+            println(letter); // "c"
+        }
         
         return GetFieldFromBorrow(obj);
     }

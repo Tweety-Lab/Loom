@@ -154,7 +154,7 @@
     "generic-arguments": {
       "comment": "A '<' glued to a word whose contents look like a type list and which closes with '>'. Recurses for nesting, e.g. Foo<Bar<T>, U>.",
       "name": "meta.generic.loom",
-      "begin": "(?<=[A-Za-z0-9_])<(?=[\\w\\s,.*<>]*>)",
+      "begin": "(?<=[A-Za-z0-9_])<(?=[\\w\\s,.*<>\\[\\]]*>)",
       "beginCaptures": {
         "0": { "name": "punctuation.definition.generic.begin.loom" }
       },
@@ -163,6 +163,14 @@
         "0": { "name": "punctuation.definition.generic.end.loom" }
       },
       "patterns": [
+        {
+          "name": "punctuation.definition.array",
+          "match": "\\[|\\]"
+        },
+        {
+          "name": "constant.numeric.integer.loom",
+          "match": "\\b[0-9]+\\b"
+        },
         { "include": "#primitive-types" },
         { "include": "#numbers" },
         { "include": "#generic-arguments" },
@@ -181,13 +189,13 @@
     "generic-call": {
       "comment": "Name<...>(  -> generic function call or declaration",
       "name": "entity.name.function.loom",
-      "match": "\\b[A-Za-z_][A-Za-z0-9_]*(?=<[\\w\\s,.*<>]*>\\s*\\()"
+      "match": "\\b[A-Za-z_][A-Za-z0-9_]*(?=<[\\w\\s,.*<>\\[\\]]*>\\s*\\()"
     },
 
     "generic-type": {
       "comment": "Name<...>  -> generic type usage",
       "name": "entity.name.type.loom",
-      "match": "\\b[A-Za-z_][A-Za-z0-9_]*(?=<[\\w\\s,.*<>]*>)"
+      "match": "\\b[A-Za-z_][A-Za-z0-9_]*(?=<[\\w\\s,.*<>\\[\\]]*>)"
     },
 
     "qualifiers": {
