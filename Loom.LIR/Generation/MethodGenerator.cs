@@ -3,6 +3,7 @@ using Loom.Analyzer.Symbols;
 using Loom.Common;
 using Loom.LIR.Intrinsics;
 using Loom.LIR.Objects;
+using Loom.LIR.OpCodes;
 using Loom.Parser.AST;
 using Loom.Parser.AST.Rules.Default;
 
@@ -121,6 +122,8 @@ internal class MethodGenerator
             if (content is StatementNode statementNode)
                 statementGen.EmitStatement(statementNode);
 
+        statementGen.EndScope();
+
         MethodSymbol? symbol = (MethodSymbol?)context.AnalysisContext.GetSymbol(node).Symbol;
 
         // Intrinsic methods define their own return
@@ -193,6 +196,8 @@ internal class MethodGenerator
             if (content is StatementNode statement)
                 statementGenerator.EmitStatement(statement);
 
+        statementGenerator.EndScope();
+
         EmitImplicitReturn(function);
     }
 
@@ -205,8 +210,35 @@ internal class MethodGenerator
         StatementGenerator statementGenerator = new StatementGenerator(context, unit, constructor, this);
 
         statementGenerator.EmitFieldInitializers(typeNode);
+        statementGenerator.EndScope();
 
         EmitImplicitReturn(constructor);
+    }
+
+    /// <summary> Allocates storage for a new instance of <paramref name="instanceType"/> on the heap. </summary>
+    /// <param name="function"> The function the allocation is emitted into. </param>
+    /// <param name="instanceType"> The type of the instance being allocated. </param>
+    /// <returns> The address of the allocated, not yet initialized instance. </returns>
+    public LIRTempValue AllocateInstance(LIRFunction function, LIRPointerType instanceType)
+    {
+        LIRGenerator generator = function.LIRGenerator!;
+        LIRFunction allocate = GetRuntimeFunction("Standard::Memory::Unsafe::Allocate.i64");
+
+        return generator.EmitIntToPtr(generator.EmitCall(allocate, generator.EmitSizeOf(instanceType.PointeeType)), instanceType);
+    }
+
+    /// <summary> Releases storage previously returned by <see cref="AllocateInstance"/>. </summary>
+    /// <param name="function"> The function the release is emitted into. </param>
+    /// <param name="storage"> The address of the pointer holding the instance to release. </param>
+    public void FreeInstance(LIRFunction function, LIRValue storage)
+    {
+        LIRGenerator generator = function.LIRGenerator!;
+        LIRFunction free = GetRuntimeFunction("Standard::Memory::Unsafe::Free.iptr");
+
+        LIRValue pointer = generator.EmitBeforeTerminator(LIROpCode.Load, ((LIRPointerType)storage.Type).PointeeType, storage);
+        LIRValue address = generator.EmitBeforeTerminator(LIROpCode.PtrToInt, LIRType.IntPtr, pointer);
+
+        generator.EmitBeforeTerminator(LIROpCode.Call, free.Type.ReturnType, free, address);
     }
 
     private LIRFunction GetFunction(string name, LIRTypeDeclaration? owningType)
@@ -214,6 +246,8 @@ internal class MethodGenerator
         LIRFunction? function = owningType != null ? owningType.Methods.FirstOrDefault(m => m.Name == name) : unit.GetFunction(name);
         return function ?? throw new Exception($"Could not find function {name}!");
     }
+
+    private LIRFunction GetRuntimeFunction(string linkageName) => unit.GetFunction(linkageName) ?? throw new Exception($"Could not find required runtime function '{linkageName}'; the standard library must be part of the compilation unit.");
 
     private static void EmitImplicitReturn(LIRFunction function)
     {

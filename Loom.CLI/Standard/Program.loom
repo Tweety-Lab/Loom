@@ -14,13 +14,14 @@ module Standard::Program
         i32 exitCode = 1;
 
         unique Object obj = GetClass();
-        i32 value = GetFieldFromBorrow(obj);
+        println("Stack mutation");
+        i32 value = GetFieldFromBorrow(obj) + 10;
         SetFieldFromMutableBorrow(obj, value);
 
         Slice myString = "Hello!";
         println(myString); // "Hello!"
         
-        return 0;
+        return value;
     }
 
     export unique Object GetClass()

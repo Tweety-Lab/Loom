@@ -184,8 +184,11 @@ internal class ExpressionGenerator
     {
         var symbol = context.AnalysisContext.ExpressionTypes[node] ?? throw new Exception("Could not resolve instance creation type.");
 
-        // A value type is constructed in place; a reference type needs storage for a pointer to the instance
-        var instance = destination ?? Generator.EmitAlloca(ASTGenerator.ConvertType(symbol, substitution));
+        LIRPointerType instanceType = new(ASTGenerator.ConvertType(symbol, substitution));
+
+        // A value type is constructed in place; a reference type is allocated on the heap so that it stays valid after
+        var instance = destination ?? (symbol.IsValueType ? Generator.EmitAlloca(instanceType.PointeeType) : methodGenerator.AllocateInstance(function, instanceType));
+
         var constructor = context.AnalysisContext.GetSymbol(node).As<MethodSymbol>() ?? symbol.Members.OfType<MethodSymbol>().FirstOrDefault(m => m.Kind == MethodSymbol.MethodKind.Constructor);
 
         LIRFunction? constructorFunc = null;

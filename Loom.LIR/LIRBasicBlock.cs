@@ -35,4 +35,12 @@ public sealed class LIRBasicBlock
         if (instruction.OpCode.Type == LIROpCode.CodeType.Control)
             Terminator = instruction;
     }
+
+    public void EmitBeforeTerminator(LIRInstruction instruction)
+    {
+        if (Terminator is null)
+            Instructions.Add(instruction);
+        else
+            Instructions.Insert(Instructions.Count - 1, instruction);
+    }
 }

@@ -51,17 +51,33 @@ public class LIRGenerator
     /// <param name="resultType"> The type of the result (if any). </param>
     /// <param name="operands"> The operands to emit. </param>
     /// <returns> The result of the emitted instruction or null if the instruction has no result. </returns>
-    public LIRTempValue Emit(LIROpCode opCode, LIRType? resultType = null, params LIRValue[] operands)
+    public LIRTempValue Emit(LIROpCode opCode, LIRType? resultType = null, params LIRValue[] operands) => Emit(WritingBlock, false, opCode, resultType, operands);
+
+    /// <summary> Emits an <see cref="LIROpCode"/> that executes just before the terminator of the current block.
+    /// </summary>
+    /// <param name="opCode"> The opcode to emit. </param>
+    /// <param name="resultType"> The type of the result (if any). </param>
+    /// <param name="operands"> The operands to emit. </param>
+    /// <returns> The result of the emitted instruction or null if the instruction has no result. </returns>
+    public LIRTempValue EmitBeforeTerminator(LIROpCode opCode, LIRType? resultType = null, params LIRValue[] operands) => Emit(WritingBlock, true, opCode, resultType, operands);
+
+    private LIRTempValue Emit(LIRBasicBlock block, bool beforeTerminator, LIROpCode opCode, LIRType? resultType, LIRValue[] operands)
     {
         LIRTempValue? result = null;
 
         if (opCode.HasResult && resultType == null)
             throw new ArgumentNullException(nameof(resultType));
 
-        if (opCode.HasResult && resultType != null)
-            result = new LIRTempValue(currentTemp++.ToString(), resultType);
+        // A void function call has a result operand but produces no value
+        if (opCode.HasResult && resultType != LIRType.Void)
+            result = new LIRTempValue(currentTemp++.ToString(), resultType!);
 
-        WritingBlock.Emit(new LIRInstruction(opCode, operands.ToList()) { Result = result });
+        LIRInstruction instruction = new(opCode, operands.ToList()) { Result = result };
+
+        if (beforeTerminator)
+            block.EmitBeforeTerminator(instruction);
+        else
+            block.Emit(instruction);
 
         return result!;
     }

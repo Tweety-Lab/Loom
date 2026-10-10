@@ -37,6 +37,10 @@ internal class OwnershipWalker : ASTVisitor
     {
         states.Clear();
         VisitChildren(node);
+
+        foreach (var (place, state) in states)
+            if (state == OwnershipState.Moved)
+                Context.MovedValues.Add(place);
     }
 
     [Visitor]

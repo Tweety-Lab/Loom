@@ -9,14 +9,16 @@ namespace Loom.LIR.Generation;
 
 internal class StatementGenerator
 {
+    protected List<LocalVariableSymbol> CurrentScope => scopes.Peek();
+    protected LIRGenerator Generator => function.LIRGenerator!;
+
     private CompilationContext context;
     private LIRCompilationUnit unit;
     private LIRFunction function;
     private MethodGenerator methodGenerator;
     private TypeSubstitution? substitution;
     private Dictionary<string, LIRTempValue> locals = new();
-
-    protected LIRGenerator Generator => function.LIRGenerator!;
+    private readonly Stack<List<LocalVariableSymbol>> scopes = new();
 
     /// <summary> Initializes a new instance of the <see cref="StatementGenerator"/> class. </summary>
     public StatementGenerator(CompilationContext context, LIRCompilationUnit unit, LIRFunction function, MethodGenerator methodGenerator, TypeSubstitution? substitution = null)
@@ -26,6 +28,8 @@ internal class StatementGenerator
         this.function = function;
         this.methodGenerator = methodGenerator;
         this.substitution = substitution;
+
+        BeginScope();
 
         foreach (var (param, value) in function.Type.Parameters.Zip(function.ParameterValues))
         {
@@ -41,6 +45,18 @@ internal class StatementGenerator
 
     /// <summary> Emits the declared initializer of every field of the type containing <paramref name="node"/>. </summary>
     public void EmitFieldInitializers(ASTNode node) => new ExpressionGenerator(context, unit, function, locals, methodGenerator, substitution).EmitFieldInitializers(node);
+
+    /// <summary> Opens a scope, collecting the unique values declared within it. </summary>
+    public void BeginScope() => scopes.Push(new List<LocalVariableSymbol>());
+
+    /// <summary> Closes the current scope, releasing every unique value it still owns. </summary>
+    public void EndScope()
+    {
+        var owned = scopes.Pop();
+
+        foreach (var symbol in owned)
+            methodGenerator.FreeInstance(function, locals[symbol.Name]);
+    }
 
     /// <summary> Emits a statement for the given node. </summary>
     public void EmitStatement(StatementNode node)
@@ -68,8 +84,15 @@ internal class StatementGenerator
         LocalVariableSymbol symbol = (LocalVariableSymbol)context.AnalysisContext.GetSymbol(node).Symbol!;
         TypeSymbol type = substitution?.Resolve(symbol.Type!) ?? symbol.Type!;
 
-        LIRTempValue address = Generator.EmitAlloca(ASTGenerator.ConvertStorageType(type, substitution));
+        LIRType storageType = ASTGenerator.ConvertStorageType(type, substitution);
+        LIRTempValue address = Generator.EmitAlloca(storageType);
         locals[declaration.Name.Text] = address;
+
+        // A unique local holding a heap allocation owns it until its scope ends, unless ownership was transferred away first
+        if (symbol.PointerType == PointerType.Unique
+            && storageType is LIRPointerType
+            && !context.AnalysisContext.MovedValues.Contains(symbol))
+            CurrentScope.Add(symbol);
 
         if (declaration.Initializer is InstanceCreationExpresssionNode creation)
         {
@@ -123,9 +146,13 @@ internal class StatementGenerator
         Generator.EmitCondBr(condition, thenBlock, continueBlock);
 
         Generator.SwitchTo(thenBlock);
+        BeginScope();
+
         foreach (var content in node.Body.Contents)
             if (content is StatementNode statementNode)
                 EmitStatement(statementNode);
+
+        EndScope();
 
         // The body may already end control flow
         if (Generator.WritingBlock.Terminator == null)
@@ -154,10 +181,13 @@ internal class StatementGenerator
         Generator.EmitCondBr(condition, bodyBlock, continueBlock);
 
         Generator.SwitchTo(bodyBlock);
+        BeginScope();
 
         foreach (var content in node.Body.Contents)
             if (content is StatementNode statementNode)
                 EmitStatement(statementNode);
+
+        EndScope();
 
         if (Generator.WritingBlock.Terminator == null)
             Generator.EmitBr(conditionBlock);
@@ -182,10 +212,13 @@ internal class StatementGenerator
         Generator.EmitCondBr(condition, bodyBlock, continueBlock);
 
         Generator.SwitchTo(bodyBlock);
+        BeginScope();
 
         foreach (var content in node.Body.Contents)
             if (content is StatementNode statementNode)
                 EmitStatement(statementNode);
+
+        EndScope();
 
         if (Generator.WritingBlock.Terminator == null)
             Generator.EmitBr(incrementorBlock);

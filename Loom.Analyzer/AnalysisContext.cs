@@ -25,6 +25,9 @@ public class AnalysisContext
     /// <summary> Maps <see cref="ASTNode"/>s to their parent <see cref="ASTNode"/>. </summary>
     public Dictionary<ASTNode, ASTNode> Parents { get; } = new();
 
+    /// <summary> The symbols whose ownership was transferred away before the end of the method declaring them. </summary>
+    public HashSet<Symbol> MovedValues { get; } = new();
+
     /// <summary> The entry point of the program or null if one could not be resolved. </summary>
     public MethodSymbol? EntryPoint { get; private set; }
 
