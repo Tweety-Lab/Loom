@@ -3,6 +3,7 @@ import Standard::Memory;
 
 module Standard::Program
 {
+    /// @brief Classes are reference types and are interfaced with through Loom's ownership and memory model (smart pointers)!
     export class Object
     {
         public i32 MutableField = default;
@@ -11,29 +12,25 @@ module Standard::Program
     /// @brief Program Entry Point
     export i32 Main()
     {
-        i32 exitCode = 1;
+        // A Unique pointer to an object can only have one owner at a time
+        unique Object obj = new Object();
+        SetFieldFromMutableBorrow(obj, 10);
 
-        unique Object obj = GetClass();
-        println("Stack mutation");
-        i32 value = GetFieldFromBorrow(obj) + 10;
-        SetFieldFromMutableBorrow(obj, value);
-
+        // 'Slice' doesn't need to use pointers because it's a value type
+        // Value types use copy semantics and typically live on the stack
         Slice myString = "Hello!";
         println(myString); // "Hello!"
         
-        return value;
+        return GetFieldFromBorrow(obj);
     }
 
-    export unique Object GetClass()
-	{
-		return new Object();
-	}
-
+    /// @brief 'ref' is used to borrow a reference to an object without claiming ownership.
     export i32 GetFieldFromBorrow(ref Object input)
     {
         return input.MutableField;
     }
 
+	/// @brief 'ref mut' is used to borrow a mutatable reference to an object without claiming ownership.
     export void SetFieldFromMutableBorrow(ref mut Object input, i32 val)
     {
         input.MutableField = val;
