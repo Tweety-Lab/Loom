@@ -87,7 +87,7 @@ internal class DeclarationWalker : ASTVisitor
         if (CurrentSymbol is MethodSymbol method)
             method.TypeParameters.Add(symbol);
 
-        Context.BoundSymbols[node] = symbol;
+        Context.Bind(node, symbol);
 
         VisitChildren(node);
     }
@@ -109,7 +109,7 @@ internal class DeclarationWalker : ASTVisitor
         }
 
         CurrentTable.Define(paramSymbol);
-        Context.BoundSymbols[node] = paramSymbol;
+        Context.Bind(node, paramSymbol);
 
         if (CurrentSymbol is MethodSymbol method)
             method.Parameters.Add(paramSymbol);
@@ -189,7 +189,7 @@ internal class DeclarationWalker : ASTVisitor
 
         symbol.DeclaringNode = node;
         CurrentTable.Define(symbol);
-        Context.BoundSymbols[node] = symbol;
+        Context.Bind(node, symbol);
 
         if (CurrentSymbol is TypeSymbol typeSymbol)
             typeSymbol.Members.Add(symbol);
@@ -208,7 +208,7 @@ internal class DeclarationWalker : ASTVisitor
 
         symbol.DeclaringNode = node;
         CurrentTable.Define(symbol);
-        Context.BoundSymbols[node] = symbol;
+        Context.Bind(node, symbol);
 
         VisitChildren(node);
     }
@@ -228,7 +228,7 @@ internal class DeclarationWalker : ASTVisitor
         if (symbol is not null)
         {
             CurrentSymbol = symbol;
-            Context.BoundSymbols[node] = symbol;
+            Context.Bind(node, symbol);
         }
 
         body();

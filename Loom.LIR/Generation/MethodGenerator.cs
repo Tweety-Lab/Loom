@@ -45,11 +45,11 @@ internal class MethodGenerator
         var funcType = ASTGenerator.BuildFunctionType(symbol, selfType);
 
         if (owningType == null)
-            unit.DefineFunction(symbol.FullyQualifiedName, funcType, !isExtern);
+            unit.DefineFunction(symbol.LinkageName, funcType, !isExtern);
         else if (isExtern)
-            owningType.DeclareMethod(symbol.FullyQualifiedName, funcType);
+            owningType.DeclareMethod(symbol.LinkageName, funcType);
         else
-            owningType.DefineMethod(symbol.FullyQualifiedName, funcType);
+            owningType.DefineMethod(symbol.LinkageName, funcType);
     }
 
     /// <summary> Emits the body of the method declared by <paramref name="node"/>. </summary>
@@ -65,7 +65,7 @@ internal class MethodGenerator
             return;
         }
 
-        LIRFunction function = GetFunction(symbol.FullyQualifiedName, owningType);
+        LIRFunction function = GetFunction(symbol.LinkageName, owningType);
 
         if (IIntrinsicEmitter.TryEmitIntrinsic(symbol, function))
             return;
@@ -83,14 +83,14 @@ internal class MethodGenerator
     public LIRFunction GetOrCreateInstance(MethodSymbol symbol, IReadOnlyList<TypeSymbol> typeArguments, ASTNode callSite)
     {
         var substitution = TypeSubstitution.Zip(symbol, typeArguments);
-        string instanceName = $"{symbol.FullyQualifiedName}<{string.Join(", ", typeArguments.Select(t => t.FullyQualifiedName))}>";
+        string instanceName = $"{symbol.LinkageName}<{string.Join(", ", typeArguments.Select(t => t.FullyQualifiedName))}>";
 
         LIRFunction? instance = unit.GetFunction(instanceName);
         if (instance != null)
             return instance;
 
         if (symbol.DeclaringNode is not MethodDeclarationNode node)
-            throw new Exception($"Could not find the declaration of generic method {symbol.FullyQualifiedName}.");
+            throw new Exception($"Could not find the declaration of generic method {symbol.LinkageName}.");
 
         LIRTypeDeclaration? owningType = null;
         var typeNode = context.AnalysisContext.FirstAncestorOrSelf<ITypeDeclarationNode>(node);
@@ -165,9 +165,9 @@ internal class MethodGenerator
         var functionType = new LIRFunctionType(LIRType.Void, [.. parameters], typeParameters.ToArray());
 
         if (symbol.IsExtern)
-            owningType.DeclareMethod(symbol.FullyQualifiedName, functionType);
+            owningType.DeclareMethod(symbol.LinkageName, functionType);
         else
-            owningType.DefineMethod(symbol.FullyQualifiedName, functionType);
+            owningType.DefineMethod(symbol.LinkageName, functionType);
     }
 
     public void GenerateConstructorBody(ConstructorDeclarationNode node, LIRTypeDeclaration owningType)
@@ -183,7 +183,7 @@ internal class MethodGenerator
         if (symbol.IsGeneric || symbol.IsExtern)
             return;
 
-        LIRFunction function = GetFunction(symbol.FullyQualifiedName, owningType);
+        LIRFunction function = GetFunction(symbol.LinkageName, owningType);
 
         StatementGenerator statementGenerator = new StatementGenerator(context, unit, function, this);
 

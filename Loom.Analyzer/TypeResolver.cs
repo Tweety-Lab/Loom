@@ -43,7 +43,7 @@ internal static class TypeResolver
 
         var resolved = type.ArraySize?.Size is { Text: var size } && int.TryParse(size, out var arraySize) ? new ArrayTypeSymbol(elementType, arraySize) : elementType;
 
-        context.BoundSymbols[type] = resolved;
+        context.Bind(type, resolved);
         return resolved;
     }
 }

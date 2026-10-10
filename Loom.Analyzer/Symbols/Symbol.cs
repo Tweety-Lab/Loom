@@ -5,6 +5,9 @@ namespace Loom.Analyzer.Symbols;
 
 public abstract record Symbol(string Name)
 {
+    /// <summary> The name that uniquely identifies this symbol in generated code. </summary>
+    public virtual string LinkageName => FullyQualifiedName;
+
     /// <summary> The fully qualified name of this symbol, i.e. "MyModule::MyMethod". </summary>
     public string FullyQualifiedName { get; set; } = Name;
 

@@ -47,32 +47,35 @@ internal class BindingWalker : ASTWalker
     [Visitor]
     public void Visit(IdentifierNameNode node)
     {
+        // A name may be declared more than once when it is overloaded. Every declaration is bound as a candidate so
+        // that overload resolution can pick between them once the types of the arguments are known.
+        Context.Bind(node, SymbolInfo.OfCandidates(Lookup(node)));
+    }
+
+    /// <summary> Resolves every <see cref="Symbol"/> the name of <paramref name="node"/> could refer to. </summary>
+    private IEnumerable<Symbol> Lookup(IdentifierNameNode node)
+    {
         // Search local scope
-        var symbol = Context.GetBinder(node)?.Lookup(node.BaseName)?.First();
+        if (Context.GetBinder(node)?.Lookup(node.BaseName) is { } local)
+            return local;
 
         // Search imported modules
-        if (symbol == null)
+        var programNode = Context.FirstAncestorOrSelf<ProgramNode>(node);
+
+        if (programNode == null)
+            return [];
+
+        foreach (var import in programNode.Imports)
         {
-            var programNode = Context.FirstAncestorOrSelf<ProgramNode>(node);
-            if (programNode != null)
-            {
-                foreach (var import in programNode.Imports)
-                {
-                    var moduleSymbol = Context.GetSymbol(import.ModuleName).Symbol as ModuleSymbol;
-                    if (moduleSymbol?.DeclaringNode is not ModuleNode moduleNode)
-                        continue;
+            var moduleSymbol = Context.GetSymbol(import.ModuleName).Symbol as ModuleSymbol;
+            if (moduleSymbol?.DeclaringNode is not ModuleNode moduleNode)
+                continue;
 
-                    var exportedSymbol = Context.Binders[moduleNode].Lookup(node.BaseName)?.FirstOrDefault(s => s is not ModuleSymbol);
-
-                    if (exportedSymbol != null)
-                    {
-                        symbol = exportedSymbol;
-                        break;
-                    }
-                }
-            }
+            // The first module that declares the name owns it, so that an import cannot be shadowed by a later one.
+            if (Context.Binders[moduleNode].Lookup(node.BaseName) is { } imported)
+                return imported.Where(s => s is not ModuleSymbol);
         }
 
-        Context.BoundSymbols[node] = symbol;
+        return [];
     }
 }

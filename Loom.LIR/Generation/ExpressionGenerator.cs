@@ -186,11 +186,11 @@ internal class ExpressionGenerator
 
         // A value type is constructed in place; a reference type needs storage for a pointer to the instance
         var instance = destination ?? Generator.EmitAlloca(ASTGenerator.ConvertType(symbol, substitution));
-        var constructor = symbol.Members.OfType<MethodSymbol>().FirstOrDefault(m => m.Kind == MethodSymbol.MethodKind.Constructor);
+        var constructor = context.AnalysisContext.GetSymbol(node).As<MethodSymbol>() ?? symbol.Members.OfType<MethodSymbol>().FirstOrDefault(m => m.Kind == MethodSymbol.MethodKind.Constructor);
 
         LIRFunction? constructorFunc = null;
         if (constructor != null)
-            constructorFunc = unit.GetFunction(constructor.FullyQualifiedName);
+            constructorFunc = unit.GetFunction(constructor.LinkageName);
         else
             constructorFunc = unit.GetFunction(symbol.FullyQualifiedName + "::.ctor"); // Default
 
@@ -417,7 +417,7 @@ internal class ExpressionGenerator
     {
         LIRFunction? target = null;
         LIRValue? self = null;
-        MethodSymbol? methodSymbol = null;
+        MethodSymbol methodSymbol = context.AnalysisContext.GetSymbol(node).As<MethodSymbol>() ?? throw new Exception($"Could not resolve call: {node.Callee}");
 
         if (node.Callee is MemberAccessExpressionNode member)
         {
@@ -425,32 +425,17 @@ internal class ExpressionGenerator
             if (!receiverIsValue)
                 receiverType = context.AnalysisContext.GetSymbol(member.Receiver).Symbol as TypeSymbol;
 
-            var method = receiverType?.Members.OfType<MethodSymbol>().FirstOrDefault(m => m.Name == member.Name.BaseName);
-
-            if (method == null)
-                throw new Exception($"Could not resolve member call: {member.Name.BaseName}");
-
-            if (!receiverIsValue && !method.IsStatic)
+            if (!receiverIsValue && !methodSymbol.IsStatic)
                 throw new Exception($"Member '{member.Name.BaseName}' is not static and cannot be called on type '{receiverType?.Name}'.");
 
-            methodSymbol = method;
-            target = unit.GetFunction(method.FullyQualifiedName);
+            target = unit.GetFunction(methodSymbol.LinkageName);
 
             if (receiverIsValue)
                 self = EmitAddress(member.Receiver);
         }
-        else if (node.Callee is IdentifierNameNode ident)
-        {
-            var symbol = context.AnalysisContext.GetSymbol(ident).Symbol;
-            if (symbol == null)
-                throw new Exception($"Could not resolve call: {ident.Token.Text}");
-
-            methodSymbol = symbol as MethodSymbol;
-            target = unit.GetFunction(symbol.FullyQualifiedName);
-        }
         else
         {
-            throw new Exception($"Unhandled call callee: {node.Callee.GetType().Name}");
+            target = unit.GetFunction(methodSymbol.LinkageName);
         }
 
         if (target == null)

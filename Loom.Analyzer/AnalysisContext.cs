@@ -1,4 +1,4 @@
-﻿using Loom.Analyzer.Analyzers;
+using Loom.Analyzer.Analyzers;
 using Loom.Analyzer.Symbols;
 using Loom.Common.Diagnostics;
 using Loom.Common.Reflection;
@@ -12,11 +12,12 @@ public class AnalysisContext
 {
     /// <summary> The <see cref="Common.Diagnostics.DiagnosticContext"/> this reports to, if any. </summary>
     public DiagnosticContext? DiagnosticContext { get; set; }
-
+    
     /// <summary> Maps <see cref="ASTNode"/>s to their corresponding <see cref="Binder"/>. </summary>
     public Dictionary<ASTNode, Symbols.Binder> Binders { get; } = new();
-
-    public Dictionary<ASTNode, Symbol?> BoundSymbols { get; } = new();
+    
+    /// <summary> Maps <see cref="ASTNode"/>s to the <see cref="SymbolInfo"/> bound to them. </summary>
+    public Dictionary<ASTNode, SymbolInfo> Symbols { get; } = new();
 
     /// <summary> Maps <see cref="ExpressionNode"/>s to their corresponding <see cref="TypeSymbol"/>. </summary>
     public Dictionary<ExpressionNode, TypeSymbol> ExpressionTypes { get; } = new();
@@ -85,7 +86,7 @@ public class AnalysisContext
 
         // Order here MATTERS
 
-        // Resolve Declarations - across all trees first
+        // Resolve Declarations
         var declWalker = new DeclarationWalker(this, rootTable);
         foreach (var root in rootList)
             declWalker.Dispatch(root);
@@ -137,13 +138,24 @@ public class AnalysisContext
         return null;
     }
 
-    /// <summary> Gets the <see cref="Symbol"/> of the given <see cref="ASTNode"/>. </summary>
+    /// <summary> Gets the <see cref="SymbolInfo"/> bound to <paramref name="node"/>. </summary>
     public SymbolInfo GetSymbol(ASTNode node)
     {
-        if (BoundSymbols.TryGetValue(node, out var symbol))
-            return new SymbolInfo(symbol);
+        if (Symbols.TryGetValue(node, out var info))
+            return info;
 
-        return default;
+        if (node is MemberAccessExpressionNode member)
+        {
+            var receiverType = ExpressionTypes.TryGetValue(member.Receiver, out var receiver) ? receiver : GetSymbol(member.Receiver).Symbol as TypeSymbol;
+            return SymbolInfo.OfCandidates(receiverType?.Members.Where(m => m.Name == member.Name.BaseName) ?? []);
+        }
+
+        return SymbolInfo.None;
     }
-} 
 
+    /// <summary> Binds <paramref name="node"/> to the single <paramref name="symbol"/> its name declares. </summary>
+    public void Bind(ASTNode node, Symbol symbol) => Symbols[node] = SymbolInfo.Of(symbol);
+
+    /// <summary> Binds <paramref name="node"/> to every <paramref name="candidates"/> its name could refer to. </summary>
+    public void Bind(ASTNode node, SymbolInfo symbols) => Symbols[node] = symbols;
+}

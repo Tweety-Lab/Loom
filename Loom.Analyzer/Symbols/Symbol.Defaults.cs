@@ -93,6 +93,13 @@ public record MethodSymbol(string Name, MethodSymbol.MethodKind Kind) : Symbol(N
     /// <summary> Whether this method is generic (has type parameters). </summary>
     public bool IsGeneric => TypeParameters.Count > 0;
 
+    /// <summary> The types of this method's parameters, as they are written in its signature. </summary>
+    public string Signature => $".{string.Join("_", Parameters.Select(p => p.Type?.LinkageName ?? p.Name))}";
+
+    /// <summary> Whether this method is an overload of another method sharing its name. </summary>
+    /// <remarks> An extern method is bound to a symbol outside of Loom, which overloads cannot name. </remarks>
+    public bool IsOverloaded => !IsExtern;
+
     /// <summary> All parameters used by this method. </summary>
     public List<ParameterSymbol> Parameters { get; set; } = new List<ParameterSymbol>();
 
@@ -107,6 +114,9 @@ public record MethodSymbol(string Name, MethodSymbol.MethodKind Kind) : Symbol(N
 
     /// <inheritdoc/>
     public MemberAccessibility Accessibility { get; set; }
+
+    /// <inheritdoc/>
+    public override string LinkageName => IsOverloaded ? $"{FullyQualifiedName}{Signature}" : FullyQualifiedName;
 
     public enum MethodKind
     {

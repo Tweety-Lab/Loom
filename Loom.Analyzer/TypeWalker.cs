@@ -129,46 +129,41 @@ internal class TypeWalker : ASTWalker
         foreach (var typeArgument in node.TypeArguments)
             TypeResolver.Resolve(Context, node, typeArgument);
 
-        var method = node.Callee switch
-        {
-            IdentifierNameNode ident => Context.GetSymbol(ident).Symbol as MethodSymbol,
-            MemberAccessExpressionNode member => ResolveMemberMethod(member),
-            _ => null
-        };
+        var invocation = OverloadResolver.Resolve(Context, node);
+        Context.Bind(node, invocation);
 
-        if (method?.ReturnType is not { } returnType)
-            return;
-
-        // A generic call evaluates to its return type with the call's type arguments bound
-        if (method.IsGeneric && node.TypeArguments.Count == method.TypeParameters.Count)
-        {
-            var arguments = node.TypeArguments.Select(t => Context.GetSymbol(t).Symbol as TypeSymbol).ToList();
-
-            if (arguments.All(a => a != null))
-            {
-                var substitution = new TypeSubstitution(method.TypeParameters.Select((p, i) => new KeyValuePair<string, TypeSymbol>(p.Name, arguments[i]!)));
-                returnType = substitution.Resolve(returnType);
-            }
-        }
-
-        Context.ExpressionTypes[node] = returnType;
+        if (invocation.Symbol is MethodSymbol method && ResolveReturnType(node, method) is { } returnType)
+            Context.ExpressionTypes[node] = returnType;
     }
 
     [Visitor]
     public void Visit(InstanceCreationExpresssionNode node)
     {
         if (Context.GetSymbol(node.TypeName).Symbol is TypeSymbol type && (type.KnownType == TypeSymbol.DefaultType.Struct || type.KnownType == TypeSymbol.DefaultType.Class))
+        {
             Context.ExpressionTypes[node] = type;
+
+            var constructors = type.Members.OfType<MethodSymbol>().Where(m => m.Kind == MethodSymbol.MethodKind.Constructor).ToArray();
+
+            Context.Bind(node, OverloadResolver.Resolve(Context, new CallExpressionNode(node.TypeName, [], node.Arguments), constructors));
+        }
     }
 
-    // Resolves the method a member access expression invokes
-    private MethodSymbol? ResolveMemberMethod(MemberAccessExpressionNode node)
+    // Resolves the type an overloaded method returns, with the type arguments of the call bound to its type parameters
+    private TypeSymbol? ResolveReturnType(CallExpressionNode node, MethodSymbol method)
     {
-        var receiverIsValue = Context.ExpressionTypes.TryGetValue(node.Receiver, out var receiverType);
-        if (!receiverIsValue)
-            receiverType = Context.GetSymbol(node.Receiver).Symbol as TypeSymbol;
+        if (method.ReturnType is not { } returnType)
+            return null;
 
-        return receiverType?.Members.OfType<MethodSymbol>().FirstOrDefault(m => m.Name == node.Name.BaseName);
+        if (!method.IsGeneric || node.TypeArguments.Count != method.TypeParameters.Count)
+            return returnType;
+
+        var arguments = node.TypeArguments.Select(t => Context.GetSymbol(t).Symbol as TypeSymbol).ToList();
+
+        if (arguments.Any(a => a == null))
+            return returnType;
+
+        return new TypeSubstitution(method.TypeParameters.Select((p, i) => new KeyValuePair<string, TypeSymbol>(p.Name, arguments[i]!))).Resolve(returnType);
     }
 
     private bool TryGetArrayType(ExpressionNode node, [NotNullWhen(true)] out ArrayTypeSymbol? array)

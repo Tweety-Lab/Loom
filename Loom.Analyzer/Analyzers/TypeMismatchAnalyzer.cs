@@ -83,37 +83,10 @@ public class TypeMismatchAnalyzer : Analyzer
     }
 
     [Visitor]
-    public void Visit(InstanceCreationExpresssionNode node)
-    {
-        if (!Context.ExpressionTypes.TryGetValue(node, out var type))
-            return;
-
-        var constructor = type.Members.OfType<MethodSymbol>().FirstOrDefault(member => member.Kind == MethodSymbol.MethodKind.Constructor);
-
-        CheckArguments(constructor?.Parameters, node.Arguments);
-    }
+    public void Visit(InstanceCreationExpresssionNode node) => CheckArguments(Context.GetSymbol(node).As<MethodSymbol>()?.Parameters, node.Arguments);
 
     [Visitor]
-    public void Visit(CallExpressionNode node)
-    {
-        MethodSymbol? method = null;
-
-        if (node.Callee is MemberAccessExpressionNode member)
-        {
-            if (!Context.ExpressionTypes.TryGetValue(member.Receiver, out var receiverType))
-                receiverType = Context.GetSymbol(member.Receiver).Symbol as TypeSymbol;
-
-            method = receiverType?.Members.OfType<MethodSymbol>().FirstOrDefault(candidate => candidate.Name == member.Name.BaseName);
-        }
-        else if (node.Callee is IdentifierNameNode identifier)
-        {
-            var symbol = Context.GetSymbol(identifier).Symbol;
-
-            method = symbol as MethodSymbol ?? (symbol as TypeSymbol)?.Members.OfType<MethodSymbol>().FirstOrDefault(candidate => candidate.Name == identifier.BaseName);
-        }
-
-        CheckArguments(method?.Parameters, node.Arguments);
-    }
+    public void Visit(CallExpressionNode node) => CheckArguments(Context.GetSymbol(node).As<MethodSymbol>()?.Parameters, node.Arguments);
 
     [Visitor]
     public void Visit(ArrayLiteralNode node)
@@ -145,46 +118,7 @@ public class TypeMismatchAnalyzer : Analyzer
         if (!Context.ExpressionTypes.TryGetValue(assigned, out var assignedType))
             return;
 
-        if (!CanImplicitlyConvert(assignedType, assignee))
+        if (!TypeConversions.CanImplicitlyConvert(assignedType, assignee))
             Context.DiagnosticContext?.Report(TypeMismatch, assigned.StartToken?.Location, assignedType.Name, assignee.Name);
     }
-
-    private static bool CanImplicitlyConvert(TypeSymbol source, TypeSymbol target)
-    {
-        if (source == null || target == null)
-            return false;
-
-        if (source.IsGeneric || target.IsGeneric)
-            return true;
-
-        // Ugly
-        if (source is ArrayTypeSymbol sourceArray || target is ArrayTypeSymbol)
-            return source is ArrayTypeSymbol { ElementType: var sourceElement, Size: var sourceSize }
-                && target is ArrayTypeSymbol { ElementType: var targetElement, Size: var targetSize }
-                && sourceSize == targetSize
-                && CanImplicitlyConvert(sourceElement, targetElement);
-
-        if (source.KnownType == target.KnownType)
-            return true;
-
-        if (target.KnownType == TypeSymbol.DefaultType.Void)
-            return false;
-
-        if (source.KnownType == TypeSymbol.DefaultType.Void)
-            return false;
-
-        // Casting check here
-
-        // The built-in integer types convert implicitly between one another
-        if (IsIntegerType(source.KnownType) && IsIntegerType(target.KnownType))
-            return true;
-
-        return false;
-    }
-
-    private static bool IsIntegerType(TypeSymbol.DefaultType type) => type switch
-    {
-        TypeSymbol.DefaultType.I32 or TypeSymbol.DefaultType.I64 or TypeSymbol.DefaultType.IPtr or TypeSymbol.DefaultType.Char => true,
-        _ => false
-    };
 }

@@ -37,7 +37,7 @@ public sealed class LLVMJITCompiler : IJITCompiler
         if (Project == null)
             return false;
 
-        LIRCompilationUnit unit = Project.CompilationContext.CompilationUnits.First(unit => unit.AllFunctions.Any(function => function.Name == method.FullyQualifiedName));
+        LIRCompilationUnit unit = Project.CompilationContext.CompilationUnits.First(unit => unit.AllFunctions.Any(function => function.Name == method.LinkageName));
 
         LLVMTranslatorPass translator = new LLVMTranslatorPass();
         translator.Run(unit);
@@ -52,7 +52,7 @@ public sealed class LLVMJITCompiler : IJITCompiler
         }
 
         LLVMExecutionEngineRef engine = translator.Result.CreateExecutionEngine();
-        LLVMValueRef main = translator.Result.GetNamedFunction(method.FullyQualifiedName);
+        LLVMValueRef main = translator.Result.GetNamedFunction(method.LinkageName);
         LLVMGenericValueRef result = engine.RunFunction(main, []);
 
         jitResult = new LLVMJITResult { Value = result };

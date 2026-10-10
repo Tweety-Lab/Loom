@@ -2,19 +2,32 @@ import Standard::Memory;
 
 module Standard::IO
 {
-	export extern void putchar(char c);
+	extern void putchar(char c);
 
     /// @brief Prints a char slice to the console and appends a newline.
     export void println(Slice s)
     {
         print(s);
-		putchar('\n');
+		print('\n');
     }
 
-    /// @brief Prints a char slice to the console.
+	/// @brief Prints a char slice to the console.
     export void print(Slice s)
     {
         for (i32 i = 0; i < s.Length; i = i + 1)
-            putchar(s.ElementAt<char>(i));
+            print(s.ElementAt<char>(i));
     }
+
+	/// @brief Prints a char to the console and appends a newline.
+    export void println(char c)
+    {
+		print(c);
+		print('\n');
+    }
+
+	/// @brief Prints a char to the console.
+    export void print(char c)
+	{
+		putchar(c);
+	}
 }
