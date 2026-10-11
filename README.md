@@ -4,66 +4,73 @@
 Loom is an object-oriented systems programming language that combines the performance and portability of low-level languages with the developer experience of high-level languages.
 
 ```Loom
-module MyModule
+import Standard::IO;
+import Standard::Memory;
+
+module Standard::Program
 {
-    // Classes are reference types and are interacted with via the Loom smart pointer memory model
-    export class MyClass
+    /// @brief Classes are reference types and are interfaced with through Loom's ownership and memory model (smart pointers)!
+    export class Object
     {
-        // Properties are wrappers for fields that run custom logic when getting or setting.
-        public i32 Value { get; set; }
+        public i32 MutableField = default;
+    }
 
-        public MyClass(i32 value)
+    /// @brief Program Entry Point
+    export i32 Main()
+    {
+        // A Unique pointer to an object can only have one owner at a time
+        unique Object obj = new Object();
+        SetFieldFromMutableBorrow(obj, 10);
+
+        // 'Slice' doesn't need to use pointers because it's a value type (struct)
+        // Value types use copy semantics and typically live on the stack
+        Slice myString = "Hello!";
+        println(myString); // "Hello!"
+
+        // Loom also allows unsafe operations inside an 'unsafe' block via the 'Standard::Memory::Unsafe' class
+        unsafe
         {
-            Value = value;
+            char[3] myArray = ['a', 'b', 'c'];
+            iptr addr = Unsafe.AddressOf<char[3]>(myArray);
+
+            char letter = Unsafe.Read<char>(addr + sizeof(char) * 2);
+            println(letter); // "c"
         }
+        
+        return GetFieldFromBorrow(obj);
     }
 
-    // Structs are value types that are reconstructed between scopes
-    export struct MyStruct
+    /// @brief 'ref' is used to borrow a reference to an object without claiming ownership.
+    export i32 GetFieldFromBorrow(ref Object input)
     {
-        public i32 Value { get; set; }
+        return input.MutableField;
     }
 
-    // Returning reference type + no pointer type = error!
-    export MyClass ReturnImplicitOwnedRefType()
+	/// @brief 'ref mut' is used to borrow a mutatable reference to an object without claiming ownership.
+    export void SetFieldFromMutableBorrow(ref mut Object input, i32 val)
     {
-        MyClass obj = new MyClass(); // No pointer type + reference type = error!
-        return obj;
+        input.MutableField = val;
+    }
+}
+
+module Standard::IO
+{
+    extern void putchar(char c);
+
+    /// @brief Prints a char slice to the console and appends a newline.
+    export void println(Slice s)
+    {
+        for (i32 i = 0; i < s.Length; i = i + 1)
+            putchar(s.ElementAt<char>(i));
+
+        putchar('\n');
     }
 
-    export MyStruct ReturnStackAllocatedValueType()
+    /// @brief Prints a char to the console and appends a newline.
+    export void println(char c)
     {
-        MyStruct obj = new MyStruct();
-        return obj;
-    }
-
-    export unique MyClass ReturnUniqueRefType()
-    {
-        unique MyClass obj = new MyClass();
-        return obj;
-    }
-
-    // Ref = Read from unique pointer without taking ownership
-    export i32 BorrowUniqueRef(ref MyClass obj)
-    {
-        return obj.Value;
-    }
-
-    // Ref Mut = Read/Write from unique pointer without taking ownership
-    export i32 BorrowMutableUniqueRef(ref mut MyClass obj)
-    {
-        obj.Value = 100;
-        return obj.Value;
-    }
-
-
-    unsafe
-    {
-        export raw MyClass ReturnRaw()
-        {
-            raw MyClass obj = new MyClass();
-            return obj;
-        }
+        putchar(c);
+        putchar('\n');
     }
 }
 ```
