@@ -37,6 +37,15 @@ public interface IAccessibleSymbol
     MemberAccessibility Accessibility { get; set; }
 }
 
+/// <summary>
+/// Represents a symbol that can have type parameters.
+/// </summary>
+public interface ITypeParameterizableSymbol
+{
+    /// <summary> The type parameters of this symbol. </summary>
+    List<TypeParameterSymbol> TypeParameters { get; }
+}
+
 public record ModuleSymbol(string Name) : Symbol(Name);
 
 public record TypeSymbol(string Name, TypeSymbol.DefaultType KnownType) : Symbol(Name), IExportableSymbol
@@ -76,10 +85,9 @@ public record TypeSymbol(string Name, TypeSymbol.DefaultType KnownType) : Symbol
     }
 }
 
-/// <summary> A type declared by a method's type parameter list. </summary>
 public record TypeParameterSymbol(string Name) : TypeSymbol(Name, TypeSymbol.DefaultType.TypeParameter);
 
-public record MethodSymbol(string Name, MethodSymbol.MethodKind Kind) : Symbol(Name), IExportableSymbol, IAccessibleSymbol
+public record MethodSymbol(string Name, MethodSymbol.MethodKind Kind) : Symbol(Name), IExportableSymbol, IAccessibleSymbol, ITypeParameterizableSymbol
 {
     /// <summary> The resolved return type. </summary>
     public TypeSymbol? ReturnType { get; set; }
@@ -87,7 +95,7 @@ public record MethodSymbol(string Name, MethodSymbol.MethodKind Kind) : Symbol(N
     /// <summary> The pointer type for the return value. </summary>
     public PointerType ReturnPointerType { get; set; }
 
-    /// <summary> All type parameters used by this method. </summary>
+    /// <inheritdoc/>
     public List<TypeParameterSymbol> TypeParameters { get; set; } = new List<TypeParameterSymbol>();
 
     /// <summary> Whether this method is generic (has type parameters). </summary>

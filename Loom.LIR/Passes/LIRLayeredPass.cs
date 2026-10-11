@@ -3,17 +3,17 @@
 namespace Loom.LIR.Passes;
 
 /// <summary>
-/// A <see cref="ICompilationPass"/> that runs on an entire <see cref="LIRCompilationUnit"/> and its contents through a layered approach.
+/// A <see cref="LIRCompilationPass"/> that runs on an entire <see cref="LIRCompilationUnit"/> and its contents through a layered approach.
 /// </summary>
 /// <remarks>
 /// Layered passes first run on all functions, then on all blocks, and finally on all instructions. Unlike recursive passes which run on a function, it's blocks, and it's instructions then
 /// moves on to the next function, layering reports every function before any block or instruction is visited. This ordering guarantees call targets are seen by a pass (e.g. an LLVM
 /// translator that emits declarations up front) before they are referenced from a block that was emitted earlier.
 /// </remarks>
-public abstract class LIRLayeredPass : ICompilationPass
+public abstract class LIRLayeredPass : LIRCompilationPass
 {
     /// <inheritdoc/>
-    public virtual void Run(LIRCompilationUnit unit)
+    public override void Run(LIRCompilationUnit unit)
     {
         var allFunctions = unit.AllFunctions.ToList(); // Prevent enumeration issues
 

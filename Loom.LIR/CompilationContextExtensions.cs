@@ -28,11 +28,22 @@ public static class CompilationContextExtensions
 
             ctx.ExtendedProperties[LIRGEN_CONTEXT_KEY] = new List<LIRCompilationUnit> { comp };
 
+            RunCompilationPasses(ctx, comp);
+
             LIRPrinter printer = new LIRPrinter(new StringPrinterStyle());
             string lir = printer.Print(comp);
             Console.WriteLine(lir);
 
             return ctx;
+        }
+    }
+
+    private static void RunCompilationPasses(CompilationContext context, LIRCompilationUnit unit)
+    {
+        foreach (var pass in LIRCompilationPass.Passes)
+        {
+            pass.Context = context;
+            pass.Run(unit);
         }
     }
 }

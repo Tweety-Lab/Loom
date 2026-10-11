@@ -4,14 +4,14 @@ using Loom.LIR.Objects;
 namespace Loom.LIR.Passes;
 
 /// <summary>
-/// A <see cref="ICompilationPass"/> that runs on an entire <see cref="LIRCompilationUnit"/> and it's contents recursively.
+/// A <see cref="LIRCompilationPass"/> that runs on an entire <see cref="LIRCompilationUnit"/> and it's contents recursively.
 /// </summary>
-public abstract class LIRRecursivePass : ICompilationPass
+public abstract class LIRRecursivePass : LIRCompilationPass
 {
     /// <inheritdoc/>
-    public virtual void Run(LIRCompilationUnit unit)
+    public override void Run(LIRCompilationUnit unit)
     {
-        foreach (var func in unit.AllFunctions.ToList())
+        foreach (var func in unit.AllFunctions.ToList()) // Prevent enumeration issues
             RunOnFunction(func);
     }
 

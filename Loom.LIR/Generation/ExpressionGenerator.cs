@@ -444,10 +444,14 @@ internal class ExpressionGenerator
         if (target == null)
             throw new Exception($"Could not find function: {node.Callee}");
 
-        // Calls made from a concrete function instantiate the generic target; calls inside a generic template stay symbolic
-        // and are instantiated when a body is generated for each type argument.
+        IReadOnlyList<TypeSymbol>? typeArguments = null;
+        LIRType? callReturnType = null;
+
         if (methodSymbol is { IsGeneric: true } generic && function.Type.TypeParameters.Length == 0)
-            target = methodGenerator.GetOrCreateInstance(generic, ResolveTypeArguments(node, generic), node);
+        {
+            typeArguments = ResolveTypeArguments(node, generic);
+            callReturnType = ResolveCallReturnType(generic, typeArguments);
+        }
 
         // An unqualified call to an instance method dispatches on the current instance
         if (self == null && target.Type.Parameters.FirstOrDefault()?.Name == "self")
@@ -456,9 +460,18 @@ internal class ExpressionGenerator
         var args = node.Arguments.Select(EmitValue).ToArray();
 
         if (self != null)
-            return Generator.EmitCallInstanced(target, self, args);
+            return Generator.EmitCallInstanced(target, self, typeArguments, node, callReturnType, args);
 
-        return Generator.EmitCall(target, args);
+        return Generator.EmitCall(target, typeArguments, node, callReturnType, args);
+    }
+
+    // Resolves the concrete LIR type a call to 'generic' with 'typeArguments' produces
+    private static LIRType ResolveCallReturnType(MethodSymbol generic, IReadOnlyList<TypeSymbol> typeArguments)
+    {
+        if (generic.ReturnType == null)
+            throw new Exception($"Could not resolve the return type of {generic.FullyQualifiedName}.");
+
+        return ASTGenerator.ConvertStorageType(generic.ReturnType, TypeSubstitution.Zip(generic, typeArguments));
     }
 
     // Resolves the type arguments of 'node', expressed in terms of the type parameters of the caller, to concrete types
