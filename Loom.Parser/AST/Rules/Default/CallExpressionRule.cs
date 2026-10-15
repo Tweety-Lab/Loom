@@ -17,21 +17,15 @@ public class CallExpressionRule : ParserRule<CallExpressionNode>
     /// <inheritdoc/>
     public CallExpressionRule(LoomParser parser) : base(parser) { }
 
-    private ExpressionNode callee = null!;
-
-    /// <summary> Parses a call on the given <paramref name="callee"/> expression. </summary>
-    public CallExpressionNode Parse(ExpressionNode callee)
-    {
-        this.callee = callee;
-        return Parse();
-    }
+    /// <summary> The receiver the call is being parsed on. Must be set before running this rule. </summary>
+    public ExpressionNode Callee { get; set; } = null!;
 
     /// <inheritdoc/>
     public override CallExpressionNode ParseNode()
     {
         // Snapshot the callee before parsing children
-        // Nested calls reuse this rule instance and overwrite the field
-        var target = callee;
+        // Nested calls reuse this rule instance and overwrite the property
+        var target = Callee;
 
         // Type Arguments
         var typeArguments = Parser.Reader.Check(TokenType.Less) ? RunRule<TypeArgumentListRule, TypeArgumentListNode>() : new TypeArgumentListNode([]);
@@ -51,16 +45,6 @@ public class CallExpressionRule : ParserRule<CallExpressionNode>
         Parser.Reader.Expect(TokenType.RParen); // )
 
         return new CallExpressionNode(target, typeArguments, args);
-    }
-
-    // hacky hacky fix now
-    
-    public static bool CanParse(TokenReader reader)
-    {
-        if (reader.Check(TokenType.LParen))
-            return true;
-
-        return reader.Peek(TypeArgumentListRule.SkipTypeArguments(reader, 0)).Type == TokenType.LParen;
     }
 }
 

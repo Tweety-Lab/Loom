@@ -26,17 +26,20 @@ public class PostfixExpressionRule : ParserRule<ExpressionNode>
     public override ExpressionNode ParseNode()
     {
         var expression = RunRule<PrimaryExpressionRule, ExpressionNode>();
+        var callRule = Parser.GetRule<CallExpressionRule>();
 
         while (true)
         {
+            callRule.Callee = expression;
+
             if (Parser.Reader.Match(TokenType.Period))
             {
                 var name = new IdentifierNameNode(Parser.Reader.Expect(TokenType.Identifier));
                 expression = new MemberAccessExpressionNode(expression, name);
             }
-            else if (CallExpressionRule.CanParse(Parser.Reader))
+            else if (TryRunRule<CallExpressionRule, CallExpressionNode>(out var call))
             {
-                expression = Parser.GetRule<CallExpressionRule>().Parse(expression);
+                expression = call;
             }
             else if (Parser.Reader.Match(TokenType.LBracket))
             {
