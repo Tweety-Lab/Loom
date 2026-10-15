@@ -22,6 +22,15 @@ public class MutabilityAnalyzer : Analyzer
         Context.DiagnosticContext?.Report(CannotMutateRef, node.StartToken?.Location, parameter.Name);
     }
 
+    [Visitor]
+    public void Visit(IncrementExpressionNode node)
+    {
+        if (FindBorrowedParameter(node.Target) is not { IsMutable: false } parameter)
+            return;
+
+        Context.DiagnosticContext?.Report(CannotMutateRef, node.StartToken?.Location, parameter.Name);
+    }
+
     private ParameterSymbol? FindBorrowedParameter(ExpressionNode target) => target switch
     {
         IdentifierNameNode identifier => Context.GetSymbol(identifier).Symbol is ParameterSymbol { IsBorrow: true } parameter ? parameter : null,

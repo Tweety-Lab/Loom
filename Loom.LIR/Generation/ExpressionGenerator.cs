@@ -49,6 +49,7 @@ internal class ExpressionGenerator
         MemberAccessExpressionNode member => ResolveProperty(member) is { } memberProperty ? EmitPropertyGet(memberProperty, member, EmitPropertySelf(memberProperty, member)) : EmitVariableValue(member),
         InstanceCreationExpresssionNode creation => EmitInstanceCreation(creation),
         SizeOfExpressionNode sizeOf => EmitSizeOf(sizeOf),
+        IncrementExpressionNode increment => EmitIncrement(increment),
         _ => throw new Exception($"Unhandled expression: {node.GetType().Name}")
     };
 
@@ -420,11 +421,10 @@ internal class ExpressionGenerator
         return address;
     }
 
-    private void EmitPropertySet(PropertySymbol property, ExpressionNode target, ExpressionNode value)
-    {
-        var self = EmitPropertySelf(property, target);
-        var stored = EmitValue(value);
+    private void EmitPropertySet(PropertySymbol property, ExpressionNode target, ExpressionNode value) => EmitPropertySet(property, target, EmitPropertySelf(property, target), EmitValue(value));
 
+    private void EmitPropertySet(PropertySymbol property, ExpressionNode target, LIRValue? self, LIRValue stored)
+    {
         if (property.Setter != null)
         {
             EmitAccessorCall(property.Setter, target, self, stored);
@@ -432,20 +432,47 @@ internal class ExpressionGenerator
         }
 
         // A get-only property is assigned through its backing field on the instance it belongs to
-        TypeSymbol owner = target is MemberAccessExpressionNode member && context.AnalysisContext.ExpressionTypes.TryGetValue(member.Receiver, out var receiverType)
-            ? receiverType
-            : ResolveOwnerType(target);
+        TypeSymbol owner = target is MemberAccessExpressionNode member && context.AnalysisContext.ExpressionTypes.TryGetValue(member.Receiver, out var receiverType) ? receiverType : ResolveOwnerType(target);
 
         Generator.EmitStore(stored, EmitFieldAddress(self!, owner, property.BackingField!));
+    }
+
+    private LIRValue EmitIncrement(IncrementExpressionNode node)
+    {
+        if (ResolveProperty(node.Target) is { } property)
+        {
+            var self = EmitPropertySelf(property, node.Target);
+            var oldPropertyValue = EmitPropertyGet(property, node.Target, self);
+            var newPropertyValue = ApplyDelta(oldPropertyValue, node.Operator);
+
+            EmitPropertySet(property, node.Target, self, newPropertyValue);
+
+            return node.IsPrefix ? newPropertyValue : oldPropertyValue;
+        }
+
+        var address = EmitAddress(node.Target);
+        var oldValue = Generator.EmitLoad(address);
+        var newValue = ApplyDelta(oldValue, node.Operator);
+
+        Generator.EmitStore(newValue, address);
+
+        return node.IsPrefix ? newValue : oldValue;
+    }
+
+    private LIRValue ApplyDelta(LIRValue value, Parser.Tokenizer.Token op)
+    {
+        var one = Generator.EmitConvert(new LIRConstantIntValue(1), value.Type);
+
+        return op.Type == Parser.Tokenizer.Token.TokenType.PlusPlus
+            ? Generator.EmitAdd(value, one)
+            : Generator.EmitSub(value, one);
     }
 
     private LIRValue EmitAccessorCall(MethodSymbol accessor, ASTNode origin, LIRValue? self, params LIRValue[] arguments)
     {
         LIRFunction target = GetCallTarget(accessor);
 
-        return self != null
-            ? Generator.EmitCallInstanced(target, self, null, origin, null, arguments)
-            : Generator.EmitCall(target, null, origin, null, arguments);
+        return self != null ? Generator.EmitCallInstanced(target, self, null, origin, null, arguments) : Generator.EmitCall(target, null, origin, null, arguments);
     }
 
     private LIRValue EmitArrayElementAddress(ArrayAccessExpressionNode node)
@@ -454,10 +481,8 @@ internal class ExpressionGenerator
         return Generator.EmitGetElement(arrayAddress, EmitValue(node.Index));
     }
 
-    // Emits the address of a field referenced by bare name inside a type, accessed through the instance (self) parameter
     private LIRValue EmitBareFieldAddress(FieldSymbol symbol, ASTNode contextNode) => EmitFieldAddress(EmitSelfParameter(), ResolveOwnerType(contextNode), symbol);
 
-    // Resolves the type the method being generated belongs to, using the instantiation carried by the generator when there is one
     private TypeSymbol ResolveOwnerType(ASTNode contextNode)
     {
         if (ownerType != null)

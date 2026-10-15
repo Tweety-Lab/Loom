@@ -113,6 +113,13 @@ internal class TypeWalker : ASTWalker
     }
 
     [Visitor]
+    public void Visit(IncrementExpressionNode node)
+    {
+        if (Context.ExpressionTypes.TryGetValue(node.Target, out var type))
+            Context.ExpressionTypes[node] = type;
+    }
+
+    [Visitor]
     public void Visit(ArrayLiteralNode node)
     {
         if (ResolveContextualType(node) is ArrayTypeSymbol contextual)

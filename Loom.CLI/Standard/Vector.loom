@@ -1,0 +1,27 @@
+import Standard::Memory;
+
+module Standard
+{
+	/// @brief Dynamically sized continuous storage of objects.
+	/// @tparam T The type of objects stored in the vector.
+	export class Vector<T>
+	{
+		/// @brief The number of elements currently stored in the vector.
+		public i32 Count { get; } = default;
+
+		/// @brief The maximum number of elements that can be stored in the vector before it needs to be resized.
+		public i32 Capacity { get; } = 4;
+
+		iptr pointer = default;
+
+		public Vector()
+		{
+
+		}
+
+		public void Add(T element)
+		{
+			Count++;
+		}
+	}
+}

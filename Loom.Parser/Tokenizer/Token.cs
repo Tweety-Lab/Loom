@@ -120,6 +120,9 @@ public class Token
 
         [MultiCharacter(':', ':')] ColonColon,
 
+        [MultiCharacter('+', '+')] PlusPlus,
+        [MultiCharacter('-', '-')] MinusMinus,
+
         [Character(',')] Comma,
         [Character(';')] Semicolon,
         [Character(':')] Colon,

@@ -47,6 +47,11 @@ public class PostfixExpressionRule : ParserRule<ExpressionNode>
                 Parser.Reader.Expect(TokenType.RBracket);
                 expression = new ArrayAccessExpressionNode(expression, index);
             }
+            else if (Parser.Reader.Current.Type is TokenType.PlusPlus or TokenType.MinusMinus)
+            {
+                var op = Parser.Reader.Advance();
+                expression = new IncrementExpressionNode(expression, op, false);
+            }
             else
             {
                 break;
