@@ -295,10 +295,8 @@ internal class ExpressionGenerator
         return arrayAddress;
     }
 
-    // Determines whether 'ident' refers to a parameter rather than a local variable or a field
     private bool IsParameter(IdentifierNameNode ident) => !locals.ContainsKey(ident.BaseName) && context.AnalysisContext.GetSymbol(ident).Symbol is ParameterSymbol;
 
-    // Determines whether 'node' has a value type, defaulting to one when its type is unknown
     private bool IsValueType(ExpressionNode node)
     {
         if (!context.AnalysisContext.ExpressionTypes.TryGetValue(node, out var type))
@@ -311,7 +309,6 @@ internal class ExpressionGenerator
         return type is TypeParameterSymbol || type.IsValueType;
     }
 
-    // Determines whether a value of 'type' is held directly rather than behind a pointer
     private static bool IsValueType(LIRType type) => type switch
     {
         LIRArrayType => true,
@@ -320,10 +317,8 @@ internal class ExpressionGenerator
         _ => false
     };
 
-    // Determines whether an integer type holds more than 32 bits
     private static bool IsWide(LIRType type) => type is LIRIntPtrType or LIRIntType { Bits: > 32 };
 
-    // Emits the value of the parameter named 'name'
     private LIRValue EmitParameterValue(string name)
     {
         var index = Array.FindIndex(function.Type.Parameters, p => p.Name == name);
@@ -367,7 +362,6 @@ internal class ExpressionGenerator
         return EmitFieldAddress(EmitSelfParameter(), typeSymbol, symbol);
     }
 
-    // Emits the value of the instance (self) parameter
     private LIRValue EmitSelfParameter()
     {
         if (!function.Type.Parameters.Any(p => p.Name == "self"))
@@ -376,7 +370,6 @@ internal class ExpressionGenerator
         return EmitParameterValue("self");
     }
 
-    // Emits the address of a field referenced by bare name inside a type, accessed through the instance (self) parameter
     private LIRValue EmitFieldAddress(LIRValue instance, TypeSymbol instanceTypeSymbol, FieldSymbol fieldSymbol)
     {
         var declarationType = new LIRTypeDeclarationType(instanceTypeSymbol.FullyQualifiedName, instanceTypeSymbol.IsValueType);

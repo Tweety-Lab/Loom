@@ -35,7 +35,7 @@ public class ModuleBlockRule : BlockRule
 
             if (Parser.Reader.Peek(offset).Type == TokenType.Identifier)
             {
-                offset = MethodDeclarationRule.SkipTypeParameters(Parser.Reader, offset + 1);
+                offset = TypeParameterListRule.SkipTypeParameters(Parser.Reader, offset + 1);
 
                 if (Parser.Reader.Peek(offset).Type == TokenType.LParen)
                 {

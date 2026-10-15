@@ -50,7 +50,7 @@ public class TypeDeclarationBlockRule : BlockRule
 
         if (next == TokenType.Less)
         {
-            offset = MethodDeclarationRule.SkipTypeParameters(Parser.Reader, offset + 1);
+            offset = TypeParameterListRule.SkipTypeParameters(Parser.Reader, offset + 1);
             next = Parser.Reader.Peek(offset).Type;
         }
 

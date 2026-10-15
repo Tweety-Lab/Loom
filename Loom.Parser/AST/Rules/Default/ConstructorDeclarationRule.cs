@@ -5,7 +5,7 @@ using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.AST.Rules.Default;
 
-public record ConstructorDeclarationNode(Token Name, List<ParameterNode> Parameters, BlockNode Body, List<Token> Modifiers) : ASTNode, IModifiableNode
+public record ConstructorDeclarationNode(Token Name, ParameterListNode Parameters, BlockNode Body, List<Token> Modifiers) : ASTNode, IModifiableNode
 {
     /// <inheritdoc/>
     public override IEnumerable<ASTNode> Children => Parameters.Cast<ASTNode>().Prepend(Body);
@@ -24,23 +24,7 @@ public class ConstructorDeclarationRule : ParserRule<ConstructorDeclarationNode>
         var modifiers = Parser.Reader.ExpectMany(t => TokenRegistry.IsMemberModifier(t.Type));
         var methodName = Parser.Reader.Expect(TokenType.Identifier); // name
 
-        Parser.Reader.Expect(TokenType.LParen); // (
-
-        // Paramaters
-        var parameters = new List<ParameterNode>();
-        if (Parser.Reader.Peek(0).Type != TokenType.RParen)
-        {
-            do
-            {
-                var type = RunRule<TypeRule, TypeNode>(); // type
-                var name = Parser.Reader.Expect(TokenType.Identifier);
-
-                parameters.Add(new ParameterNode(type, name));
-            }
-            while (Parser.Reader.Match(TokenType.Comma));
-        }
-
-        Parser.Reader.Expect(TokenType.RParen); // )
+        var parameters = RunRule<ParameterListRule, ParameterListNode>();
 
         BlockNode body = body = RunRule<MethodBlockRule, BlockNode>();
 
