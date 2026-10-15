@@ -6,7 +6,7 @@ module Standard::Program
     /// @brief Classes are reference types and are interfaced with through Loom's ownership and memory model (smart pointers)!
     export class Object
     {
-        public i32 MutableField = default;
+        public i32 MutableField { get; set; } = default;
     }
 
     /// @brief Program Entry Point

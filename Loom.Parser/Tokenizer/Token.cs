@@ -150,6 +150,9 @@ public class Token
         [Keyword("while")] While,
         [Keyword("for")] For,
 
+        [Keyword("get")] Get,
+        [Keyword("set")] Set,
+
         [Keyword("return")] Return,
         [Keyword("new")] New,
 

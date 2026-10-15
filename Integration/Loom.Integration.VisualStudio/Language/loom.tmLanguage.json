@@ -20,6 +20,7 @@
     { "include": "#qualifiers" },
     { "include": "#function-call" },
     { "include": "#type-annotation" },
+    { "include": "#property" },
     { "include": "#member" },
     { "include": "#operators" },
     { "include": "#punctuation" },
@@ -123,6 +124,10 @@
           "match": "\\b(?:if|else|while|for|break|continue|return)\\b"
         },
         {
+          "name": "keyword.other.accessor.loom",
+          "match": "\\b(?:get|set)\\b"
+        },
+        {
           "name": "storage.modifier.loom",
           "match": "\\b(?:export|extern|unsafe|static|stack|public|private|unique|shared|weak|ref|mut)\\b"
         },
@@ -212,7 +217,13 @@
     "type-annotation": {
       "comment": "Type followed by a name: 'Foo x', 'Foo* x', 'Foo name(' ... Keywords are matched earlier so they never reach this rule.",
       "name": "entity.name.type.loom",
-      "match": "\\b[A-Za-z_][A-Za-z0-9_]*(?=\\*{0,3}\\s+[A-Za-z_][A-Za-z0-9_]*\\s*[=;(),<\\[])"
+      "match": "\\b[A-Za-z_][A-Za-z0-9_]*(?=\\*{0,3}\\s+[A-Za-z_][A-Za-z0-9_]*\\s*[=;(),<\\[{])"
+    },
+
+    "property": {
+      "comment": "A property name followed by an accessor list, e.g. 'i32 Length { get; }' or 'i32 Length { get { return 10; } }'.",
+      "name": "variable.other.property.loom",
+      "match": "\\b[A-Za-z_][A-Za-z0-9_]*(?=\\s*\\{\\s*(?:get|set)\\b)"
     },
 
     "member": {
