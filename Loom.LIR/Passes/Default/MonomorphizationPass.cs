@@ -8,7 +8,6 @@ using Loom.Parser.AST.Rules.Default;
 
 namespace Loom.LIR.Passes.Default;
 
-
 [CompilationPass]
 public class MonomorphizationPass : LIRCompilationPass
 {
@@ -50,7 +49,6 @@ public class MonomorphizationPass : LIRCompilationPass
             return false;
 
         MethodSymbol method = context.AnalysisContext.GetSymbol(origin).As<MethodSymbol>() ?? throw new InvalidOperationException($"Could not resolve the generic method called at '{origin}'.");
-
         LIRFunction instance = methodGenerator.GetOrCreateInstance(method, call.TypeArguments, origin);
 
         call.Operands[0] = instance;

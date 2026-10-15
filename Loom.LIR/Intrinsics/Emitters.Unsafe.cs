@@ -29,3 +29,19 @@ internal sealed class ReadEmitter : IIntrinsicEmitter
         function.LIRGenerator.EmitReturn(function.LIRGenerator.EmitLoad(pointer));
     }
 }
+
+[IntrinsicEmitter("Standard::Memory::Unsafe::Write")]
+internal sealed class WriteEmitter : IIntrinsicEmitter
+{
+    /// <inheritdoc />
+    public void EmitInto(LIRFunction function)
+    {
+        LIRValue address = function.ParameterValues[0];
+        LIRValue value = function.ParameterValues[1];
+
+        LIRTempValue pointer = function.LIRGenerator!.EmitIntToPtr(address, new LIRPointerType(value.Type));
+        function.LIRGenerator.EmitStore(value, pointer);
+
+        function.LIRGenerator.EmitReturn();
+    }
+}

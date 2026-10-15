@@ -22,6 +22,9 @@ module Standard::Memory
 
         /// @brief Reads the value at the given address.
         public static unique T Read<T>(iptr address) { }
+
+		/// @brief Writes the value to the given address.
+		public static void Write<T>(iptr address, T value) { }
 #endregion
     }
 
