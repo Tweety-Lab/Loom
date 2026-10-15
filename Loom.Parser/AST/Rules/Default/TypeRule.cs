@@ -11,10 +11,12 @@ public record ArraySizeSpecifierNode(Token? Size) : ASTNode
     public override IEnumerable<ASTNode> Children => Enumerable.Empty<ASTNode>();
 }
 
-public record TypeNode(Token Base, List<Token> Modifiers, ArraySizeSpecifierNode? ArraySize = null) : ASTNode, IModifiableNode
+public record TypeNode(Token Base, List<Token> Modifiers, TypeArgumentListNode? TypeArguments = null, ArraySizeSpecifierNode? ArraySize = null) : ASTNode, IModifiableNode
 {
     /// <inheritdoc/>
-    public override IEnumerable<ASTNode> Children => Enumerable.Empty<ASTNode>();
+    public override IEnumerable<ASTNode> Children =>
+        (TypeArguments is not null ? new ASTNode[] { TypeArguments } : Enumerable.Empty<ASTNode>())
+        .Concat(ArraySize is not null ? new ASTNode[] { ArraySize } : Enumerable.Empty<ASTNode>());
 }
 
 [ParserRule]
@@ -30,6 +32,10 @@ public class TypeRule : ParserRule<TypeNode>
 
         var type = Parser.Reader.ExpectAny(t => IsTypeName(t.Type)); // type
 
+        TypeArgumentListNode? typeArguments = null;
+        if (Parser.Reader.Check(TokenType.Less))
+            typeArguments = RunRule<TypeArgumentListRule, TypeArgumentListNode>();
+
         ArraySizeSpecifierNode? arraySize = null;
 
         if (Parser.Reader.Match(TokenType.LBracket)) // [
@@ -40,7 +46,7 @@ public class TypeRule : ParserRule<TypeNode>
             arraySize = new ArraySizeSpecifierNode(size);
         }
 
-        return new TypeNode(type, modifiers, arraySize);
+        return new TypeNode(type, modifiers, typeArguments, arraySize);
     }
 
     public static bool IsTypeName(TokenType type) => type == TokenType.Identifier || TokenRegistry.IsBuiltInType(type);
@@ -59,6 +65,9 @@ public class TypeRule : ParserRule<TypeNode>
             return offset;
 
         offset++;
+
+        if (reader.Peek(offset).Type == TokenType.Less)
+            offset = TypeArgumentListRule.SkipTypeArguments(reader, offset);
 
         if (reader.Peek(offset).Type == TokenType.LBracket)
         {

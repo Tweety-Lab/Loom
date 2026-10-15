@@ -18,7 +18,7 @@ module Standard::Program
 
         // 'Slice' doesn't need to use pointers because it's a value type (struct)
         // Value types use copy semantics and typically live on the stack
-        Slice myString = "Hello!";
+        Slice<char> myString = "Hello!";
         println(myString); // "Hello!"
 
         // Loom also allows unsafe operations inside an 'unsafe' block via the 'Standard::Memory::Unsafe' class
