@@ -59,18 +59,18 @@ public class MonomorphizationPass : LIRCompilationPass
             return false;
 
         // A member of an instantiated generic type is redirected to the concrete function its type instantiation declared
-        if (context.AnalysisContext.GetSymbol(origin).As<MethodSymbol>() is { GenericLinkageName: not null } member && target.Name != member.LinkageName)
+        if (context.AnalysisContext.GetSymbol(origin).As<MethodSymbol>() is { GenericDefinition: not null } member && target.Name != LinkageNameResolver.LinkageName(member))
         {
-            call.Operands[0] = unit.GetFunction(member.LinkageName)
-                ?? throw new InvalidOperationException($"Could not find the instantiated member '{member.LinkageName}'.");
+            call.Operands[0] = unit.GetFunction(LinkageNameResolver.LinkageName(member))
+                ?? throw new InvalidOperationException($"Could not find the instantiated member '{LinkageNameResolver.LinkageName(member)}'.");
             return true;
         }
 
         // A property access on an instantiated generic type is redirected to the concrete accessor its type instantiation declared
         if (context.AnalysisContext.GetSymbol(origin).As<PropertySymbol>() is { } property && Accessor(property, target.Name) is { } accessor)
         {
-            call.Operands[0] = unit.GetFunction(accessor.LinkageName)
-                ?? throw new InvalidOperationException($"Could not find the instantiated accessor '{accessor.LinkageName}'.");
+            call.Operands[0] = unit.GetFunction(LinkageNameResolver.LinkageName(accessor))
+                ?? throw new InvalidOperationException($"Could not find the instantiated accessor '{LinkageNameResolver.LinkageName(accessor)}'.");
             return true;
         }
 
@@ -93,5 +93,5 @@ public class MonomorphizationPass : LIRCompilationPass
         return true;
     }
 
-    private static MethodSymbol? Accessor(PropertySymbol property, string name) => new[] { property.Getter, property.Setter }.FirstOrDefault(accessor => accessor?.GenericLinkageName == name);
+    private static MethodSymbol? Accessor(PropertySymbol property, string name) => new[] { property.Getter, property.Setter }.FirstOrDefault(accessor => accessor?.GenericDefinition is { } definition && LinkageNameResolver.LinkageName(definition) == name);
 }

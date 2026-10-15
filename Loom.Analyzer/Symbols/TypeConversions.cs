@@ -39,7 +39,7 @@ public static class TypeConversions
     }
 
     /// <summary> Whether two types are the same type, rather than merely convertible between one another. </summary>
-    public static bool IsIdentical(TypeSymbol source, TypeSymbol target) => ReferenceEquals(source, target) || source.LinkageName == target.LinkageName;
+    public static bool IsIdentical(TypeSymbol source, TypeSymbol target) => ReferenceEquals(source, target) || source.FullyQualifiedName == target.FullyQualifiedName;
 
     private static bool IsIntegerType(TypeSymbol.DefaultType type) => type switch
     {

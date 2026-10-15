@@ -559,7 +559,7 @@ internal class ExpressionGenerator
         IReadOnlyList<TypeSymbol>? typeArguments = null;
         LIRType? callReturnType = null;
 
-        if (methodSymbol.GenericLinkageName != null)
+        if (methodSymbol.GenericDefinition != null)
         {
             // A member of an instantiated generic type calls its generic definition until the monomorphization pass provides the instance
             callReturnType = ASTGenerator.ConvertStorageType(methodSymbol.ReturnType!, substitution);
@@ -585,7 +585,7 @@ internal class ExpressionGenerator
     // The function a call resolves to, targeting the generic definition while the member of an instantiated generic type has no concrete instance yet
     private LIRFunction GetCallTarget(MethodSymbol method)
     {
-        string name = method.GenericLinkageName ?? method.LinkageName;
+        string name = LinkageNameResolver.LinkageName(method.GenericDefinition ?? method);
 
         return unit.GetFunction(name) ?? throw new Exception($"Could not find function: {name}");
     }

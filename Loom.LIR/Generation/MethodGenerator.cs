@@ -51,11 +51,11 @@ internal class MethodGenerator
         var funcType = ASTGenerator.BuildFunctionType(symbol, selfType, null, typeParameters);
 
         if (owningType == null)
-            unit.DefineFunction(symbol.LinkageName, funcType, !isExtern);
+            unit.DefineFunction(LinkageNameResolver.LinkageName(symbol), funcType, !isExtern);
         else if (isExtern)
-            owningType.DeclareMethod(symbol.LinkageName, funcType);
+            owningType.DeclareMethod(LinkageNameResolver.LinkageName(symbol), funcType);
         else
-            owningType.DefineMethod(symbol.LinkageName, funcType);
+            owningType.DefineMethod(LinkageNameResolver.LinkageName(symbol), funcType);
     }
 
     /// <summary> Emits the body of the method declared by <paramref name="node"/>. </summary>
@@ -71,7 +71,7 @@ internal class MethodGenerator
             return;
         }
 
-        LIRFunction function = GetFunction(symbol.LinkageName, owningType);
+        LIRFunction function = GetFunction(LinkageNameResolver.LinkageName(symbol), owningType);
 
         if (IIntrinsicEmitter.TryEmitIntrinsic(symbol, function))
             return;
@@ -89,9 +89,9 @@ internal class MethodGenerator
         var funcType = ASTGenerator.BuildFunctionType(symbol, selfType, substitution, symbol.TypeParameters);
 
         if (symbol.IsExtern)
-            owningType.DeclareMethod(symbol.LinkageName, funcType);
+            owningType.DeclareMethod(LinkageNameResolver.LinkageName(symbol), funcType);
         else
-            owningType.DefineMethod(symbol.LinkageName, funcType);
+            owningType.DefineMethod(LinkageNameResolver.LinkageName(symbol), funcType);
     }
 
     /// <summary> Emits the body of a member of an instantiated generic type. </summary>
@@ -100,7 +100,7 @@ internal class MethodGenerator
         if (symbol.DeclaringNode is not MethodDeclarationNode node)
             return;
 
-        LIRFunction function = GetFunction(symbol.LinkageName, owningType);
+        LIRFunction function = GetFunction(LinkageNameResolver.LinkageName(symbol), owningType);
 
         if (IIntrinsicEmitter.TryEmitIntrinsic(symbol, function))
             return;
@@ -134,7 +134,7 @@ internal class MethodGenerator
         if (accessor == null || accessor.IsStatic || property.BackingField?.Type == null)
             return;
 
-        LIRFunction function = GetFunction(accessor.LinkageName, owningType);
+        LIRFunction function = GetFunction(LinkageNameResolver.LinkageName(accessor), owningType);
         LIRGenerator generator = function.LIRGenerator!;
 
         LIRField field = owningType.Fields.FirstOrDefault(f => f.Name == property.BackingField.Name) ?? throw new Exception($"Could not find field: {property.BackingField.Name}");
@@ -155,7 +155,7 @@ internal class MethodGenerator
             return;
 
         LIRType? selfType = accessor.IsStatic ? null : new LIRPointerType(owningType.Type);
-        owningType.DefineMethod(accessor.LinkageName, ASTGenerator.BuildFunctionType(accessor, selfType, substitution, typeParameters));
+        owningType.DefineMethod(LinkageNameResolver.LinkageName(accessor), ASTGenerator.BuildFunctionType(accessor, selfType, substitution, typeParameters));
     }
 
     /// <summary> Gets the instantiation of the generic method <paramref name="symbol"/> for <paramref name="typeArguments"/>, generating it on first use. </summary>
@@ -165,14 +165,14 @@ internal class MethodGenerator
     public LIRFunction GetOrCreateInstance(MethodSymbol symbol, IReadOnlyList<TypeSymbol> typeArguments, ASTNode callSite)
     {
         var substitution = TypeSubstitution.Zip(symbol, typeArguments);
-        string instanceName = $"{symbol.LinkageName}<{string.Join(", ", typeArguments.Select(t => t.FullyQualifiedName))}>";
+        string instanceName = $"{LinkageNameResolver.LinkageName(symbol)}<{string.Join(", ", typeArguments.Select(t => t.FullyQualifiedName))}>";
 
         LIRFunction? instance = unit.GetFunction(instanceName);
         if (instance != null)
             return instance;
 
         if (symbol.DeclaringNode is not MethodDeclarationNode node)
-            throw new Exception($"Could not find the declaration of generic method {symbol.LinkageName}.");
+            throw new Exception($"Could not find the declaration of generic method {LinkageNameResolver.LinkageName(symbol)}.");
 
         LIRTypeDeclaration? owningType = null;
         var typeNode = context.AnalysisContext.FirstAncestorOrSelf<ITypeDeclarationNode>(node);
@@ -251,9 +251,9 @@ internal class MethodGenerator
         var functionType = new LIRFunctionType(LIRType.Void, [.. parameters], typeParameters.ToArray());
 
         if (symbol.IsExtern)
-            owningType.DeclareMethod(symbol.LinkageName, functionType);
+            owningType.DeclareMethod(LinkageNameResolver.LinkageName(symbol), functionType);
         else
-            owningType.DefineMethod(symbol.LinkageName, functionType);
+            owningType.DefineMethod(LinkageNameResolver.LinkageName(symbol), functionType);
     }
 
     /// <summary> Declares the constructor of an instantiated generic type. </summary>
@@ -272,9 +272,9 @@ internal class MethodGenerator
         var functionType = new LIRFunctionType(LIRType.Void, [.. parameters], typeParameters);
 
         if (symbol.IsExtern)
-            owningType.DeclareMethod(symbol.LinkageName, functionType);
+            owningType.DeclareMethod(LinkageNameResolver.LinkageName(symbol), functionType);
         else
-            owningType.DefineMethod(symbol.LinkageName, functionType);
+            owningType.DefineMethod(LinkageNameResolver.LinkageName(symbol), functionType);
     }
 
     /// <summary> Emits the body of the constructor of an instantiated generic type. </summary>
@@ -283,7 +283,7 @@ internal class MethodGenerator
         if (symbol.IsExtern || symbol.DeclaringNode is not ConstructorDeclarationNode node)
             return;
 
-        LIRFunction function = GetFunction(symbol.LinkageName, owningType);
+        LIRFunction function = GetFunction(LinkageNameResolver.LinkageName(symbol), owningType);
 
         StatementGenerator statementGenerator = new StatementGenerator(context, unit, function, this, substitution, ownerType);
 
@@ -326,7 +326,7 @@ internal class MethodGenerator
         if (symbol.IsGeneric || symbol.IsExtern)
             return;
 
-        LIRFunction function = GetFunction(symbol.LinkageName, owningType);
+        LIRFunction function = GetFunction(LinkageNameResolver.LinkageName(symbol), owningType);
 
         StatementGenerator statementGenerator = new StatementGenerator(context, unit, function, this);
 

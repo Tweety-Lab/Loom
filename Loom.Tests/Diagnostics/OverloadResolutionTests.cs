@@ -1,6 +1,7 @@
 using Loom.Analyzer;
 using Loom.Analyzer.Symbols;
 using Loom.Common;
+using Loom.LIR.Generation;
 using Loom.Parser;
 
 namespace Loom.Tests.Diagnostics;
@@ -228,7 +229,7 @@ module Standard::Program
 
         Assert.Equal(2, overloads.Length);
         Assert.All(overloads, overload => Assert.Equal("Test::log", overload.FullyQualifiedName));
-        Assert.Equal(["Test::log.i32", "Test::log.i32_i32"], overloads.Select(overload => overload.LinkageName));
+        Assert.Equal(["Test::log.i32", "Test::log.i32_i32"], overloads.Select(LinkageNameResolver.LinkageName));
     }
 
     [Fact]
@@ -236,7 +237,7 @@ module Standard::Program
     {
         var methods = ParseAndAnalyze(EXTERN_METHOD).DeclaredMethods("putchar");
 
-        Assert.Equal(["putchar"], methods.Select(method => method.LinkageName));
+        Assert.Equal(["putchar"], methods.Select(LinkageNameResolver.LinkageName));
     }
 
     [Fact]
@@ -244,7 +245,7 @@ module Standard::Program
     {
         var context = ParseAndAnalyze(IMPORTING_MODULE, IMPORTED_OVERLOADS);
 
-        Assert.Equal(["Standard::IO::println.Standard::Memory::Slice", "Standard::IO::println.char"], context.DeclaredMethods("println").Select(method => method.LinkageName));
+        Assert.Equal(["Standard::IO::println.Standard::Memory::Slice", "Standard::IO::println.char"], context.DeclaredMethods("println").Select(LinkageNameResolver.LinkageName));
     }
 
     [Fact]
@@ -271,6 +272,6 @@ module Standard::Program
         .ToList();
 
     private static List<string> InvokedSignatures(CompilationContext context, string? module = null) => context.Calls(module)
-        .Select(call => context.AnalysisContext.GetSymbol(call).As<MethodSymbol>()?.Signature ?? "<unresolved>")
+        .Select(call => context.AnalysisContext.GetSymbol(call).As<MethodSymbol>() is { } method ? LinkageNameResolver.Signature(method) : "<unresolved>")
         .ToList();
 }

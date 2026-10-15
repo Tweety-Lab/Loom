@@ -3,6 +3,7 @@ using LLVMSharp.Interop;
 using Loom.Analyzer.Symbols;
 using Loom.CodeGen.LLVM;
 using Loom.LIR;
+using Loom.LIR.Generation;
 using Loom.LIR.Objects;
 
 namespace Loom.CLI.JustInTime;
@@ -37,7 +38,7 @@ public sealed class LLVMJITCompiler : IJITCompiler
         if (Project == null)
             return false;
 
-        LIRCompilationUnit unit = Project.CompilationContext.CompilationUnits.First(unit => unit.AllFunctions.Any(function => function.Name == method.LinkageName));
+        LIRCompilationUnit unit = Project.CompilationContext.CompilationUnits.First(unit => unit.AllFunctions.Any(function => function.Name == LinkageNameResolver.LinkageName(method)));
 
         LLVMTranslatorPass translator = new LLVMTranslatorPass();
         translator.Run(unit);
@@ -52,7 +53,7 @@ public sealed class LLVMJITCompiler : IJITCompiler
         }
 
         LLVMExecutionEngineRef engine = translator.Result.CreateExecutionEngine();
-        LLVMValueRef main = translator.Result.GetNamedFunction(method.LinkageName);
+        LLVMValueRef main = translator.Result.GetNamedFunction(LinkageNameResolver.LinkageName(method));
         LLVMGenericValueRef result = engine.RunFunction(main, []);
 
         jitResult = new LLVMJITResult { Value = result };
