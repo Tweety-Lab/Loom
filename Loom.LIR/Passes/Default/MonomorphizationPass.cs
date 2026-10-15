@@ -59,18 +59,23 @@ public class MonomorphizationPass : LIRCompilationPass
             return false;
 
         // A member of an instantiated generic type is redirected to the concrete function its type instantiation declared
-        if (context.AnalysisContext.GetSymbol(origin).As<MethodSymbol>() is { GenericLinkageName: not null } member
-            && target.Name != member.LinkageName)
+        if (context.AnalysisContext.GetSymbol(origin).As<MethodSymbol>() is { GenericLinkageName: not null } member && target.Name != member.LinkageName)
         {
             call.Operands[0] = unit.GetFunction(member.LinkageName)
                 ?? throw new InvalidOperationException($"Could not find the instantiated member '{member.LinkageName}'.");
             return true;
         }
 
+        // A property access on an instantiated generic type is redirected to the concrete accessor its type instantiation declared
+        if (context.AnalysisContext.GetSymbol(origin).As<PropertySymbol>() is { } property && Accessor(property, target.Name) is { } accessor)
+        {
+            call.Operands[0] = unit.GetFunction(accessor.LinkageName)
+                ?? throw new InvalidOperationException($"Could not find the instantiated accessor '{accessor.LinkageName}'.");
+            return true;
+        }
+
         // A default constructor call is redirected to the constructor of the type the instance creation instantiates
-        if (origin is InstanceCreationExpresssionNode expression
-            && context.AnalysisContext.ExpressionTypes.TryGetValue(expression, out TypeSymbol? created)
-            && created is InstantiatedTypeSymbol instanceType)
+        if (origin is InstanceCreationExpresssionNode expression && context.AnalysisContext.ExpressionTypes.TryGetValue(expression, out TypeSymbol? created) && created is InstantiatedTypeSymbol instanceType)
         {
             call.Operands[0] = unit.GetFunction($"{instanceType.FullyQualifiedName}::.ctor")
                 ?? throw new InvalidOperationException($"Could not find the constructor of '{instanceType.FullyQualifiedName}'.");
@@ -81,11 +86,12 @@ public class MonomorphizationPass : LIRCompilationPass
         if (call.TypeArguments == null || origin is not CallExpressionNode callNode)
             return false;
 
-        MethodSymbol method = context.AnalysisContext.GetSymbol(callNode).As<MethodSymbol>()
-            ?? throw new InvalidOperationException($"Could not resolve the generic method called at '{callNode}'.");
+        MethodSymbol method = context.AnalysisContext.GetSymbol(callNode).As<MethodSymbol>() ?? throw new InvalidOperationException($"Could not resolve the generic method called at '{callNode}'.");
 
         call.Operands[0] = methodGenerator.GetOrCreateInstance(method, call.TypeArguments, callNode);
 
         return true;
     }
+
+    private static MethodSymbol? Accessor(PropertySymbol property, string name) => new[] { property.Getter, property.Setter }.FirstOrDefault(accessor => accessor?.GenericLinkageName == name);
 }

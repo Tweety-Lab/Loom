@@ -74,6 +74,7 @@ internal class TypeWalker : ASTWalker
             LocalVariableSymbol local => local.Type,
             MethodSymbol method => method.ReturnType,
             FieldSymbol field => field.Type,
+            PropertySymbol property => property.Type,
             ParameterSymbol parameter => parameter.Type,
             _ => null
         };
@@ -99,6 +100,9 @@ internal class TypeWalker : ASTWalker
 
         else if (receiverIsValue && member is FieldSymbol field && field.Type is { } fieldType)
             Context.ExpressionTypes[node] = fieldType;
+
+        else if (member is PropertySymbol property && property.Type is { } propertyType && (receiverIsValue || property.IsStatic))
+            Context.ExpressionTypes[node] = propertyType;
     }
 
     [Visitor]
@@ -194,6 +198,7 @@ internal class TypeWalker : ASTWalker
             {
                 LocalVariableSymbol local => local.Type,
                 FieldSymbol field => field.Type,
+                PropertySymbol property => property.Type,
                 ParameterSymbol parameter => parameter.Type,
                 _ => null
             }) as ArrayTypeSymbol;

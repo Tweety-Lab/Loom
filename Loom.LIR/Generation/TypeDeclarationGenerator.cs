@@ -53,6 +53,10 @@ internal class TypeDeclarationGenerator
                 case FieldDeclarationNode field:
                     GenerateTypeDeclarationField(declaredType, field);
                     break;
+
+                case PropertyDeclarationNode property:
+                    GenerateTypeDeclarationProperty(declaredType, property, symbol);
+                    break;
             }
         }
     }
@@ -79,6 +83,10 @@ internal class TypeDeclarationGenerator
 
                 case MethodDeclarationNode method:
                     methodGenerator.GenerateMethodBody(method, declaredType);
+                    break;
+
+                case PropertyDeclarationNode property when context.AnalysisContext.GetSymbol(property).Symbol is PropertySymbol propertySymbol:
+                    methodGenerator.GeneratePropertyBody(propertySymbol, declaredType);
                     break;
             }
         }
@@ -113,6 +121,10 @@ internal class TypeDeclarationGenerator
                 case FieldSymbol field:
                     declaredType.DeclareField(field.Name, ASTGenerator.ConvertType(field.Type!, substitution));
                     break;
+
+                case PropertySymbol property:
+                    methodGenerator.GeneratePropertyDeclaration(property, declaredType, null, substitution);
+                    break;
             }
         }
     }
@@ -138,6 +150,10 @@ internal class TypeDeclarationGenerator
                 case MethodSymbol method:
                     methodGenerator.GenerateMethodBody(method, declaredType, substitution, symbol);
                     break;
+
+                case PropertySymbol property:
+                    methodGenerator.GeneratePropertyBody(property, declaredType, substitution, symbol);
+                    break;
             }
         }
 
@@ -157,6 +173,12 @@ internal class TypeDeclarationGenerator
         }
 
         declaredType.DeclareField(symbol.Name, ASTGenerator.ConvertType(symbol.Type!));
+    }
+
+    private void GenerateTypeDeclarationProperty(LIRTypeDeclaration declaredType, PropertyDeclarationNode node, TypeSymbol ownerType)
+    {
+        if (context.AnalysisContext.GetSymbol(node).Symbol is PropertySymbol symbol)
+            methodGenerator.GeneratePropertyDeclaration(symbol, declaredType, ownerType.TypeParameters);
     }
 
     private TypeSymbol? GetTypeSymbol(ITypeDeclarationNode node)

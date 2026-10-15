@@ -45,6 +45,27 @@ internal class BindingWalker : ASTWalker
     }
 
     [Visitor]
+    public void Visit(PropertyDeclarationNode node)
+    {
+        if (Context.GetSymbol(node).Symbol is not PropertySymbol symbol)
+            return;
+
+        symbol.Type = TypeResolver.Resolve(Context, node, node.Type);
+
+        if (symbol.BackingField != null)
+            symbol.BackingField.Type = symbol.Type;
+
+        if (symbol.Getter != null)
+            symbol.Getter.ReturnType = symbol.Type;
+
+        if (symbol.Setter != null)
+        {
+            symbol.Setter.ReturnType = TypeResolver.Resolve(Context, node, "void");
+            symbol.Setter.Parameters.Add(new ParameterSymbol("value") { Type = symbol.Type });
+        }
+    }
+
+    [Visitor]
     public void Visit(IdentifierNameNode node)
     {
         // A name may be declared more than once when it is overloaded. Every declaration is bound as a candidate so

@@ -125,19 +125,7 @@ internal class StatementGenerator
             Generator.EmitReturn(EmitValue(node.Expression));
     }
 
-    private void EmitAssignment(AssignmentStatementNode node)
-    {
-        var address = new ExpressionGenerator(context, unit, function, locals, methodGenerator, substitution, ownerType).EmitAddress(node.Target);
-
-        // Assigning to a whole array defaults each of its elements rather than storing a single value
-        if (context.AnalysisContext.ExpressionTypes.TryGetValue(node.Target, out var targetType) && targetType is ArrayTypeSymbol)
-        {
-            Initialize(address, node.Value, targetType);
-            return;
-        }
-
-        Generator.EmitStore(EmitValue(node.Value), address);
-    }
+    private void EmitAssignment(AssignmentStatementNode node) => new ExpressionGenerator(context, unit, function, locals, methodGenerator, substitution, ownerType).EmitAssignment(node);
 
     private void EmitIf(IfStatementNode node)
     {

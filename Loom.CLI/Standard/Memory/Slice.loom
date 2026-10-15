@@ -4,7 +4,7 @@ module Standard::Memory
     export stack struct Slice<T>
     {
         /// @brief The number of elements in the slice.
-        public i32 Length = default;
+        public i32 Length { get; } = default;
 
         iptr pointer = default;
 

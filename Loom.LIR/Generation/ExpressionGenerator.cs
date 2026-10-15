@@ -38,7 +38,7 @@ internal class ExpressionGenerator
     {
         CharacterLiteralNode character => new LIRConstantCharValue(character.Value),
         NumberLiteralNode num => new LIRConstantIntValue(num.Value),
-        IdentifierNameNode ident => EmitVariableValue(ident),
+        IdentifierNameNode ident => ResolveProperty(ident) is { } identProperty ? EmitPropertyGet(identProperty, ident, EmitPropertySelf(identProperty, ident)) : EmitVariableValue(ident),
         BooleanLiteralNode boolean => new LIRConstantBoolValue(boolean.Value),
         DefaultExpressionNode @default => EmitDefault(context.AnalysisContext.ExpressionTypes[@default]),
         BinaryExpressionNode binary => EmitBinary(binary),
@@ -46,23 +46,50 @@ internal class ExpressionGenerator
         ArrayLiteralNode literal => EmitArrayLiteral(literal),
         StringLiteralNode str => EmitStringLiteral(str),
         ArrayAccessExpressionNode array => EmitVariableValue(array),
-        MemberAccessExpressionNode member => EmitVariableValue(member),
+        MemberAccessExpressionNode member => ResolveProperty(member) is { } memberProperty ? EmitPropertyGet(memberProperty, member, EmitPropertySelf(memberProperty, member)) : EmitVariableValue(member),
         InstanceCreationExpresssionNode creation => EmitInstanceCreation(creation),
         SizeOfExpressionNode sizeOf => EmitSizeOf(sizeOf),
         _ => throw new Exception($"Unhandled expression: {node.GetType().Name}")
     };
 
     /// <summary> Emits the address of an addressable expression (a local variable or a field). </summary>
-    public LIRValue EmitAddress(ExpressionNode node) => node switch
+    public LIRValue EmitAddress(ExpressionNode node)
     {
-        IdentifierNameNode ident => EmitIdentifierAddress(ident),
-        MemberAccessExpressionNode member => EmitMemberAddress(member),
-        ArrayAccessExpressionNode array => EmitArrayElementAddress(array),
-        ArrayLiteralNode literal => EmitArrayLiteral(literal),
-        StringLiteralNode str => EmitStringLiteral(str),
-        InstanceCreationExpresssionNode creation => Emit(creation),
-        _ => throw new Exception($"Unhandled addressable expression: {node.GetType().Name}")
-    };
+        if (ResolveProperty(node) is { } property)
+            return EmitPropertyAddress(property, node);
+
+        return node switch
+        {
+            IdentifierNameNode ident => EmitIdentifierAddress(ident),
+            MemberAccessExpressionNode member => EmitMemberAddress(member),
+            ArrayAccessExpressionNode array => EmitArrayElementAddress(array),
+            ArrayLiteralNode literal => EmitArrayLiteral(literal),
+            StringLiteralNode str => EmitStringLiteral(str),
+            InstanceCreationExpresssionNode creation => Emit(creation),
+            _ => throw new Exception($"Unhandled addressable expression: {node.GetType().Name}")
+        };
+    }
+
+    /// <summary> Emits an assignment to a property through its set accessor, or its backing field when it has none. </summary>
+    public void EmitAssignment(AssignmentStatementNode node)
+    {
+        if (ResolveProperty(node.Target) is { } property)
+        {
+            EmitPropertySet(property, node.Target, node.Value);
+            return;
+        }
+
+        var address = EmitAddress(node.Target);
+
+        // Assigning to a whole array defaults each of its elements rather than storing a single value
+        if (context.AnalysisContext.ExpressionTypes.TryGetValue(node.Target, out var targetType) && targetType is ArrayTypeSymbol)
+        {
+            Initialize(address, node.Value, targetType);
+            return;
+        }
+
+        Generator.EmitStore(EmitValue(node.Value), address);
+    }
 
     /// <summary> Emits <paramref name="node"/> as a value. </summary>
     public LIRValue EmitValue(ExpressionNode node)
@@ -125,7 +152,7 @@ internal class ExpressionGenerator
 
             var sliceAddress = Generator.EmitAlloca(ASTGenerator.ConvertType(sliceType, substitution));
             Generator.EmitStore(stringAddress, Generator.EmitGetField(sliceAddress, declaration.Fields.First(f => f.Name == "pointer")));
-            Generator.EmitStore(new LIRConstantIntValue(node.Value.Length), Generator.EmitGetField(sliceAddress, declaration.Fields.First(f => f.Name == "Length")));
+            Generator.EmitStore(new LIRConstantIntValue(node.Value.Length), Generator.EmitGetField(sliceAddress, declaration.Fields.First(f => f.Name == "Length.field")));
 
             return sliceAddress;
         }
@@ -231,6 +258,18 @@ internal class ExpressionGenerator
             var initializer = (field.DeclaringNode as FieldDeclarationNode)?.Variable.Initializer;
 
             Initialize(address, initializer, field.Type);
+        }
+
+        // A property initializes its hidden backing field through its initializer
+        foreach (var property in instanceType.Members.OfType<PropertySymbol>())
+        {
+            if (property.IsStatic || property.BackingField?.Type == null)
+                continue;
+
+            var address = EmitFieldAddress(self, instanceType, property.BackingField);
+            var initializer = (property.DeclaringNode as PropertyDeclarationNode)?.Initializer;
+
+            Initialize(address, initializer, property.BackingField.Type);
         }
     }
 
@@ -339,6 +378,74 @@ internal class ExpressionGenerator
         var fieldSymbol = receiverType.Members.OfType<FieldSymbol>().FirstOrDefault(m => m.Name == node.Name.BaseName) ?? throw new Exception($"Could not resolve member field: {node.Name.BaseName}");
 
         return EmitFieldAddress(EmitAddress(node.Receiver), receiverType, fieldSymbol);
+    }
+
+    // Resolves the property a variable-like expression reads or writes, if it is one
+    private PropertySymbol? ResolveProperty(ExpressionNode node) => node switch
+    {
+        IdentifierNameNode identifier when !locals.ContainsKey(identifier.BaseName) && !IsParameter(identifier) => context.AnalysisContext.GetSymbol(identifier).Symbol as PropertySymbol,
+        MemberAccessExpressionNode member => ResolveMember(member) as PropertySymbol,
+        _ => null
+    };
+
+    private Symbol? ResolveMember(MemberAccessExpressionNode node)
+    {
+        var receiverType = context.AnalysisContext.ExpressionTypes.TryGetValue(node.Receiver, out var type) ? type : context.AnalysisContext.GetSymbol(node.Receiver).Symbol as TypeSymbol;
+        return receiverType?.Members.FirstOrDefault(m => m.Name == node.Name.BaseName);
+    }
+
+    // Resolves the instance a property access acts on, or null when the property is static
+    private LIRValue? EmitPropertySelf(PropertySymbol property, ExpressionNode node) => property.IsStatic ? null : node switch
+    {
+        MemberAccessExpressionNode member => EmitAddress(member.Receiver),
+        _ => EmitSelfParameter()
+    };
+
+    private LIRValue EmitPropertyGet(PropertySymbol property, ASTNode node, LIRValue? self)
+    {
+        MethodSymbol getter = property.Getter ?? throw new Exception($"Could not resolve the get accessor of property '{property.Name}'.");
+        return EmitAccessorCall(getter, node, self);
+    }
+
+    private LIRValue EmitPropertyAddress(PropertySymbol property, ExpressionNode node)
+    {
+        var value = EmitPropertyGet(property, node, EmitPropertySelf(property, node));
+
+        // A reference type is already addressed by the pointer it holds; a value type needs storage to be addressed
+        if (value.Type is LIRPointerType)
+            return value;
+
+        var address = Generator.EmitAlloca(value.Type);
+        Generator.EmitStore(value, address);
+        return address;
+    }
+
+    private void EmitPropertySet(PropertySymbol property, ExpressionNode target, ExpressionNode value)
+    {
+        var self = EmitPropertySelf(property, target);
+        var stored = EmitValue(value);
+
+        if (property.Setter != null)
+        {
+            EmitAccessorCall(property.Setter, target, self, stored);
+            return;
+        }
+
+        // A get-only property is assigned through its backing field on the instance it belongs to
+        TypeSymbol owner = target is MemberAccessExpressionNode member && context.AnalysisContext.ExpressionTypes.TryGetValue(member.Receiver, out var receiverType)
+            ? receiverType
+            : ResolveOwnerType(target);
+
+        Generator.EmitStore(stored, EmitFieldAddress(self!, owner, property.BackingField!));
+    }
+
+    private LIRValue EmitAccessorCall(MethodSymbol accessor, ASTNode origin, LIRValue? self, params LIRValue[] arguments)
+    {
+        LIRFunction target = GetCallTarget(accessor);
+
+        return self != null
+            ? Generator.EmitCallInstanced(target, self, null, origin, null, arguments)
+            : Generator.EmitCall(target, null, origin, null, arguments);
     }
 
     private LIRValue EmitArrayElementAddress(ArrayAccessExpressionNode node)

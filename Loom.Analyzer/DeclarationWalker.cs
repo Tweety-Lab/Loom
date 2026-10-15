@@ -200,6 +200,57 @@ internal class DeclarationWalker : ASTVisitor
     }
 
     [Visitor]
+    public void Visit(PropertyDeclarationNode node)
+    {
+        var symbol = new PropertySymbol(node.Name.Text);
+        symbol.IsStatic = node.HasModifier(Parser.Tokenizer.Token.TokenType.Static);
+        symbol.DeclaringNode = node;
+
+        if (node.HasModifier(Parser.Tokenizer.Token.TokenType.Public))
+            symbol.Accessibility = MemberAccessibility.Public;
+        else
+            symbol.Accessibility = MemberAccessibility.Private;
+
+        symbol.FullyQualifiedName = BuildQualifiedName(node.Name.Text);
+
+        // Every property is auto-implemented through a hidden backing field for now
+        var backingFieldName = $"{node.Name.Text}.field";
+        symbol.BackingField = new FieldSymbol(backingFieldName)
+        {
+            Accessibility = MemberAccessibility.Private,
+            DeclaringNode = node,
+            FullyQualifiedName = BuildQualifiedName(backingFieldName)
+        };
+
+        foreach (var accessor in node.Accessors)
+        {
+            // TODO: Emit declared accessor bodies instead of always auto-implementing
+            var method = new MethodSymbol($"{accessor.AccessorType.Text}.{node.Name.Text}", MethodSymbol.MethodKind.Accessor)
+            {
+                IsStatic = symbol.IsStatic,
+                Accessibility = symbol.Accessibility,
+                DeclaringNode = accessor,
+                FullyQualifiedName = BuildQualifiedName($"{accessor.AccessorType.Text}.{node.Name.Text}")
+            };
+
+            if (accessor.AccessorType.Type == Parser.Tokenizer.Token.TokenType.Get)
+                symbol.Getter = method;
+            else
+                symbol.Setter = method;
+
+            Context.Bind(accessor, method);
+        }
+
+        CurrentTable.Define(symbol);
+        Context.Bind(node, symbol);
+
+        if (CurrentSymbol is TypeSymbol typeSymbol)
+            typeSymbol.Members.Add(symbol);
+
+        VisitChildren(node);
+    }
+
+    [Visitor]
     public void Visit(LocalDeclarationStatementNode node)
     {
         var symbol = new LocalVariableSymbol(node.Variable.Name.Text);

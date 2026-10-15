@@ -137,6 +137,7 @@ public record MethodSymbol(string Name, MethodSymbol.MethodKind Kind) : Symbol(N
     public enum MethodKind
     {
         Constructor,
+        Accessor,
         Method
     }
 }
@@ -203,8 +204,7 @@ public record InstantiatedTypeSymbol : TypeSymbol
     }
 
     /// <summary> Initializes a new instance of the <see cref="InstantiatedTypeSymbol"/> class. </summary>
-    public InstantiatedTypeSymbol(TypeSymbol definition, IReadOnlyList<TypeSymbol> typeArguments, string name, TypeSubstitution substitution)
-        : base(name, definition.KnownType)
+    public InstantiatedTypeSymbol(TypeSymbol definition, IReadOnlyList<TypeSymbol> typeArguments, string name, TypeSubstitution substitution) : base(name, definition.KnownType)
     {
         Definition = definition;
         TypeArguments = typeArguments;
@@ -221,40 +221,64 @@ public record InstantiatedTypeSymbol : TypeSymbol
         switch (member)
         {
             case FieldSymbol field:
-                var substitutedField = new FieldSymbol(field.Name)
+                return SubstituteField(field);
+
+            case PropertySymbol property:
+                var substitutedProperty = new PropertySymbol(property.Name)
                 {
-                    Type = field.Type != null ? Substitution.Resolve(field.Type) : null,
-                    Accessibility = field.Accessibility,
-                    DeclaringNode = field.DeclaringNode
+                    Type = property.Type != null ? Substitution.Resolve(property.Type) : null,
+                    Accessibility = property.Accessibility,
+                    IsStatic = property.IsStatic,
+                    DeclaringNode = property.DeclaringNode
                 };
-                substitutedField.FullyQualifiedName = $"{FullyQualifiedName}::{field.Name}";
-                return substitutedField;
+                substitutedProperty.FullyQualifiedName = $"{FullyQualifiedName}::{property.Name}";
+                substitutedProperty.BackingField = property.BackingField != null ? SubstituteField(property.BackingField) : null;
+                substitutedProperty.Getter = property.Getter != null ? SubstituteMethod(property.Getter) : null;
+                substitutedProperty.Setter = property.Setter != null ? SubstituteMethod(property.Setter) : null;
+                return substitutedProperty;
 
             case MethodSymbol method:
-                var substitutedMethod = new MethodSymbol(method.Name, method.Kind)
-                {
-                    ReturnType = method.ReturnType != null ? Substitution.Resolve(method.ReturnType) : null,
-                    ReturnPointerType = method.ReturnPointerType,
-                    IsStatic = method.IsStatic,
-                    IsExtern = method.IsExtern,
-                    IsExported = method.IsExported,
-                    Accessibility = method.Accessibility,
-                    DeclaringNode = method.DeclaringNode,
-                    TypeParameters = method.TypeParameters,
-                    Parameters = method.Parameters.Select(parameter => new ParameterSymbol(parameter.Name)
-                    {
-                        Type = parameter.Type != null ? Substitution.Resolve(parameter.Type) : null,
-                        IsBorrow = parameter.IsBorrow,
-                        IsMutable = parameter.IsMutable
-                    }).ToList()
-                };
-                substitutedMethod.FullyQualifiedName = $"{FullyQualifiedName}::{method.Name}";
-                substitutedMethod.GenericLinkageName = method.LinkageName;
-                return substitutedMethod;
+                return SubstituteMethod(method);
 
             default:
                 return member;
         }
+    }
+
+    private FieldSymbol SubstituteField(FieldSymbol field)
+    {
+        var substituted = new FieldSymbol(field.Name)
+        {
+            Type = field.Type != null ? Substitution.Resolve(field.Type) : null,
+            Accessibility = field.Accessibility,
+            DeclaringNode = field.DeclaringNode
+        };
+        substituted.FullyQualifiedName = $"{FullyQualifiedName}::{field.Name}";
+        return substituted;
+    }
+
+    private MethodSymbol SubstituteMethod(MethodSymbol method)
+    {
+        var substituted = new MethodSymbol(method.Name, method.Kind)
+        {
+            ReturnType = method.ReturnType != null ? Substitution.Resolve(method.ReturnType) : null,
+            ReturnPointerType = method.ReturnPointerType,
+            IsStatic = method.IsStatic,
+            IsExtern = method.IsExtern,
+            IsExported = method.IsExported,
+            Accessibility = method.Accessibility,
+            DeclaringNode = method.DeclaringNode,
+            TypeParameters = method.TypeParameters,
+            Parameters = method.Parameters.Select(parameter => new ParameterSymbol(parameter.Name)
+            {
+                Type = parameter.Type != null ? Substitution.Resolve(parameter.Type) : null,
+                IsBorrow = parameter.IsBorrow,
+                IsMutable = parameter.IsMutable
+            }).ToList()
+        };
+        substituted.FullyQualifiedName = $"{FullyQualifiedName}::{method.Name}";
+        substituted.GenericLinkageName = method.LinkageName;
+        return substituted;
     }
 }
 
@@ -265,6 +289,27 @@ public record FieldSymbol(string Name) : Symbol(Name), IAccessibleSymbol
 
     /// <inheritdoc/>
     public MemberAccessibility Accessibility { get; set; }
+}
+
+public record PropertySymbol(string Name) : Symbol(Name), IAccessibleSymbol
+{
+    /// <summary> The resolved type. </summary>
+    public TypeSymbol? Type { get; set; }
+
+    /// <inheritdoc/>
+    public MemberAccessibility Accessibility { get; set; }
+
+    /// <summary> Whether this property is static. </summary>
+    public bool IsStatic { get; set; }
+
+    /// <summary> The hidden field the property's accessors read and write. </summary>
+    public FieldSymbol? BackingField { get; set; }
+
+    /// <summary> The accessor that reads the property, or null when it declares no get accessor. </summary>
+    public MethodSymbol? Getter { get; set; }
+
+    /// <summary> The accessor that writes the property, or null when it declares no set accessor. </summary>
+    public MethodSymbol? Setter { get; set; }
 }
 
 public record ParameterSymbol(string Name) : Symbol(Name)
