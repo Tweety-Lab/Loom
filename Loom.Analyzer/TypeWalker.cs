@@ -145,7 +145,7 @@ internal class TypeWalker : ASTWalker
 
             var constructors = type.Members.OfType<MethodSymbol>().Where(m => m.Kind == MethodSymbol.MethodKind.Constructor).ToArray();
 
-            Context.Bind(node, OverloadResolver.Resolve(Context, new CallExpressionNode(node.TypeName, [], node.Arguments), constructors));
+            Context.Bind(node, OverloadResolver.Resolve(Context, new CallExpressionNode(node.TypeName, new TypeArgumentListNode([]), node.Arguments), constructors));
         }
     }
 
