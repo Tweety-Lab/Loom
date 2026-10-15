@@ -41,6 +41,18 @@ internal static class TypeResolver
         if (elementType == null)
             return null;
 
+        // A generic type is instantiated when it is used with type arguments
+        if (type.TypeArguments is { Count: > 0 } typeArguments)
+        {
+            var arguments = typeArguments
+                .Select(argument => Resolve(context, node, argument))
+                .Where(argument => argument != null)
+                .Cast<TypeSymbol>()
+                .ToList();
+
+            elementType = TypeInstantiator.Instantiate(context, elementType, arguments);
+        }
+
         var resolved = type.ArraySize?.Size is { Text: var size } && int.TryParse(size, out var arraySize) ? new ArrayTypeSymbol(elementType, arraySize) : elementType;
 
         context.Bind(type, resolved);

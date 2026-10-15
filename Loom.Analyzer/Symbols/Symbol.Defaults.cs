@@ -48,10 +48,15 @@ public interface ITypeParameterizableSymbol
 
 public record ModuleSymbol(string Name) : Symbol(Name);
 
-public record TypeSymbol(string Name, TypeSymbol.DefaultType KnownType) : Symbol(Name), IExportableSymbol
+public record TypeSymbol(string Name, TypeSymbol.DefaultType KnownType) : Symbol(Name), IExportableSymbol, ITypeParameterizableSymbol
 {
+    private readonly List<Symbol> members = new();
+
     /// <summary> The members declared by this type. </summary>
-    public List<Symbol> Members { get; } = new();
+    public virtual List<Symbol> Members => members;
+
+    /// <inheritdoc/>
+    public List<TypeParameterSymbol> TypeParameters { get; } = new();
 
     /// <inheritdoc/>
     public bool IsExported { get; set; }
@@ -62,12 +67,12 @@ public record TypeSymbol(string Name, TypeSymbol.DefaultType KnownType) : Symbol
     /// <summary> Whether this type can only exist on the stack. </summary>
     public bool IsStackOnly { get; set; }
 
-    /// <summary> Whether this type is a generic. </summary>
+    /// <summary> Whether this type is a generic, i.e. it still has unresolved type parameters. </summary>
     public bool IsGeneric => this switch
     {
         TypeParameterSymbol => true,
         ArrayTypeSymbol array => array.ElementType.IsGeneric,
-        _ => false
+        _ => TypeParameters.Count > 0
     };
 
     public enum DefaultType
@@ -126,6 +131,9 @@ public record MethodSymbol(string Name, MethodSymbol.MethodKind Kind) : Symbol(N
     /// <inheritdoc/>
     public override string LinkageName => IsOverloaded ? $"{FullyQualifiedName}{Signature}" : FullyQualifiedName;
 
+    /// <summary> The linkage name of the generic member this method was substituted from, or null when it does not belong to an instantiated generic type. </summary>
+    public string? GenericLinkageName { get; set; }
+
     public enum MethodKind
     {
         Constructor,
@@ -156,6 +164,97 @@ public record ArrayTypeSymbol : TypeSymbol
         Size = size;
         IsValueType = true;
         FullyQualifiedName = $"{elementType.FullyQualifiedName}[{size}]";
+    }
+}
+
+/// <summary>
+/// A generic type whose type parameters have been bound to concrete type arguments, i.e. an instantiation such as <c>Slice&lt;char&gt;</c>.
+/// </summary>
+public record InstantiatedTypeSymbol : TypeSymbol
+{
+    /// <summary> The generic type this instantiation was built from. </summary>
+    public TypeSymbol Definition { get; }
+
+    /// <summary> The concrete type arguments the definition's type parameters were bound to. </summary>
+    public IReadOnlyList<TypeSymbol> TypeArguments { get; }
+
+    /// <summary> The substitution binding the definition's type parameters to <see cref="TypeArguments"/>. </summary>
+    public TypeSubstitution Substitution { get; }
+
+    private readonly List<Symbol> members = new();
+    private bool membersBuilt;
+
+    /// <summary>
+    /// The definition's members with their types substituted for the type arguments.
+    /// </summary>
+    /// <remarks> Built lazily so that the definition's members are read after every declaration has been bound. </remarks>
+    public override List<Symbol> Members
+    {
+        get
+        {
+            if (!membersBuilt)
+            {
+                membersBuilt = true;
+                members.AddRange(Definition.Members.Select(member => Substitute(member)));
+            }
+
+            return members;
+        }
+    }
+
+    /// <summary> Initializes a new instance of the <see cref="InstantiatedTypeSymbol"/> class. </summary>
+    public InstantiatedTypeSymbol(TypeSymbol definition, IReadOnlyList<TypeSymbol> typeArguments, string name, TypeSubstitution substitution)
+        : base(name, definition.KnownType)
+    {
+        Definition = definition;
+        TypeArguments = typeArguments;
+        Substitution = substitution;
+
+        IsValueType = definition.IsValueType;
+        IsStackOnly = definition.IsStackOnly;
+        IsExported = definition.IsExported;
+    }
+
+    // Builds a copy of a member whose types have the definition's type parameters substituted for the instantiation's arguments
+    private Symbol Substitute(Symbol member)
+    {
+        switch (member)
+        {
+            case FieldSymbol field:
+                var substitutedField = new FieldSymbol(field.Name)
+                {
+                    Type = field.Type != null ? Substitution.Resolve(field.Type) : null,
+                    Accessibility = field.Accessibility,
+                    DeclaringNode = field.DeclaringNode
+                };
+                substitutedField.FullyQualifiedName = $"{FullyQualifiedName}::{field.Name}";
+                return substitutedField;
+
+            case MethodSymbol method:
+                var substitutedMethod = new MethodSymbol(method.Name, method.Kind)
+                {
+                    ReturnType = method.ReturnType != null ? Substitution.Resolve(method.ReturnType) : null,
+                    ReturnPointerType = method.ReturnPointerType,
+                    IsStatic = method.IsStatic,
+                    IsExtern = method.IsExtern,
+                    IsExported = method.IsExported,
+                    Accessibility = method.Accessibility,
+                    DeclaringNode = method.DeclaringNode,
+                    TypeParameters = method.TypeParameters,
+                    Parameters = method.Parameters.Select(parameter => new ParameterSymbol(parameter.Name)
+                    {
+                        Type = parameter.Type != null ? Substitution.Resolve(parameter.Type) : null,
+                        IsBorrow = parameter.IsBorrow,
+                        IsMutable = parameter.IsMutable
+                    }).ToList()
+                };
+                substitutedMethod.FullyQualifiedName = $"{FullyQualifiedName}::{method.Name}";
+                substitutedMethod.GenericLinkageName = method.LinkageName;
+                return substitutedMethod;
+
+            default:
+                return member;
+        }
     }
 }
 

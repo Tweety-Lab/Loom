@@ -22,6 +22,15 @@ public sealed class TypeSubstitution
         return new TypeSubstitution(method.TypeParameters.Select((parameter, index) => new KeyValuePair<string, TypeSymbol>(parameter.Name, typeArguments[index])));
     }
 
+    /// <summary> Creates a substitution binding every type parameter of <paramref name="type"/> to its corresponding type argument. </summary>
+    public static TypeSubstitution Zip(TypeSymbol type, IReadOnlyList<TypeSymbol> typeArguments)
+    {
+        if (typeArguments.Count != type.TypeParameters.Count)
+            throw new ArgumentException($"Expected {type.TypeParameters.Count} type argument(s) for {type.FullyQualifiedName}, got {typeArguments.Count}.");
+
+        return new TypeSubstitution(type.TypeParameters.Select((parameter, index) => new KeyValuePair<string, TypeSymbol>(parameter.Name, typeArguments[index])));
+    }
+
     /// <summary> Resolves every type parameter bound by this substitution within <paramref name="type"/> to its concrete type. </summary>
     public TypeSymbol Resolve(TypeSymbol type)
     {

@@ -54,8 +54,11 @@ internal class TypeWalker : ASTWalker
     [Visitor]
     public void Visit(StringLiteralNode node)
     {
-        if (TypeResolver.Resolve(Context, node, "Slice") is { } slice)
-            Context.ExpressionTypes[node] = slice;
+        if (TypeResolver.Resolve(Context, node, "Slice") is not { } slice || TypeResolver.Resolve(Context, node, "char") is not { } charType)
+            return;
+
+        // A string literal is a slice of characters
+        Context.ExpressionTypes[node] = TypeInstantiator.Instantiate(Context, slice, [charType]);
     }
 
     [Visitor]
@@ -139,14 +142,26 @@ internal class TypeWalker : ASTWalker
     [Visitor]
     public void Visit(InstanceCreationExpresssionNode node)
     {
-        if (Context.GetSymbol(node.TypeName).Symbol is TypeSymbol type && (type.KnownType == TypeSymbol.DefaultType.Struct || type.KnownType == TypeSymbol.DefaultType.Class))
+        if (Context.GetSymbol(node.TypeName).Symbol is not TypeSymbol type || (type.KnownType != TypeSymbol.DefaultType.Struct && type.KnownType != TypeSymbol.DefaultType.Class))
+            return;
+
+        // A generic type is instantiated when it is created with type arguments
+        if (node.TypeArguments is { Count: > 0 } typeArguments)
         {
-            Context.ExpressionTypes[node] = type;
+            var arguments = typeArguments
+                .Select(argument => TypeResolver.Resolve(Context, node, argument))
+                .Where(argument => argument != null)
+                .Cast<TypeSymbol>()
+                .ToList();
 
-            var constructors = type.Members.OfType<MethodSymbol>().Where(m => m.Kind == MethodSymbol.MethodKind.Constructor).ToArray();
-
-            Context.Bind(node, OverloadResolver.Resolve(Context, new CallExpressionNode(node.TypeName, new TypeArgumentListNode([]), node.Arguments), constructors));
+            type = TypeInstantiator.Instantiate(Context, type, arguments);
         }
+
+        Context.ExpressionTypes[node] = type;
+
+        var constructors = type.Members.OfType<MethodSymbol>().Where(m => m.Kind == MethodSymbol.MethodKind.Constructor).ToArray();
+
+        Context.Bind(node, OverloadResolver.Resolve(Context, new CallExpressionNode(node.TypeName, new TypeArgumentListNode([]), node.Arguments), constructors));
     }
 
     // Resolves the type an overloaded method returns, with the type arguments of the call bound to its type parameters

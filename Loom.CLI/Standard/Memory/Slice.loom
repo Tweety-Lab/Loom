@@ -9,7 +9,7 @@ module Standard::Memory
         iptr pointer = default;
 
         /// @brief Returns the element at the given index.
-        public unique T ElementAt<T>(i64 index)
+        public unique T ElementAt(i64 index)
         {
             unsafe
             {

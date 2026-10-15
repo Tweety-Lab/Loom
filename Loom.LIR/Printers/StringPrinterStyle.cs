@@ -20,7 +20,13 @@ internal class StringPrinterStyle : ILIRPrinterStyle
     public string PrintFunctionFooter() => "}\n";
 
     /// <inheritdoc/>
-    public string PrintTypeDeclarationHeader(LIRTypeDeclaration s) => s.Type.IsValueType ? $"struct {s.Name}" : $"class {s.Name}";
+    public string PrintTypeDeclarationHeader(LIRTypeDeclaration s)
+    {
+        var typeParameters = string.Join(", ", s.TypeParameters.Select(tp => tp.Name));
+        var typeParameterSuffix = typeParameters.Length > 0 ? $"<{typeParameters}>" : "";
+
+        return s.Type.IsValueType ? $"struct {s.Name}{typeParameterSuffix}" : $"class {s.Name}{typeParameterSuffix}";
+    }
 
     /// <inheritdoc/>
     public string PrintTypeDeclarationFooter() => "}\n";

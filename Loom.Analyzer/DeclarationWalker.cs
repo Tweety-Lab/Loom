@@ -86,6 +86,8 @@ internal class DeclarationWalker : ASTVisitor
 
         if (CurrentSymbol is MethodSymbol method)
             method.TypeParameters.Add(symbol);
+        else if (CurrentSymbol is TypeSymbol type)
+            type.TypeParameters.Add(symbol);
 
         Context.Bind(node, symbol);
 

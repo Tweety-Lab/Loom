@@ -17,6 +17,12 @@ public sealed class LIRTypeDeclaration : LIRValueObject
     /// <summary> The fields declared by this <see cref="LIRTypeDeclaration"/>. </summary>
     public List<LIRField> Fields { get; } = new List<LIRField>();
 
+    /// <summary> The type parameters this generic <see cref="LIRTypeDeclaration"/> declares. </summary>
+    public List<LIRTypeParameter> TypeParameters { get; } = new List<LIRTypeParameter>();
+
+    /// <summary> Whether this <see cref="LIRTypeDeclaration"/> is generic, i.e. it still declares unresolved type parameters. </summary>
+    public bool IsGeneric => TypeParameters.Count > 0;
+
     /// <summary> Initializes a new instance of the <see cref="LIRTypeDeclaration"/> class. </summary>
     private LIRTypeDeclaration(string name, bool isValue)
     {

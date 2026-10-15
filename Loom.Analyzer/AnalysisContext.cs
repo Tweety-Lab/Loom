@@ -28,6 +28,12 @@ public class AnalysisContext
     /// <summary> The symbols whose ownership was transferred away before the end of the method declaring them. </summary>
     public HashSet<Symbol> MovedValues { get; } = new();
 
+    /// <summary> The generic type instantiations requested during analysis, keyed by their fully qualified name. </summary>
+    public Dictionary<string, InstantiatedTypeSymbol> InstantiatedTypes { get; } = new();
+
+    /// <summary> The generic type instantiations requested during analysis, in the order they were first encountered. </summary>
+    public List<InstantiatedTypeSymbol> Instantiations { get; } = new();
+
     /// <summary> The entry point of the program or null if one could not be resolved. </summary>
     public MethodSymbol? EntryPoint { get; private set; }
 

@@ -43,7 +43,12 @@ internal class MethodGenerator
         // An instance method receives a pointer to the instance it belongs to as its first parameter
         LIRType? selfType = owningType != null && !symbol.IsStatic ? new LIRPointerType(owningType.Type) : null;
 
-        var funcType = ASTGenerator.BuildFunctionType(symbol, selfType);
+        // A method of a generic type carries the type's parameters so that it is only emitted for its instantiations
+        var typeParameters = GetOwningTypeParameters(node) is { } owning
+            ? (IReadOnlyList<TypeParameterSymbol>)[.. owning, .. symbol.TypeParameters]
+            : null;
+
+        var funcType = ASTGenerator.BuildFunctionType(symbol, selfType, null, typeParameters);
 
         if (owningType == null)
             unit.DefineFunction(symbol.LinkageName, funcType, !isExtern);
@@ -75,6 +80,35 @@ internal class MethodGenerator
             return;
 
         GenerateBody(node, function, null);
+    }
+
+    /// <summary> Declares the signature of a member of an instantiated generic type. </summary>
+    public void GenerateMethodDeclaration(MethodSymbol symbol, LIRTypeDeclaration owningType, TypeSubstitution substitution)
+    {
+        LIRType? selfType = !symbol.IsStatic ? new LIRPointerType(owningType.Type) : null;
+        var funcType = ASTGenerator.BuildFunctionType(symbol, selfType, substitution, symbol.TypeParameters);
+
+        if (symbol.IsExtern)
+            owningType.DeclareMethod(symbol.LinkageName, funcType);
+        else
+            owningType.DefineMethod(symbol.LinkageName, funcType);
+    }
+
+    /// <summary> Emits the body of a member of an instantiated generic type. </summary>
+    public void GenerateMethodBody(MethodSymbol symbol, LIRTypeDeclaration owningType, TypeSubstitution substitution, TypeSymbol ownerType)
+    {
+        if (symbol.DeclaringNode is not MethodDeclarationNode node)
+            return;
+
+        LIRFunction function = GetFunction(symbol.LinkageName, owningType);
+
+        if (IIntrinsicEmitter.TryEmitIntrinsic(symbol, function))
+            return;
+
+        if (symbol.IsExtern)
+            return;
+
+        GenerateBody(node, function, substitution, ownerType);
     }
 
     /// <summary> Gets the instantiation of the generic method <paramref name="symbol"/> for <paramref name="typeArguments"/>, generating it on first use. </summary>
@@ -114,9 +148,9 @@ internal class MethodGenerator
         return instance;
     }
 
-    private void GenerateBody(MethodDeclarationNode node, LIRFunction function, TypeSubstitution? substitution)
+    private void GenerateBody(MethodDeclarationNode node, LIRFunction function, TypeSubstitution? substitution, TypeSymbol? ownerType = null)
     {
-        StatementGenerator statementGen = new(context, unit, function, this, substitution);
+        StatementGenerator statementGen = new(context, unit, function, this, substitution, ownerType);
 
         foreach (var content in node.Body?.Contents ?? Enumerable.Empty<ASTNode>())
             if (content is StatementNode statementNode)
@@ -136,7 +170,9 @@ internal class MethodGenerator
     public void GenerateConstructorDeclaration(LIRTypeDeclaration owningType)
     {
         var selfType = new LIRPointerType(owningType.Type);
-        var functionType = new LIRFunctionType(LIRType.Void, [new LIRParameter("self", selfType)], []);
+
+        // A constructor of a generic type carries the type's parameters so that it is only emitted for its instantiations
+        var functionType = new LIRFunctionType(LIRType.Void, [new LIRParameter("self", selfType)], [.. owningType.TypeParameters]);
 
         owningType.DefineMethod($"{owningType.Name}::.ctor", functionType);
     }
@@ -163,7 +199,7 @@ internal class MethodGenerator
 
         parameters.AddRange(symbol.Parameters.Select(parameter => new LIRParameter(parameter.Name, ASTGenerator.ConvertStorageType(parameter.Type!))));
 
-        List<LIRTypeParameter> typeParameters = symbol.TypeParameters.Select(tp => new LIRTypeParameter(tp.Name)).ToList();
+        List<LIRTypeParameter> typeParameters = [.. owningType.TypeParameters, .. symbol.TypeParameters.Select(tp => new LIRTypeParameter(tp.Name))];
 
         var functionType = new LIRFunctionType(LIRType.Void, [.. parameters], typeParameters.ToArray());
 
@@ -171,6 +207,63 @@ internal class MethodGenerator
             owningType.DeclareMethod(symbol.LinkageName, functionType);
         else
             owningType.DefineMethod(symbol.LinkageName, functionType);
+    }
+
+    /// <summary> Declares the constructor of an instantiated generic type. </summary>
+    public void GenerateConstructorDeclaration(MethodSymbol symbol, LIRTypeDeclaration owningType, TypeSubstitution substitution)
+    {
+        var selfType = new LIRPointerType(owningType.Type);
+
+        var parameters = new List<LIRParameter>
+        {
+            new("self", selfType)
+        };
+
+        parameters.AddRange(symbol.Parameters.Select(parameter => new LIRParameter(parameter.Name, ASTGenerator.ConvertStorageType(parameter.Type!, substitution))));
+
+        var typeParameters = symbol.TypeParameters.Select(tp => new LIRTypeParameter(tp.Name)).ToArray();
+        var functionType = new LIRFunctionType(LIRType.Void, [.. parameters], typeParameters);
+
+        if (symbol.IsExtern)
+            owningType.DeclareMethod(symbol.LinkageName, functionType);
+        else
+            owningType.DefineMethod(symbol.LinkageName, functionType);
+    }
+
+    /// <summary> Emits the body of the constructor of an instantiated generic type. </summary>
+    public void GenerateConstructorBody(MethodSymbol symbol, LIRTypeDeclaration owningType, TypeSubstitution substitution, TypeSymbol ownerType)
+    {
+        if (symbol.IsExtern || symbol.DeclaringNode is not ConstructorDeclarationNode node)
+            return;
+
+        LIRFunction function = GetFunction(symbol.LinkageName, owningType);
+
+        StatementGenerator statementGenerator = new StatementGenerator(context, unit, function, this, substitution, ownerType);
+
+        statementGenerator.EmitFieldInitializers(node);
+
+        foreach (var content in node.Body?.Contents ?? Enumerable.Empty<ASTNode>())
+            if (content is StatementNode statement)
+                statementGenerator.EmitStatement(statement);
+
+        statementGenerator.EndScope();
+
+        EmitImplicitReturn(function);
+    }
+
+    /// <summary> Emits the body of the implicit constructor of an instantiated generic type. </summary>
+    public void GenerateDefaultConstructorBody(ASTNode typeNode, LIRTypeDeclaration owningType, TypeSymbol ownerType, TypeSubstitution substitution)
+    {
+        LIRFunction? constructor = owningType.Methods.FirstOrDefault(method => method.Name == $"{owningType.Name}::.ctor");
+        if (constructor == null)
+            return;
+
+        StatementGenerator statementGenerator = new StatementGenerator(context, unit, constructor, this, substitution, ownerType);
+
+        statementGenerator.EmitFieldInitializers(typeNode);
+        statementGenerator.EndScope();
+
+        EmitImplicitReturn(constructor);
     }
 
     public void GenerateConstructorBody(ConstructorDeclarationNode node, LIRTypeDeclaration owningType)
@@ -239,6 +332,16 @@ internal class MethodGenerator
         LIRValue address = generator.EmitBeforeTerminator(LIROpCode.PtrToInt, LIRType.IntPtr, pointer);
 
         generator.EmitBeforeTerminator(LIROpCode.Call, free.Type.ReturnType, free, address);
+    }
+
+    // The type parameters of the generic type enclosing 'node', or null when it is not declared inside a generic type
+    private IReadOnlyList<TypeParameterSymbol>? GetOwningTypeParameters(MethodDeclarationNode node)
+    {
+        var typeNode = context.AnalysisContext.FirstAncestorOrSelf<ITypeDeclarationNode>(node);
+
+        return typeNode != null && context.AnalysisContext.GetSymbol((ASTNode)typeNode).Symbol is TypeSymbol { TypeParameters.Count: > 0 } owner
+            ? owner.TypeParameters
+            : null;
     }
 
     private LIRFunction GetFunction(string name, LIRTypeDeclaration? owningType)

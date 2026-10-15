@@ -1,5 +1,6 @@
 ﻿using Loom.Analyzer.Symbols;
 using Loom.LIR.OpCodes;
+using Loom.Parser.AST;
 using Loom.Parser.AST.Rules.Default;
 using System.Reflection;
 
@@ -63,7 +64,7 @@ public class LIRGenerator
     /// <returns> The result of the emitted instruction or null if the instruction has no result. </returns>
     public LIRTempValue EmitBeforeTerminator(LIROpCode opCode, LIRType? resultType = null, params LIRValue[] operands) => Emit(WritingBlock, true, opCode, resultType, operands);
 
-    private LIRTempValue Emit(LIRBasicBlock block, bool beforeTerminator, LIROpCode opCode, LIRType? resultType, LIRValue[] operands, CallExpressionNode? origin = null, IReadOnlyList<TypeSymbol>? typeArguments = null)
+    private LIRTempValue Emit(LIRBasicBlock block, bool beforeTerminator, LIROpCode opCode, LIRType? resultType, LIRValue[] operands, ASTNode? origin = null, IReadOnlyList<TypeSymbol>? typeArguments = null)
     {
         LIRTempValue? result = null;
 
@@ -161,7 +162,7 @@ public class LIRGenerator
     /// <param name="origin"> The call expression this instruction is emitted for, or null when it does not originate from a call. </param>
     /// <param name="resultType"> The concrete type of the call result, or null to use the callee's declared return type. </param>
     /// <param name="arguments"> The arguments to pass. </param>
-    public LIRTempValue EmitCall(LIRFunction function, IReadOnlyList<TypeSymbol>? typeArguments, CallExpressionNode? origin, LIRType? resultType, params LIRValue[] arguments)
+    public LIRTempValue EmitCall(LIRFunction function, IReadOnlyList<TypeSymbol>? typeArguments, ASTNode? origin, LIRType? resultType, params LIRValue[] arguments)
     {
         LIRValue[] operands = [function, .. CoerceArguments(function.Type.Parameters, arguments)];
         var returnType = resultType ?? function.Type.ReturnType;
@@ -186,7 +187,7 @@ public class LIRGenerator
     /// <param name="origin"> The call expression this instruction is emitted for, or null when it does not originate from a call. </param>
     /// <param name="resultType"> The concrete type of the call result, or null to use the callee's declared return type. </param>
     /// <param name="arguments"> The arguments to pass. </param>
-    public LIRTempValue EmitCallInstanced(LIRFunction function, LIRValue receiver, IReadOnlyList<TypeSymbol>? typeArguments, CallExpressionNode? origin, LIRType? resultType, params LIRValue[] arguments)
+    public LIRTempValue EmitCallInstanced(LIRFunction function, LIRValue receiver, IReadOnlyList<TypeSymbol>? typeArguments, ASTNode? origin, LIRType? resultType, params LIRValue[] arguments)
     {
         // The instance is passed as the receiver, so the formal parameters start at the one after 'self'
         LIRValue[] operands = [function, receiver, .. CoerceArguments(function.Type.Parameters, arguments, 1)];

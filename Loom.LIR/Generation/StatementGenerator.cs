@@ -17,17 +17,19 @@ internal class StatementGenerator
     private LIRFunction function;
     private MethodGenerator methodGenerator;
     private TypeSubstitution? substitution;
+    private TypeSymbol? ownerType;
     private Dictionary<string, LIRTempValue> locals = new();
     private readonly Stack<List<LocalVariableSymbol>> scopes = new();
 
     /// <summary> Initializes a new instance of the <see cref="StatementGenerator"/> class. </summary>
-    public StatementGenerator(CompilationContext context, LIRCompilationUnit unit, LIRFunction function, MethodGenerator methodGenerator, TypeSubstitution? substitution = null)
+    public StatementGenerator(CompilationContext context, LIRCompilationUnit unit, LIRFunction function, MethodGenerator methodGenerator, TypeSubstitution? substitution = null, TypeSymbol? ownerType = null)
     {
         this.context = context;
         this.unit = unit;
         this.function = function;
         this.methodGenerator = methodGenerator;
         this.substitution = substitution;
+        this.ownerType = ownerType;
 
         BeginScope();
 
@@ -44,7 +46,7 @@ internal class StatementGenerator
     }
 
     /// <summary> Emits the declared initializer of every field of the type containing <paramref name="node"/>. </summary>
-    public void EmitFieldInitializers(ASTNode node) => new ExpressionGenerator(context, unit, function, locals, methodGenerator, substitution).EmitFieldInitializers(node);
+    public void EmitFieldInitializers(ASTNode node) => new ExpressionGenerator(context, unit, function, locals, methodGenerator, substitution, ownerType).EmitFieldInitializers(node);
 
     /// <summary> Opens a scope, collecting the unique values declared within it. </summary>
     public void BeginScope() => scopes.Push(new List<LocalVariableSymbol>());
@@ -74,9 +76,9 @@ internal class StatementGenerator
         }
     }
 
-    private LIRValue EmitExpression(ExpressionNode node) => new ExpressionGenerator(context, unit, function, locals, methodGenerator, substitution).Emit(node);
+    private LIRValue EmitExpression(ExpressionNode node) => new ExpressionGenerator(context, unit, function, locals, methodGenerator, substitution, ownerType).Emit(node);
 
-    private LIRValue EmitValue(ExpressionNode node) => new ExpressionGenerator(context, unit, function, locals, methodGenerator, substitution).EmitValue(node);
+    private LIRValue EmitValue(ExpressionNode node) => new ExpressionGenerator(context, unit, function, locals, methodGenerator, substitution, ownerType).EmitValue(node);
 
     private void EmitLocalDeclaration(LocalDeclarationStatementNode node)
     {
@@ -96,7 +98,7 @@ internal class StatementGenerator
 
         if (declaration.Initializer is InstanceCreationExpresssionNode creation)
         {
-            var expressionGen = new ExpressionGenerator(context, unit, function, locals, methodGenerator, substitution);
+            var expressionGen = new ExpressionGenerator(context, unit, function, locals, methodGenerator, substitution, ownerType);
 
             // The storage of a value type is the instance itself, so it is constructed in place; a reference type stores a pointer to it
             if (type.IsValueType)
@@ -113,7 +115,7 @@ internal class StatementGenerator
     }
 
     /// <summary> Emits the initialization of <paramref name="address"/>. </summary>
-    private void Initialize(LIRValue address, ExpressionNode initializer, TypeSymbol type) => new ExpressionGenerator(context, unit, function, locals, methodGenerator, substitution).Initialize(address, initializer, type);
+    private void Initialize(LIRValue address, ExpressionNode initializer, TypeSymbol type) => new ExpressionGenerator(context, unit, function, locals, methodGenerator, substitution, ownerType).Initialize(address, initializer, type);
 
     private void EmitReturn(ReturnStatementNode node)
     {
@@ -125,7 +127,7 @@ internal class StatementGenerator
 
     private void EmitAssignment(AssignmentStatementNode node)
     {
-        var address = new ExpressionGenerator(context, unit, function, locals, methodGenerator, substitution).EmitAddress(node.Target);
+        var address = new ExpressionGenerator(context, unit, function, locals, methodGenerator, substitution, ownerType).EmitAddress(node.Target);
 
         // Assigning to a whole array defaults each of its elements rather than storing a single value
         if (context.AnalysisContext.ExpressionTypes.TryGetValue(node.Target, out var targetType) && targetType is ArrayTypeSymbol)

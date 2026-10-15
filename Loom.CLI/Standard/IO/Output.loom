@@ -5,17 +5,17 @@ module Standard::IO
 	extern void putchar(char c);
 
     /// @brief Prints a char slice to the console and appends a newline.
-    export void println(Slice s)
+    export void println(Slice<char> s)
     {
         print(s);
 		print('\n');
     }
 
 	/// @brief Prints a char slice to the console.
-    export void print(Slice s)
+    export void print(Slice<char> s)
     {
         for (i32 i = 0; i < s.Length; i = i + 1)
-            print(s.ElementAt<char>(i));
+            print(s.ElementAt(i));
     }
 
 	/// @brief Prints a char to the console and appends a newline.
