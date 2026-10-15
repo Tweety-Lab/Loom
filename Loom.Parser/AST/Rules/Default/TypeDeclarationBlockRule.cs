@@ -1,7 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using Loom.Parser.AST;
-using Loom.Parser.Tokenizer;
-using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.AST.Rules.Default;
 
@@ -17,53 +14,27 @@ public class TypeDeclarationBlockRule : BlockRule
     /// <inheritdoc/>
     protected override bool TryParseMember([NotNullWhen(true)] out ASTNode? node)
     {
-        var offset = TypeRule.SkipModifiers(Parser.Reader, 0);
-        var token = Parser.Reader.Peek(offset).Type;
-
-        if (token == TokenType.Struct)
+        if (TryRunRule<StructDeclarationRule, StructDeclarationNode>(out var structDecl))
         {
-            node = RunRule<StructDeclarationRule, StructDeclarationNode>();
+            node = structDecl;
             return true;
         }
 
-        if (token == TokenType.Identifier && Parser.Reader.Peek(offset + 1).Type == TokenType.LParen)
+        if (TryRunRule<ConstructorDeclarationRule, ConstructorDeclarationNode>(out var ctorDecl))
         {
-            node = RunRule<ConstructorDeclarationRule, ConstructorDeclarationNode>();
+            node = ctorDecl;
             return true;
         }
 
-        if (!TypeRule.IsTypeName(token))
+        if (TryRunRule<MethodDeclarationRule, MethodDeclarationNode>(out var methodDecl))
         {
-            node = null;
-            return false;
-        }
-
-        offset = TypeRule.SkipType(Parser.Reader, offset);
-
-        if (Parser.Reader.Peek(offset).Type != TokenType.Identifier)
-        {
-            node = null;
-            return false;
-        }
-
-        var next = Parser.Reader.Peek(offset + 1).Type;
-
-        if (next == TokenType.Less)
-        {
-            offset = TypeParameterListRule.SkipTypeParameters(Parser.Reader, offset + 1);
-            next = Parser.Reader.Peek(offset).Type;
-        }
-
-        if (next == TokenType.LParen)
-        {
-            node = RunRule<MethodDeclarationRule, MethodDeclarationNode>();
+            node = methodDecl;
             return true;
         }
 
-        // A typed member followed by '=' is a field.
-        if (next == TokenType.Equals)
+        if (TryRunRule<FieldDeclarationRule, FieldDeclarationNode>(out var fieldDecl))
         {
-            node = RunRule<FieldDeclarationRule, FieldDeclarationNode>();
+            node = fieldDecl;
             return true;
         }
 
