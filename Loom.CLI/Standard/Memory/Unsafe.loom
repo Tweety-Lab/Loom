@@ -2,7 +2,7 @@ module Standard::Memory
 {
     /// @brief Provides unsafe memory operations.
     /// @remark This class can only be used inside of an `unsafe` block.
-    export class Unsafe
+    export static class Unsafe
     {
         /// @brief Allocates memory of the given size.
         public static iptr Allocate(i64 size)

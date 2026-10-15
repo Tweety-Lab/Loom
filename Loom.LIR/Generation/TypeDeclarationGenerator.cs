@@ -35,7 +35,7 @@ internal class TypeDeclarationGenerator
 
         bool hasConstructor = node.Body.Contents.Any(content => content is ConstructorDeclarationNode);
 
-        if (!hasConstructor)
+        if (!hasConstructor && !symbol.IsStatic)
             methodGenerator.GenerateConstructorDeclaration(declaredType);
 
         foreach (var content in node.Body.Contents)
@@ -91,7 +91,10 @@ internal class TypeDeclarationGenerator
             }
         }
 
-        // A type without a declared constructor gets an implicit constructor which initializes its fields
+        // A non-static type without a declared constructor gets an implicit constructor which initializes its fields
+        if (symbol.IsStatic)
+            return;
+
         if (!node.Body.Contents.Any(c => c is ConstructorDeclarationNode))
             methodGenerator.GenerateDefaultConstructorBody((ASTNode)node, declaredType);
     }

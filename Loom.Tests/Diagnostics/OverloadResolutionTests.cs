@@ -186,16 +186,10 @@ module Standard::Program
     }
 
     [Fact]
-    public void Analyze_NoMatchingOverload_ReportsNoMatchingOverload()
-    {
-        Assert.Equal(["No overload of 'log' accepts 3 argument(s)."], OverloadDiagnostics(NO_MATCHING_OVERLOAD));
-    }
+    public void Analyze_NoMatchingOverload_ReportsNoMatchingOverload() => Assert.Equal(["No overload of 'log' accepts 3 argument(s)."], OverloadDiagnostics(NO_MATCHING_OVERLOAD));
 
     [Fact]
-    public void Analyze_EquallyApplicableOverloads_ReportAmbiguity()
-    {
-        Assert.Equal(["The call to 'log' is ambiguous."], OverloadDiagnostics(AMBIGUOUS_OVERLOAD));
-    }
+    public void Analyze_EquallyApplicableOverloads_ReportAmbiguity() => Assert.Equal(["The call to 'log' is ambiguous."], OverloadDiagnostics(AMBIGUOUS_OVERLOAD));
 
     [Fact]
     public void Analyze_OverloadedMember_ResolvesByTheTypeOfTheReceiver()

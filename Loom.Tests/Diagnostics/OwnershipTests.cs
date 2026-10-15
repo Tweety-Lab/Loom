@@ -338,94 +338,49 @@ module Test
     }
 
     [Fact]
-    public void Analyze_MoveOutViaLocalDeclaration_ReportsUseOfMovedValue()
-    {
-        Assert.Equal(["Cannot use moved value 'first'."], MoveDiagnostics(MOVE_OUT_VIA_LOCAL_DECLARATION));
-    }
+    public void Analyze_MoveOutViaLocalDeclaration_ReportsUseOfMovedValue() => Assert.Equal(["Cannot use moved value 'first'."], MoveDiagnostics(MOVE_OUT_VIA_LOCAL_DECLARATION));
 
     [Fact]
-    public void Analyze_MoveOutViaOwnedParameter_ReportsUseOfMovedValue()
-    {
-        Assert.Equal(["Cannot use moved value 'a'."], MoveDiagnostics(MOVE_OUT_VIA_OWNED_PARAMETER));
-    }
+    public void Analyze_MoveOutViaOwnedParameter_ReportsUseOfMovedValue() => Assert.Equal(["Cannot use moved value 'a'."], MoveDiagnostics(MOVE_OUT_VIA_OWNED_PARAMETER));
 
     [Fact]
-    public void Analyze_MoveOutViaReturn_ReportsUseOfMovedValue()
-    {
-        Assert.Equal(["Cannot use moved value 'a'."], MoveDiagnostics(MOVE_OUT_VIA_RETURN));
-    }
+    public void Analyze_MoveOutViaReturn_ReportsUseOfMovedValue() => Assert.Equal(["Cannot use moved value 'a'."], MoveDiagnostics(MOVE_OUT_VIA_RETURN));
 
     [Fact]
-    public void Analyze_MoveOutViaAssignment_ReportsUseOfMovedValue()
-    {
-        Assert.Equal(["Cannot use moved value 'a'."], MoveDiagnostics(MOVE_OUT_VIA_ASSIGNMENT));
-    }
+    public void Analyze_MoveOutViaAssignment_ReportsUseOfMovedValue() => Assert.Equal(["Cannot use moved value 'a'."], MoveDiagnostics(MOVE_OUT_VIA_ASSIGNMENT));
 
     [Fact]
-    public void Analyze_BorrowViaRefParameter_DoesNotMoveTheValue()
-    {
-        Assert.Empty(MoveDiagnostics(BORROW_VIA_REF_PARAMETER));
-    }
+    public void Analyze_BorrowViaRefParameter_DoesNotMoveTheValue() => Assert.Empty(MoveDiagnostics(BORROW_VIA_REF_PARAMETER));
 
     [Fact]
-    public void Analyze_BorrowViaMutRefParameter_DoesNotMoveTheValue()
-    {
-        Assert.Empty(MoveDiagnostics(BORROW_VIA_MUT_REF_PARAMETER));
-    }
+    public void Analyze_BorrowViaMutRefParameter_DoesNotMoveTheValue() => Assert.Empty(MoveDiagnostics(BORROW_VIA_MUT_REF_PARAMETER));
 
     [Fact]
-    public void Analyze_ReassignMovedValue_RestoresOwnership()
-    {
-        Assert.Empty(MoveDiagnostics(REASSIGN_RESTORES_OWNERSHIP));
-    }
+    public void Analyze_ReassignMovedValue_RestoresOwnership() => Assert.Empty(MoveDiagnostics(REASSIGN_RESTORES_OWNERSHIP));
 
     [Fact]
-    public void Analyze_CopyValue_MayBeReused()
-    {
-        Assert.Empty(MoveDiagnostics(COPY_VALUE_MAY_BE_REUSED));
-    }
+    public void Analyze_CopyValue_MayBeReused() => Assert.Empty(MoveDiagnostics(COPY_VALUE_MAY_BE_REUSED));
 
     [Fact]
-    public void Analyze_MemberReadAfterMove_ReportsUseOfMovedValue()
-    {
-        Assert.Equal(["Cannot use moved value 'a'."], MoveDiagnostics(MEMBER_READ_AFTER_MOVE));
-    }
+    public void Analyze_MemberReadAfterMove_ReportsUseOfMovedValue() => Assert.Equal(["Cannot use moved value 'a'."], MoveDiagnostics(MEMBER_READ_AFTER_MOVE));
 
     [Fact]
-    public void Analyze_MemberWriteAfterMove_ReportsUseOfMovedValue()
-    {
-        Assert.Equal(["Cannot use moved value 'a'."], MoveDiagnostics(MEMBER_WRITE_AFTER_MOVE));
-    }
+    public void Analyze_MemberWriteAfterMove_ReportsUseOfMovedValue() => Assert.Equal(["Cannot use moved value 'a'."], MoveDiagnostics(MEMBER_WRITE_AFTER_MOVE));
 
     [Fact]
-    public void Analyze_MemberWriteViaBorrow_DoesNotMoveTheValue()
-    {
-        Assert.Empty(MoveDiagnostics(MEMBER_WRITE_VIA_BORROW_DOES_NOT_MOVE));
-    }
+    public void Analyze_MemberWriteViaBorrow_DoesNotMoveTheValue() => Assert.Empty(MoveDiagnostics(MEMBER_WRITE_VIA_BORROW_DOES_NOT_MOVE));
 
     [Fact]
-    public void Analyze_DistinctLocals_DoNotShareMoveState()
-    {
-        Assert.Empty(MoveDiagnostics(DISTINCT_LOCALS_ARE_INDEPENDENT));
-    }
+    public void Analyze_DistinctLocals_DoNotShareMoveState() => Assert.Empty(MoveDiagnostics(DISTINCT_LOCALS_ARE_INDEPENDENT));
 
     [Fact]
-    public void Analyze_UseAfterMove_ReportsOnlyTheMovedLocal()
-    {
-        Assert.Equal(["Cannot use moved value 'a'."], MoveDiagnostics(USE_AFTER_MOVE_NAMES_ONLY_MOVED_LOCAL));
-    }
+    public void Analyze_UseAfterMove_ReportsOnlyTheMovedLocal() => Assert.Equal(["Cannot use moved value 'a'."], MoveDiagnostics(USE_AFTER_MOVE_NAMES_ONLY_MOVED_LOCAL));
 
     [Fact]
-    public void Analyze_MoveState_IsResetBetweenMethods()
-    {
-        Assert.Empty(MoveDiagnostics(MOVE_STATE_IS_PER_METHOD));
-    }
+    public void Analyze_MoveState_IsResetBetweenMethods() => Assert.Empty(MoveDiagnostics(MOVE_STATE_IS_PER_METHOD));
 
     [Fact]
-    public void Analyze_BorrowAfterMove_ReportsUseOfMovedValue()
-    {
-        Assert.Equal(["Cannot use moved value 'a'."], MoveDiagnostics(BORROW_AFTER_MOVE));
-    }
+    public void Analyze_BorrowAfterMove_ReportsUseOfMovedValue() => Assert.Equal(["Cannot use moved value 'a'."], MoveDiagnostics(BORROW_AFTER_MOVE));
 
     private static CompilationContext ParseAndAnalyze(string source)
     {

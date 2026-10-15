@@ -67,6 +67,9 @@ public record TypeSymbol(string Name, TypeSymbol.DefaultType KnownType) : Symbol
     /// <summary> Whether this type can only exist on the stack. </summary>
     public bool IsStackOnly { get; set; }
 
+    /// <summary> Whether this type is static. </summary>
+    public bool IsStatic { get; set; }
+
     /// <summary> Whether this type is a generic, i.e. it still has unresolved type parameters. </summary>
     public bool IsGeneric => this switch
     {
@@ -158,9 +161,6 @@ public record ArrayTypeSymbol : TypeSymbol
     }
 }
 
-/// <summary>
-/// A generic type whose type parameters have been bound to concrete type arguments, i.e. an instantiation such as <c>Slice&lt;char&gt;</c>.
-/// </summary>
 public record InstantiatedTypeSymbol : TypeSymbol
 {
     /// <summary> The generic type this instantiation was built from. </summary>
@@ -202,6 +202,7 @@ public record InstantiatedTypeSymbol : TypeSymbol
 
         IsValueType = definition.IsValueType;
         IsStackOnly = definition.IsStackOnly;
+        IsStatic = definition.IsStatic;
         IsExported = definition.IsExported;
     }
 

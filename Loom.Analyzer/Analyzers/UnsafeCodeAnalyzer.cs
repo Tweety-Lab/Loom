@@ -11,7 +11,7 @@ namespace Loom.Analyzer.Analyzers;
 [LoomAnalyzer]
 public class UnsafeCodeAnalyzer : Analyzer
 {
-    public static Diagnostic SymbolUsedOutsideUnsafe = new(Diagnostic.DiagnosticLevel.Error, "Symbol '{0}' can not be used outside of an 'unsafe' block.");
+    public static Diagnostic SymbolUsedOutsideUnsafe = new(Diagnostic.DiagnosticLevel.Error, "Symbol '{0}' cannot be used outside of an 'unsafe' block.");
 
     [Visitor]
     public void Visit(CallExpressionNode node)
