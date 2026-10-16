@@ -40,14 +40,14 @@ public class MonomorphizationPass : LIRCompilationPass
                 foreach (LIRBasicBlock block in function.Blocks)
                 {
                     foreach (LIRInstruction instruction in block.Instructions.ToList())
-                        changed |= Monomorphize(methodGenerator, unit, instruction, context);
+                        changed |= Monomorphize(methodGenerator, unit, function, instruction, context);
                 }
             }
         }
         while (changed);
     }
 
-    private static bool Monomorphize(MethodGenerator methodGenerator, LIRCompilationUnit unit, LIRInstruction call, CompilationContext context)
+    private static bool Monomorphize(MethodGenerator methodGenerator, LIRCompilationUnit unit, LIRFunction caller, LIRInstruction call, CompilationContext context)
     {
         if (call.OpCode != LIROpCode.Call && call.OpCode != LIROpCode.CallInstanced)
             return false;
@@ -67,7 +67,9 @@ public class MonomorphizationPass : LIRCompilationPass
         }
 
         // A property access on an instantiated generic type is redirected to the concrete accessor its type instantiation declared
-        if (context.AnalysisContext.GetSymbol(origin).As<PropertySymbol>() is { } property && Accessor(property, target.Name) is { } accessor)
+        if (context.AnalysisContext.GetSymbol(origin).As<PropertySymbol>() is { } property &&
+            ResolveInstantiatedProperty(unit, caller, context, origin, property) is { } instantiatedProperty &&
+            Accessor(instantiatedProperty, target.Name) is { } accessor)
         {
             call.Operands[0] = unit.GetFunction(LinkageNameResolver.LinkageName(accessor))
                 ?? throw new InvalidOperationException($"Could not find the instantiated accessor '{LinkageNameResolver.LinkageName(accessor)}'.");
@@ -91,6 +93,23 @@ public class MonomorphizationPass : LIRCompilationPass
         call.Operands[0] = methodGenerator.GetOrCreateInstance(method, call.TypeArguments, callNode);
 
         return true;
+    }
+
+    private static PropertySymbol? ResolveInstantiatedProperty(LIRCompilationUnit unit, LIRFunction caller, CompilationContext context, ASTNode origin, PropertySymbol property)
+    {
+        TypeSymbol? receiverType = null;
+        if (origin is MemberAccessExpressionNode member && context.AnalysisContext.ExpressionTypes.TryGetValue(member.Receiver, out TypeSymbol? expressionType))
+            receiverType = expressionType;
+
+        if (receiverType is not InstantiatedTypeSymbol)
+            receiverType = unit.TypeDeclarations.FirstOrDefault(type => type.Methods.Contains(caller)) is { IsGeneric: false } declaration
+                ? context.AnalysisContext.Instantiations.FirstOrDefault(instance => instance.FullyQualifiedName == declaration.Name)
+                : null;
+
+        if (receiverType is not InstantiatedTypeSymbol)
+            return property;
+
+        return receiverType.Members.OfType<PropertySymbol>().FirstOrDefault(candidate => candidate.Name == property.Name) ?? property;
     }
 
     private static MethodSymbol? Accessor(PropertySymbol property, string name) => new[] { property.Getter, property.Setter }.FirstOrDefault(accessor => accessor?.GenericDefinition is { } definition && LinkageNameResolver.LinkageName(definition) == name);

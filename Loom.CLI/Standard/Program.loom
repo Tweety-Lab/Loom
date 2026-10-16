@@ -1,3 +1,4 @@
+import Standard;
 import Standard::IO;
 import Standard::Memory;
 
@@ -30,6 +31,8 @@ module Standard::Program
             char letter = Unsafe.Read<char>(addr + sizeof(char) * 2);
             println(letter); // "c"
         }
+
+        unique Vector<i32> myVec = new Vector<i32>();
         
         return GetFieldFromBorrow(obj);
     }
@@ -46,3 +49,5 @@ module Standard::Program
         input.MutableField = val;
     }
 }
+
+
