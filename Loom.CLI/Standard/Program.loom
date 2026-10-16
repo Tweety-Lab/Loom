@@ -33,8 +33,14 @@ module Standard::Program
         }
 
         unique Vector<i32> myVec = new Vector<i32>();
+        myVec.Add(10);
+        myVec.Add(100);
+        myVec.Add(20);
+        myVec.Add(42);
+        myVec.Add(20);
+        myVec.Add(220);
         
-        return GetFieldFromBorrow(obj);
+        return GetFieldFromBorrow(obj) + myVec.ElementAt(1);
     }
 
     /// @brief 'ref' is used to borrow a reference to an object without claiming ownership.

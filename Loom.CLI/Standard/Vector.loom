@@ -16,12 +16,51 @@ module Standard
 
 		public Vector()
 		{
-
+			unsafe
+			{
+				pointer = Unsafe.Allocate(Capacity * sizeof(T));
+			}
 		}
 
+		/// @brief Adds an element to the end of the vector.
+		/// @param element The element to add to the vector.
 		public void Add(T element)
 		{
+			if (Count >= Capacity)
+			{
+				Capacity *= 2;
+
+				unsafe
+				{
+					iptr newPointer = Unsafe.Allocate(Capacity * sizeof(T));
+					for (i32 i = 0; i < Count; i++)
+					{
+						unique T value = Unsafe.Read<T>(pointer + i * sizeof(T));
+						Unsafe.Write<T>(newPointer + i * sizeof(T), value);
+					}
+
+					Unsafe.Free(pointer);
+					pointer = newPointer;
+				}
+			}
+
+			unsafe
+			{
+				Unsafe.Write<T>(pointer + Count * sizeof(T), element);
+			}
+
 			Count++;
+		}
+
+		/// @brief Returns the element at the specified index.
+		/// @param index The index of the element to return.
+		/// @return The element at the specified index.
+		public unique T ElementAt(i32 index)
+		{
+			unsafe
+			{
+				return Unsafe.Read<T>(pointer + index * sizeof(T));
+			}
 		}
 	}
 }
