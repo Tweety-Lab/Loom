@@ -1,4 +1,5 @@
 using Loom.Analyzer.Symbols;
+using Loom.Common.Diagnostics;
 using Loom.Parser.AST;
 using Loom.Parser.AST.Rules.Default;
 
@@ -9,6 +10,9 @@ namespace Loom.Analyzer;
 /// </summary>
 internal static class TypeResolver
 {
+    private static readonly Diagnostic WrongArity = new(Diagnostic.DiagnosticLevel.Error,
+        "Type '{0}' expects {1} type argument(s), got {2}.");
+
     /// <summary> Resolves a type by name in the scope of <paramref name="node"/>, or null if it could not be found. </summary>
     public static TypeSymbol? Resolve(AnalysisContext context, ASTNode node, string name)
     {
@@ -41,21 +45,27 @@ internal static class TypeResolver
         if (elementType == null)
             return null;
 
-        // A generic type is instantiated when it is used with type arguments
         if (type.TypeArguments is { Count: > 0 } typeArguments)
         {
-            var arguments = typeArguments
-                .Select(argument => Resolve(context, node, argument))
-                .Where(argument => argument != null)
-                .Cast<TypeSymbol>()
-                .ToList();
-
-            elementType = TypeInstantiator.Instantiate(context, elementType, arguments);
+            elementType = Construct(context, node, elementType, typeArguments);
+            if (elementType == null)
+                return null;
         }
 
         var resolved = type.ArraySize?.Size is { Text: var size } && int.TryParse(size, out var arraySize) ? new ArrayTypeSymbol(elementType, arraySize) : elementType;
 
         context.Bind(type, resolved);
         return resolved;
+    }
+    /// <summary> Resolves arguments in their use-site scope, then constructs the semantic type. </summary>
+    internal static TypeSymbol? Construct(AnalysisContext context, ASTNode node, TypeSymbol definition, IReadOnlyList<TypeNode> typeArguments)
+    {
+        var arguments = typeArguments.Select(argument => Resolve(context, node, argument)).ToArray();
+        if (definition.Arity != arguments.Length)
+        {
+            context.DiagnosticContext?.Report(WrongArity, node.StartToken?.Location, definition.Name, definition.Arity, arguments.Length);
+            return null;
+        }
+        return arguments.Any(argument => argument == null) ? null : definition.Construct([.. arguments!]);
     }
 }

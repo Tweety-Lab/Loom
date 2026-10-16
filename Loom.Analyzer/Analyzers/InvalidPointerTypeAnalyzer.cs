@@ -22,7 +22,7 @@ public class InvalidPointerTypeAnalyzer : Analyzer
         if (Context.GetSymbol(node).Symbol is not LocalVariableSymbol symbol || symbol.Type == null)
             return;
 
-        if (symbol.Type.IsGeneric)
+        if (symbol.Type.ContainsTypeParameters)
             return;
 
         if (symbol.Type.IsValueType && symbol.PointerType != PointerType.None)

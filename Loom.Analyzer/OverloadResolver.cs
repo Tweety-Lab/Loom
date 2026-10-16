@@ -42,11 +42,11 @@ internal static class OverloadResolver
             return info;
 
         if (candidates.Count == 1)
-            return info.Resolved(candidates[0]);
+            return info.Resolved(Construct(context, node, candidates[0]));
 
         var (best, tied) = Best(context, node, candidates);
 
-        return best == null || tied ? info : info.Resolved(best);
+        return best == null || tied ? info : info.Resolved(Construct(context, node, best));
     }
 
     /// <summary> Reports why a call resolved to no method, or <see langword="null"/> when it resolved to one. </summary>
@@ -116,13 +116,16 @@ internal static class OverloadResolver
 
     private static MatchQuality[]? Match(AnalysisContext context, CallExpressionNode node, MethodSymbol candidate)
     {
+        if (candidate.Arity != node.TypeArguments.Count)
+            return null;
+
         if (candidate.Parameters.Count != node.Arguments.Count)
             return null;
 
         if (candidate.Parameters.Any(p => p.Type == null))
             return null;
 
-        var substitution = Substitute(context, node, candidate);
+        candidate = Construct(context, node, candidate);
 
         var matches = new MatchQuality[node.Arguments.Count];
 
@@ -130,12 +133,9 @@ internal static class OverloadResolver
         {
             var parameter = candidate.Parameters[index].Type!;
 
-            if (substitution != null)
-                parameter = substitution.Resolve(parameter);
-
             var argument = context.ExpressionTypes.TryGetValue(node.Arguments[index], out var argumentType) ? argumentType : null;
 
-            if (argument == null || parameter.IsGeneric)
+            if (argument == null || parameter.ContainsTypeParameters)
                 matches[index] = MatchQuality.Unknown;
 
             else if (TypeConversions.IsIdentical(parameter, argument))
@@ -151,16 +151,11 @@ internal static class OverloadResolver
         return matches;
     }
 
-    private static TypeSubstitution? Substitute(AnalysisContext context, CallExpressionNode node, MethodSymbol candidate)
+    private static MethodSymbol Construct(AnalysisContext context, CallExpressionNode node, MethodSymbol candidate)
     {
-        if (!candidate.IsGeneric || node.TypeArguments.Count != candidate.TypeParameters.Count)
-            return null;
-
-        var typeArguments = node.TypeArguments.Select(t => context.GetSymbol(t).Symbol as TypeSymbol).ToArray();
-
-        if (typeArguments.Any(t => t == null))
-            return null;
-
-        return TypeSubstitution.Zip(candidate, typeArguments!);
+        if (node.TypeArguments.Count == 0 || node.TypeArguments.Count != candidate.Arity)
+            return candidate;
+        var arguments = node.TypeArguments.Select(t => context.GetSymbol(t).Symbol as TypeSymbol).ToArray();
+        return arguments.Any(t => t == null) ? candidate : candidate.Construct([.. arguments!]);
     }
 }

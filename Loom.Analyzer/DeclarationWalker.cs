@@ -47,6 +47,7 @@ internal class DeclarationWalker : ASTVisitor
     public void Visit(MethodDeclarationNode node)
     {
         var symbol = new MethodSymbol(node.MethodName.Text, MethodSymbol.MethodKind.Method);
+        symbol.ContainingType = CurrentSymbol as TypeSymbol;
         symbol.IsStatic = node.HasModifier(Parser.Tokenizer.Token.TokenType.Static);
         symbol.IsExported = node.HasModifier(Parser.Tokenizer.Token.TokenType.Export);
         symbol.IsExtern = node.HasModifier(Parser.Tokenizer.Token.TokenType.Extern);
@@ -71,7 +72,7 @@ internal class DeclarationWalker : ASTVisitor
         CurrentTable.Define(symbol);
 
         if (CurrentSymbol is TypeSymbol type)
-            type.Members.Add(symbol);
+            type.Members = [.. type.Members, symbol];
 
         WithScope(node, () => VisitChildren(node), symbol);
     }
@@ -79,15 +80,19 @@ internal class DeclarationWalker : ASTVisitor
     [Visitor]
     public void Visit(TypeParameterNode node)
     {
-        var symbol = new TypeParameterSymbol(node.BaseName);
+        var symbol = new TypeParameterSymbol(node.BaseName)
+        {
+            DeclaringSymbol = CurrentSymbol,
+            Ordinal = (CurrentSymbol as IGenericSymbol)?.TypeParameters.Count ?? 0
+        };
         symbol.DeclaringNode = node;
 
         CurrentTable.Define(symbol);
 
         if (CurrentSymbol is MethodSymbol method)
-            method.TypeParameters.Add(symbol);
+            method.TypeParameters = [.. method.TypeParameters, symbol];
         else if (CurrentSymbol is TypeSymbol type)
-            type.TypeParameters.Add(symbol);
+            type.TypeParameters = [.. type.TypeParameters, symbol];
 
         Context.Bind(node, symbol);
 
@@ -99,6 +104,7 @@ internal class DeclarationWalker : ASTVisitor
     {
         var paramSymbol = new ParameterSymbol(node.Name.Text);
         paramSymbol.IsMutable = true;
+        paramSymbol.DeclaringNode = node;
         
         if (node.Type.HasModifier(Parser.Tokenizer.Token.TokenType.Ref))
         {
@@ -114,7 +120,7 @@ internal class DeclarationWalker : ASTVisitor
         Context.Bind(node, paramSymbol);
 
         if (CurrentSymbol is MethodSymbol method)
-            method.Parameters.Add(paramSymbol);
+            method.Parameters = [.. method.Parameters, paramSymbol];
 
         VisitChildren(node);
     }
@@ -123,6 +129,7 @@ internal class DeclarationWalker : ASTVisitor
     public void Visit(ConstructorDeclarationNode node)
     {
         var symbol = new MethodSymbol(".ctor", MethodSymbol.MethodKind.Constructor);
+        symbol.ContainingType = CurrentSymbol as TypeSymbol;
         symbol.IsStatic = node.HasModifier(Parser.Tokenizer.Token.TokenType.Static);
         symbol.IsExported = node.HasModifier(Parser.Tokenizer.Token.TokenType.Export);
         symbol.IsExtern = node.HasModifier(Parser.Tokenizer.Token.TokenType.Extern);
@@ -144,7 +151,7 @@ internal class DeclarationWalker : ASTVisitor
         CurrentTable.Define(symbol);
 
         if (CurrentSymbol is TypeSymbol type)
-            type.Members.Add(symbol);
+            type.Members = [.. type.Members, symbol];
 
         WithScope(node, () => VisitChildren(node), symbol);
     }
@@ -184,6 +191,7 @@ internal class DeclarationWalker : ASTVisitor
     public void Visit(FieldDeclarationNode node)
     {
         var symbol = new FieldSymbol(node.Variable.Name.Text);
+        symbol.ContainingType = CurrentSymbol as TypeSymbol;
         symbol.FullyQualifiedName = BuildQualifiedName(node.Variable.Name.Text);
 
         if (node.HasModifier(Parser.Tokenizer.Token.TokenType.Public))
@@ -196,7 +204,7 @@ internal class DeclarationWalker : ASTVisitor
         Context.Bind(node, symbol);
 
         if (CurrentSymbol is TypeSymbol typeSymbol)
-            typeSymbol.Members.Add(symbol);
+            typeSymbol.Members = [.. typeSymbol.Members, symbol];
 
         VisitChildren(node);
     }
@@ -205,6 +213,7 @@ internal class DeclarationWalker : ASTVisitor
     public void Visit(PropertyDeclarationNode node)
     {
         var symbol = new PropertySymbol(node.Name.Text);
+        symbol.ContainingType = CurrentSymbol as TypeSymbol;
         symbol.IsStatic = node.HasModifier(Parser.Tokenizer.Token.TokenType.Static);
         symbol.DeclaringNode = node;
 
@@ -220,6 +229,7 @@ internal class DeclarationWalker : ASTVisitor
         symbol.BackingField = new FieldSymbol(backingFieldName)
         {
             Accessibility = MemberAccessibility.Private,
+            ContainingType = CurrentSymbol as TypeSymbol,
             DeclaringNode = node,
             FullyQualifiedName = BuildQualifiedName(backingFieldName)
         };
@@ -230,6 +240,7 @@ internal class DeclarationWalker : ASTVisitor
             var method = new MethodSymbol($"{accessor.AccessorType.Text}.{node.Name.Text}", MethodSymbol.MethodKind.Accessor)
             {
                 IsStatic = symbol.IsStatic,
+                ContainingType = CurrentSymbol as TypeSymbol,
                 Accessibility = symbol.Accessibility,
                 DeclaringNode = accessor,
                 FullyQualifiedName = BuildQualifiedName($"{accessor.AccessorType.Text}.{node.Name.Text}")
@@ -247,7 +258,7 @@ internal class DeclarationWalker : ASTVisitor
         Context.Bind(node, symbol);
 
         if (CurrentSymbol is TypeSymbol typeSymbol)
-            typeSymbol.Members.Add(symbol);
+            typeSymbol.Members = [.. typeSymbol.Members, symbol];
 
         VisitChildren(node);
     }

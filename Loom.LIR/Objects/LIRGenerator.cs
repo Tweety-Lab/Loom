@@ -1,8 +1,4 @@
-﻿using Loom.Analyzer.Symbols;
-using Loom.LIR.OpCodes;
-using Loom.Parser.AST;
-using Loom.Parser.AST.Rules.Default;
-using System.Reflection;
+﻿using Loom.LIR.OpCodes;
 
 namespace Loom.LIR.Objects;
 
@@ -64,7 +60,7 @@ public class LIRGenerator
     /// <returns> The result of the emitted instruction or null if the instruction has no result. </returns>
     public LIRTempValue EmitBeforeTerminator(LIROpCode opCode, LIRType? resultType = null, params LIRValue[] operands) => Emit(WritingBlock, true, opCode, resultType, operands);
 
-    private LIRTempValue Emit(LIRBasicBlock block, bool beforeTerminator, LIROpCode opCode, LIRType? resultType, LIRValue[] operands, ASTNode? origin = null, IReadOnlyList<TypeSymbol>? typeArguments = null)
+    private LIRTempValue Emit(LIRBasicBlock block, bool beforeTerminator, LIROpCode opCode, LIRType? resultType, LIRValue[] operands)
     {
         LIRTempValue? result = null;
 
@@ -75,7 +71,7 @@ public class LIRGenerator
         if (opCode.HasResult && resultType != LIRType.Void)
             result = new LIRTempValue(currentTemp++.ToString(), resultType!);
 
-        LIRInstruction instruction = new(opCode, operands.ToList()) { Result = result, Origin = origin, TypeArguments = typeArguments };
+        LIRInstruction instruction = new(opCode, operands.ToList()) { Result = result };
 
         if (beforeTerminator)
             block.EmitBeforeTerminator(instruction);
@@ -154,53 +150,21 @@ public class LIRGenerator
     /// <summary> Whether <paramref name="type"/> is one of the built-in integer types. </summary>
     public static bool IsIntegerType(LIRType type) => type is LIRIntType or LIRIntPtrType or LIRCharType;
 
-    public LIRTempValue EmitCall(LIRFunction function, params LIRValue[] arguments) => EmitCall(function, null, null, null, arguments);
+    /// <summary> Emits a call using the target operand's function signature. </summary>
+    public LIRTempValue EmitCall(LIRValue target, params LIRValue[] arguments) => EmitCallCore(target, null, arguments);
 
-    /// <summary> Emits a call, optionally recording the generic-targeting call site the monomorphization pass instantiates. </summary>
-    /// <param name="function"> The function to call. </param>
-    /// <param name="typeArguments"> The concrete type arguments a generic <paramref name="function"/> is bound to, or null when the call is concrete. </param>
-    /// <param name="origin"> The call expression this instruction is emitted for, or null when it does not originate from a call. </param>
-    /// <param name="resultType"> The concrete type of the call result, or null to use the callee's declared return type. </param>
-    /// <param name="arguments"> The arguments to pass. </param>
-    public LIRTempValue EmitCall(LIRFunction function, IReadOnlyList<TypeSymbol>? typeArguments, ASTNode? origin, LIRType? resultType, params LIRValue[] arguments)
+    /// <summary> Emits a call with an explicit receiver using the target operand's function signature. </summary>
+    public LIRTempValue EmitCallInstanced(LIRValue target, LIRValue receiver, params LIRValue[] arguments) => EmitCallCore(target, receiver, arguments);
+
+    private LIRTempValue EmitCallCore(LIRValue target, LIRValue? receiver, LIRValue[] arguments)
     {
-        LIRValue[] operands = [function, .. CoerceArguments(function.Type.Parameters, arguments)];
-        var returnType = resultType ?? function.Type.ReturnType;
+        if (target.Type is not LIRFunctionType signature)
+            throw new ArgumentException("A call target must have a function type.", nameof(target));
 
-        if (returnType == LIRType.Void)
-        {
-            LIRInstruction instruction = new(LIROpCode.Call, operands.ToList()) { Origin = origin, TypeArguments = typeArguments };
-            WritingBlock.Emit(instruction);
-            return null;
-        }
+        var coerced = CoerceArguments(signature.Parameters, arguments, receiver == null ? 0 : 1);
+        LIRValue[] operands = receiver == null ? [target, .. coerced] : [target, receiver, .. coerced];
 
-        return Emit(WritingBlock, false, LIROpCode.Call, returnType, operands, origin, typeArguments);
-    }
-
-    /// <summary> Emits an instance call to <paramref name="function"/> where <paramref name="receiver"/> is passed as the instance (this) argument. </summary>
-    public LIRTempValue EmitCallInstanced(LIRFunction function, LIRValue receiver, params LIRValue[] arguments) => EmitCallInstanced(function, receiver, null, null, null, arguments);
-
-    /// <summary> Emits an instance call, optionally recording the generic-targeting call site the monomorphization pass instantiates. </summary>
-    /// <param name="function"> The function to call. </param>
-    /// <param name="receiver"> The receiver (this), passed as the first argument of the call. </param>
-    /// <param name="typeArguments"> The concrete type arguments a generic <paramref name="function"/> is bound to, or null when the call is concrete. </param>
-    /// <param name="origin"> The call expression this instruction is emitted for, or null when it does not originate from a call. </param>
-    /// <param name="resultType"> The concrete type of the call result, or null to use the callee's declared return type. </param>
-    /// <param name="arguments"> The arguments to pass. </param>
-    public LIRTempValue EmitCallInstanced(LIRFunction function, LIRValue receiver, IReadOnlyList<TypeSymbol>? typeArguments, ASTNode? origin, LIRType? resultType, params LIRValue[] arguments)
-    {
-        // The instance is passed as the receiver, so the formal parameters start at the one after 'self'
-        LIRValue[] operands = [function, receiver, .. CoerceArguments(function.Type.Parameters, arguments, 1)];
-        var returnType = resultType ?? function.Type.ReturnType;
-
-        if (returnType == LIRType.Void)
-        {
-            LIRInstruction instruction = new(LIROpCode.CallInstanced, operands.ToList()) { Origin = origin, TypeArguments = typeArguments };
-            WritingBlock.Emit(instruction);
-            return null!;
-        }
-
-        return Emit(WritingBlock, false, LIROpCode.CallInstanced, returnType, operands, origin, typeArguments);
+        return Emit(receiver == null ? LIROpCode.Call : LIROpCode.CallInstanced, signature.ReturnType, operands);
     }
 
     private LIRValue[] CoerceArguments(LIRParameter[] parameters, LIRValue[] arguments, int skip = 0)

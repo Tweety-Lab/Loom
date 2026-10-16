@@ -146,7 +146,7 @@ internal class ExpressionGenerator
             var stringAddress = EmitStringConstant(node.Value);
 
             // A slice literal is built through the generic definition, whose declaration exists before monomorphization
-            TypeSymbol layout = sliceType is InstantiatedTypeSymbol instantiated ? instantiated.Definition : sliceType;
+            TypeSymbol layout = sliceType is ConstructedTypeSymbol instantiated ? instantiated.OriginalDefinition : sliceType;
 
             var declarationType = new LIRTypeDeclarationType(layout.FullyQualifiedName, layout.IsValueType);
             var declaration = unit.TypeDeclarations.FirstOrDefault(t => t.Type == declarationType) ?? throw new Exception($"Could not find type: {layout.FullyQualifiedName}");
@@ -216,6 +216,7 @@ internal class ExpressionGenerator
     public LIRValue EmitInstanceCreation(InstanceCreationExpresssionNode node, LIRValue? destination = null)
     {
         var symbol = context.AnalysisContext.ExpressionTypes[node] ?? throw new Exception("Could not resolve instance creation type.");
+        symbol = substitution?.Resolve(symbol) ?? symbol;
 
         LIRPointerType instanceType = new(ASTGenerator.ConvertType(symbol, substitution));
 
@@ -224,23 +225,23 @@ internal class ExpressionGenerator
 
         var constructor = context.AnalysisContext.GetSymbol(node).As<MethodSymbol>() ?? symbol.Members.OfType<MethodSymbol>().FirstOrDefault(m => m.Kind == MethodSymbol.MethodKind.Constructor);
 
-        // A constructor of an instantiated generic type is called through the generic definition until the monomorphization pass provides the instance
-        LIRFunction? constructorFunc = constructor != null
-            ? GetCallTarget(constructor)
-            : unit.GetFunction($"{DefaultConstructorOwner(symbol).FullyQualifiedName}::.ctor"); // Default
-
-        if (constructorFunc == null)
-            throw new Exception($"Could not find constructor for {symbol.FullyQualifiedName}!");
-
-
+        var target = constructor == null ? GetDefaultConstructorTarget(symbol) : GetCallTarget(constructor);
         var args = node.Arguments.Select(EmitValue).ToArray();
-        Generator.EmitCallInstanced(constructorFunc, instance, null, node, null, args);
+
+        Generator.EmitCallInstanced(target, instance, args);
 
         return instance;
     }
 
-    // The type whose constructor an instance creation of 'symbol' calls
-    private static TypeSymbol DefaultConstructorOwner(TypeSymbol symbol) => symbol is InstantiatedTypeSymbol instantiated ? instantiated.Definition : symbol;
+    private LIRValue GetDefaultConstructorTarget(TypeSymbol type)
+    {
+        if (type is not ConstructedTypeSymbol)
+            return unit.GetFunction($"{type.FullyQualifiedName}::.ctor") ?? throw new Exception($"Could not find constructor for {type.FullyQualifiedName}.");
+
+        var signature = new LIRFunctionType(LIRType.Void, [new LIRParameter("self", new LIRPointerType(ASTGenerator.ConvertType(type)))], []);
+
+        return new LIRDefaultConstructorReference(type, signature);
+    }
 
     /// <summary> Emits the declared initializer of every field of the type containing <paramref name="contextNode"/> into the instance being constructed. </summary>
     /// <remarks> Fields declared without an initializer are defaulted. </remarks>
@@ -405,7 +406,7 @@ internal class ExpressionGenerator
     private LIRValue EmitPropertyGet(PropertySymbol property, ASTNode node, LIRValue? self)
     {
         MethodSymbol getter = property.Getter ?? throw new Exception($"Could not resolve the get accessor of property '{property.Name}'.");
-        return EmitAccessorCall(getter, node, self);
+        return EmitAccessorCall(getter, self);
     }
 
     private LIRValue EmitPropertyAddress(PropertySymbol property, ExpressionNode node)
@@ -427,7 +428,7 @@ internal class ExpressionGenerator
     {
         if (property.Setter != null)
         {
-            EmitAccessorCall(property.Setter, target, self, stored);
+            EmitAccessorCall(property.Setter, self, stored);
             return;
         }
 
@@ -468,12 +469,7 @@ internal class ExpressionGenerator
             : Generator.EmitSub(value, one);
     }
 
-    private LIRValue EmitAccessorCall(MethodSymbol accessor, ASTNode origin, LIRValue? self, params LIRValue[] arguments)
-    {
-        LIRFunction target = GetCallTarget(accessor);
-
-        return self != null ? Generator.EmitCallInstanced(target, self, null, origin, null, arguments) : Generator.EmitCall(target, null, origin, null, arguments);
-    }
+    private LIRValue EmitAccessorCall(MethodSymbol accessor, LIRValue? self, params LIRValue[] arguments) => self == null ? Generator.EmitCall(GetCallTarget(accessor), arguments) : Generator.EmitCallInstanced(GetCallTarget(accessor), self, arguments);
 
     private LIRValue EmitArrayElementAddress(ArrayAccessExpressionNode node)
     {
@@ -509,8 +505,10 @@ internal class ExpressionGenerator
 
     private LIRValue EmitFieldAddress(LIRValue instance, TypeSymbol instanceTypeSymbol, FieldSymbol fieldSymbol)
     {
+        instanceTypeSymbol = substitution?.Resolve(instanceTypeSymbol) ?? instanceTypeSymbol;
+        fieldSymbol = instanceTypeSymbol.Members.OfType<FieldSymbol>().FirstOrDefault(field => field.Name == fieldSymbol.Name) ?? fieldSymbol;
         // An instantiated generic type shares the layout of its definition, whose declaration exists before monomorphization
-        TypeSymbol layout = instanceTypeSymbol is InstantiatedTypeSymbol instantiated ? instantiated.Definition : instanceTypeSymbol;
+        TypeSymbol layout = instanceTypeSymbol is ConstructedTypeSymbol instantiated ? instantiated.OriginalDefinition : instanceTypeSymbol;
 
         var declarationType = new LIRTypeDeclarationType(layout.FullyQualifiedName, layout.IsValueType);
         var declaration = unit.TypeDeclarations.FirstOrDefault(s => s.Type == declarationType) ?? throw new Exception($"Could not find type: {layout.FullyQualifiedName}");
@@ -518,7 +516,7 @@ internal class ExpressionGenerator
         var field = declaration.Fields.FirstOrDefault(f => f.Name == fieldSymbol.Name) ?? throw new Exception($"Could not find field: {fieldSymbol.Name}");
 
         // The concrete declaration does not exist yet, so the substituted field is rebuilt from the definition's layout
-        if (instanceTypeSymbol is InstantiatedTypeSymbol)
+        if (instanceTypeSymbol is ConstructedTypeSymbol)
             field = LIRField.Declare(field.Name, field.Index, ASTGenerator.ConvertType(fieldSymbol.Type!, substitution));
 
         return Generator.EmitGetField(instance, field);
@@ -555,7 +553,6 @@ internal class ExpressionGenerator
 
     private LIRValue EmitCall(CallExpressionNode node)
     {
-        LIRFunction? target = null;
         LIRValue? self = null;
         MethodSymbol methodSymbol = context.AnalysisContext.GetSymbol(node).As<MethodSymbol>() ?? throw new Exception($"Could not resolve call: {node.Callee}");
 
@@ -568,74 +565,31 @@ internal class ExpressionGenerator
             if (!receiverIsValue && !methodSymbol.IsStatic)
                 throw new Exception($"Member '{member.Name.BaseName}' is not static and cannot be called on type '{receiverType?.Name}'.");
 
-            target = GetCallTarget(methodSymbol);
-
             if (receiverIsValue)
                 self = EmitAddress(member.Receiver);
         }
-        else
-        {
-            target = GetCallTarget(methodSymbol);
-        }
 
-        if (target == null)
-            throw new Exception($"Could not find function: {node.Callee}");
+        var target = GetCallTarget(methodSymbol);
 
-        IReadOnlyList<TypeSymbol>? typeArguments = null;
-        LIRType? callReturnType = null;
-
-        if (methodSymbol.GenericDefinition != null)
-        {
-            // A member of an instantiated generic type calls its generic definition until the monomorphization pass provides the instance
-            callReturnType = ASTGenerator.ConvertStorageType(methodSymbol.ReturnType!, substitution);
-        }
-        else if (methodSymbol is { IsGeneric: true } generic && function.Type.TypeParameters.Length == 0)
-        {
-            typeArguments = ResolveTypeArguments(node, generic);
-            callReturnType = ResolveCallReturnType(generic, typeArguments);
-        }
-
-        // An unqualified call to an instance method dispatches on the current instance
-        if (self == null && target.Type.Parameters.FirstOrDefault()?.Name == "self")
+        if (self == null && ((LIRFunctionType)target.Type).Parameters.FirstOrDefault()?.Name == "self")
             self = EmitSelfParameter();
 
         var args = node.Arguments.Select(EmitValue).ToArray();
-
-        if (self != null)
-            return Generator.EmitCallInstanced(target, self, typeArguments, node, callReturnType, args);
-
-        return Generator.EmitCall(target, typeArguments, node, callReturnType, args);
+        return self == null ? Generator.EmitCall(target, args) : Generator.EmitCallInstanced(target, self, args);
     }
 
-    // The function a call resolves to, targeting the generic definition while the member of an instantiated generic type has no concrete instance yet
-    private LIRFunction GetCallTarget(MethodSymbol method)
+    // A reference carries the invocation's signature while its concrete function body is deferred to monomorphization.
+    private LIRValue GetCallTarget(MethodSymbol method)
     {
-        string name = LinkageNameResolver.LinkageName(method.GenericDefinition ?? method);
+        method = substitution?.Resolve(method) ?? method;
+        string name = LinkageNameResolver.LinkageName(method);
 
-        return unit.GetFunction(name) ?? throw new Exception($"Could not find function: {name}");
-    }
+        if (method.IsDefinition)
+            return unit.GetFunction(name) ?? throw new Exception($"Could not find function: {name}");
 
-    // Resolves the concrete LIR type a call to 'generic' with 'typeArguments' produces
-    private static LIRType ResolveCallReturnType(MethodSymbol generic, IReadOnlyList<TypeSymbol> typeArguments)
-    {
-        if (generic.ReturnType == null)
-            throw new Exception($"Could not resolve the return type of {generic.FullyQualifiedName}.");
+        LIRType? selfType = method is { IsStatic: false, ContainingType: { } containingType } ? new LIRPointerType(ASTGenerator.ConvertType(containingType)) : null;
+        var signature = ASTGenerator.BuildFunctionType(method, selfType, typeParameters: []);
 
-        return ASTGenerator.ConvertStorageType(generic.ReturnType, TypeSubstitution.Zip(generic, typeArguments));
-    }
-
-    // Resolves the type arguments of 'node', expressed in terms of the type parameters of the caller, to concrete types
-    private TypeSymbol[] ResolveTypeArguments(CallExpressionNode node, MethodSymbol method)
-    {
-        if (node.TypeArguments.Count != method.TypeParameters.Count)
-            throw new Exception($"Expected {method.TypeParameters.Count} type argument(s) when calling {method.FullyQualifiedName}, got {node.TypeArguments.Count}.");
-
-        return node.TypeArguments.Select(typeArgument =>
-        {
-            var resolved = context.AnalysisContext.GetSymbol(typeArgument).Symbol as TypeSymbol
-                ?? throw new Exception($"Could not resolve type argument of {method.FullyQualifiedName}.");
-
-            return substitution?.Resolve(resolved) ?? resolved;
-        }).ToArray();
+        return new LIRMethodReference(name, method, signature);
     }
 }

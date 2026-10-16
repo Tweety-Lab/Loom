@@ -158,14 +158,12 @@ internal class MethodGenerator
         owningType.DefineMethod(LinkageNameResolver.LinkageName(accessor), ASTGenerator.BuildFunctionType(accessor, selfType, substitution, typeParameters));
     }
 
-    /// <summary> Gets the instantiation of the generic method <paramref name="symbol"/> for <paramref name="typeArguments"/>, generating it on first use. </summary>
+    /// <summary> Gets the instantiation of the generic method <paramref name="symbol"/> for its type arguments, generating it on first use. </summary>
     /// <param name="symbol"> The generic method to instantiate. </param>
-    /// <param name="typeArguments"> The concrete type arguments to bind the method's type parameters to. </param>
-    /// <param name="callSite"> The node requesting the instantiation. </param>
-    public LIRFunction GetOrCreateInstance(MethodSymbol symbol, IReadOnlyList<TypeSymbol> typeArguments, ASTNode callSite)
+    public LIRFunction GetOrCreateInstance(ConstructedMethodSymbol symbol)
     {
-        var substitution = TypeSubstitution.Zip(symbol, typeArguments);
-        string instanceName = $"{LinkageNameResolver.LinkageName(symbol)}<{string.Join(", ", typeArguments.Select(t => t.FullyQualifiedName))}>";
+        var substitution = symbol.Substitution;
+        string instanceName = LinkageNameResolver.LinkageName(symbol);
 
         LIRFunction? instance = unit.GetFunction(instanceName);
         if (instance != null)
@@ -174,11 +172,8 @@ internal class MethodGenerator
         if (symbol.DeclaringNode is not MethodDeclarationNode node)
             throw new Exception($"Could not find the declaration of generic method {LinkageNameResolver.LinkageName(symbol)}.");
 
-        LIRTypeDeclaration? owningType = null;
-        var typeNode = context.AnalysisContext.FirstAncestorOrSelf<ITypeDeclarationNode>(node);
-
-        if (typeNode != null && context.AnalysisContext.GetSymbol((ASTNode)typeNode).Symbol is TypeSymbol owningSymbol)
-            owningType = unit.GetTypeDeclaration(owningSymbol.FullyQualifiedName);
+        var containingType = symbol.ContainingType;
+        var owningType = containingType == null ? null : unit.GetTypeDeclaration(containingType.FullyQualifiedName);
 
         LIRType? selfType = owningType != null && !symbol.IsStatic ? new LIRPointerType(owningType.Type) : null;
         var functionType = ASTGenerator.BuildFunctionType(symbol, selfType, substitution);
@@ -190,7 +185,7 @@ internal class MethodGenerator
             return instance;
 
         if (!symbol.IsExtern)
-            GenerateBody(node, instance, substitution);
+            GenerateBody(node, instance, substitution, containingType);
 
         return instance;
     }

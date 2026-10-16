@@ -204,7 +204,7 @@ module Standard::Program
     {
         var context = ParseAndAnalyze(GENERIC_AMONG_OVERLOADS);
 
-        Assert.Equal([".char", ".i32", ".T"], InvokedSignatures(context));
+        Assert.Equal([".char", ".i32", ".i32"], InvokedSignatures(context));
         Assert.DoesNotContain(context.DiagnosticContext.Diagnostics, diagnostic => diagnostic.Message.Contains("implicitly cast"));
     }
 

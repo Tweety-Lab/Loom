@@ -100,13 +100,13 @@ internal class TypeDeclarationGenerator
     }
 
     /// <summary> Declares the concrete LIR type for an instantiated generic type. </summary>
-    public void DeclareTypeDeclaration(InstantiatedTypeSymbol symbol, TypeSubstitution substitution)
+    public void DeclareTypeDeclaration(ConstructedTypeSymbol symbol, TypeSubstitution substitution)
     {
         LIRTypeDeclaration declaredType = unit.DefineTypeDeclaration(symbol.FullyQualifiedName, symbol.IsValueType);
 
         bool hasConstructor = symbol.Members.OfType<MethodSymbol>().Any(member => member.Kind == MethodSymbol.MethodKind.Constructor);
 
-        if (!hasConstructor)
+        if (!hasConstructor && !symbol.IsStatic)
             methodGenerator.GenerateConstructorDeclaration(declaredType);
 
         foreach (var member in symbol.Members)
@@ -133,14 +133,14 @@ internal class TypeDeclarationGenerator
     }
 
     /// <summary> Emits the bodies of the methods of an instantiated generic type. </summary>
-    public void GenerateTypeDeclarationBodies(InstantiatedTypeSymbol symbol, TypeSubstitution substitution)
+    public void GenerateTypeDeclarationBodies(ConstructedTypeSymbol symbol, TypeSubstitution substitution)
     {
         LIRTypeDeclaration? declaredType = unit.GetTypeDeclaration(symbol.FullyQualifiedName);
 
         if (declaredType == null)
             return;
 
-        var node = (ITypeDeclarationNode)symbol.Definition.DeclaringNode!;
+        var node = (ITypeDeclarationNode)symbol.OriginalDefinition.DeclaringNode!;
 
         foreach (var member in symbol.Members)
         {
@@ -161,7 +161,7 @@ internal class TypeDeclarationGenerator
         }
 
         // A type without a declared constructor gets an implicit constructor which initializes its fields
-        if (!symbol.Members.OfType<MethodSymbol>().Any(member => member.Kind == MethodSymbol.MethodKind.Constructor))
+        if (!symbol.IsStatic && !symbol.Members.OfType<MethodSymbol>().Any(member => member.Kind == MethodSymbol.MethodKind.Constructor))
             methodGenerator.GenerateDefaultConstructorBody((ASTNode)node, declaredType, symbol, substitution);
     }
 

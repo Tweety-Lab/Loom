@@ -4,8 +4,6 @@ using Loom.Common;
 using Loom.LIR.Generation;
 using Loom.LIR.Objects;
 using Loom.LIR.OpCodes;
-using Loom.Parser.AST;
-using Loom.Parser.AST.Rules.Default;
 
 namespace Loom.LIR.Passes.Default;
 
@@ -15,102 +13,77 @@ public class MonomorphizationPass : LIRCompilationPass
     /// <inheritdoc/>
     public override void Run(LIRCompilationUnit unit)
     {
-        if (Context == null)
-            throw new InvalidOperationException($"{nameof(MonomorphizationPass)} requires a {nameof(CompilationContext)} to be set.");
+        if (Context is not { } context)
+            throw new InvalidOperationException($"{nameof(MonomorphizationPass)} requires a {nameof(CompilationContext)}.");
 
-        CompilationContext context = Context;
-        MethodGenerator methodGenerator = new(context, unit);
+        new Specialization(context, unit).Run();
+    }
 
-        // Every instantiation of a generic type is emitted as its own concrete type before the members it is called through are monomorphized
-        var typeGenerator = new TypeDeclarationGenerator(context, unit);
+    private sealed class Specialization(CompilationContext context, LIRCompilationUnit unit)
+    {
+        private readonly TypeDeclarationGenerator types = new(context, unit);
+        private readonly MethodGenerator methods = new(context, unit);
+        private readonly HashSet<ConstructedTypeSymbol> declaredTypes = [];
+        private readonly HashSet<LIRFunction> processedFunctions = [];
 
-        foreach (InstantiatedTypeSymbol instance in context.AnalysisContext.Instantiations)
-            typeGenerator.DeclareTypeDeclaration(instance, instance.Substitution);
-
-        foreach (InstantiatedTypeSymbol instance in context.AnalysisContext.Instantiations)
-            typeGenerator.GenerateTypeDeclarationBodies(instance, instance.Substitution);
-
-        bool changed;
-        do
+        public void Run()
         {
-            changed = false;
-
-            foreach (LIRFunction function in unit.AllFunctions.ToList())
+            while (true)
             {
-                foreach (LIRBasicBlock block in function.Blocks)
-                {
-                    foreach (LIRInstruction instruction in block.Instructions.ToList())
-                        changed |= Monomorphize(methodGenerator, unit, function, instruction, context);
-                }
+                foreach (var type in context.AnalysisContext.ConstructedTypes.Where(type => !type.ContainsTypeParameters))
+                    DeclareType(type);
+
+                var pending = unit.AllFunctions.Where(function => function.Type.TypeParameters.Length == 0 && processedFunctions.Add(function)).ToArray();
+
+                if (pending.Length == 0)
+                    return;
+
+                foreach (var function in pending)
+                    foreach (var instruction in function.Blocks.SelectMany(block => block.Instructions).ToArray())
+                        RewriteCall(instruction);
             }
         }
-        while (changed);
-    }
 
-    private static bool Monomorphize(MethodGenerator methodGenerator, LIRCompilationUnit unit, LIRFunction caller, LIRInstruction call, CompilationContext context)
-    {
-        if (call.OpCode != LIROpCode.Call && call.OpCode != LIROpCode.CallInstanced)
-            return false;
-
-        if (call.Operands[0] is not LIRFunction target || target.Type.TypeParameters.Length == 0)
-            return false;
-
-        if (call.Origin is not ASTNode origin)
-            return false;
-
-        // A member of an instantiated generic type is redirected to the concrete function its type instantiation declared
-        if (context.AnalysisContext.GetSymbol(origin).As<MethodSymbol>() is { GenericDefinition: not null } member && target.Name != LinkageNameResolver.LinkageName(member))
+        private void DeclareType(ConstructedTypeSymbol type)
         {
-            call.Operands[0] = unit.GetFunction(LinkageNameResolver.LinkageName(member))
-                ?? throw new InvalidOperationException($"Could not find the instantiated member '{LinkageNameResolver.LinkageName(member)}'.");
-            return true;
+            if (!declaredTypes.Add(type))
+                return;
+
+            types.DeclareTypeDeclaration(type, type.Substitution);
+            types.GenerateTypeDeclarationBodies(type, type.Substitution);
         }
 
-        // A property access on an instantiated generic type is redirected to the concrete accessor its type instantiation declared
-        if (context.AnalysisContext.GetSymbol(origin).As<PropertySymbol>() is { } property &&
-            ResolveInstantiatedProperty(unit, caller, context, origin, property) is { } instantiatedProperty &&
-            Accessor(instantiatedProperty, target.Name) is { } accessor)
+        private void RewriteCall(LIRInstruction call)
         {
-            call.Operands[0] = unit.GetFunction(LinkageNameResolver.LinkageName(accessor))
-                ?? throw new InvalidOperationException($"Could not find the instantiated accessor '{LinkageNameResolver.LinkageName(accessor)}'.");
-            return true;
+            if (call.OpCode != LIROpCode.Call && call.OpCode != LIROpCode.CallInstanced)
+                return;
+
+            if (call.Operands[0] is LIRFunctionReference reference)
+                call.Operands[0] = ResolveFunction(reference);
         }
 
-        // A default constructor call is redirected to the constructor of the type the instance creation instantiates
-        if (origin is InstanceCreationExpresssionNode expression && context.AnalysisContext.ExpressionTypes.TryGetValue(expression, out TypeSymbol? created) && created is InstantiatedTypeSymbol instanceType)
+        private LIRFunction ResolveFunction(LIRFunctionReference reference)
         {
-            call.Operands[0] = unit.GetFunction($"{instanceType.FullyQualifiedName}::.ctor")
-                ?? throw new InvalidOperationException($"Could not find the constructor of '{instanceType.FullyQualifiedName}'.");
-            return true;
+            switch (reference)
+            {
+                case LIRMethodReference { Method: { ContainsTypeParameters: false } method }:
+                    if (method.ContainingType is ConstructedTypeSymbol containingType)
+                        DeclareType(containingType);
+
+                    if (method is ConstructedMethodSymbol constructed)
+                        return methods.GetOrCreateInstance(constructed);
+
+                    break;
+
+                case LIRDefaultConstructorReference { DeclaringType: ConstructedTypeSymbol { ContainsTypeParameters: false } type }:
+                    DeclareType(type);
+                    break;
+
+                default:
+                    throw new InvalidOperationException($"Cannot materialize open function reference '{reference.Name}'.");
+            }
+
+            return unit.GetFunction(reference.Name) ?? throw new InvalidOperationException($"Missing LIR function '{reference.Name}'.");
         }
-
-        // A generic method call is monomorphized into the instance for the call's type arguments
-        if (call.TypeArguments == null || origin is not CallExpressionNode callNode)
-            return false;
-
-        MethodSymbol method = context.AnalysisContext.GetSymbol(callNode).As<MethodSymbol>() ?? throw new InvalidOperationException($"Could not resolve the generic method called at '{callNode}'.");
-
-        call.Operands[0] = methodGenerator.GetOrCreateInstance(method, call.TypeArguments, callNode);
-
-        return true;
     }
-
-    private static PropertySymbol? ResolveInstantiatedProperty(LIRCompilationUnit unit, LIRFunction caller, CompilationContext context, ASTNode origin, PropertySymbol property)
-    {
-        TypeSymbol? receiverType = null;
-        if (origin is MemberAccessExpressionNode member && context.AnalysisContext.ExpressionTypes.TryGetValue(member.Receiver, out TypeSymbol? expressionType))
-            receiverType = expressionType;
-
-        if (receiverType is not InstantiatedTypeSymbol)
-            receiverType = unit.TypeDeclarations.FirstOrDefault(type => type.Methods.Contains(caller)) is { IsGeneric: false } declaration
-                ? context.AnalysisContext.Instantiations.FirstOrDefault(instance => instance.FullyQualifiedName == declaration.Name)
-                : null;
-
-        if (receiverType is not InstantiatedTypeSymbol)
-            return property;
-
-        return receiverType.Members.OfType<PropertySymbol>().FirstOrDefault(candidate => candidate.Name == property.Name) ?? property;
-    }
-
-    private static MethodSymbol? Accessor(PropertySymbol property, string name) => new[] { property.Getter, property.Setter }.FirstOrDefault(accessor => accessor?.GenericDefinition is { } definition && LinkageNameResolver.LinkageName(definition) == name);
 }

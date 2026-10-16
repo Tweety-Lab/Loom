@@ -1,48 +1,46 @@
+using System.Collections.Immutable;
 
 namespace Loom.Analyzer.Symbols;
 
-// TODO: Remove this. At least move it to codegen.
-
-/// <summary>
-/// Substitutes the type parameters of a generic method with the concrete type arguments it was instantiated with.
-/// </summary>
+/// <summary> An immutable generic environment keyed by declaration identity rather than parameter names. </summary>
 public sealed class TypeSubstitution
 {
-    private readonly Dictionary<string, TypeSymbol> bindings;
+    private readonly ImmutableDictionary<TypeParameterSymbol, TypeSymbol> bindings;
 
-    /// <summary> Initializes a new instance of the <see cref="TypeSubstitution"/> class. </summary>
-    public TypeSubstitution(IEnumerable<KeyValuePair<string, TypeSymbol>> bindings) => this.bindings = new Dictionary<string, TypeSymbol>(bindings);
+    /// <summary> The identity substitution. </summary>
+    public static TypeSubstitution Empty { get; } = new([]);
 
-    /// <summary> Creates a substitution binding every type parameter of <paramref name="method"/> to its corresponding type argument. </summary>
-    public static TypeSubstitution Zip(MethodSymbol method, IReadOnlyList<TypeSymbol> typeArguments)
+    /// <summary> Initializes a substitution from explicit parameter bindings. </summary>
+    public TypeSubstitution(IEnumerable<KeyValuePair<TypeParameterSymbol, TypeSymbol>> bindings) => this.bindings = bindings.ToImmutableDictionary();
+
+    /// <summary> Binds the declaration's own type parameters to an ordered argument list. </summary>
+    public static TypeSubstitution Create(IGenericSymbol definition, IReadOnlyList<TypeSymbol> arguments)
     {
-        if (typeArguments.Count != method.TypeParameters.Count)
-            throw new ArgumentException($"Expected {method.TypeParameters.Count} type argument(s) for {method.FullyQualifiedName}, got {typeArguments.Count}.");
+        ValidateArity(definition, arguments.Count);
 
-        return new TypeSubstitution(method.TypeParameters.Select((parameter, index) => new KeyValuePair<string, TypeSymbol>(parameter.Name, typeArguments[index])));
+        return new(definition.TypeParameters.Select((parameter, index) => KeyValuePair.Create(parameter, arguments[index])));
     }
 
-    /// <summary> Creates a substitution binding every type parameter of <paramref name="type"/> to its corresponding type argument. </summary>
-    public static TypeSubstitution Zip(TypeSymbol type, IReadOnlyList<TypeSymbol> typeArguments)
+    /// <summary> Rejects argument lists that cannot describe a construction of this declaration. </summary>
+    internal static void ValidateArity(IGenericSymbol definition, int count) => ArgumentOutOfRangeException.ThrowIfNotEqual(count, definition.Arity);
+
+    /// <summary> Applies this environment followed by <paramref name="next"/>, including within existing bindings. </summary>
+    public TypeSubstitution Then(TypeSubstitution next) => new(bindings.Select(binding => KeyValuePair.Create(binding.Key, next.Resolve(binding.Value))).ToImmutableDictionary().SetItems(next.bindings));
+
+    /// <summary> Substitutes recursively through named types, generic arguments, and array elements. </summary>
+    public TypeSymbol Resolve(TypeSymbol type) => type switch
     {
-        if (typeArguments.Count != type.TypeParameters.Count)
-            throw new ArgumentException($"Expected {type.TypeParameters.Count} type argument(s) for {type.FullyQualifiedName}, got {typeArguments.Count}.");
+        TypeParameterSymbol parameter => bindings.GetValueOrDefault(parameter, parameter),
+        ArrayTypeSymbol array => array.WithElementType(Resolve(array.ElementType)),
+        { IsGeneric: true } => type.OriginalDefinition.Construct([.. type.TypeArguments.Select(Resolve)]),
+        _ => type
+    };
 
-        return new TypeSubstitution(type.TypeParameters.Select((parameter, index) => new KeyValuePair<string, TypeSymbol>(parameter.Name, typeArguments[index])));
-    }
-
-    /// <summary> Resolves every type parameter bound by this substitution within <paramref name="type"/> to its concrete type. </summary>
-    public TypeSymbol Resolve(TypeSymbol type)
+    /// <summary> Substitutes both the containing type and the method's own arguments. </summary>
+    public MethodSymbol Resolve(MethodSymbol method)
     {
-        if (type is TypeParameterSymbol parameter && bindings.TryGetValue(parameter.Name, out TypeSymbol? bound))
-            return bound;
+        var definition = method.ContainingType is { } type ? method.AsMemberOf(Resolve(type)) : method.ConstructedFrom;
 
-        if (type is ArrayTypeSymbol array)
-        {
-            var element = Resolve(array.ElementType);
-            return ReferenceEquals(element, array.ElementType) ? array : new ArrayTypeSymbol(element, array.Size);
-        }
-
-        return type;
+        return method is ConstructedMethodSymbol ? definition.Construct([.. method.TypeArguments.Select(Resolve)]) : definition;
     }
 }

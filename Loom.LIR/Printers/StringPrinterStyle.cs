@@ -126,6 +126,7 @@ internal class StringPrinterStyle : ILIRPrinterStyle
             LIRDefaultValue d => $"default({PrintType(d.Type)})",
             LIRTempValue t => $"%{t.ID}",
             LIRFunction f => $"@{f.Name}",
+            LIRFunctionReference reference => $"@{reference.Name}",
             LIRMetadataValue g => $"@{g.Name}",
             LIRField field => field.Name,
             LIRBlockValue b => $"%{b.Block.Name}",
