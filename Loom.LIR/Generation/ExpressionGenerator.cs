@@ -578,18 +578,6 @@ internal class ExpressionGenerator
         return self == null ? Generator.EmitCall(target, args) : Generator.EmitCallInstanced(target, self, args);
     }
 
-    // A reference carries the invocation's signature while its concrete function body is deferred to monomorphization.
-    private LIRValue GetCallTarget(MethodSymbol method)
-    {
-        method = substitution?.Resolve(method) ?? method;
-        string name = LinkageNameResolver.LinkageName(method);
-
-        if (method.IsDefinition)
-            return unit.GetFunction(name) ?? throw new Exception($"Could not find function: {name}");
-
-        LIRType? selfType = method is { IsStatic: false, ContainingType: { } containingType } ? new LIRPointerType(ASTGenerator.ConvertType(containingType)) : null;
-        var signature = ASTGenerator.BuildFunctionType(method, selfType, typeParameters: []);
-
-        return new LIRMethodReference(name, method, signature);
-    }
+    // References preserve the substituted signature until monomorphization supplies the body.
+    private LIRValue GetCallTarget(MethodSymbol method) => methodGenerator.GetMethodReference(substitution?.Resolve(method) ?? method);
 }

@@ -157,6 +157,26 @@ internal class DeclarationWalker : ASTVisitor
     }
 
     [Visitor]
+    public void Visit(DestructorDeclarationNode node)
+    {
+        var symbol = new MethodSymbol(".dtor", MethodSymbol.MethodKind.Destructor)
+        {
+            ContainingType = CurrentSymbol as TypeSymbol,
+            ReturnType = CurrentTable.Lookup("void")?.OfType<TypeSymbol>().FirstOrDefault(),
+            Accessibility = MemberAccessibility.Private,
+            DeclaringNode = node,
+            FullyQualifiedName = BuildQualifiedName(".dtor")
+        };
+
+        CurrentTable.Define(symbol);
+
+        if (CurrentSymbol is TypeSymbol type)
+            type.Members = [.. type.Members, symbol];
+
+        WithScope(node, () => VisitChildren(node), symbol);
+    }
+
+    [Visitor]
     public void Visit(StructDeclarationNode node)
     {
         var symbol = new TypeSymbol(node.Name.Text, TypeSymbol.DefaultType.Struct);

@@ -46,6 +46,10 @@ internal class TypeDeclarationGenerator
                     methodGenerator.GenerateConstructorDeclaration(constructor, declaredType);
                     break;
 
+                case DestructorDeclarationNode destructor when context.AnalysisContext.GetSymbol(destructor).Symbol is MethodSymbol destructorSymbol:
+                    methodGenerator.GenerateDestructorDeclaration(destructorSymbol, declaredType);
+                    break;
+
                 case MethodDeclarationNode method:
                     methodGenerator.GenerateMethodDeclaration(method, declaredType);
                     break;
@@ -79,6 +83,10 @@ internal class TypeDeclarationGenerator
             {
                 case ConstructorDeclarationNode constructor:
                     methodGenerator.GenerateConstructorBody(constructor, declaredType);
+                    break;
+
+                case DestructorDeclarationNode destructor when context.AnalysisContext.GetSymbol(destructor).Symbol is MethodSymbol destructorSymbol:
+                    methodGenerator.GenerateDestructorBody(destructorSymbol, declaredType);
                     break;
 
                 case MethodDeclarationNode method:
@@ -117,6 +125,10 @@ internal class TypeDeclarationGenerator
                     methodGenerator.GenerateConstructorDeclaration(constructor, declaredType, substitution);
                     break;
 
+                case MethodSymbol { Kind: MethodSymbol.MethodKind.Destructor } destructor:
+                    methodGenerator.GenerateDestructorDeclaration(destructor, declaredType);
+                    break;
+
                 case MethodSymbol method:
                     methodGenerator.GenerateMethodDeclaration(method, declaredType, substitution);
                     break;
@@ -148,6 +160,10 @@ internal class TypeDeclarationGenerator
             {
                 case MethodSymbol { Kind: MethodSymbol.MethodKind.Constructor } constructor:
                     methodGenerator.GenerateConstructorBody(constructor, declaredType, substitution, symbol);
+                    break;
+
+                case MethodSymbol { Kind: MethodSymbol.MethodKind.Destructor } destructor:
+                    methodGenerator.GenerateDestructorBody(destructor, declaredType, substitution, symbol);
                     break;
 
                 case MethodSymbol method:

@@ -9,7 +9,7 @@ namespace Loom.LIR.Generation;
 
 internal class StatementGenerator
 {
-    protected List<LocalVariableSymbol> CurrentScope => scopes.Peek();
+    protected Scope CurrentScope => scopes.Peek();
     protected LIRGenerator Generator => function.LIRGenerator!;
 
     private CompilationContext context;
@@ -19,7 +19,14 @@ internal class StatementGenerator
     private TypeSubstitution? substitution;
     private TypeSymbol? ownerType;
     private Dictionary<string, LIRTempValue> locals = new();
-    private readonly Stack<List<LocalVariableSymbol>> scopes = new();
+    private readonly Stack<Scope> scopes = new();
+
+    protected sealed class Scope
+    {
+        public List<(LIRValue Storage, TypeSymbol Type)> Owned { get; } = [];
+
+        public Dictionary<string, LIRTempValue?> Bindings { get; } = [];
+    }
 
     /// <summary> Initializes a new instance of the <see cref="StatementGenerator"/> class. </summary>
     public StatementGenerator(CompilationContext context, LIRCompilationUnit unit, LIRFunction function, MethodGenerator methodGenerator, TypeSubstitution? substitution = null, TypeSymbol? ownerType = null)
@@ -49,20 +56,35 @@ internal class StatementGenerator
     public void EmitFieldInitializers(ASTNode node) => new ExpressionGenerator(context, unit, function, locals, methodGenerator, substitution, ownerType).EmitFieldInitializers(node);
 
     /// <summary> Opens a scope, collecting the unique values declared within it. </summary>
-    public void BeginScope() => scopes.Push(new List<LocalVariableSymbol>());
+    public void BeginScope() => scopes.Push(new());
 
-    /// <summary> Closes the current scope, releasing every unique value it still owns. </summary>
+    /// <summary> Closes the current scope, destroying its owned values in reverse declaration order. </summary>
     public void EndScope()
     {
-        var owned = scopes.Pop();
+        var scope = scopes.Pop();
 
-        foreach (var symbol in owned)
-            methodGenerator.FreeInstance(function, locals[symbol.Name]);
+        if (Generator.WritingBlock.Terminator == null)
+            EmitCleanup(scope.Owned);
+
+        foreach (var (name, previous) in scope.Bindings)
+            if (previous == null)
+                locals.Remove(name);
+            else
+                locals[name] = previous;
+    }
+
+    private void EmitCleanup(IEnumerable<(LIRValue Storage, TypeSymbol Type)> owned)
+    {
+        foreach (var (storage, type) in owned.Reverse())
+            methodGenerator.DestroyInstance(function, storage, type);
     }
 
     /// <summary> Emits a statement for the given node. </summary>
     public void EmitStatement(StatementNode node)
     {
+        if (Generator.WritingBlock.Terminator != null)
+            return;
+
         switch (node)
         {
             case ReturnStatementNode ret: EmitReturn(ret); break;
@@ -88,13 +110,13 @@ internal class StatementGenerator
 
         LIRType storageType = ASTGenerator.ConvertStorageType(type, substitution);
         LIRTempValue address = Generator.EmitAlloca(storageType);
-        locals[declaration.Name.Text] = address;
+        CurrentScope.Bindings.TryAdd(symbol.Name, locals.GetValueOrDefault(symbol.Name));
+        locals[symbol.Name] = address;
 
-        // A unique local holding a heap allocation owns it until its scope ends, unless ownership was transferred away first
-        if (symbol.PointerType == PointerType.Unique
-            && storageType is LIRPointerType
-            && !context.AnalysisContext.MovedValues.Contains(symbol))
-            CurrentScope.Add(symbol);
+        // Value destructors operate on local storage; unique references additionally release their allocation
+        if ((type.IsValueType && type.Members.OfType<MethodSymbol>().Any(method => method.Kind == MethodSymbol.MethodKind.Destructor)) ||
+            (symbol.PointerType == PointerType.Unique && storageType is LIRPointerType && !context.AnalysisContext.MovedValues.Contains(symbol)))
+            CurrentScope.Owned.Add((address, type));
 
         if (declaration.Initializer is InstanceCreationExpresssionNode creation)
         {
@@ -119,10 +141,12 @@ internal class StatementGenerator
 
     private void EmitReturn(ReturnStatementNode node)
     {
-        if (node.Expression == null)
-            Generator.EmitReturn();
-        else
-            Generator.EmitReturn(EmitValue(node.Expression));
+        var result = node.Expression == null ? null : EmitValue(node.Expression);
+
+        foreach (var scope in scopes)
+            EmitCleanup(scope.Owned);
+
+        Generator.EmitReturn(result);
     }
 
     private void EmitAssignment(AssignmentStatementNode node) => new ExpressionGenerator(context, unit, function, locals, methodGenerator, substitution, ownerType).EmitAssignment(node);
@@ -153,9 +177,13 @@ internal class StatementGenerator
 
     private void EmitUnsafe(UnsafeStatementNode node)
     {
+        BeginScope();
+
         foreach (var content in node.Body.Contents)
             if (content is StatementNode statementNode)
                 EmitStatement(statementNode);
+
+        EndScope();
     }
 
     private void EmitWhile(WhileStatementNode node)
@@ -187,6 +215,7 @@ internal class StatementGenerator
 
     private void EmitFor(ForStatementNode node)
     {
+        BeginScope();
         EmitStatement(node.Initializer);
 
         var conditionBlock = Generator.CreateBlock("for.condition");
@@ -220,5 +249,6 @@ internal class StatementGenerator
             Generator.EmitBr(conditionBlock);
 
         Generator.SwitchTo(continueBlock);
+        EndScope();
     }
 }

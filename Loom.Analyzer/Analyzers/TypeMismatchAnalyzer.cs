@@ -18,11 +18,12 @@ public class TypeMismatchAnalyzer : Analyzer
     [Visitor]
     public void Visit(ReturnStatementNode node)
     {
-        var method = Context.FirstAncestorOrSelf<MethodDeclarationNode>(node);
-        if (method == null)
-            return;
+        var declaration = Context.GetParent(node);
 
-        if (Context.GetSymbol(method).Symbol is not MethodSymbol methodSymbol)
+        while (declaration != null && Context.GetSymbol(declaration).Symbol is not MethodSymbol)
+            declaration = Context.GetParent(declaration);
+
+        if (declaration == null || Context.GetSymbol(declaration).Symbol is not MethodSymbol methodSymbol)
             return;
 
         var returnType = methodSymbol.ReturnType;

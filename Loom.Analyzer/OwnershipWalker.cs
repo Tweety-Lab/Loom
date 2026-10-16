@@ -33,7 +33,15 @@ internal class OwnershipWalker : ASTVisitor
     protected override void OnUnhandled(ASTNode node) => VisitChildren(node);
 
     [Visitor]
-    public void Visit(MethodDeclarationNode node)
+    public void Visit(MethodDeclarationNode node) => VisitFunction(node);
+
+    [Visitor]
+    public void Visit(ConstructorDeclarationNode node) => VisitFunction(node);
+
+    [Visitor]
+    public void Visit(DestructorDeclarationNode node) => VisitFunction(node);
+
+    private void VisitFunction(ASTNode node)
     {
         states.Clear();
         VisitChildren(node);

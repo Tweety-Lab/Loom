@@ -83,6 +83,7 @@ public class MethodSymbol : MemberSymbol, IExportableSymbol, IGenericSymbol
     public enum MethodKind
     {
         Constructor,
+        Destructor,
         Accessor,
         Method
     }
