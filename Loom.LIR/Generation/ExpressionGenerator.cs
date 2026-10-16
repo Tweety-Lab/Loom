@@ -10,7 +10,7 @@ namespace Loom.LIR.Generation;
 /// <summary>
 /// Handles conversion of Abstract Syntax Tree (AST) expressions into Loom Intermediate Representation (LIR).
 /// </summary>
-internal class ExpressionGenerator
+internal partial class ExpressionGenerator
 {
     private CompilationContext context;
     private LIRCompilationUnit unit;
@@ -88,7 +88,7 @@ internal class ExpressionGenerator
             return;
         }
 
-        Generator.EmitStore(EmitValue(node.Value), address);
+        Generator.EmitStore(EmitValue(node.Value, context.AnalysisContext.ExpressionTypes[node.Target]), address);
     }
 
     /// <summary> Emits <paramref name="node"/> as a value. </summary>
@@ -113,7 +113,7 @@ internal class ExpressionGenerator
             return;
         }
 
-        Generator.EmitStore(initializer != null ? EmitValue(initializer) : EmitDefault(type), address);
+        Generator.EmitStore(initializer != null ? EmitValue(initializer, type) : EmitDefault(type), address);
     }
 
     public LIRValue EmitSizeOf(SizeOfExpressionNode node)
@@ -225,7 +225,7 @@ internal class ExpressionGenerator
         var constructor = context.AnalysisContext.GetSymbol(node).As<MethodSymbol>() ?? symbol.Members.OfType<MethodSymbol>().FirstOrDefault(m => m.Kind == MethodSymbol.MethodKind.Constructor);
 
         var target = constructor == null ? GetDefaultConstructorTarget(symbol) : GetCallTarget(constructor);
-        var args = node.Arguments.Select(EmitValue).ToArray();
+        var args = constructor == null ? node.Arguments.Select(EmitValue).ToArray() : EmitArguments(node.Arguments, constructor);
 
         Generator.EmitCallInstanced(target, instance, args);
 
@@ -334,7 +334,7 @@ internal class ExpressionGenerator
     private LIRValue EmitArrayLiteralInto(LIRValue arrayAddress, ArrayTypeSymbol type, IReadOnlyList<ExpressionNode> elements)
     {
         for (int index = 0; index < Math.Min(elements.Count, type.Size); index++)
-            Generator.EmitStore(EmitValue(elements[index]), Generator.EmitGetElement(arrayAddress, new LIRConstantIntValue(index)));
+            Generator.EmitStore(EmitValue(elements[index], type.ElementType), Generator.EmitGetElement(arrayAddress, new LIRConstantIntValue(index)));
 
         EmitDefaultArray(arrayAddress, type, elements.Count);
 
@@ -426,7 +426,7 @@ internal class ExpressionGenerator
         return address;
     }
 
-    private void EmitPropertySet(PropertySymbol property, ExpressionNode target, ExpressionNode value) => EmitPropertySet(property, target, EmitPropertySelf(property, target), EmitValue(value));
+    private void EmitPropertySet(PropertySymbol property, ExpressionNode target, ExpressionNode value) => EmitPropertySet(property, target, EmitPropertySelf(property, target), EmitValue(value, property.Type!));
 
     private void EmitPropertySet(PropertySymbol property, ExpressionNode target, LIRValue? self, LIRValue stored)
     {
@@ -578,9 +578,11 @@ internal class ExpressionGenerator
         if (self == null && ((LIRFunctionType)target.Type).Parameters.FirstOrDefault()?.Name == "self")
             self = EmitSelfParameter();
 
-        var args = node.Arguments.Select(EmitValue).ToArray();
+        var args = EmitArguments(node.Arguments, methodSymbol);
         return self == null ? Generator.EmitCall(target, args) : Generator.EmitCallInstanced(target, self, args);
     }
+
+    private LIRValue[] EmitArguments(IReadOnlyList<ExpressionNode> arguments, MethodSymbol method) => [.. arguments.Select((argument, index) => EmitValue(argument, method.Parameters[index].Type!))];
 
     // References preserve the substituted signature until monomorphization supplies the body.
     private LIRValue GetCallTarget(MethodSymbol method) => methodGenerator.GetMethodReference(substitution?.Resolve(method) ?? method);

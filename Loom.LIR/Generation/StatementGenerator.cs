@@ -100,7 +100,12 @@ internal class StatementGenerator
 
     private LIRValue EmitExpression(ExpressionNode node) => new ExpressionGenerator(context, unit, function, locals, methodGenerator, substitution, ownerType).Emit(node);
 
-    private LIRValue EmitValue(ExpressionNode node) => new ExpressionGenerator(context, unit, function, locals, methodGenerator, substitution, ownerType).EmitValue(node);
+    private LIRValue EmitValue(ExpressionNode node, TypeSymbol? targetType = null)
+    {
+        ExpressionGenerator expressions = new(context, unit, function, locals, methodGenerator, substitution, ownerType);
+
+        return targetType == null ? expressions.EmitValue(node) : expressions.EmitValue(node, targetType);
+    }
 
     private void EmitLocalDeclaration(LocalDeclarationStatementNode node)
     {
@@ -141,7 +146,9 @@ internal class StatementGenerator
 
     private void EmitReturn(ReturnStatementNode node)
     {
-        var result = node.Expression == null ? null : EmitValue(node.Expression);
+        var method = context.AnalysisContext.FirstAncestorOrSelf<MethodDeclarationNode>(node);
+        var returnType = method == null ? null : context.AnalysisContext.GetSymbol(method).As<MethodSymbol>()?.ReturnType;
+        var result = node.Expression == null ? null : EmitValue(node.Expression, returnType);
 
         foreach (var scope in scopes)
             EmitCleanup(scope.Owned);

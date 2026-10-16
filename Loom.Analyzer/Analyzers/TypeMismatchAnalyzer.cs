@@ -77,6 +77,13 @@ public class TypeMismatchAnalyzer : Analyzer
     }
 
     [Visitor]
+    public void Visit(PropertyDeclarationNode node)
+    {
+        if (node.Initializer != null && Context.GetSymbol(node).Symbol is PropertySymbol { Type: { } type })
+            Check(type, node.Initializer);
+    }
+
+    [Visitor]
     public void Visit(AssignmentStatementNode node)
     {
         if (Context.ExpressionTypes.TryGetValue(node.Target, out var targetType))

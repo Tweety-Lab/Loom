@@ -16,6 +16,9 @@ public static class TypeConversions
         if (source is TypeParameterSymbol || target is TypeParameterSymbol)
             return true;
 
+        if (IsArrayToVectorConversion(source, target))
+            return true;
+
         if (source is ArrayTypeSymbol || target is ArrayTypeSymbol)
             return source is ArrayTypeSymbol { ElementType: var sourceElement, Size: var sourceSize }
                 && target is ArrayTypeSymbol { ElementType: var targetElement, Size: var targetSize }
@@ -42,6 +45,12 @@ public static class TypeConversions
 
         return false;
     }
+
+    /// <summary> The element type of the standard vector construction, or null for other types. </summary>
+    public static TypeSymbol? GetVectorElementType(TypeSymbol? type) => type is ConstructedTypeSymbol { KnownType: TypeSymbol.DefaultType.Class, OriginalDefinition.FullyQualifiedName: "Standard::Vector", TypeArguments: [var element] } ? element : null;
+
+    /// <summary> Whether an array can populate a new standard vector through implicit element conversions. </summary>
+    public static bool IsArrayToVectorConversion(TypeSymbol source, TypeSymbol target) => source is ArrayTypeSymbol array && GetVectorElementType(target) is { } element && CanImplicitlyConvert(array.ElementType, element);
 
     /// <summary> Whether two types are the same type, rather than merely convertible between one another. </summary>
     public static bool IsIdentical(TypeSymbol source, TypeSymbol target) => ReferenceEquals(source, target) || (source, target) switch

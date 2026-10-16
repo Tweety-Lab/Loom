@@ -20,6 +20,45 @@ internal class TypeWalker : ASTWalker
     /// <remarks> This is what <c>default</c> literals resolve to. </remarks>
     public TypeSymbol? ResolveContextualType(ASTNode node)
     {
+        var parent = Context.GetParent(node);
+
+        if (parent is ArrayLiteralNode array)
+        {
+            var contextual = ResolveContextualType(array);
+
+            return contextual is ArrayTypeSymbol arrayType ? arrayType.ElementType : TypeConversions.GetVectorElementType(contextual);
+        }
+
+        if (parent is PropertyDeclarationNode property)
+            return Context.GetSymbol(property).As<PropertySymbol>()?.Type;
+
+        if (parent is ReturnStatementNode && Context.FirstAncestorOrSelf<MethodDeclarationNode>(node) is { } method)
+            return Context.GetSymbol(method).As<MethodSymbol>()?.ReturnType;
+
+        if (parent is CallExpressionNode call && node is ExpressionNode argument && call.Arguments.Contains(argument))
+        {
+            var arguments = call.TypeArguments.Select(type => TypeResolver.Resolve(Context, call, type)).ToArray();
+            var candidates = Context.GetSymbol(call.Callee).AsMembers().AsAll<MethodSymbol>().Where(method => method.Arity == arguments.Length);
+
+            if (arguments.Any(type => type == null))
+                return null;
+
+            return ResolveArgumentType(argument, call.Arguments, candidates.Select(method => method.Arity == 0 ? method : method.Construct([.. arguments!])));
+        }
+
+        if (parent is InstanceCreationExpresssionNode creation && node is ExpressionNode constructorArgument && Context.GetSymbol(creation.TypeName).Symbol is TypeSymbol containingType)
+        {
+            if (creation.TypeArguments is { Count: > 0 } typeArguments)
+            {
+                if (TypeResolver.Construct(Context, creation, containingType, typeArguments) is not { } constructed)
+                    return null;
+
+                containingType = constructed;
+            }
+
+            return ResolveArgumentType(constructorArgument, creation.Arguments, containingType.Members.OfType<MethodSymbol>().Where(method => method.Kind == MethodSymbol.MethodKind.Constructor));
+        }
+
         var declaration = Context.FirstAncestorOrSelf<VariableDeclarationNode>(node);
         if (declaration != null)
             return TypeResolver.Resolve(Context, declaration, declaration.Type);
@@ -29,6 +68,14 @@ internal class TypeWalker : ASTWalker
             return targetType;
 
         return null;
+    }
+
+    private static TypeSymbol? ResolveArgumentType(ExpressionNode argument, List<ExpressionNode> arguments, IEnumerable<MethodSymbol> candidates)
+    {
+        int index = arguments.IndexOf(argument);
+        var types = candidates.Where(method => method.Parameters.Count == arguments.Count).Select(method => method.Parameters[index].Type).OfType<TypeSymbol>().ToArray();
+
+        return types is [var first, ..] && types.All(type => TypeConversions.IsIdentical(first, type)) ? first : null;
     }
 
     [Visitor]
@@ -128,7 +175,7 @@ internal class TypeWalker : ASTWalker
             return;
         }
 
-        var elementType = node.Elements.Select(e => Context.ExpressionTypes.TryGetValue(e, out var type) ? type : null).FirstOrDefault(t => t != null);
+        var elementType = node.Elements.Select(e => Context.ExpressionTypes.TryGetValue(e, out var type) ? type : null).FirstOrDefault(t => t != null) ?? TypeConversions.GetVectorElementType(ResolveContextualType(node));
 
         if (elementType == null)
             return;
