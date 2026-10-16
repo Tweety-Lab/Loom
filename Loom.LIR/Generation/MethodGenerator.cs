@@ -251,7 +251,6 @@ internal class MethodGenerator
             owningType.DefineMethod(LinkageNameResolver.LinkageName(symbol), functionType);
     }
 
-    /// <summary> Declares the constructor of an instantiated generic type. </summary>
     public void GenerateConstructorDeclaration(MethodSymbol symbol, LIRTypeDeclaration owningType, TypeSubstitution substitution)
     {
         var selfType = new LIRPointerType(owningType.Type);

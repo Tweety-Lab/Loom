@@ -26,6 +26,12 @@ public class TypeDeclarationBlockRule : BlockRule
             return true;
         }
 
+        if (TryRunRule<DestructorDeclarationRule, DestructorDeclarationNode>(out var dtorDecl))
+        {
+            node = dtorDecl;
+            return true;
+        }
+
         if (TryRunRule<MethodDeclarationRule, MethodDeclarationNode>(out var methodDecl))
         {
             node = methodDecl;

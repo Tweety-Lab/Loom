@@ -126,6 +126,7 @@ public class Token
         [Character(',')] Comma,
         [Character(';')] Semicolon,
         [Character(':')] Colon,
+        [Character('~')] Tilde,
 
         [Keyword("module")] Module,
         [Keyword("struct")] Struct,

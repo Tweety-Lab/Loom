@@ -10,12 +10,12 @@ namespace Loom.Analyzer.Analyzers;
 [LoomAnalyzer]
 public class InvalidStatementScopeAnalyzer : Analyzer
 {
-    public static Diagnostic InvalidStatementScope = new(Diagnostic.DiagnosticLevel.Error, "Statement cannot exist outside of a method or constructor.");
+    public static Diagnostic InvalidStatementScope = new(Diagnostic.DiagnosticLevel.Error, "Statement cannot exist outside of a method body.");
 
     [Visitor]
     public void Visit(StatementNode node)
     {
-        if (Context.FirstAncestorOrSelf<MethodDeclarationNode>(node) == null && Context.FirstAncestorOrSelf<ConstructorDeclarationNode>(node) == null)
+        if (Context.FirstAncestorOrSelf<MethodDeclarationNode>(node) == null && Context.FirstAncestorOrSelf<ConstructorDeclarationNode>(node) == null && Context.FirstAncestorOrSelf<DestructorDeclarationNode>(node) == null)
             Context.DiagnosticContext?.Report(InvalidStatementScope, node.StartToken?.Location);
     }
 }
