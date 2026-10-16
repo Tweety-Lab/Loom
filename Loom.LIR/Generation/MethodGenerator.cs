@@ -115,7 +115,7 @@ internal class MethodGenerator
     public void GeneratePropertyDeclaration(PropertySymbol symbol, LIRTypeDeclaration owningType, IReadOnlyList<TypeParameterSymbol>? typeParameters = null, TypeSubstitution? substitution = null)
     {
         if (symbol.BackingField?.Type != null)
-            owningType.DeclareField(symbol.BackingField.Name, ASTGenerator.ConvertType(symbol.BackingField.Type, substitution));
+            owningType.DeclareField(symbol.BackingField.Name, ASTGenerator.ConvertStorageType(symbol.BackingField.Type, substitution));
 
         DeclareAccessor(symbol.Getter, owningType, typeParameters, substitution);
         DeclareAccessor(symbol.Setter, owningType, typeParameters, substitution);

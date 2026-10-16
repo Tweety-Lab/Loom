@@ -62,8 +62,7 @@ internal class ExpressionGenerator
         return node switch
         {
             IdentifierNameNode ident => EmitIdentifierAddress(ident),
-            MemberAccessExpressionNode member => EmitMemberAddress(member),
-            ArrayAccessExpressionNode array => EmitArrayElementAddress(array),
+            MemberAccessExpressionNode or ArrayAccessExpressionNode => IsValueType(node) ? EmitStorage(node) : Generator.EmitLoad(EmitStorage(node)),
             ArrayLiteralNode literal => EmitArrayLiteral(literal),
             StringLiteralNode str => EmitStringLiteral(str),
             InstanceCreationExpresssionNode creation => Emit(creation),
@@ -80,7 +79,7 @@ internal class ExpressionGenerator
             return;
         }
 
-        var address = EmitAddress(node.Target);
+        var address = EmitStorage(node.Target);
 
         // Assigning to a whole array defaults each of its elements rather than storing a single value
         if (context.AnalysisContext.ExpressionTypes.TryGetValue(node.Target, out var targetType) && targetType is ArrayTypeSymbol)
@@ -289,6 +288,15 @@ internal class ExpressionGenerator
         }
     }
 
+    // Assignment targets refer to their storage slot; reference receivers use the pointer stored in that slot.
+    private LIRValue EmitStorage(ExpressionNode node) => node switch
+    {
+        IdentifierNameNode identifier => EmitStorage(identifier),
+        MemberAccessExpressionNode member => EmitMemberStorage(member),
+        ArrayAccessExpressionNode array => EmitArrayElementAddress(array),
+        _ => throw new Exception($"Unhandled storage expression: {node.GetType().Name}")
+    };
+
     // Emits a pointer to the storage of the local variable or field referenced by 'ident'
     private LIRValue EmitStorage(IdentifierNameNode ident)
     {
@@ -320,12 +328,8 @@ internal class ExpressionGenerator
     // Emits the value of the variable referenced by 'ident'
     private LIRValue EmitVariableValue(IdentifierNameNode ident) => IsParameter(ident) ? EmitParameterValue(ident.BaseName) : Generator.EmitLoad(EmitStorage(ident));
 
-    // Emits the value of the variable-like 'node', which is stored in memory
-    private LIRValue EmitVariableValue(ExpressionNode node)
-    {
-        var address = EmitAddress(node);
-        return IsValueType(node) ? Generator.EmitLoad(address) : address;
-    }
+    // Reading a field or array element loads its stored value, including a reference pointer.
+    private LIRValue EmitVariableValue(ExpressionNode node) => Generator.EmitLoad(EmitStorage(node));
 
     private LIRValue EmitArrayLiteralInto(LIRValue arrayAddress, ArrayTypeSymbol type, IReadOnlyList<ExpressionNode> elements)
     {
@@ -371,7 +375,7 @@ internal class ExpressionGenerator
         return function.ParameterValues[index];
     }
 
-    private LIRValue EmitMemberAddress(MemberAccessExpressionNode node)
+    private LIRValue EmitMemberStorage(MemberAccessExpressionNode node)
     {
         var receiverType = context.AnalysisContext.ExpressionTypes.TryGetValue(node.Receiver, out var type) ? type : null;
         if (receiverType == null)
@@ -451,7 +455,7 @@ internal class ExpressionGenerator
             return node.IsPrefix ? newPropertyValue : oldPropertyValue;
         }
 
-        var address = EmitAddress(node.Target);
+        var address = EmitStorage(node.Target);
         var oldValue = Generator.EmitLoad(address);
         var newValue = ApplyDelta(oldValue, node.Operator);
 
@@ -517,7 +521,7 @@ internal class ExpressionGenerator
 
         // The concrete declaration does not exist yet, so the substituted field is rebuilt from the definition's layout
         if (instanceTypeSymbol is ConstructedTypeSymbol)
-            field = LIRField.Declare(field.Name, field.Index, ASTGenerator.ConvertType(fieldSymbol.Type!, substitution));
+            field = LIRField.Declare(field.Name, field.Index, ASTGenerator.ConvertStorageType(fieldSymbol.Type!, substitution));
 
         return Generator.EmitGetField(instance, field);
     }

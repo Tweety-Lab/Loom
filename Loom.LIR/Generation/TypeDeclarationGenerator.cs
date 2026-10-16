@@ -134,7 +134,7 @@ internal class TypeDeclarationGenerator
                     break;
 
                 case FieldSymbol field:
-                    declaredType.DeclareField(field.Name, ASTGenerator.ConvertType(field.Type!, substitution));
+                    declaredType.DeclareField(field.Name, ASTGenerator.ConvertStorageType(field.Type!, substitution));
                     break;
 
                 case PropertySymbol property:
@@ -191,7 +191,7 @@ internal class TypeDeclarationGenerator
             return;
         }
 
-        declaredType.DeclareField(symbol.Name, ASTGenerator.ConvertType(symbol.Type!));
+        declaredType.DeclareField(symbol.Name, ASTGenerator.ConvertStorageType(symbol.Type!));
     }
 
     private void GenerateTypeDeclarationProperty(LIRTypeDeclaration declaredType, PropertyDeclarationNode node, TypeSymbol ownerType)
