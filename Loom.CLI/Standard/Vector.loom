@@ -22,6 +22,14 @@ module Standard
 			}
 		}
 
+		~Vector()
+		{
+			unsafe
+			{
+				Unsafe.Free(pointer);
+			}
+		}
+
 		/// @brief Adds an element to the end of the vector.
 		/// @param element The element to add to the vector.
 		public void Add(T element)
