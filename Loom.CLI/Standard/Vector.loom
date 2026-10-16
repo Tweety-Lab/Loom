@@ -6,10 +6,10 @@ module Standard
 	/// @tparam T The type of objects stored in the vector.
 	export class Vector<T>
 	{
-		/// @brief The number of elements currently stored in the vector.
+		/// @brief The number of elements currently stored in the \ref Vector.
 		public i32 Count { get; } = default;
 
-		/// @brief The maximum number of elements that can be stored in the vector before it needs to be resized.
+		/// @brief The maximum number of elements that can be stored in the \ref Vector before it needs to be resized.
 		public i32 Capacity { get; } = 4;
 
 		iptr pointer = default;
@@ -30,13 +30,13 @@ module Standard
 			}
 		}
 
-		/// @brief Adds an element to the end of the vector.
-		/// @param element The element to add to the vector.
+		/// @brief Adds an element to the end of the \ref Vector.
+		/// @param element The element to add to the \ref Vector.
 		public void Add(T element)
 		{
 			if (Count >= Capacity)
 			{
-				Capacity *= 2;
+				Capacity = Capacity * 2;
 
 				unsafe
 				{

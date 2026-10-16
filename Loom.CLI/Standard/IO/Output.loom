@@ -1,4 +1,5 @@
 import Standard::Memory;
+import Standard;
 
 module Standard::IO
 {
@@ -11,12 +12,12 @@ module Standard::IO
 		print('\n');
     }
 
-	/// @brief Prints a char slice to the console.
-    export void print(Slice<char> s)
-    {
-        for (i32 i = 0; i < s.Length; i++)
-            print(s.ElementAt(i));
-    }
+    /// @brief Prints a char vector to the console and appends a newline.
+	export void println(ref Vector<char> v)
+	{
+		print(v);
+		print('\n');
+	}
 
 	/// @brief Prints a char to the console and appends a newline.
     export void println(char c)
@@ -24,6 +25,20 @@ module Standard::IO
 		print(c);
 		print('\n');
     }
+
+	/// @brief Prints a char slice to the console.
+    export void print(Slice<char> s)
+    {
+        for (i32 i = 0; i < s.Length; i++)
+            print(s.ElementAt(i));
+    }
+
+	/// @brief Prints a char vector to the console.
+    export void print(ref Vector<char> v)
+	{
+        for (i32 i = 0; i < v.Count; i++)
+			print(v.ElementAt(i));
+	}
 
 	/// @brief Prints a char to the console.
     export void print(char c)
