@@ -1,6 +1,7 @@
 ﻿
 using Loom.Parser.Tokenizer;
 using System.Collections;
+using System.Xml.Linq;
 
 namespace Loom.Parser.AST;
 
@@ -11,6 +12,9 @@ public abstract record ASTNode
 {
     /// <summary> The children of this node. </summary>
     public abstract IEnumerable<ASTNode> Children { get; }
+
+    /// <summary> Every node below this node, outermost first. </summary>
+    public IEnumerable<ASTNode> Descendants => Children.SelectMany(child => child.Descendants.Prepend(child));
 
     /// <summary> The first token that makes up this node. </summary>
     public Token? StartToken { get; set; }
