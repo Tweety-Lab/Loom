@@ -1,5 +1,4 @@
-﻿using LLVMSharp;
-using LLVMSharp.Interop;
+﻿using LLVMSharp.Interop;
 using Loom.CodeGen.LLVM.Emitters;
 using Loom.LIR;
 using Loom.LIR.Objects;

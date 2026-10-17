@@ -2,7 +2,6 @@ using Loom.Analyzer;
 using Loom.Analyzer.Symbols;
 using Loom.Common;
 using Loom.Parser;
-using Loom.Parser.AST;
 using Loom.Parser.AST.Rules.Default;
 
 namespace Loom.Tests;

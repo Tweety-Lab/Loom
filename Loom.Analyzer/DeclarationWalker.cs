@@ -1,6 +1,5 @@
 ﻿using Loom.Analyzer.Symbols;
 using Loom.Parser.AST;
-using Loom.Parser.AST.Rules;
 using Loom.Parser.AST.Rules.Default;
 
 namespace Loom.Analyzer;

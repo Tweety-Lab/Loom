@@ -2,7 +2,6 @@
 using Loom.Common.Diagnostics;
 using Loom.Parser.AST;
 using Loom.Parser.AST.Rules.Default;
-using Loom.Parser.Tokenizer;
 
 namespace Loom.Analyzer.Analyzers;
 

@@ -1,7 +1,6 @@
 ﻿using Loom.Common;
 using Loom.LIR.Generation;
 using Loom.LIR.Objects;
-using Loom.LIR.OpCodes;
 using Loom.LIR.Passes;
 using Loom.LIR.Printers;
 using Loom.Parser;

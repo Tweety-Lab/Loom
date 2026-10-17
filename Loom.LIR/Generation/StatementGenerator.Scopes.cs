@@ -1,9 +1,4 @@
-using Loom.Analyzer;
 using Loom.Analyzer.Symbols;
-using Loom.Common;
-using Loom.LIR.Objects;
-using Loom.Parser.AST;
-using Loom.Parser.AST.Rules.Default;
 
 namespace Loom.LIR.Generation;
 

@@ -1,7 +1,4 @@
-﻿using Loom.Parser.AST;
-using Loom.Parser.AST.Rules;
-
-namespace Loom.Parser.AST.Rules.Default;
+﻿namespace Loom.Parser.AST.Rules.Default;
 
 public record LocalDeclarationStatementNode(VariableDeclarationNode Variable) : StatementNode
 {

@@ -3,7 +3,6 @@ using Loom.Analyzer.Symbols;
 using Loom.Common;
 using Loom.LIR.Intrinsics;
 using Loom.LIR.Objects;
-using Loom.LIR.OpCodes;
 using Loom.Parser.AST;
 using Loom.Parser.AST.Rules.Default;
 

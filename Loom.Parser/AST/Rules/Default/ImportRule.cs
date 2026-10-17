@@ -1,8 +1,4 @@
-﻿using Loom.Parser.AST;
-using Loom.Parser.AST.Rules;
-using Loom.Parser.Tokenizer;
-
-using static Loom.Parser.Tokenizer.Token;
+﻿using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.AST.Rules.Default;
 

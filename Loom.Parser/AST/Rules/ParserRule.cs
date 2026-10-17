@@ -1,5 +1,4 @@
-﻿using Loom.Parser.AST;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.AST.Rules;

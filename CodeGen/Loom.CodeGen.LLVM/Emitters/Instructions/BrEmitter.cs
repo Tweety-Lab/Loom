@@ -1,4 +1,3 @@
-using LLVMSharp.Interop;
 using Loom.LIR;
 using Loom.LIR.OpCodes;
 
