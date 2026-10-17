@@ -11,8 +11,11 @@ public record UnsafeStatementNode(BlockNode Body) : StatementNode
 }
 
 [ParserRule]
-public class UnsafeStatementRule : ParserRule<UnsafeStatementNode>
+public class UnsafeStatementRule : StatementParserRule
 {
+    /// <inheritdoc/>
+    public override bool RequiresTerminator => false;
+
     /// <inheritdoc/>
     public UnsafeStatementRule(LoomParser parser) : base(parser) { }
 

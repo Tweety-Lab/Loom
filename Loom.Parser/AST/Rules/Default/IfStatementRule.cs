@@ -12,8 +12,11 @@ public record IfStatementNode(ExpressionNode Expression, BlockNode Body) : State
 }
 
 [ParserRule]
-public class IfStatementRule : ParserRule<IfStatementNode>
+public class IfStatementRule : StatementParserRule
 {
+    /// <inheritdoc/>
+    public override bool RequiresTerminator => false;
+
     /// <inheritdoc/>
     public IfStatementRule(LoomParser parser) : base(parser) { }
 

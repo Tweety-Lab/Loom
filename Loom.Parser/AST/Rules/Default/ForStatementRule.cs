@@ -12,8 +12,11 @@ public record ForStatementNode(StatementNode Initializer, ExpressionNode Conditi
 }
 
 [ParserRule]
-public class ForStatementRule : ParserRule<ForStatementNode>
+public class ForStatementRule : StatementParserRule
 {
+    /// <inheritdoc/>
+    public override bool RequiresTerminator => false;
+
     /// <inheritdoc/>
     public ForStatementRule(LoomParser parser) : base(parser) { }
 

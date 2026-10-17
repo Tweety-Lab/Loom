@@ -6,6 +6,18 @@ using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.AST.Rules.Default;
 
+/// <summary>
+/// Base class for rules that automatically get parsed as statements.
+/// </summary>
+public abstract class StatementParserRule : ParserRule<StatementNode>
+{
+    /// <summary> Whether the statement must be followed by a semicolon. </summary>
+    public virtual bool RequiresTerminator => true;
+
+    /// <inheritdoc/>
+    protected StatementParserRule(LoomParser parser) : base(parser) { }
+}
+
 public abstract record StatementNode() : ASTNode;
 
 public record ExpressionStatementNode(ExpressionNode Expression) : StatementNode
@@ -23,13 +35,12 @@ public class StatementRule : ParserRule<StatementNode>
     /// <inheritdoc/>
     public override StatementNode ParseNode()
     {
-        var current = Parser.Reader.Current.Type;
         var statement = ParseStatement();
 
-        if (current is not (TokenType.If or TokenType.While or TokenType.For or TokenType.Unsafe)) // TODO: Statements should probably own whether they have a terminator
+        if (statement.RequiresTerminator)
             Parser.Reader.Expect(TokenType.Semicolon); // ;
 
-        return statement;
+        return statement.Statement;
     }
 
     // TODO: Should we split this into BareStatement and Statement?
@@ -38,31 +49,21 @@ public class StatementRule : ParserRule<StatementNode>
     {
         var startToken = Parser.Reader.Current;
         var statement = ParseStatement();
-        statement.StartToken = startToken;
-        return statement;
+        statement.Statement.StartToken = startToken;
+        return statement.Statement;
     }
 
-    private StatementNode ParseStatement()
+    private (StatementNode Statement, bool RequiresTerminator) ParseStatement()
     {
-        if (TryRunRule<ReturnStatementRule, ReturnStatementNode>(out var returnStatement))
-            return returnStatement;
+        bool requiresTerminator = true;
+        foreach (var rule in Parser.GetRules<StatementParserRule>())
+            if (TryRunRule(rule, out var statement))
+            {
+                requiresTerminator = rule.RequiresTerminator;
+                return ((StatementNode)statement, requiresTerminator);
+            }
 
-        if (TryRunRule<UnsafeStatementRule, UnsafeStatementNode>(out var unsafeStatement))
-            return unsafeStatement;
-
-        if (TryRunRule<IfStatementRule, IfStatementNode>(out var ifStatement))
-            return ifStatement;
-
-        if (TryRunRule<WhileStatementRule, WhileStatementNode>(out var whileStatement))
-            return whileStatement;
-
-        if (TryRunRule<ForStatementRule, ForStatementNode>(out var forStatement))
-            return forStatement;
-
-        if (TryRunRule<LocalDeclarationStatementRule, LocalDeclarationStatementNode>(out var localDeclarationStatement))
-            return localDeclarationStatement;
-
-        return ParseExpressionOrAssignment();
+        return (ParseExpressionOrAssignment(), false);
     }
 
     private StatementNode ParseExpressionOrAssignment()

@@ -10,7 +10,7 @@ public record LocalDeclarationStatementNode(VariableDeclarationNode Variable) : 
 }
 
 [ParserRule]
-public class LocalDeclarationStatementRule : ParserRule<LocalDeclarationStatementNode>
+public class LocalDeclarationStatementRule : StatementParserRule
 {
     /// <inheritdoc/>
     public LocalDeclarationStatementRule(LoomParser parser) : base(parser) { }

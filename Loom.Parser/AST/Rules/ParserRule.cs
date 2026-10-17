@@ -39,13 +39,26 @@ public abstract class ParserRule<T> : IParserRule where T : ASTNode
     /// <returns> <see langword="true"/> if the rule ran without errors; otherwise, <see langword="false"/>. </returns>
     protected bool TryRunRule<TRule, TNode>([NotNullWhen(true)] out TNode? node) where TRule : ParserRule<TNode> where TNode : ASTNode
     {
+        if (TryRunRule(Parser.GetRule<TRule>(), out var result))
+        {
+            node = (TNode)result;
+            return true;
+        }
+
+        node = default;
+        return false;
+    }
+
+    /// <summary> Attempts a discovered rule, rolling back tokens and diagnostics if it does not apply. </summary>
+    protected bool TryRunRule(IParserRule rule, [NotNullWhen(true)] out ASTNode? node)
+    {
         var context = Parser.DiagnosticContext;
         int position = Parser.Reader.Position;
         int diagnostics = context?.Diagnostics.Count ?? 0;
 
         try
         {
-            node = Parser.GetRule<TRule>().Parse();
+            node = rule.ParseUntyped(Parser);
         }
         catch (ParseFailureException)
         {
@@ -55,10 +68,10 @@ public abstract class ParserRule<T> : IParserRule where T : ASTNode
             return false;
         }
 
-        if (context is not null && context.Diagnostics.Count > diagnostics)
+        if (node is null || (context is not null && context.Diagnostics.Count > diagnostics))
         {
             Parser.Reader.Position = position;
-            context.Rewind(diagnostics);
+            context?.Rewind(diagnostics);
             node = default!;
             return false;
         }

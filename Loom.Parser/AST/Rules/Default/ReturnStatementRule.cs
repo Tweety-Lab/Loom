@@ -10,7 +10,7 @@ public record ReturnStatementNode(ExpressionNode? Expression = null) : Statement
 }
 
 [ParserRule]
-public class ReturnStatementRule : ParserRule<ReturnStatementNode>
+public class ReturnStatementRule : StatementParserRule
 {
     /// <inheritdoc/>
     public ReturnStatementRule(LoomParser parser) : base(parser) { }

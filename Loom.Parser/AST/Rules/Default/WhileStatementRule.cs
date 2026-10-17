@@ -12,8 +12,11 @@ public record WhileStatementNode(ExpressionNode Expression, BlockNode Body) : St
 }
 
 [ParserRule]
-public class WhileStatementRule : ParserRule<WhileStatementNode>
+public class WhileStatementRule : StatementParserRule
 {
+    /// <inheritdoc/>
+    public override bool RequiresTerminator => false;
+
     /// <inheritdoc/>
     public WhileStatementRule(LoomParser parser) : base(parser) { }
 
