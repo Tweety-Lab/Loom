@@ -39,6 +39,12 @@ public class ModuleBlockRule : BlockRule
             return true;
         }
 
+        if (Parser.Reader.Peek(offset).Type == TokenType.Enum)
+        {
+            node = RunRule<EnumDeclarationRule, ASTNode>();
+            return true;
+        }
+
         if (TypeRule.IsTypeName(Parser.Reader.Peek(offset).Type))
         {
             offset = TypeRule.SkipType(Parser.Reader, offset);
