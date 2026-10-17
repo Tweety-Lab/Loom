@@ -27,6 +27,12 @@ public class ModuleBlockRule : BlockRule
             return true;
         }
 
+        if (Parser.Reader.Peek(offset).Type == TokenType.Interface)
+        {
+            node = RunRule<InterfaceDeclarationRule, ASTNode>();
+            return true;
+        }
+
         if (TypeRule.IsTypeName(Parser.Reader.Peek(offset).Type))
         {
             offset = TypeRule.SkipType(Parser.Reader, offset);

@@ -43,9 +43,7 @@ internal partial class MethodGenerator
         LIRType? selfType = owningType != null && !symbol.IsStatic ? new LIRPointerType(owningType.Type) : null;
 
         // A method of a generic type carries the type's parameters so that it is only emitted for its instantiations
-        var typeParameters = GetOwningTypeParameters(node) is { } owning
-            ? (IReadOnlyList<TypeParameterSymbol>)[.. owning, .. symbol.TypeParameters]
-            : null;
+        var typeParameters = GetOwningTypeParameters(node) is { } owning ? (IReadOnlyList<TypeParameterSymbol>)[.. owning, .. symbol.TypeParameters] : null;
 
         var funcType = ASTGenerator.BuildFunctionType(symbol, selfType, null, typeParameters);
 

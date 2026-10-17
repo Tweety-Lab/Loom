@@ -25,9 +25,7 @@ public class ClassDeclarationRule : ParserRule<ClassDeclarationNode>
 
         var className = Parser.Reader.Expect(TokenType.Identifier); // name
 
-        var typeParameters = Parser.Reader.Check(TokenType.Less)
-            ? RunRule<TypeParameterListRule, TypeParameterListNode>()
-            : new TypeParameterListNode([]);
+        var typeParameters = Parser.Reader.Check(TokenType.Less) ? RunRule<TypeParameterListRule, TypeParameterListNode>() : new TypeParameterListNode([]);
 
         BlockNode body = RunRule<TypeDeclarationBlockRule, BlockNode>();
 
