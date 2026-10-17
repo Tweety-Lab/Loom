@@ -2,5 +2,17 @@ import Standard::Memory;
 
 module Standard
 {
-	export attribute ExternType(Slice<char> Type);
+	export enum ExternType
+	{
+		/// @brief The definition of this extern comes from C source code.
+		C,
+
+		/// @brief The definition of this extern comes from C++ source code.
+		CPP,
+
+		/// @brief The definition of this extern comes from the Loom compiler.
+		Intrinsic
+	}
+
+	export attribute Extern(ExternType Type);
 }

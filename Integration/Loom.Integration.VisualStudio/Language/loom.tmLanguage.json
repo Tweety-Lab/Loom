@@ -112,6 +112,13 @@
             "1": { "name": "keyword.declaration.attribute.loom" },
             "2": { "name": "entity.name.type.attribute.loom" }
           }
+        },
+        {
+          "match": "\\b(enum)\\b(?:\\s+([A-Za-z_][A-Za-z0-9_]*))?",
+          "captures": {
+            "1": { "name": "keyword.declaration.enum.loom" },
+            "2": { "name": "entity.name.type.enum.loom" }
+          }
         }
       ]
     },
