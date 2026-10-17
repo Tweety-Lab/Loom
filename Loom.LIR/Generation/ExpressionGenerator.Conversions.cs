@@ -5,8 +5,6 @@ using Loom.Parser.AST.Rules.Default;
 
 namespace Loom.LIR.Generation;
 
-// TODO: Remove this
-// Partial class is a sign this class is getting to big
 internal partial class ExpressionGenerator
 {
     /// <summary> Emits a value with its implicit conversion to the required semantic type. </summary>
