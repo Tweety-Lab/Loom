@@ -13,7 +13,7 @@ public record ConstructorDeclarationNode(Token Name, ParameterListNode Parameter
 
 
 [ParserRule]
-public class ConstructorDeclarationRule : ParserRule<ConstructorDeclarationNode>
+public class ConstructorDeclarationRule : TypeMemberParserRule
 {
     /// <inheritdoc/>
     public ConstructorDeclarationRule(LoomParser parser) : base(parser) { }

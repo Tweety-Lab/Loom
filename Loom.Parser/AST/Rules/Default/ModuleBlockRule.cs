@@ -19,7 +19,7 @@ public class ModuleBlockRule : BlockRule
 
         if (Parser.Reader.Peek(offset).Type == TokenType.Struct)
         {
-            node = RunRule<StructDeclarationRule, StructDeclarationNode>();
+            node = RunRule<StructDeclarationRule, ASTNode>();
             return true;
         }
 
@@ -39,7 +39,7 @@ public class ModuleBlockRule : BlockRule
 
                 if (Parser.Reader.Peek(offset).Type == TokenType.LParen)
                 {
-                    node = RunRule<MethodDeclarationRule, MethodDeclarationNode>();
+                    node = RunRule<MethodDeclarationRule, ASTNode>();
                     return true;
                 }
             }

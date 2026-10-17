@@ -12,7 +12,7 @@ public record FieldDeclarationNode(List<Token> Modifiers, VariableDeclarationNod
 }
 
 [ParserRule]
-public class FieldDeclarationRule : ParserRule<FieldDeclarationNode>
+public class FieldDeclarationRule : TypeMemberParserRule
 {
     /// <inheritdoc/>
     public FieldDeclarationRule(LoomParser parser) : base(parser) { }

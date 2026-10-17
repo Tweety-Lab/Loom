@@ -12,7 +12,7 @@ public record DestructorDeclarationNode(Token Name, ParameterListNode Parameters
 }
 
 [ParserRule]
-public class DestructorDeclarationRule : ParserRule<DestructorDeclarationNode>
+public class DestructorDeclarationRule : TypeMemberParserRule
 {
     /// <inheritdoc/>
     public DestructorDeclarationRule(LoomParser parser) : base(parser) { }

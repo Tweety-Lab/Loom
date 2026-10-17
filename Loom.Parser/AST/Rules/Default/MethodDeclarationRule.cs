@@ -13,7 +13,7 @@ public record MethodDeclarationNode(TypeNode ReturnType, Token MethodName, Param
 
 
 [ParserRule]
-public class MethodDeclarationRule : ParserRule<MethodDeclarationNode>
+public class MethodDeclarationRule : TypeMemberParserRule
 {
     /// <inheritdoc/>
     public MethodDeclarationRule(LoomParser parser) : base(parser) { }

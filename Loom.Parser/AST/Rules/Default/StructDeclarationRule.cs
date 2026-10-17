@@ -13,7 +13,7 @@ public record StructDeclarationNode(Token Name, TypeParameterListNode TypeParame
 
 
 [ParserRule]
-public class StructDeclarationRule : ParserRule<StructDeclarationNode>
+public class StructDeclarationRule : TypeMemberParserRule
 {
     /// <inheritdoc/>
     public StructDeclarationRule(LoomParser parser) : base(parser) { }

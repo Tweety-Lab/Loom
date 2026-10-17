@@ -17,7 +17,7 @@ public record AccessorNode(Token AccessorType, BlockNode? Body) : ASTNode
 }
 
 [ParserRule]
-public class PropertyDeclarationRule : ParserRule<PropertyDeclarationNode>
+public class PropertyDeclarationRule : TypeMemberParserRule
 {
     /// <inheritdoc/>
     public PropertyDeclarationRule(LoomParser parser) : base(parser) { }
