@@ -1,0 +1,6 @@
+import Standard::Memory;
+
+module Standard
+{
+	export attribute ExternType(Slice<char> Type);
+}

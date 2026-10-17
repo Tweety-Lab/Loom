@@ -131,6 +131,7 @@ public class Token
         [Keyword("module")] Module,
         [Keyword("struct")] Struct,
         [Keyword("class")] Class,
+        [Keyword("attribute")] Attribute,
         [Keyword("interface")] Interface,
         [Keyword("import")] Import,
         [Keyword("unsafe")] Unsafe,

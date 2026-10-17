@@ -105,6 +105,13 @@
             "1": { "name": "keyword.declaration.class.loom" },
             "2": { "name": "entity.name.type.class.loom" }
           }
+        },
+        {
+          "match": "\\b(attribute)\\b(?:\\s+([A-Za-z_][A-Za-z0-9_]*))?",
+          "captures": {
+            "1": { "name": "keyword.declaration.attribute.loom" },
+            "2": { "name": "entity.name.type.attribute.loom" }
+          }
         }
       ]
     },
