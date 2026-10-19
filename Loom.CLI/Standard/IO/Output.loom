@@ -30,14 +30,14 @@ module Standard::IO
     export void print(Slice<char> s)
     {
         for (i32 i = 0; i < s.Length; i++)
-            print(s.ElementAt(i));
+            print(s[i]);
     }
 
 	/// @brief Prints a char vector to the console.
     export void print(ref Vector<char> v)
 	{
         for (i32 i = 0; i < v.Count; i++)
-			print(v.ElementAt(i));
+			print(v[i]);
 	}
 
 	/// @brief Prints a char to the console.

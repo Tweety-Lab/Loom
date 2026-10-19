@@ -48,6 +48,18 @@ public class InaccessibleSymbolAnalyzer : Analyzer
     public void Visit(LocalDeclarationStatementNode node) => CheckTypeAccess(node, node.Variable.Type.Base.Text);
 
     [Visitor]
+    public void Visit(ArrayAccessExpressionNode node)
+    {
+        if (Context.GetSymbol(node).Symbol is not MethodSymbol { Kind: MethodSymbol.MethodKind.Operator, Accessibility: MemberAccessibility.Private } method)
+            return;
+
+        var declaringType = Context.FirstAncestorOrSelf<ITypeDeclarationNode>(method.DeclaringNode!);
+        var usageType = Context.FirstAncestorOrSelf<ITypeDeclarationNode>(node);
+        if (declaringType != null && declaringType != usageType)
+            Context.DiagnosticContext?.Report(InaccessibleMemberDiagnostic, node.StartToken?.Location ?? node.Receiver.StartToken?.Location, "operator[]");
+    }
+
+    [Visitor]
     public void Visit(FieldDeclarationNode node) => CheckTypeAccess(node, node.Variable.Type.Base.Text);
 
     [Visitor]

@@ -41,6 +41,9 @@ internal class OwnershipWalker : ASTVisitor
     [Visitor]
     public void Visit(DestructorDeclarationNode node) => VisitFunction(node);
 
+    [Visitor]
+    public void Visit(OperatorDeclarationNode node) => VisitFunction(node);
+
     private void VisitFunction(ASTNode node)
     {
         states.Clear();
@@ -87,12 +90,25 @@ internal class OwnershipWalker : ASTVisitor
 
     [Visitor]
     public void Visit(CallExpressionNode node)
-    {
-        var parameters = Context.GetSymbol(node).As<MethodSymbol>()?.Parameters;
+        => VisitArguments(node.Arguments, Context.GetSymbol(node).As<MethodSymbol>()?.Parameters);
 
-        for (int index = 0; index < node.Arguments.Count; index++)
+    [Visitor]
+    public void Visit(ArrayAccessExpressionNode node)
+    {
+        if (Context.GetSymbol(node).Symbol is MethodSymbol { Kind: MethodSymbol.MethodKind.Operator } method)
+            VisitArguments([node.Receiver, node.Index], method.Parameters);
+        else
         {
-            var argument = node.Arguments[index];
+            UseWithoutMove(node.Receiver);
+            Dispatch(node.Index);
+        }
+    }
+
+    private void VisitArguments(IReadOnlyList<ExpressionNode> arguments, IReadOnlyList<ParameterSymbol>? parameters)
+    {
+        for (int index = 0; index < arguments.Count; index++)
+        {
+            var argument = arguments[index];
             var parameter = parameters is not null && index < parameters.Count ? parameters[index] : null;
 
             if (parameter is { IsBorrow: true })

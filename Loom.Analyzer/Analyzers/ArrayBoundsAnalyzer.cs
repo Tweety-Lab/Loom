@@ -15,6 +15,7 @@ public class ArrayBoundsAnalyzer : Analyzer
     public static Diagnostic InvalidIndexType = new(Diagnostic.DiagnosticLevel.Error, "Array indexes must be i32 values.");
     public static Diagnostic IndexOutOfBounds = new(Diagnostic.DiagnosticLevel.Error, "Array index {0} is outside the bounds of array '{1}' of size {2}.");
     public static Diagnostic TooManyElements = new(Diagnostic.DiagnosticLevel.Error, "Array literal with {0} elements is outside the bounds of array '{1}' of size {2}.");
+    public static Diagnostic IndexOperatorResultNotAssignable = new(Diagnostic.DiagnosticLevel.Error, "The result of operator[] cannot be assigned to.");
 
     [Visitor]
     public void Visit(ArrayAccessExpressionNode node)
@@ -23,6 +24,21 @@ public class ArrayBoundsAnalyzer : Analyzer
 
         if (!Context.ExpressionTypes.TryGetValue(node.Receiver, out var receiverType) || receiverType is not ArrayTypeSymbol array)
         {
+            if (OverloadResolver.DiagnoseIndexOperator(Context, node) is { } failure)
+            {
+                var diagnostic = failure == OverloadFailure.Ambiguous ? UnresolvedOverloadAnalyzer.AmbiguousOverload : UnresolvedOverloadAnalyzer.NoMatchingOverload;
+                Context.DiagnosticContext?.Report(diagnostic, node.StartToken?.Location ?? node.Receiver.StartToken?.Location, "operator[]", 2);
+                return;
+            }
+
+            if (Context.GetSymbol(node).Symbol is MethodSymbol { Kind: MethodSymbol.MethodKind.Operator })
+            {
+                if (Context.GetParent(node) is AssignmentStatementNode assignment && assignment.Target == node || Context.GetParent(node) is IncrementExpressionNode increment && increment.Target == node)
+                    Context.DiagnosticContext?.Report(IndexOperatorResultNotAssignable, node.StartToken?.Location ?? node.Receiver.StartToken?.Location);
+
+                return;
+            }
+
             Context.DiagnosticContext?.Report(NonArrayIndex, node.Receiver.StartToken?.Location, name);
             return;
         }

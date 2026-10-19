@@ -14,6 +14,17 @@ internal partial class ExpressionGenerator
         if (ResolveProperty(node) is { } property)
             return EmitPropertyAddress(property, node);
 
+        if (node is ArrayAccessExpressionNode access && context.AnalysisContext.GetSymbol(access).Symbol is MethodSymbol { Kind: MethodSymbol.MethodKind.Operator })
+        {
+            var value = EmitIndexOperatorCall(access);
+            if (value.Type is LIRPointerType)
+                return value;
+
+            var address = Generator.EmitAlloca(value.Type);
+            Generator.EmitStore(value, address);
+            return address;
+        }
+
         return node switch
         {
             IdentifierNameNode ident => EmitIdentifierAddress(ident),

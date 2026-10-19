@@ -45,7 +45,7 @@ internal partial class ExpressionGenerator
         CallExpressionNode call => EmitCall(call),
         ArrayLiteralNode literal => EmitArrayLiteral(literal),
         StringLiteralNode str => EmitStringLiteral(str),
-        ArrayAccessExpressionNode array => EmitVariableValue(array),
+        ArrayAccessExpressionNode array => context.AnalysisContext.GetSymbol(array).Symbol is MethodSymbol { Kind: MethodSymbol.MethodKind.Operator } ? EmitIndexOperatorCall(array) : EmitVariableValue(array),
         MemberAccessExpressionNode member => ResolveProperty(member) is { } memberProperty ? EmitPropertyGet(memberProperty, member, EmitPropertySelf(memberProperty, member)) : EmitVariableValue(member),
         InstanceCreationExpresssionNode creation => EmitInstanceCreation(creation),
         SizeOfExpressionNode sizeOf => EmitSizeOf(sizeOf),

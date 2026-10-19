@@ -8,6 +8,13 @@ internal partial class ExpressionGenerator
 {
     private LIRValue EmitAccessorCall(MethodSymbol accessor, LIRValue? self, params LIRValue[] arguments) => self == null ? Generator.EmitCall(GetCallTarget(accessor), arguments) : Generator.EmitCallInstanced(GetCallTarget(accessor), self, arguments);
 
+    private LIRValue EmitIndexOperatorCall(ArrayAccessExpressionNode node)
+    {
+        var method = context.AnalysisContext.GetSymbol(node).As<MethodSymbol>()
+            ?? throw new InvalidOperationException("Could not resolve operator[].");
+        return Generator.EmitCall(GetCallTarget(method), EmitArguments([node.Receiver, node.Index], method));
+    }
+
     private LIRValue EmitCall(CallExpressionNode node)
     {
         LIRValue? self = null;

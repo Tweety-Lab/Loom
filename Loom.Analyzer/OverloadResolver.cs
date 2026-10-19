@@ -30,6 +30,18 @@ internal enum MatchQuality
 /// </summary>
 internal static class OverloadResolver
 {
+    /// <summary> Finds static index operators on the receiver's type. </summary>
+    public static IReadOnlyList<MethodSymbol> IndexOperatorCandidates(AnalysisContext context, ArrayAccessExpressionNode node) => context.ExpressionTypes.TryGetValue(node.Receiver, out var type) ? type.Members.OfType<MethodSymbol>().Where(method => method is { Kind: MethodSymbol.MethodKind.Operator, Name: ".[]", IsStatic: true, Arity: 0 }).ToArray() : [];
+
+    /// <summary> Resolves receiver[index] as a static operator[](receiver, index) invocation. </summary>
+    public static SymbolInfo ResolveIndexOperator(AnalysisContext context, ArrayAccessExpressionNode node)
+    {
+        var candidates = IndexOperatorCandidates(context, node);
+        var call = new CallExpressionNode(node.Receiver, new TypeArgumentListNode([]), [node.Receiver, node.Index]);
+        var (best, tied) = Best(context, call, candidates);
+        return best == null || tied ? SymbolInfo.None : SymbolInfo.OfCandidates(candidates).Resolved(best);
+    }
+
     /// <summary> Resolves <paramref name="node"/> against every method its callee could name. </summary>
     public static SymbolInfo Resolve(AnalysisContext context, CallExpressionNode node) => Resolve(context, node, Candidates(context, node.Callee));
 
@@ -48,6 +60,9 @@ internal static class OverloadResolver
 
         return best == null || tied ? info : info.Resolved(Construct(context, node, best));
     }
+
+    /// <summary> Reports invalid or ambiguous static index operator invocations. </summary>
+    public static OverloadFailure? DiagnoseIndexOperator(AnalysisContext context, ArrayAccessExpressionNode node) => Diagnose(context, new CallExpressionNode(node.Receiver, new TypeArgumentListNode([]), [node.Receiver, node.Index]), IndexOperatorCandidates(context, node));
 
     /// <summary> Reports why a call resolved to no method, or <see langword="null"/> when it resolved to one. </summary>
     public static OverloadFailure? Diagnose(AnalysisContext context, CallExpressionNode node) => Diagnose(context, node, Candidates(context, node.Callee));

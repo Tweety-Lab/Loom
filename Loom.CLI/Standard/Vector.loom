@@ -63,12 +63,12 @@ module Standard
 		/// @brief Returns the element at the specified index.
 		/// @param index The index of the element to return.
 		/// @return The element at the specified index.
-		public unique T ElementAt(i32 index)
-		{
-			unsafe
-			{
-				return Unsafe.Read<T>(pointer + index * sizeof(T));
-			}
-		}
+        public static unique T operator[](Vector<T> slice, i32 index)
+        {
+            unsafe
+            {
+                return Unsafe.Read<T>(slice.pointer + index * sizeof(T));
+            }
+        }
 	}
 }

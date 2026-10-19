@@ -34,7 +34,7 @@ module Standard::Program
 
         unique Vector<i32> vec = [10, 3, 6, 64, 12];
         
-        return GetFieldFromBorrow(obj) + vec.ElementAt(2);
+        return GetFieldFromBorrow(obj) + vec[2];
     }
 
     /// @brief 'ref' is used to borrow a reference to an object without claiming ownership.

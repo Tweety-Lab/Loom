@@ -38,6 +38,9 @@ internal class TypeWalker : ASTWalker
         if (parent is ReturnStatementNode && Context.FirstAncestorOrSelf<OperatorDeclarationNode>(node) is { } op)
             return Context.GetSymbol(op).As<MethodSymbol>()?.ReturnType;
 
+        if (parent is ArrayAccessExpressionNode access && node == access.Index)
+            return ResolveArgumentType(access.Index, [access.Receiver, access.Index], OverloadResolver.IndexOperatorCandidates(Context, access));
+
         if (parent is CallExpressionNode call && node is ExpressionNode argument && call.Arguments.Contains(argument))
         {
             var arguments = call.TypeArguments.Select(type => TypeResolver.Resolve(Context, call, type)).ToArray();
@@ -159,7 +162,16 @@ internal class TypeWalker : ASTWalker
     public void Visit(ArrayAccessExpressionNode node)
     {
         if (TryGetArrayType(node.Receiver, out var array))
+        {
             Context.ExpressionTypes[node] = array.ElementType;
+            return;
+        }
+
+        var invocation = OverloadResolver.ResolveIndexOperator(Context, node);
+        Context.Bind(node, invocation);
+
+        if (invocation.Symbol is MethodSymbol { ReturnType: { } returnType })
+            Context.ExpressionTypes[node] = returnType;
     }
 
     [Visitor]

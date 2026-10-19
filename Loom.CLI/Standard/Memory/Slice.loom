@@ -8,18 +8,15 @@ module Standard::Memory
 
         iptr pointer = default;
 
-        /// @brief Returns the element at the given index.
-        public unique T ElementAt(i64 index)
+        /// @brief Returns the element at the specified index.
+		/// @param index The index of the element to return.
+		/// @return The element at the specified index.
+        public static unique T operator[](Slice<T> slice, i32 index)
         {
             unsafe
             {
-                return Unsafe.Read<T>(pointer + index * sizeof(T));
+                return Unsafe.Read<T>(slice.pointer + index * sizeof(T));
             }
-        }
-
-        public static unique T operator[](Slice<T> slice, i64 index)
-        {
-            return slice.ElementAt(index);
         }
     }
 }
