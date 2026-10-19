@@ -10,8 +10,7 @@ namespace Loom.Analyzer;
 /// </summary>
 internal static class TypeResolver
 {
-    private static readonly Diagnostic WrongArity = new(Diagnostic.DiagnosticLevel.Error,
-        "Type '{0}' expects {1} type argument(s), got {2}.");
+    private static readonly Diagnostic WrongArity = new(Diagnostic.DiagnosticLevel.Error, "Type '{0}' expects {1} type argument(s), got {2}.");
 
     /// <summary> Resolves a type by name in the scope of <paramref name="node"/>, or null if it could not be found. </summary>
     public static TypeSymbol? Resolve(AnalysisContext context, ASTNode node, string name)
@@ -57,6 +56,7 @@ internal static class TypeResolver
         context.Bind(type, resolved);
         return resolved;
     }
+
     /// <summary> Resolves arguments in their use-site scope, then constructs the semantic type. </summary>
     internal static TypeSymbol? Construct(AnalysisContext context, ASTNode node, TypeSymbol definition, IReadOnlyList<TypeNode> typeArguments)
     {

@@ -35,6 +35,9 @@ internal class TypeWalker : ASTWalker
         if (parent is ReturnStatementNode && Context.FirstAncestorOrSelf<MethodDeclarationNode>(node) is { } method)
             return Context.GetSymbol(method).As<MethodSymbol>()?.ReturnType;
 
+        if (parent is ReturnStatementNode && Context.FirstAncestorOrSelf<OperatorDeclarationNode>(node) is { } op)
+            return Context.GetSymbol(op).As<MethodSymbol>()?.ReturnType;
+
         if (parent is CallExpressionNode call && node is ExpressionNode argument && call.Arguments.Contains(argument))
         {
             var arguments = call.TypeArguments.Select(type => TypeResolver.Resolve(Context, call, type)).ToArray();

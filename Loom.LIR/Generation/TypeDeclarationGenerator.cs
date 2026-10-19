@@ -54,6 +54,10 @@ internal class TypeDeclarationGenerator
                     methodGenerator.GenerateMethodDeclaration(method, declaredType);
                     break;
 
+                case OperatorDeclarationNode op:
+                    methodGenerator.GenerateMethodDeclaration(op, declaredType);
+                    break;
+
                 case FieldDeclarationNode field:
                     GenerateTypeDeclarationField(declaredType, field);
                     break;
@@ -91,6 +95,10 @@ internal class TypeDeclarationGenerator
 
                 case MethodDeclarationNode method:
                     methodGenerator.GenerateMethodBody(method, declaredType);
+                    break;
+
+                case OperatorDeclarationNode op:
+                    methodGenerator.GenerateMethodBody(op, declaredType);
                     break;
 
                 case PropertyDeclarationNode property when context.AnalysisContext.GetSymbol(property).Symbol is PropertySymbol propertySymbol:

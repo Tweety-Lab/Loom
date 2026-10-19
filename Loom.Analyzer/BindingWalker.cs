@@ -24,6 +24,13 @@ internal class BindingWalker : ASTWalker
     }
 
     [Visitor]
+    public void Visit(OperatorDeclarationNode node)
+    {
+        if (Context.GetSymbol(node).Symbol is MethodSymbol symbol)
+            symbol.ReturnType = TypeResolver.Resolve(Context, node, node.ReturnType);
+    }
+
+    [Visitor]
     public void Visit(ParameterNode node)
     {
         if (Context.GetSymbol(node).Symbol is ParameterSymbol symbol)
@@ -66,14 +73,8 @@ internal class BindingWalker : ASTWalker
     }
 
     [Visitor]
-    public void Visit(IdentifierNameNode node)
-    {
-        // A name may be declared more than once when it is overloaded. Every declaration is bound as a candidate so
-        // that overload resolution can pick between them once the types of the arguments are known.
-        Context.Bind(node, SymbolInfo.OfCandidates(Lookup(node)));
-    }
+    public void Visit(IdentifierNameNode node) => Context.Bind(node, SymbolInfo.OfCandidates(Lookup(node)));
 
-    /// <summary> Resolves every <see cref="Symbol"/> the name of <paramref name="node"/> could refer to. </summary>
     private IEnumerable<Symbol> Lookup(IdentifierNameNode node)
     {
         // Search local scope

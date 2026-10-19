@@ -1,4 +1,5 @@
-﻿using Loom.Common.Diagnostics;
+﻿using Loom.Analyzer.Symbols;
+using Loom.Common.Diagnostics;
 using Loom.Parser.AST;
 using Loom.Parser.AST.Rules.Default;
 
@@ -15,7 +16,7 @@ public class InvalidStatementScopeAnalyzer : Analyzer
     [Visitor]
     public void Visit(StatementNode node)
     {
-        if (Context.FirstAncestorOrSelf<MethodDeclarationNode>(node) == null && Context.FirstAncestorOrSelf<ConstructorDeclarationNode>(node) == null && Context.FirstAncestorOrSelf<DestructorDeclarationNode>(node) == null)
+        if (Context.FirstAncestorOrSelf<MethodDeclarationNode>(node) == null && Context.FirstAncestorOrSelf<ConstructorDeclarationNode>(node) == null && Context.FirstAncestorOrSelf<DestructorDeclarationNode>(node) == null && Context.FirstAncestorOrSelf<ModuleNode>(node) == null && Context.FirstAncestorOrSelf<OperatorDeclarationNode>(node) == null)
             Context.DiagnosticContext?.Report(InvalidStatementScope, node.StartToken?.Location);
     }
 }

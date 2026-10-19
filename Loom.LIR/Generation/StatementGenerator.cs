@@ -115,7 +115,8 @@ internal partial class StatementGenerator
 
     private void EmitReturn(ReturnStatementNode node)
     {
-        var method = context.AnalysisContext.FirstAncestorOrSelf<MethodDeclarationNode>(node);
+        ASTNode? method = context.AnalysisContext.FirstAncestorOrSelf<MethodDeclarationNode>(node)
+            ?? (ASTNode?)context.AnalysisContext.FirstAncestorOrSelf<OperatorDeclarationNode>(node);
         var returnType = method == null ? null : context.AnalysisContext.GetSymbol(method).As<MethodSymbol>()?.ReturnType;
         var result = node.Expression == null ? null : EmitValue(node.Expression, returnType);
 

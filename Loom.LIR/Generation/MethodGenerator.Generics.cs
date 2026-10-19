@@ -42,7 +42,7 @@ internal partial class MethodGenerator
     }
 
     // The type parameters of the generic type enclosing 'node', or null when it is not declared inside a generic type
-    private IReadOnlyList<TypeParameterSymbol>? GetOwningTypeParameters(MethodDeclarationNode node)
+    private IReadOnlyList<TypeParameterSymbol>? GetOwningTypeParameters(ASTNode node)
     {
         var typeNode = context.AnalysisContext.FirstAncestorOrSelf<ITypeDeclarationNode>(node);
 

@@ -9,8 +9,7 @@ using Loom.Parser.AST.Rules.Default;
 namespace Loom.LIR.Generation;
 
 /// <summary>
-/// Generates the Loom Intermediate Representation (LIR) of the methods declared by a program, whether they are declared
-/// inside a type or outside of one.
+/// Generates the Loom Intermediate Representation (LIR) of the methods declared by a program, whether they are declared inside a type or outside of one.
 /// </summary>
 internal partial class MethodGenerator
 {
@@ -27,13 +26,17 @@ internal partial class MethodGenerator
     /// <summary> Declares the signature of the method declared by <paramref name="node"/>. </summary>
     /// <param name="node"> The node declaring the method. </param>
     /// <param name="owningType"> The type owning the method, or null when the method is declared outside of a type. </param>
-    public void GenerateMethodDeclaration(MethodDeclarationNode node, LIRTypeDeclaration? owningType = null)
+    public void GenerateMethodDeclaration(MethodDeclarationNode node, LIRTypeDeclaration? owningType = null) => GenerateMethodDeclaration((ASTNode)node, owningType);
+
+    public void GenerateMethodDeclaration(OperatorDeclarationNode node, LIRTypeDeclaration owningType) => GenerateMethodDeclaration((ASTNode)node, owningType);
+
+    private void GenerateMethodDeclaration(ASTNode node, LIRTypeDeclaration? owningType)
     {
         MethodSymbol? symbol = (MethodSymbol?)context.AnalysisContext.GetSymbol(node).Symbol;
 
         if (symbol == null)
         {
-            Console.WriteLine($"Could not find symbol for {node.MethodName}!");
+            Console.WriteLine($"Could not find method symbol for declaration at {node.StartToken?.Location}!");
             return;
         }
 
@@ -58,13 +61,17 @@ internal partial class MethodGenerator
     /// <summary> Emits the body of the method declared by <paramref name="node"/>. </summary>
     /// <param name="node"> The node declaring the method. </param>
     /// <param name="owningType"> The type owning the method, or null when the method is declared outside of a type. </param>
-    public void GenerateMethodBody(MethodDeclarationNode node, LIRTypeDeclaration? owningType = null)
+    public void GenerateMethodBody(MethodDeclarationNode node, LIRTypeDeclaration? owningType = null) => GenerateMethodBody((ASTNode)node, owningType);
+
+    public void GenerateMethodBody(OperatorDeclarationNode node, LIRTypeDeclaration owningType) => GenerateMethodBody((ASTNode)node, owningType);
+
+    private void GenerateMethodBody(ASTNode node, LIRTypeDeclaration? owningType)
     {
         MethodSymbol? symbol = (MethodSymbol?)context.AnalysisContext.GetSymbol(node).Symbol;
 
         if (symbol == null)
         {
-            Console.WriteLine($"Could not find symbol for {node.MethodName}!");
+            Console.WriteLine($"Could not find method symbol for declaration at {node.StartToken?.Location}!");
             return;
         }
 
@@ -94,8 +101,10 @@ internal partial class MethodGenerator
     /// <summary> Emits the body of a member of an instantiated generic type. </summary>
     public void GenerateMethodBody(MethodSymbol symbol, LIRTypeDeclaration owningType, TypeSubstitution substitution, TypeSymbol ownerType)
     {
-        if (symbol.DeclaringNode is not MethodDeclarationNode node)
+        if (symbol.DeclaringNode is not (MethodDeclarationNode or OperatorDeclarationNode))
             return;
+
+        var node = symbol.DeclaringNode;
 
         LIRFunction function = GetFunction(LinkageNameResolver.LinkageName(symbol), owningType);
 
@@ -108,11 +117,18 @@ internal partial class MethodGenerator
         GenerateBody(node, function, substitution, ownerType);
     }
 
-    private void GenerateBody(MethodDeclarationNode node, LIRFunction function, TypeSubstitution? substitution, TypeSymbol? ownerType = null)
+    private void GenerateBody(ASTNode node, LIRFunction function, TypeSubstitution? substitution, TypeSymbol? ownerType = null)
     {
+        var body = node switch
+        {
+            MethodDeclarationNode method => method.Body,
+            OperatorDeclarationNode op => op.Body,
+            _ => throw new InvalidOperationException($"Unsupported method declaration: {node.GetType().Name}.")
+        };
+
         StatementGenerator statementGen = new(context, unit, function, this, substitution, ownerType);
 
-        foreach (var content in node.Body?.Contents ?? Enumerable.Empty<ASTNode>())
+        foreach (var content in body?.Contents ?? Enumerable.Empty<ASTNode>())
             if (content is StatementNode statementNode)
                 statementGen.EmitStatement(statementNode);
 
@@ -127,7 +143,6 @@ internal partial class MethodGenerator
         EmitImplicitReturn(function);
     }
 
-    /// <summary> Gets a method's substituted function operand without materializing its body. </summary>
     public LIRValue GetMethodReference(MethodSymbol method)
     {
         string name = LinkageNameResolver.LinkageName(method);

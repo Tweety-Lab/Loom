@@ -162,10 +162,43 @@ internal class DeclarationWalker : ASTVisitor
         {
             ContainingType = CurrentSymbol as TypeSymbol,
             ReturnType = CurrentTable.Lookup("void")?.OfType<TypeSymbol>().FirstOrDefault(),
-            Accessibility = MemberAccessibility.Private,
+            Accessibility = MemberAccessibility.Public,
             DeclaringNode = node,
             FullyQualifiedName = BuildQualifiedName(".dtor")
         };
+
+        CurrentTable.Define(symbol);
+
+        if (CurrentSymbol is TypeSymbol type)
+            type.Members = [.. type.Members, symbol];
+
+        WithScope(node, () => VisitChildren(node), symbol);
+    }
+
+    [Visitor]
+    public void Visit(OperatorDeclarationNode node)
+    {
+        var symbol = new MethodSymbol($".{node.Operator.Text}", MethodSymbol.MethodKind.Operator)
+        {
+            ContainingType = CurrentSymbol as TypeSymbol,
+            IsStatic = node.HasModifier(Parser.Tokenizer.Token.TokenType.Static),
+            IsExported = node.HasModifier(Parser.Tokenizer.Token.TokenType.Export),
+            IsExtern = node.HasModifier(Parser.Tokenizer.Token.TokenType.Extern)
+        };
+
+        if (node.ReturnType.HasModifier(Parser.Tokenizer.Token.TokenType.Unique))
+            symbol.ReturnPointerType = PointerType.Unique;
+
+        // TODO:
+        // Non member methods should be MemberAccessibility.None
+        if (node.HasModifier(Parser.Tokenizer.Token.TokenType.Public))
+            symbol.Accessibility = MemberAccessibility.Public;
+        else
+            symbol.Accessibility = MemberAccessibility.Private;
+
+        symbol.DeclaringNode = node;
+
+        symbol.FullyQualifiedName = BuildQualifiedName($".{node.Operator.Text}");
 
         CurrentTable.Define(symbol);
 
