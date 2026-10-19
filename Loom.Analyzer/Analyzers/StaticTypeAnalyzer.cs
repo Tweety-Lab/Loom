@@ -14,6 +14,35 @@ public class StaticTypeAnalyzer : Analyzer
 {
     public static Diagnostic InstansiatedStaticType = new(Diagnostic.DiagnosticLevel.Error, "Cannot instantiate static type '{0}'.");
     public static Diagnostic InstanceMemberInStaticType = new(Diagnostic.DiagnosticLevel.Error, "Cannot declare instance member '{0}' in static type '{1}'.");
+    public static Diagnostic InstanceMemberRequiresReceiver = new(Diagnostic.DiagnosticLevel.Error, "Cannot access instance member '{0}' in a static function.");
+
+    [Visitor]
+    public void Visit(IdentifierNameNode node)
+    {
+        var parent = Context.GetParent(node);
+
+        if (parent is MemberAccessExpressionNode member && member.Name == node)
+            return;
+
+        var symbol = parent is CallExpressionNode call && call.Callee == node ? Context.GetSymbol(call).Symbol : Context.GetSymbol(node).Symbol;
+
+        if (!(symbol is FieldSymbol or PropertySymbol { IsStatic: false } or MethodSymbol { IsStatic: false, ContainingType: not null }))
+            return;
+
+        for (var enclosing = parent; enclosing != null; enclosing = Context.GetParent(enclosing))
+        {
+            if (enclosing is MethodDeclarationNode or OperatorDeclarationNode or ConstructorDeclarationNode or DestructorDeclarationNode && Context.GetSymbol(enclosing).Symbol is MethodSymbol function)
+            {
+                if (function.IsStatic)
+                    Context.DiagnosticContext?.Report(InstanceMemberRequiresReceiver, node.StartToken?.Location, symbol!.Name);
+
+                return;
+            }
+
+            if (enclosing is ITypeDeclarationNode)
+                return;
+        }
+    }
 
     [Visitor]
     public void Visit(InstanceCreationExpresssionNode node)
