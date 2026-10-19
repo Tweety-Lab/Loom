@@ -27,7 +27,7 @@
     <None Update="Standard\IO\Output.loom">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Standard\Memory\DefaultAllocator.loom">
+    <None Update="Standard\Memory\IAllocator.loom">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Standard\Memory\Slice.loom">

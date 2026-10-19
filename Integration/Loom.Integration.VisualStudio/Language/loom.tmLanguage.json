@@ -115,6 +115,13 @@
           }
         },
         {
+          "match": "\\b(interface)\\b(?:\\s+([A-Za-z_][A-Za-z0-9_]*))?",
+          "captures": {
+            "1": { "name": "keyword.declaration.interface.loom" },
+            "2": { "name": "entity.name.type.interface.loom" }
+          }
+        },
+        {
           "match": "\\b(attribute)\\b(?:\\s+([A-Za-z_][A-Za-z0-9_]*))?",
           "captures": {
             "1": { "name": "keyword.declaration.attribute.loom" },
