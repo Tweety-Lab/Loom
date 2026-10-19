@@ -99,8 +99,7 @@ module Test
     [InlineData(STATIC_CLASS_WITH_STATIC_MEMBERS)]
     [InlineData(INSTANCE_CLASS_WITH_INSTANCE_MEMBERS)]
     [InlineData(STATIC_STRUCT_IS_NOT_INSTANTIABLE, "Cannot instantiate static type 'Marker'.")]
-    public void Analyze_StaticTypeRules_ReportExpectedDiagnostics(string source, params string[] expectedDiagnostics)
-        => Assert.Equal(expectedDiagnostics, StaticTypeDiagnostics(source));
+    public void Analyze_StaticTypeRules_ReportExpectedDiagnostics(string source, params string[] expectedDiagnostics) => Assert.Equal(expectedDiagnostics, StaticTypeDiagnostics(source));
 
     private static CompilationContext ParseAndAnalyze(string source)
     {
