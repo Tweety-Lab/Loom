@@ -2,7 +2,9 @@ using System.Collections.Immutable;
 
 namespace Loom.Analyzer.Symbols;
 
-/// <summary> A method paired with its own generic arguments and its containing type's substitution. </summary>
+/// <summary>
+/// A method paired with its own generic arguments and its containing type's substitution.
+/// </summary>
 public sealed class ConstructedMethodSymbol : SubstitutedMethodSymbol
 {
     /// <inheritdoc/>

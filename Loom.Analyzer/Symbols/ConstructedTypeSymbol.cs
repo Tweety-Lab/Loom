@@ -2,7 +2,9 @@ using System.Collections.Immutable;
 
 namespace Loom.Analyzer.Symbols;
 
-/// <summary> A named type definition paired with immutable, possibly open, generic arguments. </summary>
+/// <summary>
+/// A named type definition paired with immutable, possibly open, generic arguments.
+/// </summary>
 public sealed class ConstructedTypeSymbol : TypeSymbol
 {
     private readonly Dictionary<Symbol, Symbol> members = [];

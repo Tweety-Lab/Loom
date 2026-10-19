@@ -27,6 +27,12 @@ public sealed class ModifierAttribute : Attribute
 public sealed class TypeAttribute : Attribute { }
 
 /// <summary>
+/// Marks a <see cref="Token.TokenType"/> as an overloadable operator.
+/// </summary>
+[AttributeUsage(AttributeTargets.Field)]
+public sealed class OperatorAttribute : Attribute { }
+
+/// <summary>
 /// Marks a <see cref="Token.TokenType"/> as a keyword.
 /// </summary>
 [AttributeUsage(AttributeTargets.Field)]
@@ -94,34 +100,34 @@ public class Token
         [Character('{')] LBrace,
         [Character('}')] RBrace,
 
-        [Character('[')] LBracket,
+        [Character('['), Operator] LBracket,
         [Character(']')] RBracket,
 
         [Character('(')] LParen,
         [Character(')')] RParen,
 
         [Character('=')] Equals,
-        [Character('+')] Plus,
-        [Character('-')] Minus,
-        [Character('*')] Star,
-        [Character('/')] Slash,
+        [Character('+'), Operator] Plus,
+        [Character('-'), Operator] Minus,
+        [Character('*'), Operator] Star,
+        [Character('/'), Operator] Slash,
         [Character('\\')] BackSlash,
 
         [Character('!')] Exclamation,
-        [Character('<')] Less,
-        [Character('>')] Greater,
+        [Character('<'), Operator] Less,
+        [Character('>'), Operator] Greater,
 
         [Character('.')] Period,
 
-        [MultiCharacter('=', '=')] EqualEqual,
-        [MultiCharacter('!', '=')] NotEqual,
-        [MultiCharacter('<', '=')] LessEqual,
-        [MultiCharacter('>', '=')] GreaterEqual,
+        [MultiCharacter('=', '='), Operator] EqualEqual,
+        [MultiCharacter('!', '='), Operator] NotEqual,
+        [MultiCharacter('<', '='), Operator] LessEqual,
+        [MultiCharacter('>', '='), Operator] GreaterEqual,
 
         [MultiCharacter(':', ':')] ColonColon,
 
-        [MultiCharacter('+', '+')] PlusPlus,
-        [MultiCharacter('-', '-')] MinusMinus,
+        [MultiCharacter('+', '+'), Operator] PlusPlus,
+        [MultiCharacter('-', '-'), Operator] MinusMinus,
 
         [Character(',')] Comma,
         [Character(';')] Semicolon,
@@ -134,6 +140,7 @@ public class Token
         [Keyword("enum")] Enum,
         [Keyword("attribute")] Attribute,
         [Keyword("interface")] Interface,
+        [Keyword("operator")] Operator,
         [Keyword("import")] Import,
         [Keyword("unsafe")] Unsafe,
 

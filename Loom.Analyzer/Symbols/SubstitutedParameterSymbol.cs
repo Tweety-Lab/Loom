@@ -1,6 +1,8 @@
 namespace Loom.Analyzer.Symbols;
 
-/// <summary> A parameter signature under a type or method substitution. </summary>
+/// <summary>
+/// A parameter signature under a type or method substitution.
+/// </summary>
 internal sealed class SubstitutedParameterSymbol(ParameterSymbol definition, TypeSubstitution substitution) : ParameterSymbol(definition)
 {
     /// <inheritdoc/>

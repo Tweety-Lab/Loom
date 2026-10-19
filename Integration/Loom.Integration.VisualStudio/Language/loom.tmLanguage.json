@@ -86,6 +86,14 @@
     "declarations": {
       "patterns": [
         {
+          "comment": "Operator declarations, including paired index and call operators. The following '(' starts the parameter list.",
+          "match": "\\b(operator)\\b\\s*(\\[\\s*\\]|\\(\\s*\\)|\\+\\+|--|==|!=|<=|>=|[+\\-*/!~<>])(?=\\s*\\()",
+          "captures": {
+            "1": { "name": "keyword.declaration.operator.loom" },
+            "2": { "name": "entity.name.function.operator.loom" }
+          }
+        },
+        {
           "match": "\\b(module|import)\\b(?:\\s+([A-Za-z_][A-Za-z0-9_.]*))?",
           "captures": {
             "1": { "name": "keyword.declaration.module.loom" },
@@ -133,6 +141,10 @@
 
     "keywords": {
       "patterns": [
+        {
+          "name": "keyword.declaration.operator.loom",
+          "match": "\\boperator\\b"
+        },
         {
           "name": "keyword.control.loom",
           "match": "\\b(?:if|else|while|for|break|continue|return)\\b"
@@ -231,7 +243,7 @@
     "type-annotation": {
       "comment": "Type followed by a name: 'Foo x', 'Foo* x', 'Foo name(' ... Keywords are matched earlier so they never reach this rule.",
       "name": "entity.name.type.loom",
-      "match": "\\b[A-Za-z_][A-Za-z0-9_]*(?=\\*{0,3}\\s+[A-Za-z_][A-Za-z0-9_]*\\s*[=;(),<\\[{])"
+      "match": "\\b[A-Za-z_][A-Za-z0-9_]*(?=\\*{0,3}\\s+(?:operator\\b|[A-Za-z_][A-Za-z0-9_]*\\s*[=;(),<\\[{]))"
     },
 
     "property": {
@@ -249,7 +261,7 @@
       "patterns": [
         {
           "name": "keyword.operator.loom",
-          "match": "==|!=|<=|>=|\\+=|-=|\\*=|/=|%=|&&|\\|\\||[=+\\-*/%<>!&|]"
+          "match": "\\+\\+|--|==|!=|<=|>=|\\+=|-=|\\*=|/=|%=|&&|\\|\\||[=+\\-*/%<>!~&|]"
         },
         {
           "name": "punctuation.accessor.loom",

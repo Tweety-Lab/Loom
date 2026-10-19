@@ -1,6 +1,8 @@
 namespace Loom.Analyzer.Symbols;
 
-/// <summary> A method signature viewed through a substitution; its source body remains on the definition. </summary>
+/// <summary>
+/// A method signature viewed through a substitution; its source body remains on the definition.
+/// </summary>
 public class SubstitutedMethodSymbol : MethodSymbol
 {
     /// <inheritdoc/>

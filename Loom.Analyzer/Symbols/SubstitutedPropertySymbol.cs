@@ -1,6 +1,8 @@
 namespace Loom.Analyzer.Symbols;
 
-/// <summary> A property whose field and accessors share the containing type's member projections. </summary>
+/// <summary>
+/// A property whose field and accessors share the containing type's member projections.
+/// </summary>
 internal sealed class SubstitutedPropertySymbol(PropertySymbol definition, ConstructedTypeSymbol containingType) : PropertySymbol(definition, containingType)
 {
     /// <inheritdoc/>

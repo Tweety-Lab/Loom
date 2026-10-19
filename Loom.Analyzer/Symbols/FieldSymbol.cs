@@ -1,6 +1,8 @@
 namespace Loom.Analyzer.Symbols;
 
-/// <summary> A field declaration or a substituted view of its type. </summary>
+/// <summary>
+/// A field declaration or a substituted view of its type.
+/// </summary>
 public class FieldSymbol : MemberSymbol
 {
     /// <summary> The resolved type. </summary>

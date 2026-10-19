@@ -1,6 +1,8 @@
 namespace Loom.Analyzer.Symbols;
 
-/// <summary> A declaration with positional type parameters and a possibly substituted set of arguments. </summary>
+/// <summary>
+/// A declaration with positional type parameters and a possibly substituted set of arguments.
+/// </summary>
 public interface IGenericSymbol
 {
     /// <summary> The type parameters introduced by this declaration, in ordinal order. </summary>

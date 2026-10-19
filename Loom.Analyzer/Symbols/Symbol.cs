@@ -2,7 +2,9 @@ using Loom.Parser.AST;
 
 namespace Loom.Analyzer.Symbols;
 
-/// <summary> A semantic declaration or a substituted view of one. Symbols have reference identity. </summary>
+/// <summary>
+/// A semantic declaration or a substituted view of one. Symbols have reference identity.
+/// </summary>
 public abstract class Symbol(string name)
 {
     /// <summary> The unqualified name of this symbol. </summary>

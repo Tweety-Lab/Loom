@@ -1,6 +1,8 @@
 namespace Loom.Analyzer.Symbols;
 
-/// <summary> A property declaration with its backing field and accessors. </summary>
+/// <summary>
+/// A property declaration with its backing field and accessors.
+/// </summary>
 public class PropertySymbol : MemberSymbol
 {
     /// <summary> The resolved type. </summary>

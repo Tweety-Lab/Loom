@@ -1,6 +1,8 @@
 namespace Loom.Analyzer.Symbols;
 
-/// <summary> A fixed-size array whose element type may still contain type parameters. </summary>
+/// <summary>
+/// A fixed-size array.
+/// </summary>
 public sealed class ArrayTypeSymbol : TypeSymbol
 {
     /// <summary> The element type. </summary>

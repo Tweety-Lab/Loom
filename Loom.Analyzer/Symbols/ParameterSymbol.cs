@@ -1,6 +1,8 @@
 namespace Loom.Analyzer.Symbols;
 
-/// <summary> A parameter declaration or a substituted view of its type. </summary>
+/// <summary>
+/// A parameter declaration or a substituted view of its type.
+/// </summary>
 public class ParameterSymbol : Symbol
 {
     /// <summary> The resolved type. </summary>

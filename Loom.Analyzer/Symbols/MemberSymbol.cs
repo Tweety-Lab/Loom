@@ -1,6 +1,8 @@
 namespace Loom.Analyzer.Symbols;
 
-/// <summary> A method, field, or property declared by a type. </summary>
+/// <summary>
+/// A method, field, or property declared by a type.
+/// </summary>
 public abstract class MemberSymbol : Symbol, IAccessibleSymbol
 {
     /// <summary> The type through which this member is viewed, or null for a module-level method. </summary>

@@ -2,7 +2,9 @@ using System.Collections.Immutable;
 
 namespace Loom.Analyzer.Symbols;
 
-/// <summary> A method declaration or a substituted view of its signature. </summary>
+/// <summary>
+/// A method declaration or a substituted view of its signature.
+/// </summary>
 public class MethodSymbol : MemberSymbol, IExportableSymbol, IGenericSymbol
 {
     private readonly SymbolConstructionCache<ConstructedMethodSymbol> constructions = new();
@@ -85,6 +87,7 @@ public class MethodSymbol : MemberSymbol, IExportableSymbol, IGenericSymbol
         Constructor,
         Destructor,
         Accessor,
+        Operator,
         Method
     }
 }
