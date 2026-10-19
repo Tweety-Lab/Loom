@@ -169,52 +169,25 @@ module Standard::Program
 }
 ";
 
-    [Fact]
-    public void Analyze_OverloadedByParameterType_ResolvesEachCallToItsOwnOverload()
+    [Theory]
+    [InlineData(OVERLOADED_BY_PARAMETER_TYPE, ".char", ".i32", ".Test::Point")]
+    [InlineData(OVERLOADED_BY_ARITY, ".i32_i32")]
+    [InlineData(OVERLOADED_MEMBER, ".char", ".i32")]
+    [InlineData(GENERIC_AMONG_OVERLOADS, ".char", ".i32", ".i32")]
+    [InlineData(EARLIER_ARGUMENT_DECIDES, ".i32_i64")]
+    public void Analyze_Overloads_ResolveExpectedSignatures(string source, params string[] expectedSignatures)
     {
-        var context = ParseAndAnalyze(OVERLOADED_BY_PARAMETER_TYPE);
+        var context = ParseAndAnalyze(source);
 
-        Assert.Equal([".char", ".i32", ".Test::Point"], InvokedSignatures(context));
-    }
-
-    [Fact]
-    public void Analyze_OverloadedByArity_ResolvesTheCallTakingThatManyArguments()
-    {
-        var context = ParseAndAnalyze(OVERLOADED_BY_ARITY);
-
-        Assert.Equal([".i32_i32"], InvokedSignatures(context));
-    }
-
-    [Fact]
-    public void Analyze_NoMatchingOverload_ReportsNoMatchingOverload() => Assert.Equal(["No overload of 'log' accepts 3 argument(s)."], OverloadDiagnostics(NO_MATCHING_OVERLOAD));
-
-    [Fact]
-    public void Analyze_EquallyApplicableOverloads_ReportAmbiguity() => Assert.Equal(["The call to 'log' is ambiguous."], OverloadDiagnostics(AMBIGUOUS_OVERLOAD));
-
-    [Fact]
-    public void Analyze_OverloadedMember_ResolvesByTheTypeOfTheReceiver()
-    {
-        var context = ParseAndAnalyze(OVERLOADED_MEMBER);
-
-        Assert.Equal([".char", ".i32"], InvokedSignatures(context));
-    }
-
-    [Fact]
-    public void Analyze_Overloads_AreCheckedAgainstTheOverloadTheyResolveTo()
-    {
-        var context = ParseAndAnalyze(GENERIC_AMONG_OVERLOADS);
-
-        Assert.Equal([".char", ".i32", ".i32"], InvokedSignatures(context));
+        Assert.Equal(expectedSignatures, InvokedSignatures(context));
         Assert.DoesNotContain(context.DiagnosticContext.Diagnostics, diagnostic => diagnostic.Message.Contains("implicitly cast"));
     }
 
-    [Fact]
-    public void Analyze_EquallyGoodMatchesInTotal_AreBrokenByTheFirstArgument()
-    {
-        var context = ParseAndAnalyze(EARLIER_ARGUMENT_DECIDES);
-
-        Assert.Equal([".i32_i64"], InvokedSignatures(context));
-    }
+    [Theory]
+    [InlineData(NO_MATCHING_OVERLOAD, "No overload of 'log' accepts 3 argument(s).")]
+    [InlineData(AMBIGUOUS_OVERLOAD, "The call to 'log' is ambiguous.")]
+    public void Analyze_InvalidOverloads_ReportExpectedDiagnostics(string source, params string[] expectedDiagnostics)
+        => Assert.Equal(expectedDiagnostics, OverloadDiagnostics(source));
 
     [Fact]
     public void Analyze_Overloads_ShareAFullyQualifiedNameButNotALinkageName()
