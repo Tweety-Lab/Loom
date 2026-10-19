@@ -1,5 +1,11 @@
 module Standard::Memory
 {
+	export interface IAllocator
+	{
+		iptr Allocate(i64 size);
+		void Free(iptr address);
+	}
+
 	extern iptr malloc(i64 size);
 	extern void free(iptr address);
 

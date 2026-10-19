@@ -85,6 +85,7 @@ public class TypeSymbol : Symbol, IExportableSymbol, IGenericSymbol
         Char,
         Struct,
         Class,
+        Interface,
         TypeParameter
     }
 }

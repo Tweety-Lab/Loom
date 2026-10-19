@@ -37,10 +37,10 @@ public class InaccessibleSymbolAnalyzer : Analyzer
         if (accessibility != MemberAccessibility.Private)
             return;
 
-        var declaringStruct = Context.FirstAncestorOrSelf<StructDeclarationNode>(member.DeclaringNode!);
-        var usageStruct = Context.FirstAncestorOrSelf<StructDeclarationNode>(node);
+        var declaringType = Context.FirstAncestorOrSelf<ITypeDeclarationNode>(member.DeclaringNode!);
+        var usageType = Context.FirstAncestorOrSelf<ITypeDeclarationNode>(node);
 
-        if (declaringStruct != null && declaringStruct != usageStruct)
+        if (declaringType != null && declaringType != usageType)
             Context.DiagnosticContext?.Report(InaccessibleMemberDiagnostic, node.StartToken?.Location, member.Name);
     }
 

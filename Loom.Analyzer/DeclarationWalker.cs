@@ -56,7 +56,8 @@ internal class DeclarationWalker : ASTVisitor
 
         // TODO:
         // Non member methods should be MemberAccessibility.None
-        if (node.HasModifier(Parser.Tokenizer.Token.TokenType.Public))
+        if (node.HasModifier(Parser.Tokenizer.Token.TokenType.Public) ||
+            (symbol.ContainingType?.KnownType == TypeSymbol.DefaultType.Interface && !node.HasModifier(Parser.Tokenizer.Token.TokenType.Private)))
             symbol.Accessibility = MemberAccessibility.Public;
         else
             symbol.Accessibility = MemberAccessibility.Private;
@@ -240,6 +241,21 @@ internal class DeclarationWalker : ASTVisitor
     }
 
     [Visitor]
+    public void Visit(InterfaceDeclarationNode node)
+    {
+        var symbol = new TypeSymbol(node.Name.Text, TypeSymbol.DefaultType.Interface);
+        symbol.FullyQualifiedName = BuildQualifiedName(node.Name.Text);
+        symbol.IsExported = node.HasModifier(Parser.Tokenizer.Token.TokenType.Export);
+        symbol.DeclaringNode = node;
+        symbol.IsValueType = false;
+        symbol.IsStatic = false;
+
+        CurrentTable.Define(symbol);
+
+        WithScope(node, () => VisitChildren(node), symbol);
+    }
+
+    [Visitor]
     public void Visit(FieldDeclarationNode node)
     {
         var symbol = new FieldSymbol(node.Variable.Name.Text);
@@ -269,16 +285,17 @@ internal class DeclarationWalker : ASTVisitor
         symbol.IsStatic = node.HasModifier(Parser.Tokenizer.Token.TokenType.Static);
         symbol.DeclaringNode = node;
 
-        if (node.HasModifier(Parser.Tokenizer.Token.TokenType.Public))
+        if (node.HasModifier(Parser.Tokenizer.Token.TokenType.Public) ||
+            (symbol.ContainingType?.KnownType == TypeSymbol.DefaultType.Interface && !node.HasModifier(Parser.Tokenizer.Token.TokenType.Private)))
             symbol.Accessibility = MemberAccessibility.Public;
         else
             symbol.Accessibility = MemberAccessibility.Private;
 
         symbol.FullyQualifiedName = BuildQualifiedName(node.Name.Text);
 
-        // Every property is auto-implemented through a hidden backing field for now
+        // Interface properties describe accessors without allocating instance storage.
         var backingFieldName = $"{node.Name.Text}.field";
-        symbol.BackingField = new FieldSymbol(backingFieldName)
+        symbol.BackingField = symbol.ContainingType?.KnownType == TypeSymbol.DefaultType.Interface ? null : new FieldSymbol(backingFieldName)
         {
             Accessibility = MemberAccessibility.Private,
             ContainingType = CurrentSymbol as TypeSymbol,

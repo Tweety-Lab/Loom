@@ -38,6 +38,13 @@ public class UnresolvedTypeAnalyzer : Analyzer
     }
 
     [Visitor]
+    public void Visit(PropertyDeclarationNode node)
+    {
+        if (node.Type.Base.Type == Token.TokenType.Identifier && TypeResolver.Resolve(Context, node, node.Type.Base.Text) == null)
+            Context.DiagnosticContext?.Report(UnresolvedType, node.Type.Base.Location, node.Type.Base.Text);
+    }
+
+    [Visitor]
     public void Visit(DefaultExpressionNode node)
     {
         if (node.Type is { } type && type.Base.Type == Token.TokenType.Identifier)

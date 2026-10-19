@@ -20,6 +20,9 @@ public class MethodBodyAnalyzer : Analyzer
         if (Context.GetSymbol(node).Symbol is not MethodSymbol symbol)
             return;
 
+        if (symbol.ContainingType?.KnownType == TypeSymbol.DefaultType.Interface)
+            return;
+
         if (node.Body == null && !symbol.IsExtern)
             Context.DiagnosticContext?.Report(MethodNeedsBody, node.StartToken?.Location, symbol.FullyQualifiedName);
     }

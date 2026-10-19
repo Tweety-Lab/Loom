@@ -46,6 +46,9 @@ public class MonomorphizationPass : LIRCompilationPass
 
         private void DeclareType(ConstructedTypeSymbol type)
         {
+            if (type.KnownType == TypeSymbol.DefaultType.Interface)
+                return;
+
             if (!declaredTypes.Add(type))
                 return;
 
