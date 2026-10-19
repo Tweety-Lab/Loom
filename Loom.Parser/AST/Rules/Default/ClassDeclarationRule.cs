@@ -3,10 +3,10 @@ using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.AST.Rules.Default;
 
-public record ClassDeclarationNode(Token Name, TypeParameterListNode TypeParameters, BlockNode Body, List<Token> Modifiers) : ASTNode, ITypeDeclarationNode, ITypeParameterizableNode
+public record ClassDeclarationNode(Token Name, TypeParameterListNode TypeParameters, InheritanceListNode Inheritance, BlockNode Body, List<Token> Modifiers) : ASTNode, ITypeDeclarationNode, ITypeParameterizableNode, IInheritableNode
 {
     /// <inheritdoc/>
-    public override IEnumerable<ASTNode> Children => [TypeParameters, Body];
+    public override IEnumerable<ASTNode> Children => [TypeParameters, Inheritance, Body];
 }
 
 
@@ -27,8 +27,10 @@ public class ClassDeclarationRule : ParserRule<ClassDeclarationNode>
 
         var typeParameters = Parser.Reader.Check(TokenType.Less) ? RunRule<TypeParameterListRule, TypeParameterListNode>() : new TypeParameterListNode([]);
 
+        var inheritance = Parser.Reader.Check(TokenType.Colon) ? RunRule<InheritanceListRule, InheritanceListNode>() : new InheritanceListNode([]);
+
         BlockNode body = RunRule<TypeDeclarationBlockRule, BlockNode>();
 
-        return new ClassDeclarationNode(className, typeParameters, body, modifiers);
+        return new ClassDeclarationNode(className, typeParameters, inheritance, body, modifiers);
     }
 }

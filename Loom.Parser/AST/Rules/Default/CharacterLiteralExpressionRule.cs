@@ -3,7 +3,9 @@ using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.AST.Rules.Default;
 
-/// <summary> A character literal, holding the Unicode scalar value it represents. </summary>
+/// <summary>
+/// A character literal, holding the Unicode scalar value it represents.
+/// </summary>
 public record CharacterLiteralNode(int Value) : ExpressionNode
 {
     /// <inheritdoc/>

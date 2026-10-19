@@ -24,6 +24,11 @@ public interface ITypeParameterizableNode
     TypeParameterListNode TypeParameters { get; }
 }
 
+public interface IInheritableNode
+{
+    InheritanceListNode Inheritance { get; }
+}
+
 public record IdentifierNameNode(Token Token) : ExpressionNode, INameNode
 {
     /// <inheritdoc/>

@@ -101,18 +101,32 @@
           }
         },
         {
-          "match": "\\b(struct)\\b(?:\\s+([A-Za-z_][A-Za-z0-9_]*))?",
-          "captures": {
+          "name": "meta.declaration.struct.loom",
+          "begin": "\\b(struct)\\b(?:\\s+([A-Za-z_][A-Za-z0-9_]*))?",
+          "beginCaptures": {
             "1": { "name": "keyword.declaration.struct.loom" },
             "2": { "name": "entity.name.type.struct.loom" }
-          }
+          },
+          "end": "(?=[{};])",
+          "patterns": [
+            { "include": "#comments" },
+            { "include": "#generic-arguments" },
+            { "include": "#inheritance" }
+          ]
         },
         {
-          "match": "\\b(class)\\b(?:\\s+([A-Za-z_][A-Za-z0-9_]*))?",
-          "captures": {
+          "name": "meta.declaration.class.loom",
+          "begin": "\\b(class)\\b(?:\\s+([A-Za-z_][A-Za-z0-9_]*))?",
+          "beginCaptures": {
             "1": { "name": "keyword.declaration.class.loom" },
             "2": { "name": "entity.name.type.class.loom" }
-          }
+          },
+          "end": "(?=[{};])",
+          "patterns": [
+            { "include": "#comments" },
+            { "include": "#generic-arguments" },
+            { "include": "#inheritance" }
+          ]
         },
         {
           "match": "\\b(interface)\\b(?:\\s+([A-Za-z_][A-Za-z0-9_]*))?",
@@ -134,6 +148,28 @@
             "1": { "name": "keyword.declaration.enum.loom" },
             "2": { "name": "entity.name.type.enum.loom" }
           }
+        }
+      ]
+    },
+
+    "inheritance": {
+      "name": "meta.inheritance.loom",
+      "begin": "(?<!:):(?!:)",
+      "beginCaptures": {
+        "0": { "name": "punctuation.separator.inheritance.loom" }
+      },
+      "end": "(?=[{};])",
+      "patterns": [
+        { "include": "#comments" },
+        { "include": "#generic-arguments" },
+        { "include": "#primitive-types" },
+        {
+          "name": "punctuation.separator.comma.loom",
+          "match": ","
+        },
+        {
+          "name": "entity.name.type.inherited.loom",
+          "match": "\\b[A-Za-z_][A-Za-z0-9_]*\\b"
         }
       ]
     },

@@ -2,7 +2,10 @@ module Standard::Memory
 {
 	export interface IAllocator
 	{
+		/// @brief Allocates memory of the given size.
 		iptr Allocate(i64 size);
+
+		/// @brief Frees the memory at the given address.
 		void Free(iptr address);
 	}
 
@@ -10,15 +13,15 @@ module Standard::Memory
 	extern void free(iptr address);
 
 	/// @brief Defines how heap memory is allocated and freed.
-	export struct DefaultAllocator
+	export struct DefaultAllocator : IAllocator
 	{
-		/// @brief Allocates memory of the given size.
+		/// @inheritdoc
         public iptr Allocate(i64 size)
         {
             return malloc(size);
         }
 
-		/// @brief Frees the memory at the given address.
+		/// @inheritdoc
         public void Free(iptr address)
         {
 			free(address);

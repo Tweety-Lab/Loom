@@ -3,7 +3,9 @@ using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.AST.Rules.Default;
 
-/// <summary> A boolean literal, holding the value it represents. </summary>
+/// <summary>
+/// A boolean literal, holding the value it represents.
+/// </summary>
 public record BooleanLiteralNode(bool Value) : ExpressionNode
 {
     /// <inheritdoc/>
