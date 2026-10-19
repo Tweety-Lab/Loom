@@ -63,7 +63,7 @@ internal class DeclarationWalker : ASTVisitor
 
         symbol.DeclaringNode = node;
 
-        if (symbol.IsExtern)
+        if (symbol.IsExtern && symbol.ContainingType == null)
             symbol.FullyQualifiedName = node.MethodName.Text;
         else
             symbol.FullyQualifiedName = BuildQualifiedName(node.MethodName.Text);

@@ -34,7 +34,7 @@ internal interface IIntrinsicEmitter
             if (emitterAttribute?.FullyQualifiedName != method.FullyQualifiedName)
                 continue;
 
-            target.StartBody(); // In the future, intrinsics will emit into functions marked as 'extern'
+            target.StartBody();
             emitter.EmitInto(target);
 
             return true;

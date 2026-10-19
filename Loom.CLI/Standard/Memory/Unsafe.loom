@@ -27,13 +27,13 @@ module Standard::Memory
 
 #region Intrinsics
         /// @brief Returns the memory address of the given value.
-        public static iptr AddressOf<T>(ref T value) { }
+        public static extern iptr AddressOf<T>(ref T value);
 
         /// @brief Reads the value at the given address.
-        public static unique T Read<T>(iptr address) { }
+        public static extern unique T Read<T>(iptr address);
 
 		/// @brief Writes the value to the given address.
-		public static void Write<T>(iptr address, T value) { }
+		public static extern void Write<T>(iptr address, T value);
 #endregion
     }
 }

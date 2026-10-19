@@ -1,4 +1,5 @@
 using Loom.Analyzer.Symbols;
+using Loom.LIR.Intrinsics;
 
 namespace Loom.LIR.Generation;
 
@@ -7,8 +8,12 @@ public static class LinkageNameResolver
     /// <summary> The name that uniquely identifies <paramref name="symbol"/> in generated code. </summary>
     public static string LinkageName(Symbol symbol)
     {
-        if (symbol is not MethodSymbol { IsExtern: false } method)
+        if (symbol is not MethodSymbol method)
             return symbol.FullyQualifiedName;
+
+        // Intrinsics have compiler-generated bodies and need distinct names
+        if (method.IsExtern && !IIntrinsicEmitter.HasIntrinsicEmitter(method))
+            return method.Name;
 
         string arity = method.IsGeneric ? $"`{method.Arity}" : string.Empty;
         string name = $"{method.FullyQualifiedName}{arity}{Signature(method.OriginalDefinition)}";
