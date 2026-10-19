@@ -4,16 +4,25 @@ module Standard::Memory
     /// @remark This class can only be used inside of an `unsafe` block.
     export static class Unsafe
     {
+        /// @brief The heap allocator unsafe operations uses.
+        public static DefaultAllocator Allocator { get; set; }
+
         /// @brief Allocates memory of the given size.
         public static iptr Allocate(i64 size)
         {
-            return malloc(size);
+            unsafe
+            {
+                return Allocator.Allocate(size);
+            }
         }
 
 		/// @brief Frees the memory at the given address.
         public static void Free(iptr address)
         {
-			free(address);
+            unsafe
+            {
+                Allocator.Free(address);
+            }
         }
 
 #region Intrinsics
@@ -27,7 +36,4 @@ module Standard::Memory
 		public static void Write<T>(iptr address, T value) { }
 #endregion
     }
-
-    extern iptr malloc(i64 size);
-	extern void free(iptr address);
 }

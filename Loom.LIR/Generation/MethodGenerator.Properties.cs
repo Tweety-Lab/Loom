@@ -1,4 +1,5 @@
 using Loom.Analyzer.Symbols;
+using Loom.LIR.Metadata;
 using Loom.LIR.Objects;
 
 namespace Loom.LIR.Generation;
@@ -9,7 +10,14 @@ internal partial class MethodGenerator
     public void GeneratePropertyDeclaration(PropertySymbol symbol, LIRTypeDeclaration owningType, IReadOnlyList<TypeParameterSymbol>? typeParameters = null, TypeSubstitution? substitution = null)
     {
         if (symbol.BackingField?.Type != null)
-            owningType.DeclareField(symbol.BackingField.Name, ASTGenerator.ConvertStorageType(symbol.BackingField.Type, substitution));
+        {
+            var storageType = ASTGenerator.ConvertStorageType(symbol.BackingField.Type, substitution);
+            if (!symbol.IsStatic)
+                owningType.DeclareField(symbol.BackingField.Name, storageType);
+            else if (symbol.ContainingType?.ContainsTypeParameters != true)
+                unit.Metadata[MetadataType.Static].Add(LIRMetadataValue.Define(
+                    $"{owningType.Name}::{symbol.BackingField.Name}", storageType, new LIRDefaultValue(storageType), isConstant: false));
+        }
 
         DeclareAccessor(symbol.Getter, owningType, typeParameters, substitution);
         DeclareAccessor(symbol.Setter, owningType, typeParameters, substitution);
@@ -25,18 +33,23 @@ internal partial class MethodGenerator
     // TODO: Emit the declared accessor body once it is supported instead of the auto-implemented field access
     private void GenerateAccessorBody(PropertySymbol property, MethodSymbol? accessor, LIRTypeDeclaration owningType, bool isSetter)
     {
-        if (accessor == null || accessor.IsStatic || property.BackingField?.Type == null)
+        if (accessor == null || property.BackingField?.Type == null || (accessor.IsStatic && property.ContainingType?.ContainsTypeParameters == true))
             return;
 
         LIRFunction function = GetFunction(LinkageNameResolver.LinkageName(accessor), owningType);
         LIRGenerator generator = function.LIRGenerator!;
 
-        LIRField field = owningType.Fields.FirstOrDefault(f => f.Name == property.BackingField.Name) ?? throw new Exception($"Could not find field: {property.BackingField.Name}");
-
-        var address = generator.EmitGetField(function.ParameterValues[0], field);
+        LIRValue address;
+        if (accessor.IsStatic)
+            address = unit.Metadata[MetadataType.Static].Single(value => value.Name == $"{owningType.Name}::{property.BackingField.Name}");
+        else
+        {
+            LIRField field = owningType.Fields.FirstOrDefault(f => f.Name == property.BackingField.Name) ?? throw new Exception($"Could not find field: {property.BackingField.Name}");
+            address = generator.EmitGetField(function.ParameterValues[0], field);
+        }
 
         if (isSetter)
-            generator.EmitStore(function.ParameterValues[1], address);
+            generator.EmitStore(function.ParameterValues[accessor.IsStatic ? 0 : 1], address);
         else
             generator.EmitReturn(generator.EmitLoad(address));
 

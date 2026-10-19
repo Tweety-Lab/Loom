@@ -8,7 +8,8 @@ public class LIRCompilationUnit : ILIRObject
     public Dictionary<MetadataType, List<LIRMetadataValue>> Metadata { get; } = new()
     {
         { MetadataType.Program, new() },
-        { MetadataType.Strings, new() }
+        { MetadataType.Strings, new() },
+        { MetadataType.Static, new() }
     };
 
     /// <summary> All functions owned by this <see cref="LIRCompilationUnit"/>, including methods declared in types. </summary>

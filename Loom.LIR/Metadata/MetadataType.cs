@@ -7,5 +7,8 @@ public enum MetadataType : byte
     Program,
 
     /// <summary> Contains constant strings. </summary>
-    Strings
+    Strings,
+
+    /// <summary> Contains mutable storage for static members. </summary>
+    Static
 }
