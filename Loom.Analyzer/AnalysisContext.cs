@@ -107,6 +107,9 @@ public class AnalysisContext
         foreach (var root in rootList)
             bindWalker.Dispatch(root);
 
+        // Resolve inheritance after every declaration and signature is bound
+        InheritanceBinder.Bind(this, rootList);
+
         // Resolve Types
         var typeWalker = new TypeWalker(this);
         foreach (var root in rootList)

@@ -45,6 +45,14 @@ public class InaccessibleSymbolAnalyzer : Analyzer
     }
 
     [Visitor]
+    public void Visit(InheritanceListNode node)
+    {
+        foreach (var syntax in node.SelectMany(type => type.Descendants.OfType<TypeNode>().Prepend(type)))
+            if (Context.GetSymbol(syntax).Symbol is TypeSymbol type)
+                CheckExported(syntax, type);
+    }
+
+    [Visitor]
     public void Visit(LocalDeclarationStatementNode node) => CheckTypeAccess(node, node.Variable.Type.Base.Text);
 
     [Visitor]

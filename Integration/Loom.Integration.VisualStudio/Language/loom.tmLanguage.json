@@ -129,11 +129,18 @@
           ]
         },
         {
-          "match": "\\b(interface)\\b(?:\\s+([A-Za-z_][A-Za-z0-9_]*))?",
-          "captures": {
+          "name": "meta.declaration.interface.loom",
+          "begin": "\\b(interface)\\b(?:\\s+([A-Za-z_][A-Za-z0-9_]*))?",
+          "beginCaptures": {
             "1": { "name": "keyword.declaration.interface.loom" },
             "2": { "name": "entity.name.type.interface.loom" }
-          }
+          },
+          "end": "(?=[{};])",
+          "patterns": [
+            { "include": "#comments" },
+            { "include": "#generic-arguments" },
+            { "include": "#inheritance" }
+          ]
         },
         {
           "match": "\\b(attribute)\\b(?:\\s+([A-Za-z_][A-Za-z0-9_]*))?",

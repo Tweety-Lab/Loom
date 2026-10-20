@@ -13,6 +13,47 @@ public class TypeSymbol : Symbol, IExportableSymbol, IGenericSymbol
     /// <summary> The members declared by this type, or their substituted views. </summary>
     public virtual IReadOnlyList<Symbol> Members { get; internal set; } = [];
 
+    /// <summary> The directly declared base class, or null when there is none. </summary>
+    public virtual TypeSymbol? BaseType { get; internal set; }
+
+    /// <summary> All interfaces declared directly on this type. </summary>
+    public virtual IReadOnlyList<TypeSymbol> Interfaces { get; internal set; } = [];
+
+    /// <summary> All interfaces, including those inherited from base classes. </summary>
+    public IReadOnlyList<TypeSymbol> AllInterfaces
+    {
+        get
+        {
+            var result = new List<TypeSymbol>();
+            var visited = new HashSet<TypeSymbol>();
+            var path = new HashSet<TypeSymbol>();
+
+            void Visit(TypeSymbol type)
+            {
+                if (!path.Add(type.OriginalDefinition))
+                    return;
+
+                if (visited.Add(type))
+                {
+                    if (type.BaseType is { } baseType)
+                        Visit(baseType);
+
+                    foreach (var implemented in type.Interfaces.Reverse())
+                        Visit(implemented);
+
+                    if (!ReferenceEquals(type, this) && type.KnownType == DefaultType.Interface)
+                        result.Add(type);
+                }
+
+                path.Remove(type.OriginalDefinition);
+            }
+
+            Visit(this);
+            result.Reverse();
+            return result;
+        }
+    }
+
     /// <inheritdoc/>
     public virtual IReadOnlyList<TypeParameterSymbol> TypeParameters { get; internal set; } = [];
 

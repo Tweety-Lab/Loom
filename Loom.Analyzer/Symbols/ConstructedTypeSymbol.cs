@@ -16,6 +16,20 @@ public sealed class ConstructedTypeSymbol : TypeSymbol
     public TypeSubstitution Substitution { get; }
 
     /// <inheritdoc/>
+    public override TypeSymbol? BaseType
+    {
+        get => OriginalDefinition.BaseType is { } baseType ? Substitution.Resolve(baseType) : null;
+        internal set => throw new InvalidOperationException("A constructed type's base type is derived from its definition.");
+    }
+
+    /// <inheritdoc/>
+    public override IReadOnlyList<TypeSymbol> Interfaces
+    {
+        get => [.. OriginalDefinition.Interfaces.Select(Substitution.Resolve)];
+        internal set => throw new InvalidOperationException("A constructed type's interfaces are derived from its definition.");
+    }
+
+    /// <inheritdoc/>
     public override IReadOnlyList<Symbol> Members
     {
         get => field ??= [.. OriginalDefinition.Members.Select(GetMember)];
