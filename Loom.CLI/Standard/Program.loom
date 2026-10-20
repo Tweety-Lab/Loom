@@ -22,6 +22,9 @@ module Standard::Program
         Slice<char> myString = "Hello!";
         println(myString); // "Hello!"
 
+        Slice<char> window = myString.Subslice(2, 3);
+		println(window); // "llo"
+
         // Loom also allows unsafe operations inside an 'unsafe' block via the 'Standard::Memory::Unsafe' class
         unsafe
         {

@@ -8,6 +8,21 @@ module Standard::Memory
 
         iptr pointer = default;
 
+        /// @brief Initializes a new instance of the Slice class.
+        private Slice(iptr point, i32 leng)
+        {
+			pointer = point;
+			Length = leng;
+        }
+
+        /// @brief Creates a new Slice that represents a portion of the original Slice.
+		/// @param start The inclusive index of the first element to include in the new Slice.
+		/// @param length The number of elements to include in the new Slice.
+        public Slice<T> Subslice(i32 start, i32 length)
+        {
+			return new Slice<T>(pointer + start * sizeof(T), length);
+        }
+
         /// @brief Returns the element at the specified index.
 		/// @param index The index of the element to return.
 		/// @return The element at the specified index.
