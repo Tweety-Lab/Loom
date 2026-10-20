@@ -19,7 +19,7 @@ internal class MetadataEmitter : Emitter<(MetadataType, List<LIRMetadataValue>)>
     public void EmitSingle(MetadataType type, LIRMetadataValue value)
     {
         LLVMTypeRef valueType = Context.ResolveType(value.ValueType);
-        LLVMValueRef metadata = Context.Module.AddGlobal(valueType, $"{type.ToString()}{value.Name}");
+        LLVMValueRef metadata = Context.Module.AddGlobal(valueType, $"{type.ToString()}::{value.Name}");
 
         metadata.Initializer = Context.ResolveValue(value.Initializer);
 

@@ -10,5 +10,8 @@ public enum MetadataType : byte
     Strings,
 
     /// <summary> Contains mutable storage for static members. </summary>
-    Static
+    Static,
+
+    /// <summary> Contains VTable information. </summary>
+    VirtualDispatch
 }

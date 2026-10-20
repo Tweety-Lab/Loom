@@ -47,7 +47,8 @@ public class InterfaceImplementationAnalyzer : Analyzer
         }
     }
 
-    private static IEnumerable<Symbol> ImplementationMembers(TypeSymbol type)
+    /// <summary> Enumerates potential implementations, starting with the most derived type. </summary>
+    public static IEnumerable<Symbol> ImplementationMembers(TypeSymbol type)
     {
         var visited = new HashSet<TypeSymbol>();
         for (TypeSymbol? current = type; current != null && visited.Add(current.OriginalDefinition); current = current.BaseType)
@@ -55,7 +56,8 @@ public class InterfaceImplementationAnalyzer : Analyzer
                 yield return member;
     }
 
-    private static bool Implements(MethodSymbol candidate, MethodSymbol required)
+    /// <summary> Whether a method satisfies an interface signature, including generic and borrow modifiers. </summary>
+    public static bool Implements(MethodSymbol candidate, MethodSymbol required)
     {
         if (candidate.Kind != required.Kind || candidate.Name != required.Name ||
             candidate.Accessibility != MemberAccessibility.Public || candidate.IsStatic != required.IsStatic ||
@@ -74,7 +76,8 @@ public class InterfaceImplementationAnalyzer : Analyzer
             (!pair.First.IsBorrow || pair.First.IsMutable == pair.Second.IsMutable));
     }
 
-    private static bool Implements(PropertySymbol candidate, PropertySymbol required) =>
+    /// <summary> Whether a property satisfies an interface's type and accessor requirements. </summary>
+    public static bool Implements(PropertySymbol candidate, PropertySymbol required) =>
         candidate.Name == required.Name && candidate.Accessibility == MemberAccessibility.Public &&
         candidate.IsStatic == required.IsStatic && candidate.Type is { } type && TypeConversions.IsIdentical(type, required.Type!) &&
         (required.Getter == null || candidate.Getter is { Accessibility: MemberAccessibility.Public }) &&

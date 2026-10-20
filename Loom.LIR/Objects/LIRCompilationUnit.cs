@@ -9,7 +9,8 @@ public class LIRCompilationUnit : ILIRObject
     {
         { MetadataType.Program, new() },
         { MetadataType.Strings, new() },
-        { MetadataType.Static, new() }
+        { MetadataType.Static, new() },
+        { MetadataType.VirtualDispatch, new() }
     };
 
     /// <summary> All functions owned by this <see cref="LIRCompilationUnit"/>, including methods declared in types. </summary>

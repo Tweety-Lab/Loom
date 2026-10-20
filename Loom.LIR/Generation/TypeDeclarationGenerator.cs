@@ -10,7 +10,7 @@ namespace Loom.LIR.Generation;
 /// <summary>
 /// Generates the Loom Intermediate Representation (LIR) of the types declared by a program.
 /// </summary>
-internal class TypeDeclarationGenerator
+internal partial class TypeDeclarationGenerator
 {
     private readonly CompilationContext context;
     private readonly LIRCompilationUnit unit;
@@ -26,6 +26,9 @@ internal class TypeDeclarationGenerator
 
     public void DeclareTypeDeclaration(ITypeDeclarationNode node)
     {
+        if (node is InterfaceDeclarationNode)
+            return;
+
         TypeSymbol? symbol = GetTypeSymbol(node);
         if (symbol == null)
             return;
@@ -71,6 +74,9 @@ internal class TypeDeclarationGenerator
 
     public void GenerateTypeDeclarationBodies(ITypeDeclarationNode node)
     {
+        if (node is InterfaceDeclarationNode)
+            return;
+
         TypeSymbol? symbol = GetTypeSymbol(node);
 
         if (symbol == null)
@@ -80,6 +86,8 @@ internal class TypeDeclarationGenerator
 
         if (declaredType == null)
             return;
+
+        GenerateInterfaceDispatch(symbol);
 
         foreach (var content in node.Body.Contents)
         {
@@ -160,6 +168,8 @@ internal class TypeDeclarationGenerator
         if (declaredType == null)
             return;
 
+        GenerateInterfaceDispatch(symbol);
+
         var node = (ITypeDeclarationNode)symbol.OriginalDefinition.DeclaringNode!;
 
         foreach (var member in symbol.Members)
@@ -218,7 +228,7 @@ internal class TypeDeclarationGenerator
         };
 
         if (symbol == null)
-            Console.WriteLine($"Could not find symbol for {node.Name}!");
+            Console.WriteLine($"Could not find symbol for {node.Name.Text}!");
 
         return symbol;
     }

@@ -11,10 +11,10 @@ namespace Loom.LIR.Printers;
 internal class StringPrinterStyle : ILIRPrinterStyle
 {
     /// <inheritdoc/>
-    public string PrintMetaType(MetadataType type) => $"META {type.ToString()}:";
+    public string PrintMetaType(MetadataType type) => $"\nMETA {type.ToString()}:";
 
     /// <inheritdoc/>
-    public string PrintMeta(LIRMetadataValue meta) => $"{(meta.IsConstant ? "constant" : "meta")} {PrintType(meta.ValueType)} @{meta.Name} = {PrintValue(meta.Initializer)}";
+    public string PrintMeta(LIRMetadataValue meta) => $"{(meta.IsConstant ? "constant" : "mutable")} {PrintType(meta.ValueType)} @{meta.Name} = {PrintValue(meta.Initializer)}";
 
     /// <inheritdoc/>
     public string PrintFunctionFooter() => "}\n";
@@ -110,6 +110,8 @@ internal class StringPrinterStyle : ILIRPrinterStyle
         LIRArrayType a => $"[{a.Size} x {PrintType(a.ElementType)}]",
         LIRTypeDeclarationType s => s.Name,
         LIRTypeParameter p => p.Name,
+        LIRFunctionType f => $"({string.Join(", ", f.Parameters.Select(p => PrintType(p.Type)))}) -> {PrintType(f.ReturnType)}",
+        LIRVirtualTableType table => $"vtable {{ {string.Join(", ", table.Slots.Select(slot => PrintType(slot) + "*"))} }}",
         _ => type.ToString()
     };
 
@@ -120,6 +122,7 @@ internal class StringPrinterStyle : ILIRPrinterStyle
         {
             LIRConstantCharValue c => CharacterLiteralParser.Format(c.Value),
             LIRConstantArrayValue a => $"[{string.Join(", ", a.Elements.Select(PrintValue))}]",
+            LIRVirtualTableValue table => $"{{ {string.Join(", ", table.Slots.Select((slot, index) => $"[{index}] @{slot.Member} = @{slot.Implementation.Name}"))} }}",
             LIRConstantIntValue c => $"{c.Value}",
             LIRConstantBoolValue c => c.Value ? "true" : "false",
             LIRNullValue => "null",

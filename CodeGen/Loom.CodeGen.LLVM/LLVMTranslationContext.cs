@@ -1,6 +1,7 @@
 ﻿using LLVMSharp.Interop;
 using Loom.LIR;
 using Loom.LIR.Objects;
+using Loom.LIR.Metadata;
 
 namespace Loom.CodeGen.LLVM;
 
@@ -31,6 +32,17 @@ internal class LLVMTranslationContext
 
         if (type is LIRArrayType { ElementType: var elementType, Size: var size })
             return LLVMTypeRef.CreateArray(ResolveType(elementType), (uint)size);
+
+        if (type is LIRFunctionType function)
+            return LLVMTypeRef.CreateFunction(ResolveType(function.ReturnType), function.Parameters.Select(parameter => ResolveType(parameter.Type)).ToArray());
+
+        if (type is LIRVirtualTableType table)
+        {
+            var fields = table.Slots.Select(slot => LLVMTypeRef.CreatePointer(ResolveType(slot), 0)).ToArray();
+            var aggregate = Context.GetStructType(fields, false);
+            TypeMap[type] = aggregate;
+            return aggregate;
+        }
 
         throw type is LIRTypeParameter ? new InvalidOperationException($"Generic template containing '{type}' reached code generation; only instantiations may be translated.") : new InvalidOperationException($"Unhandled LIR type: {type.GetType().Name}");
     }
@@ -67,6 +79,13 @@ internal class LLVMTranslationContext
             var llvmVal = LLVMValueRef.CreateConstArray(llvmElementType, arrayConst.Elements.Select(ResolveValue).ToArray());
             ValueMap[value] = llvmVal;
             return llvmVal;
+        }
+
+        if (value is LIRVirtualTableValue table)
+        {
+            var initializer = LLVMValueRef.CreateConstStruct(table.Slots.Select(slot => ResolveValue(slot.Implementation)).ToArray(), false);
+            ValueMap[value] = initializer;
+            return initializer;
         }
 
         if (value is LIRNullValue nullValue)

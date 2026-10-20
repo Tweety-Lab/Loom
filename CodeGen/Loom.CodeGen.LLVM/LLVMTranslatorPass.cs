@@ -56,11 +56,15 @@ public class LLVMTranslatorPass : LIRLayeredPass
             structType.StructSetBody(fieldTypes, false);
         }
 
+        // Dispatch table initializers contain function addresses, so declare them before globals
+        functionEmitter = new FunctionEmitter(translationContext);
+        foreach (var function in unit.AllFunctions)
+            RunOnFunction(function);
+
         MetadataEmitter metaEmitter = new MetadataEmitter(translationContext);
         foreach (var metaType in unit.Metadata)
             metaEmitter.Emit((metaType.Key, metaType.Value));
 
-        functionEmitter = new FunctionEmitter(translationContext);
         blockEmitter = new BlockEmitter(translationContext);
         instructionEmitter = new InstructionEmitter(translationContext);
 
@@ -73,6 +77,9 @@ public class LLVMTranslatorPass : LIRLayeredPass
     protected override void RunOnFunction(LIRFunction func)
     {
         if (func.Type.TypeParameters.Length > 0)
+            return;
+
+        if (translationContext.FunctionMap.ContainsKey(func))
             return;
 
         functionEmitter.Emit(func);

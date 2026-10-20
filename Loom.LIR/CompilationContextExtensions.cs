@@ -34,8 +34,7 @@ public static class CompilationContextExtensions
             }
 
             LIRPrinter printer = new LIRPrinter(new StringPrinterStyle());
-            string lir = printer.Print(comp);
-            Console.WriteLine(lir);
+            Console.WriteLine(printer.Print(comp));
 
             return ctx;
         }
