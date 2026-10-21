@@ -1,4 +1,5 @@
 using Loom.Analyzer.Symbols;
+using Loom.LIR.Intrinsics;
 using Loom.LIR.Metadata;
 using Loom.LIR.Objects;
 
@@ -33,10 +34,16 @@ internal partial class MethodGenerator
     // TODO: Emit the declared accessor body once it is supported instead of the auto-implemented field access
     private void GenerateAccessorBody(PropertySymbol property, MethodSymbol? accessor, LIRTypeDeclaration owningType, bool isSetter)
     {
-        if (accessor == null || property.BackingField?.Type == null || (accessor.IsStatic && property.ContainingType?.ContainsTypeParameters == true))
+        if (accessor == null || (accessor.IsStatic && property.ContainingType?.ContainsTypeParameters == true))
             return;
 
         LIRFunction function = GetFunction(LinkageNameResolver.LinkageName(accessor), owningType);
+        if (IIntrinsicEmitter.TryEmitIntrinsic(accessor, function, unit))
+            return;
+
+        if (property.BackingField?.Type == null)
+            return;
+
         LIRGenerator generator = function.LIRGenerator!;
 
         LIRValue address;

@@ -32,7 +32,7 @@ internal partial class MethodGenerator
         // Register the instance before generating its body so recursive calls resolve to it
         instance = owningType == null ? unit.DefineFunction(instanceName, functionType, !symbol.IsExtern) : symbol.IsExtern ? owningType.DeclareMethod(instanceName, functionType) : owningType.DefineMethod(instanceName, functionType);
 
-        if (IIntrinsicEmitter.TryEmitIntrinsic(symbol, instance))
+        if (IIntrinsicEmitter.TryEmitIntrinsic(symbol, instance, unit))
             return instance;
 
         if (!symbol.IsExtern)

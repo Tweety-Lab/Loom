@@ -1,0 +1,21 @@
+import Standard;
+import Standard::Memory;
+
+module Standard::Reflection
+{
+	/// @brief Represents compiled assembly used to load and execute code.
+	export struct Assembly
+	{
+		/// @brief The assembly executing this code.
+		public static Assembly Current { get; }
+
+		/// @brief The name of this assembly.
+		public string Name { get; }
+
+		/// @brief Initializes a new instance of the /ref Assembly class.
+		private Assembly(Slice<char> name)
+		{
+			Name = new string(name);
+		}
+	}
+}

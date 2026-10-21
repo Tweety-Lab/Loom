@@ -77,7 +77,7 @@ internal partial class MethodGenerator
 
         LIRFunction function = GetFunction(LinkageNameResolver.LinkageName(symbol), owningType);
 
-        if (IIntrinsicEmitter.TryEmitIntrinsic(symbol, function))
+        if (IIntrinsicEmitter.TryEmitIntrinsic(symbol, function, unit))
             return;
 
         if (symbol.IsExtern)
@@ -108,7 +108,7 @@ internal partial class MethodGenerator
 
         LIRFunction function = GetFunction(LinkageNameResolver.LinkageName(symbol), owningType);
 
-        if (IIntrinsicEmitter.TryEmitIntrinsic(symbol, function))
+        if (IIntrinsicEmitter.TryEmitIntrinsic(symbol, function, unit))
             return;
 
         if (symbol.IsExtern)

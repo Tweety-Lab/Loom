@@ -6,7 +6,7 @@ namespace Loom.LIR.Intrinsics;
 internal sealed class AddressOfEmitter : IIntrinsicEmitter
 {
     /// <inheritdoc />
-    public void EmitInto(LIRFunction function)
+    public void EmitInto(LIRFunction function, LIRCompilationUnit unit)
     {
         LIRValue value = function.ParameterValues[0];
 
@@ -21,7 +21,7 @@ internal sealed class AddressOfEmitter : IIntrinsicEmitter
 internal sealed class ReadEmitter : IIntrinsicEmitter
 {
     /// <inheritdoc />
-    public void EmitInto(LIRFunction function)
+    public void EmitInto(LIRFunction function, LIRCompilationUnit unit)
     {
         LIRValue address = function.ParameterValues[0];
 
@@ -34,7 +34,7 @@ internal sealed class ReadEmitter : IIntrinsicEmitter
 internal sealed class WriteEmitter : IIntrinsicEmitter
 {
     /// <inheritdoc />
-    public void EmitInto(LIRFunction function)
+    public void EmitInto(LIRFunction function, LIRCompilationUnit unit)
     {
         LIRValue address = function.ParameterValues[0];
         LIRValue value = function.ParameterValues[1];

@@ -18,14 +18,14 @@ internal interface IIntrinsicEmitter
     public static List<IIntrinsicEmitter> Emitters { get; } = LoomReflection.InstansiateAllWithAttribute<IntrinsicEmitterAttribute>(Assembly.GetExecutingAssembly()).Cast<IIntrinsicEmitter>().ToList();
 
     /// <summary> Emit the intrinsic into the body of the given function. </summary>
-    void EmitInto(LIRFunction function);
+    void EmitInto(LIRFunction function, LIRCompilationUnit unit);
 
     /// <summary> Checks if the given method has an intrinsic emitter. </summary>
     public static bool HasIntrinsicEmitter(MethodSymbol method) => Emitters.Any(emitter => emitter.GetType().GetCustomAttribute<IntrinsicEmitterAttribute>()?.FullyQualifiedName == method.FullyQualifiedName);
 
     /// <summary> Emits the intrinsic into the body of the given function. </summary>
     /// <returns> <see langword="true"/> if the intrinsic was emitted, <see langword="false"/> otherwise. </returns>
-    public static bool TryEmitIntrinsic(MethodSymbol method, LIRFunction target)
+    public static bool TryEmitIntrinsic(MethodSymbol method, LIRFunction target, LIRCompilationUnit unit)
     {
         foreach (var emitter in Emitters)
         {
@@ -35,7 +35,7 @@ internal interface IIntrinsicEmitter
                 continue;
 
             target.StartBody();
-            emitter.EmitInto(target);
+            emitter.EmitInto(target, unit);
 
             return true;
         }
