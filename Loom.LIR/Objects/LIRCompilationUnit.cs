@@ -1,5 +1,7 @@
 ﻿using Loom.LIR.Metadata;
 
+using System.Text;
+
 namespace Loom.LIR.Objects;
 
 public class LIRCompilationUnit : ILIRObject
@@ -26,7 +28,13 @@ public class LIRCompilationUnit : ILIRObject
     public string Name { get; }
 
     /// <summary> Initializes a new instance of the <see cref="LIRCompilationUnit"/> class. </summary>
-    public LIRCompilationUnit(string name) => Name = name;
+    public LIRCompilationUnit(string name)
+    {
+        Name = name;
+
+        var metaString = name.ToLIRConstantArray();
+        Metadata[MetadataType.Program].Add(LIRMetadataValue.Define(".program.name", metaString.Type, metaString));
+    }
 
     /// <summary> Defines a new function inside this <see cref="LIRCompilationUnit"/>. </summary>
     public LIRFunction DefineFunction(string name, LIRFunctionType type, bool hasBody = true)
