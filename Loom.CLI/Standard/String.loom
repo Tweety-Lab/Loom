@@ -2,18 +2,21 @@ import Standard::Memory;
 
 module Standard
 {
-	export class String
+	// Its a little strange that we make string lowercase like C#, but it enforces it as a base type.
+	// Worth checking back on though.
+
+	export class string
 	{
 		Vector<char> characters = default;
 
 		/// @brief Initializes a new empty string.
-		public String()
+		public string()
 		{
 			characters = new Vector<char>();
 		}
 
 		/// @brief Initializes a new string from a slice of characters.
-		public String(Slice<char> slice)
+		public string(Slice<char> slice)
 		{
 			characters = new Vector<char>(slice.Length);
 

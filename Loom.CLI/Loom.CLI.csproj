@@ -42,6 +42,9 @@
     <None Update="Standard\Range.loom">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Standard\Reflection\Assembly.loom">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Standard\String.loom">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -55,6 +58,7 @@
 
   <ItemGroup>
     <Folder Include="Standard\IO\" />
+    <Folder Include="Standard\Reflection\" />
   </ItemGroup>
 
 </Project>
