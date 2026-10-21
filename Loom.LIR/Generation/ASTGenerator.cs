@@ -18,14 +18,14 @@ public class ASTGenerator
     public ASTGenerator(CompilationContext context) => this.context = context;
 
     /// <summary> Generates Loom Intermediate Representation (LIR) from all Abstract Syntax Tree (AST) roots in the program. </summary>
-    /// <param name="roots"> All roots of the AST, one per source file. </param>
+    /// <param name="roots"> All roots of the AST. </param>
     /// <returns> The generated LIR unit. </returns>
     public LIRCompilationUnit Generate(IEnumerable<ProgramNode> roots)
     {
         // Eventually, we want to link units instead of compiling into just one
 
         var rootList = roots.ToList();
-        unit = new LIRCompilationUnit(string.Join("+", rootList.Select(r => r.Name)));
+        unit = new LIRCompilationUnit(context.ProjectName ?? string.Join("+", rootList.Select(r => r.Name)));
 
         var contents = rootList.SelectMany(root => root.Modules).SelectMany(module => module.Body.Contents).ToList();
 

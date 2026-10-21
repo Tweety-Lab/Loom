@@ -8,6 +8,9 @@ namespace Loom.Common;
 /// </summary>
 public class CompilationContext
 {
+    /// <summary> The name of the project being compiled. </summary>
+    public string? ProjectName { get; set; }
+
     /// <summary> Properties set by extensions of <see cref="CompilationContext"/>. </summary>
     public Dictionary<string, object> ExtendedProperties { get; set; } = new();
 

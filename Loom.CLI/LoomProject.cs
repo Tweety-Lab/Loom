@@ -37,6 +37,7 @@ public sealed class LoomProject
             throw new FileNotFoundException("The specified file does not exist.", lmprojpath);
 
         Name = Path.GetFileNameWithoutExtension(lmprojpath);
+        CompilationContext.ProjectName = Name;
 
         string relativePath = Path.GetDirectoryName(lmprojpath)!;
         SourceFiles = Directory.GetFiles(relativePath, "*.loom", SearchOption.AllDirectories);
