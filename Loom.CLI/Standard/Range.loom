@@ -1,0 +1,22 @@
+module Standard
+{
+	/// @brief Represents a range of values.
+	/// @tparam T The type of the values in the range.
+	export struct Range<T>
+	{
+		/// @brief The starting value of the range.
+		public T Start { get; }
+
+		/// @brief The ending value of the range.
+		public T End { get; }
+
+		/// @brief Initializes a new instance of the Range class.
+		/// @param start The starting value of the range.
+		/// @param end The ending value of the range.
+		public Range(T start, T end)
+		{
+			Start = start;
+			End = end;
+		}
+	}
+}
