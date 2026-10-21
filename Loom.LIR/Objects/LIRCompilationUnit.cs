@@ -9,7 +9,7 @@ public class LIRCompilationUnit : ILIRObject
     /// <summary> All metadata contained in this <see cref="LIRCompilationUnit"/>. </summary>
     public Dictionary<MetadataType, List<LIRMetadataValue>> Metadata { get; } = new()
     {
-        { MetadataType.Program, new() },
+        { MetadataType.Assembly, new() },
         { MetadataType.Strings, new() },
         { MetadataType.Static, new() },
         { MetadataType.VirtualDispatch, new() }
@@ -33,7 +33,7 @@ public class LIRCompilationUnit : ILIRObject
         Name = name;
 
         var metaString = name.ToLIRConstantArray();
-        Metadata[MetadataType.Program].Add(LIRMetadataValue.Define(".program.name", metaString.Type, metaString));
+        Metadata[MetadataType.Assembly].Add(LIRMetadataValue.Define(".assembly.name", metaString.Type, metaString));
     }
 
     /// <summary> Defines a new function inside this <see cref="LIRCompilationUnit"/>. </summary>
