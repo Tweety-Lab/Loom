@@ -4,14 +4,19 @@ module Standard
 {
 	export class String
 	{
-		Vector<char> characters = new Vector<char>();
+		Vector<char> characters = default;
 
 		/// @brief Initializes a new empty string.
-		public String() { }
+		public String()
+		{
+			characters = new Vector<char>();
+		}
 
 		/// @brief Initializes a new string from a slice of characters.
 		public String(Slice<char> slice)
 		{
+			characters = new Vector<char>(slice.Length);
+
 			for (i32 i = 0; i < slice.Length; i++)
 				characters.Add(slice[i]);
 		}

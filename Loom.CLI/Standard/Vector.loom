@@ -22,6 +22,16 @@ module Standard
 			}
 		}
 
+		public Vector(i32 capacity)
+		{
+			Capacity = capacity;
+
+			unsafe
+			{
+				pointer = Unsafe.Allocate(Capacity * sizeof(T));
+			}
+		}
+
 		~Vector()
 		{
 			unsafe
