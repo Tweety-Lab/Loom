@@ -25,7 +25,7 @@ module Standard::Program
         Slice<char> window = myString.Subslice(2, 3);
 		println(window); // "llo"
 
-        Slice<char> rangedWindow = myString[new Range<i32>(0, 3)];
+        Slice<char> rangedWindow = myString[0..3];
 		println(rangedWindow); // "Hel"
 
         // Loom also allows unsafe operations inside an 'unsafe' block via the 'Standard::Memory::Unsafe' class

@@ -125,6 +125,7 @@ public class Token
         [MultiCharacter('>', '='), Operator] GreaterEqual,
 
         [MultiCharacter(':', ':')] ColonColon,
+        [MultiCharacter('.', '.')] PeriodPeriod,
 
         [MultiCharacter('+', '+'), Operator] PlusPlus,
         [MultiCharacter('-', '-'), Operator] MinusMinus,

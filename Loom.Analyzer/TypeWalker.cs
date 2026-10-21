@@ -110,8 +110,19 @@ internal class TypeWalker : ASTWalker
         if (TypeResolver.Resolve(Context, node, "Slice") is not { } slice || TypeResolver.Resolve(Context, node, "char") is not { } charType)
             return;
 
-        // A string literal is a slice of characters
+        // String literal = Slice<char>
         Context.ExpressionTypes[node] = slice.Construct(charType);
+    }
+
+    [Visitor]
+    public void Visit(RangeExpressionNode node)
+    {
+        if (TypeResolver.Resolve(Context, node, "Range") is not { } range || TypeResolver.Resolve(Context, node, "i32") is not { } intType)
+            return;
+
+        // Range expression = Range<i32>
+        Context.ExpressionTypes[node] = range.Construct(intType);
+
     }
 
     [Visitor]

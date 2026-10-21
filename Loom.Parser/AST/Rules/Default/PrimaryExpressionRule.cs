@@ -27,6 +27,9 @@ public class PrimaryExpressionRule : ParserRule<ExpressionNode>
     /// <inheritdoc/>
     public override ExpressionNode ParseNode()
     {
+        if (TryRunRule<RangeExpressionRule, RangeExpressionNode>(out var range))
+            return range;
+
         if (TryRunRule<ArrayLiteralExpressionRule, ArrayLiteralNode>(out var arrayLiteral))
             return arrayLiteral;
 

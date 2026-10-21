@@ -41,6 +41,28 @@ internal partial class ExpressionGenerator
         throw new Exception($"Could not resolve the type of a string literal of {node.Value.Length} character(s).");
     }
 
+    public LIRValue EmitRangeExpression(RangeExpressionNode node)
+    {
+        if (context.AnalysisContext.ExpressionTypes.TryGetValue(node, out var rangeType) && rangeType.IsValueType)
+        {
+            var start = Emit(node.Start);
+            var end = Emit(node.End);
+
+            TypeSymbol layout = rangeType is ConstructedTypeSymbol instantiated ? instantiated.OriginalDefinition : rangeType;
+
+            var declarationType = new LIRTypeDeclarationType(layout.FullyQualifiedName, layout.IsValueType);
+            var declaration = unit.TypeDeclarations.FirstOrDefault(t => t.Type == declarationType) ?? throw new Exception($"Could not find type: {layout.FullyQualifiedName}");
+
+            var rangeAddress = Generator.EmitAlloca(ASTGenerator.ConvertType(rangeType, substitution));
+            Generator.EmitStore(start, Generator.EmitGetField(rangeAddress, declaration.Fields.First(f => f.Name == "Start.field")));
+            Generator.EmitStore(end, Generator.EmitGetField(rangeAddress, declaration.Fields.First(f => f.Name == "End.field")));
+
+            return rangeAddress;
+        }
+
+        throw new Exception($"Could not resolve the type of a range expression.");
+    }
+
     // Emits the constant metadata value holding the characters of a string literal, reusing an identical one when the unit already declares it
     private LIRMetadataValue EmitStringConstant(int[] characters)
     {
