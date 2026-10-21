@@ -28,6 +28,8 @@ module Standard::Program
         Slice<char> rangedWindow = myString[0..3];
 		println(rangedWindow); // "Hel"
 
+        unique String myHeapString = new String("Test");
+
         // Loom also allows unsafe operations inside an 'unsafe' block via the 'Standard::Memory::Unsafe' class
         unsafe
         {

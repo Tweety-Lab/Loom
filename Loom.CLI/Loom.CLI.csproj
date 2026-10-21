@@ -42,6 +42,9 @@
     <None Update="Standard\Range.loom">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Standard\String.loom">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Standard\Vector.loom">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
