@@ -19,6 +19,13 @@ module Standard::IO
 		print('\n');
 	}
 
+	/// @brief Prints a string to the console and appends a newline.
+	export void println(ref string s)
+	{
+		print(s);
+		print('\n');
+	}
+
 	/// @brief Prints a char to the console and appends a newline.
     export void println(char c)
     {
@@ -38,6 +45,13 @@ module Standard::IO
 	{
         for (i32 i = 0; i < v.Count; i++)
 			print(v[i]);
+	}
+
+	/// @brief Prints a string to the console.
+	export void print(ref string s)
+	{
+		for (i32 i = 0; i < s.Length; i++)
+			print(s[i]);
 	}
 
 	/// @brief Prints a char to the console.

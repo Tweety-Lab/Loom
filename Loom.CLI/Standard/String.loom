@@ -7,6 +7,10 @@ module Standard
 
 	export class string
 	{
+		// TODO: Make this just call into characters.Count
+		/// @brief The amount of characters in this string.
+		public i32 Length { get; }
+
 		Vector<char> characters = default;
 
 		/// @brief Initializes a new empty string.
@@ -22,6 +26,16 @@ module Standard
 
 			for (i32 i = 0; i < slice.Length; i++)
 				characters.Add(slice[i]);
+
+			Length = slice.Length;
 		}
+
+		/// @brief Returns the character at the specified index.
+		/// @param index The index of the element to return.
+		/// @return The character at the specified index.
+        public static char operator[](string str, i32 index)
+        {
+			return str.characters[index];
+        }
 	}
 }

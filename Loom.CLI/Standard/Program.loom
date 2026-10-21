@@ -1,6 +1,7 @@
 import Standard;
 import Standard::IO;
 import Standard::Memory;
+import Standard::Reflection;
 
 module Standard::Program
 {
@@ -28,7 +29,8 @@ module Standard::Program
         Slice<char> rangedWindow = myString[0..3];
 		println(rangedWindow); // "Hel"
 
-        unique string myHeapString = new string("Test");
+        Assembly assembly = Assembly.Current;
+        println(assembly.Name);
 
         // Loom also allows unsafe operations inside an 'unsafe' block via the 'Standard::Memory::Unsafe' class
         unsafe
