@@ -96,10 +96,12 @@ internal class HoverHandler(ParsedDocumentStore documents, DocumentAnalysisServi
         builder.Keyword(symbol.IsStatic ? "static " : "");
         builder.Keyword(symbol.IsExtern ? "extern " : "");
 
-        if (symbol.ReturnType.IsValueType)
-            builder.StructName(symbol.ReturnType.Name + " ");
+        if (symbol.ReturnType is not { } returnType)
+            builder.Text("? ");
+        else if (returnType.IsValueType)
+            builder.StructName(returnType.Name + " ");
         else
-            builder.ClassName(symbol.ReturnType.Name + " ");
+            builder.ClassName(returnType.Name + " ");
 
         ReadOnlySpan<string> parts = symbol.FullyQualifiedName.Split("::");
 
@@ -119,10 +121,12 @@ internal class HoverHandler(ParsedDocumentStore documents, DocumentAnalysisServi
             if (!first)
                 builder.Punctuation(", ");
 
-            if (param.Type.IsValueType)
-                builder.StructName(param.Type.Name + " ");
+            if (param.Type is not { } parameterType)
+                builder.Text("? ");
+            else if (parameterType.IsValueType)
+                builder.StructName(parameterType.Name + " ");
             else
-                builder.ClassName(param.Type.Name + " ");
+                builder.ClassName(parameterType.Name + " ");
 
             builder.ParameterName(param.Name);
 

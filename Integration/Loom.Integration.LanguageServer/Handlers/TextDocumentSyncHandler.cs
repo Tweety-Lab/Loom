@@ -8,30 +8,33 @@ using Loom.Integration.LanguageServer.Documents;
 
 namespace Loom.Integration.LanguageServer.Handlers;
 
-internal class TextDocumentSyncHandler(ParsedDocumentStore documents) : TextDocumentSyncHandlerBase
+internal class TextDocumentSyncHandler(ParsedDocumentStore documents, DocumentDiagnosticService diagnostics) : TextDocumentSyncHandlerBase
 {
     /// <inheritdoc/>
     public override TextDocumentAttributes GetTextDocumentAttributes(DocumentUri uri) => new(uri, "Loom");
 
     /// <inheritdoc/>
-    public override Task<Unit> Handle(DidOpenTextDocumentParams request, CancellationToken cancellationToken)
+    public override async Task<Unit> Handle(DidOpenTextDocumentParams request, CancellationToken cancellationToken)
     {
         documents.Open(request.TextDocument);
-        return Unit.Task;
+        await diagnostics.PublishAsync(request.TextDocument.Uri, cancellationToken);
+        return Unit.Value;
     }
 
     /// <inheritdoc/>
     public override Task<Unit> Handle(DidCloseTextDocumentParams request, CancellationToken cancellationToken)
     {
         documents.Close(request.TextDocument.Uri);
+        diagnostics.Clear(request.TextDocument.Uri);
         return Unit.Task;
     }
 
     /// <inheritdoc/>
-    public override Task<Unit> Handle(DidChangeTextDocumentParams request, CancellationToken cancellationToken)
+    public override async Task<Unit> Handle(DidChangeTextDocumentParams request, CancellationToken cancellationToken)
     {
-        documents.Update(request.TextDocument.Uri, request.TextDocument.Version, request.ContentChanges);
-        return Unit.Task;
+        if (documents.Update(request.TextDocument.Uri, request.TextDocument.Version, request.ContentChanges))
+            await diagnostics.PublishAsync(request.TextDocument.Uri, cancellationToken);
+        return Unit.Value;
     }
 
     /// <inheritdoc/>

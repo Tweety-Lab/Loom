@@ -6,7 +6,7 @@ namespace Loom.Analyzer.Symbols;
 public class ParameterSymbol : Symbol
 {
     /// <summary> The resolved type. </summary>
-    public virtual TypeSymbol Type { get; internal set; } = null!;
+    public virtual TypeSymbol? Type { get; internal set; }
 
     /// <summary> Whether this parameter is a borrow. </summary>
     public bool IsBorrow { get; set; }

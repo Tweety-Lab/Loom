@@ -110,7 +110,7 @@ public class InaccessibleSymbolAnalyzer : Analyzer
 
     private void CheckExported(ASTNode node, Symbol symbol)
     {
-        if (symbol.DeclaringNode == null)
+        if (symbol.DeclaringNode == null || symbol is MemberSymbol { ContainingType: not null })
             return;
 
         ModuleNode? usageModuleNode = Context.FirstAncestorOrSelf<ModuleNode>(node);

@@ -36,6 +36,19 @@ internal sealed class TextDocumentSnapshot(DocumentUri uri, string languageId, i
         return start + Math.Min(position.Character, end - start);
     }
 
+    public Position GetPosition(int offset)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(offset);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(offset, Text.Length);
+
+        var starts = lineStarts.Value;
+        var line = Array.BinarySearch(starts, offset);
+        if (line < 0)
+            line = ~line - 1;
+
+        return new Position(line, offset - starts[line]);
+    }
+
     internal TextDocumentSnapshot WithChanges(int? newVersion, IEnumerable<TextDocumentContentChangeEvent> changes)
     {
         var updated = this;

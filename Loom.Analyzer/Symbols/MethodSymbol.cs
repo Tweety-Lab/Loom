@@ -13,7 +13,7 @@ public class MethodSymbol : MemberSymbol, IExportableSymbol, IGenericSymbol
     public MethodKind Kind { get; }
 
     /// <summary> The resolved return type. </summary>
-    public virtual TypeSymbol ReturnType { get; internal set; } = null!;
+    public virtual TypeSymbol? ReturnType { get; internal set; }
 
     /// <summary> The pointer type for the return value. </summary>
     public PointerType ReturnPointerType { get; set; }
