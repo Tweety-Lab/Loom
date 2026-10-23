@@ -31,7 +31,7 @@ module Standard
 		}
 
 		/// @brief Returns the character at the specified index.
-		/// @param index The index of the element to return.
+		/// @param(index) The index of the element to return.
 		/// @return The character at the specified index.
         public static char operator[](string str, i32 index)
         {

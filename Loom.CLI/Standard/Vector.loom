@@ -3,7 +3,7 @@ import Standard::Memory;
 module Standard
 {
 	/// @brief Dynamically sized continuous storage of objects.
-	/// @tparam T The type of objects stored in the vector.
+	/// @tparam(T) The type of objects stored in the vector.
 	export class Vector<T>
 	{
 		/// @brief The number of elements currently stored in the \ref Vector.
@@ -41,7 +41,7 @@ module Standard
 		}
 
 		/// @brief Adds an element to the end of the \ref Vector.
-		/// @param element The element to add to the \ref Vector.
+		/// @param(element) The element to add to the \ref Vector.
 		public void Add(T element)
 		{
 			if (Count >= Capacity)
@@ -71,7 +71,7 @@ module Standard
 		}
 
 		/// @brief Returns the element at the specified index.
-		/// @param index The index of the element to return.
+		/// @param(index) The index of the element to return.
 		/// @return The element at the specified index.
         public static unique T operator[](Vector<T> slice, i32 index)
         {

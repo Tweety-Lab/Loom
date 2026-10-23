@@ -11,8 +11,8 @@ module Standard
 		public T End { get; }
 
 		/// @brief Initializes a new instance of the Range class.
-		/// @param start The starting value of the range.
-		/// @param end The ending value of the range.
+		/// @param(start) The starting value of the range.
+		/// @param(end) The ending value of the range.
 		public Range(T start, T end)
 		{
 			Start = start;
