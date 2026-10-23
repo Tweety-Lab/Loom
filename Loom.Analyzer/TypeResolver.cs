@@ -63,7 +63,7 @@ internal static class TypeResolver
         var arguments = typeArguments.Select(argument => Resolve(context, node, argument)).ToArray();
         if (definition.Arity != arguments.Length)
         {
-            context.DiagnosticContext?.Report(WrongArity, node.StartToken?.Location, definition.Name, definition.Arity, arguments.Length);
+            context.DiagnosticContext?.Report(WrongArity, node.Span.StartToken?.Location, definition.Name, definition.Arity, arguments.Length);
             return null;
         }
         return arguments.Any(argument => argument == null) ? null : definition.Construct([.. arguments!]);

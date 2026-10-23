@@ -29,7 +29,7 @@ public interface IInheritableNode
     InheritanceListNode Inheritance { get; }
 }
 
-public record IdentifierNameNode(Token Token) : ExpressionNode, INameNode
+public record IdentifierNameNode(Token Token) : ExpressionNode(Span.FromToken(Token)), INameNode
 {
     /// <inheritdoc/>
     public string BaseName => Token.Text;

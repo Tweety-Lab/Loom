@@ -3,7 +3,7 @@ using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.AST.Rules.Default;
 
-public record TypeParameterNode(Token Token) : ASTNode
+public record TypeParameterNode(Token Token) : ASTNode(Span.FromToken(Token))
 {
     public string BaseName => Token.Text;
 

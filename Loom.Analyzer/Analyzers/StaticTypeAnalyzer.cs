@@ -34,7 +34,7 @@ public class StaticTypeAnalyzer : Analyzer
             if (enclosing is MethodDeclarationNode or OperatorDeclarationNode or ConstructorDeclarationNode or DestructorDeclarationNode && Context.GetSymbol(enclosing).Symbol is MethodSymbol function)
             {
                 if (function.IsStatic)
-                    Context.DiagnosticContext?.Report(InstanceMemberRequiresReceiver, node.StartToken?.Location, symbol!.Name);
+                    Context.DiagnosticContext?.Report(InstanceMemberRequiresReceiver, node.Span.StartToken?.Location, symbol!.Name);
 
                 return;
             }
@@ -48,28 +48,28 @@ public class StaticTypeAnalyzer : Analyzer
     public void Visit(InstanceCreationExpresssionNode node)
     {
         if (Context.GetSymbol(node.TypeName).Symbol is TypeSymbol type && type.IsStatic)
-            Context.DiagnosticContext?.Report(InstansiatedStaticType, node.StartToken?.Location, type.Name);
+            Context.DiagnosticContext?.Report(InstansiatedStaticType, node.Span.StartToken?.Location, type.Name);
     }
 
     [Visitor]
     public void Visit(FieldDeclarationNode node)
     {
         if (EnclosingStaticType(node) is { } type)
-            Context.DiagnosticContext?.Report(InstanceMemberInStaticType, node.Variable.StartToken?.Location, node.Variable.Name.Text, type.Name);
+            Context.DiagnosticContext?.Report(InstanceMemberInStaticType, node.Variable.Span.StartToken?.Location, node.Variable.Name.Text, type.Name);
     }
 
     [Visitor]
     public void Visit(MethodDeclarationNode node)
     {
         if (EnclosingStaticType(node) is { } type && Context.GetSymbol(node).Symbol is MethodSymbol { IsStatic: false } method)
-            Context.DiagnosticContext?.Report(InstanceMemberInStaticType, node.StartToken?.Location, method.Name, type.Name);
+            Context.DiagnosticContext?.Report(InstanceMemberInStaticType, node.Span.StartToken?.Location, method.Name, type.Name);
     }
 
     [Visitor]
     public void Visit(PropertyDeclarationNode node)
     {
         if (EnclosingStaticType(node) is { } type && Context.GetSymbol(node).Symbol is PropertySymbol { IsStatic: false } property)
-            Context.DiagnosticContext?.Report(InstanceMemberInStaticType, node.StartToken?.Location, property.Name, type.Name);
+            Context.DiagnosticContext?.Report(InstanceMemberInStaticType, node.Span.StartToken?.Location, property.Name, type.Name);
     }
 
     private TypeSymbol? EnclosingStaticType(ASTNode node) => Context.FirstAncestorOrSelf<ITypeDeclarationNode>(node) is { } declaration && Context.GetSymbol((ASTNode)declaration).Symbol is TypeSymbol { IsStatic: true } type ? type : null;

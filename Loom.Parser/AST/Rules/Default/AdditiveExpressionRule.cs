@@ -1,9 +1,9 @@
-﻿using Loom.Parser.Tokenizer;
+using Loom.Parser.Tokenizer;
 using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.AST.Rules.Default;
 
-public record BinaryExpressionNode(ExpressionNode Left, Token Operator, ExpressionNode Right) : ExpressionNode
+public record BinaryExpressionNode(ExpressionNode Left, Token Operator, ExpressionNode Right) : ExpressionNode(Span.Cover(Left.Span, Right.Span))
 {
     /// <inheritdoc/>
     public override IEnumerable<ASTNode> Children => [Left, Right];

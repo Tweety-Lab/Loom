@@ -14,9 +14,13 @@ public abstract class StatementParserRule : ParserRule<StatementNode>
     protected StatementParserRule(LoomParser parser) : base(parser) { }
 }
 
-public abstract record StatementNode() : ASTNode;
+public abstract record StatementNode : ASTNode
+{
+    protected StatementNode() { }
+    protected StatementNode(Span span) : base(span) { }
+}
 
-public record ExpressionStatementNode(ExpressionNode Expression) : StatementNode
+public record ExpressionStatementNode(ExpressionNode Expression) : StatementNode(Expression.Span)
 {
     /// <inheritdoc/>
     public override IEnumerable<ASTNode> Children => [Expression];
@@ -43,10 +47,9 @@ public class StatementRule : ParserRule<StatementNode>
     /// <summary> Parses a statement whose <c>;</c> terminator is left for the caller to consume. </summary>
     public StatementNode ParseClause()
     {
-        var startToken = Parser.Reader.Current;
+        var startPosition = Parser.Reader.Position;
         var statement = ParseStatement();
-        statement.Statement.StartToken = startToken;
-        return statement.Statement;
+        return Parser.Complete(statement.Statement, startPosition);
     }
 
     private (StatementNode Statement, bool RequiresTerminator) ParseStatement()

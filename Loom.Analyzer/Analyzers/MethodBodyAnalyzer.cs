@@ -24,6 +24,6 @@ public class MethodBodyAnalyzer : Analyzer
             return;
 
         if (node.Body == null && !symbol.IsExtern)
-            Context.DiagnosticContext?.Report(MethodNeedsBody, node.StartToken?.Location, symbol.FullyQualifiedName);
+            Context.DiagnosticContext?.Report(MethodNeedsBody, node.Span.StartToken?.Location, symbol.FullyQualifiedName);
     }
 }

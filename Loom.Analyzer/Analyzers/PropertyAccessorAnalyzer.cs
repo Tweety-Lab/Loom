@@ -26,13 +26,13 @@ public class PropertyAccessorAnalyzer : Analyzer
         if (Property(node.Target) is not { Setter: null } property || IsPrivateAssignment(node))
             return;
 
-        Context.DiagnosticContext?.Report(MissingSetAccessor, node.Target.StartToken?.Location, property.Name);
+        Context.DiagnosticContext?.Report(MissingSetAccessor, node.Target.Span.StartToken?.Location, property.Name);
     }
 
     private void CheckRead(ASTNode node, PropertySymbol? property)
     {
         if (property is { Getter: null } && !IsAssignmentTarget(node))
-            Context.DiagnosticContext?.Report(MissingGetAccessor, node.StartToken?.Location, property.Name);
+            Context.DiagnosticContext?.Report(MissingGetAccessor, node.Span.StartToken?.Location, property.Name);
     }
 
     private bool IsPrivateAssignment(AssignmentStatementNode node) =>node.Target is IdentifierNameNode && Property(node.Target) is { BackingField: not null, DeclaringNode: not null } property && Context.FirstAncestorOrSelf<ITypeDeclarationNode>(property.DeclaringNode) == Context.FirstAncestorOrSelf<ITypeDeclarationNode>(node);

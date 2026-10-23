@@ -26,10 +26,10 @@ public class InvalidPointerTypeAnalyzer : Analyzer
             return;
 
         if (symbol.Type.IsValueType && symbol.PointerType != PointerType.None)
-            Context.DiagnosticContext?.Report(ValueTypePointer, node.Variable.StartToken?.Location, symbol.PointerType, symbol.Type.Name);
+            Context.DiagnosticContext?.Report(ValueTypePointer, node.Variable.Span.StartToken?.Location, symbol.PointerType, symbol.Type.Name);
 
         if (symbol.Type is not ArrayTypeSymbol && !symbol.Type.IsValueType && symbol.PointerType == PointerType.None)
-            Context.DiagnosticContext?.Report(MissingPointer, node.Variable.StartToken?.Location, symbol.Type.Name);
+            Context.DiagnosticContext?.Report(MissingPointer, node.Variable.Span.StartToken?.Location, symbol.Type.Name);
 
     }
 
@@ -43,6 +43,6 @@ public class InvalidPointerTypeAnalyzer : Analyzer
             return;
 
         if (!symbol.ReturnType.IsValueType && symbol.ReturnPointerType == PointerType.None)
-            Context.DiagnosticContext?.Report(MissingReturnPointer, node.StartToken?.Location, symbol.ReturnType.Name);
+            Context.DiagnosticContext?.Report(MissingReturnPointer, node.Span.StartToken?.Location, symbol.ReturnType.Name);
     }
 }

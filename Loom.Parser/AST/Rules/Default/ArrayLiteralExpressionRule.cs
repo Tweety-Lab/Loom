@@ -1,4 +1,4 @@
-﻿using static Loom.Parser.Tokenizer.Token;
+using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.AST.Rules.Default;
 
@@ -23,10 +23,10 @@ public class ArrayLiteralExpressionRule : ParserRule<ArrayLiteralNode>
         var elements = new List<ExpressionNode>();
         if (Parser.Reader.Peek(0).Type != TokenType.RBracket)
         {
-            elements.Add(Parser.GetRule<ExpressionRule>().ParseNode());
+            elements.Add(Parser.GetRule<ExpressionRule>().Parse());
 
             while (Parser.Reader.Match(TokenType.Comma))
-                elements.Add(Parser.GetRule<ExpressionRule>().ParseNode());
+                elements.Add(Parser.GetRule<ExpressionRule>().Parse());
         }
 
         Parser.Reader.Expect(TokenType.RBracket); // ]

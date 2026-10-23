@@ -36,7 +36,7 @@ internal partial class MethodGenerator
 
         if (symbol == null)
         {
-            Console.WriteLine($"Could not find method symbol for declaration at {node.StartToken?.Location}!");
+            Console.WriteLine($"Could not find method symbol for declaration at {node.Span.StartToken?.Location}!");
             return;
         }
 
@@ -71,7 +71,7 @@ internal partial class MethodGenerator
 
         if (symbol == null)
         {
-            Console.WriteLine($"Could not find method symbol for declaration at {node.StartToken?.Location}!");
+            Console.WriteLine($"Could not find method symbol for declaration at {node.Span.StartToken?.Location}!");
             return;
         }
 

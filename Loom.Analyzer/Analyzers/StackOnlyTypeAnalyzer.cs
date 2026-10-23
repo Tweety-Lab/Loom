@@ -23,7 +23,7 @@ public class StackOnlyTypeAnalyzer : Analyzer
             return;
 
         if (symbol.Type?.IsStackOnly == true)
-            Context.DiagnosticContext?.Report(FieldCannotBeStackOnlyType, node.Variable.StartToken?.Location, symbol.Type.Name);
+            Context.DiagnosticContext?.Report(FieldCannotBeStackOnlyType, node.Variable.Span.StartToken?.Location, symbol.Type.Name);
     }
 
     [Visitor]
@@ -36,7 +36,7 @@ public class StackOnlyTypeAnalyzer : Analyzer
                 continue;
 
             if (symbol.IsStackOnly)
-                Context.DiagnosticContext?.Report(TypeParameterCannotBeStackOnlyType, typeArg.StartToken?.Location, symbol.Name);
+                Context.DiagnosticContext?.Report(TypeParameterCannotBeStackOnlyType, typeArg.Span.StartToken?.Location, symbol.Name);
         }
     }
 

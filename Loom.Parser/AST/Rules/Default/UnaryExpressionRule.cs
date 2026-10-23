@@ -3,7 +3,7 @@ using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.AST.Rules.Default;
 
-public record IncrementExpressionNode(ExpressionNode Target, Token Operator, bool IsPrefix) : ExpressionNode
+public record IncrementExpressionNode(ExpressionNode Target, Token Operator, bool IsPrefix) : ExpressionNode(IsPrefix ? Span.Cover(Span.FromToken(Operator), Target.Span) : Span.Cover(Target.Span, Span.FromToken(Operator)))
 {
     /// <inheritdoc/>
     public override IEnumerable<ASTNode> Children => [Target];

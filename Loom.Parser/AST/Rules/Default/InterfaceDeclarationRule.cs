@@ -23,9 +23,9 @@ public class InterfaceDeclarationRule : TypeMemberParserRule
         Parser.Reader.Expect(TokenType.Interface); // interface
         var name = Parser.Reader.Expect(TokenType.Identifier); // name
 
-        var typeParameters = Parser.Reader.Check(TokenType.Less) ? RunRule<TypeParameterListRule, TypeParameterListNode>() : new TypeParameterListNode([]);
+        var typeParameters = Parser.Reader.Check(TokenType.Less) ? RunRule<TypeParameterListRule, TypeParameterListNode>() : Parser.Empty(new TypeParameterListNode([]));
 
-        var inheritance = Parser.Reader.Check(TokenType.Colon) ? RunRule<InheritanceListRule, InheritanceListNode>() : new InheritanceListNode([]);
+        var inheritance = Parser.Reader.Check(TokenType.Colon) ? RunRule<InheritanceListRule, InheritanceListNode>() : Parser.Empty(new InheritanceListNode([]));
 
         var body = RunRule<TypeDeclarationBlockRule, BlockNode>();
 

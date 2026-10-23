@@ -2,7 +2,8 @@
 
 namespace Loom.Parser.AST.Rules.Default;
 
-public record AssignmentStatementNode(ExpressionNode Target, ExpressionNode Value) : StatementNode
+public record AssignmentStatementNode(ExpressionNode Target, ExpressionNode Value)
+    : StatementNode(Span.Cover(Target.Span, Value.Span))
 {
     /// <inheritdoc/>
     public override IEnumerable<ASTNode> Children => [Target, Value];

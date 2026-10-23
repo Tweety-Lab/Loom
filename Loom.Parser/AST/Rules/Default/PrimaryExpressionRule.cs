@@ -2,8 +2,11 @@
 
 namespace Loom.Parser.AST.Rules.Default;
 
-public abstract record ExpressionNode() : ASTNode
+public abstract record ExpressionNode : ASTNode
 {
+    protected ExpressionNode() { }
+    protected ExpressionNode(Span span) : base(span) { }
+
     /// <inheritdoc/>
     public override IEnumerable<ASTNode> Children => Enumerable.Empty<ASTNode>();
 }

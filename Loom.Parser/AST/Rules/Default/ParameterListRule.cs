@@ -3,7 +3,7 @@ using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.AST.Rules.Default;
 
-public record ParameterNode(TypeNode Type, Token Name) : ASTNode
+public record ParameterNode(TypeNode Type, Token Name) : ASTNode(Span.Cover(Type.Span, Span.FromToken(Name)))
 {
     /// <inheritdoc/>
     public override IEnumerable<ASTNode> Children => Enumerable.Empty<ASTNode>();

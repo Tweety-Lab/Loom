@@ -36,12 +36,13 @@ public class TypeRule : ParserRule<TypeNode>
 
         ArraySizeSpecifierNode? arraySize = null;
 
+        var arrayStart = Parser.Reader.Position;
         if (Parser.Reader.Match(TokenType.LBracket)) // [
         {
             var size = Parser.Reader.Expect(TokenType.Number); // number
             Parser.Reader.Expect(TokenType.RBracket); // ]
 
-            arraySize = new ArraySizeSpecifierNode(size);
+            arraySize = Parser.Complete(new ArraySizeSpecifierNode(size), arrayStart);
         }
 
         return new TypeNode(type, modifiers, typeArguments, arraySize);

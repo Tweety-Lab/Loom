@@ -25,19 +25,19 @@ public class InterfaceAnalyzer : Analyzer
             {
                 case MethodDeclarationNode method:
                     if (method.Body != null)
-                        Context.DiagnosticContext?.Report(MemberHasBody, method.StartToken?.Location, method.MethodName.Text);
+                        Context.DiagnosticContext?.Report(MemberHasBody, method.Span.StartToken?.Location, method.MethodName.Text);
 
                     break;
                 case PropertyDeclarationNode property:
                     if (property.Initializer != null)
-                        Context.DiagnosticContext?.Report(PropertyHasInitializer, property.StartToken?.Location, property.Name.Text);
+                        Context.DiagnosticContext?.Report(PropertyHasInitializer, property.Span.StartToken?.Location, property.Name.Text);
 
                     if (property.Accessors.Any(accessor => accessor.Body != null))
-                        Context.DiagnosticContext?.Report(MemberHasBody, property.StartToken?.Location, property.Name.Text);
+                        Context.DiagnosticContext?.Report(MemberHasBody, property.Span.StartToken?.Location, property.Name.Text);
 
                     break;
                 default:
-                    Context.DiagnosticContext?.Report(InvalidMember, member.StartToken?.Location, node.Name.Text);
+                    Context.DiagnosticContext?.Report(InvalidMember, member.Span.StartToken?.Location, node.Name.Text);
                     break;
             }
         }
@@ -47,6 +47,6 @@ public class InterfaceAnalyzer : Analyzer
     public void Visit(InstanceCreationExpresssionNode node)
     {
         if (Context.GetSymbol(node.TypeName).Symbol is TypeSymbol { KnownType: TypeSymbol.DefaultType.Interface } type)
-            Context.DiagnosticContext?.Report(CannotInstantiate, node.StartToken?.Location, type.Name);
+            Context.DiagnosticContext?.Report(CannotInstantiate, node.Span.StartToken?.Location, type.Name);
     }
 }

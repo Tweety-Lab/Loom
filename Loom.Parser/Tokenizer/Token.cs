@@ -190,6 +190,12 @@ public class Token
     /// <summary> The source location of the token. </summary>
     public TokenLocation Location { get; }
 
+    /// <summary> The absolute UTF-16 source offset where this token starts. </summary>
+    public int Start { get; internal set; }
+
+    /// <summary> The absolute UTF-16 source offset immediately after this token. </summary>
+    public int End { get; internal set; }
+
     /// <summary> Initializes a new instance of the <see cref="Token"/> class. </summary>
     public Token(TokenType type, string value, TokenLocation location)
     {

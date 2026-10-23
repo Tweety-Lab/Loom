@@ -3,7 +3,7 @@ using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.AST.Rules.Default;
 
-public record EnumMemberNode(Token Name) : ASTNode
+public record EnumMemberNode(Token Name) : ASTNode(Span.FromToken(Name))
 {
     /// <inheritdoc/>
     public override IEnumerable<ASTNode> Children => Enumerable.Empty<ASTNode>();
@@ -28,19 +28,20 @@ public class EnumDeclarationRule : TypeMemberParserRule
 
         Parser.Reader.Expect(TokenType.Enum);
         var name = Parser.Reader.Expect(TokenType.Identifier);
+        var bodyStart = Parser.Reader.Position;
         Parser.Reader.Expect(TokenType.LBrace);
 
         var members = new List<ASTNode>();
         while (!Parser.Reader.Check(TokenType.RBrace))
         {
             var memberName = Parser.Reader.Expect(TokenType.Identifier);
-            members.Add(new EnumMemberNode(memberName) { StartToken = memberName });
+            members.Add(new EnumMemberNode(memberName));
 
             if (!Parser.Reader.Check(TokenType.RBrace))
                 Parser.Reader.Expect(TokenType.Comma);
         }
 
         Parser.Reader.Expect(TokenType.RBrace);
-        return new EnumDeclarationNode(name, new BlockNode(members), modifiers);
+        return new EnumDeclarationNode(name, Parser.Complete(new BlockNode(members), bodyStart), modifiers);
     }
 }

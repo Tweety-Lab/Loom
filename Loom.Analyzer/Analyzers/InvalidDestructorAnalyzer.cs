@@ -24,18 +24,18 @@ public class InvalidDestructorAnalyzer : Analyzer
             return;
 
         if (node.Parameters.Count != 0)
-            Context.DiagnosticContext?.Report(InvalidParameters, node.StartToken?.Location, node.Name.Text);
+            Context.DiagnosticContext?.Report(InvalidParameters, node.Span.StartToken?.Location, node.Name.Text);
 
         if (node.HasModifier(TokenType.Static) || node.HasModifier(TokenType.Extern))
-            Context.DiagnosticContext?.Report(InvalidModifiers, node.StartToken?.Location, node.Name.Text);
+            Context.DiagnosticContext?.Report(InvalidModifiers, node.Span.StartToken?.Location, node.Name.Text);
 
         if (type.IsStatic)
-            Context.DiagnosticContext?.Report(StaticTypeAnalyzer.InstanceMemberInStaticType, node.StartToken?.Location, node.Name.Text, type.Name);
+            Context.DiagnosticContext?.Report(StaticTypeAnalyzer.InstanceMemberInStaticType, node.Span.StartToken?.Location, node.Name.Text, type.Name);
 
         if (node.Name.Text != type.Name)
-            Context.DiagnosticContext?.Report(InvalidName, node.StartToken?.Location, node.Name.Text, type.Name);
+            Context.DiagnosticContext?.Report(InvalidName, node.Span.StartToken?.Location, node.Name.Text, type.Name);
 
         if (type.Members.OfType<MethodSymbol>().Count(method => method.Kind == MethodSymbol.MethodKind.Destructor) > 1)
-            Context.DiagnosticContext?.Report(DuplicateDestructor, node.StartToken?.Location, type.Name);
+            Context.DiagnosticContext?.Report(DuplicateDestructor, node.Span.StartToken?.Location, type.Name);
     }
 }

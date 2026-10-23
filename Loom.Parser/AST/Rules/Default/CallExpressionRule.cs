@@ -1,8 +1,8 @@
-﻿using static Loom.Parser.Tokenizer.Token;
+using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.AST.Rules.Default;
 
-public record CallExpressionNode(ExpressionNode Callee, TypeArgumentListNode TypeArguments, List<ExpressionNode> Arguments) : ExpressionNode
+public record CallExpressionNode(ExpressionNode Callee, TypeArgumentListNode TypeArguments, List<ExpressionNode> Arguments) : ExpressionNode(Callee.Span)
 {
     /// <inheritdoc/>
     public override IEnumerable<ASTNode> Children => Arguments.Prepend(Callee);
@@ -25,7 +25,7 @@ public class CallExpressionRule : ParserRule<CallExpressionNode>
         var target = Callee;
 
         // Type Arguments
-        var typeArguments = Parser.Reader.Check(TokenType.Less) ? RunRule<TypeArgumentListRule, TypeArgumentListNode>() : new TypeArgumentListNode([]);
+        var typeArguments = Parser.Reader.Check(TokenType.Less) ? RunRule<TypeArgumentListRule, TypeArgumentListNode>() : Parser.Empty(new TypeArgumentListNode([]));
 
         Parser.Reader.Expect(TokenType.LParen); // (
 
@@ -33,10 +33,10 @@ public class CallExpressionRule : ParserRule<CallExpressionNode>
         var args = new List<ExpressionNode>();
         if (Parser.Reader.Peek(0).Type != TokenType.RParen)
         {
-            args.Add(Parser.GetRule<ExpressionRule>().ParseNode());
+            args.Add(Parser.GetRule<ExpressionRule>().Parse());
 
             while (Parser.Reader.Match(TokenType.Comma))
-                args.Add(Parser.GetRule<ExpressionRule>().ParseNode());
+                args.Add(Parser.GetRule<ExpressionRule>().Parse());
         }
 
         Parser.Reader.Expect(TokenType.RParen); // )

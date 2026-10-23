@@ -37,7 +37,7 @@ public class TypeMismatchAnalyzer : Analyzer
         if (node.Expression == null)
         {
             if (!isVoid)
-                Context.DiagnosticContext?.Report(MissingReturn, node.StartToken?.Location, returnType.Name);
+                Context.DiagnosticContext?.Report(MissingReturn, node.Span.StartToken?.Location, returnType.Name);
 
             return;
         }
@@ -45,7 +45,7 @@ public class TypeMismatchAnalyzer : Analyzer
         // return value; when return is void
         if (isVoid)
         {
-            Context.DiagnosticContext?.Report(UnexpectedValue, node.StartToken?.Location);
+            Context.DiagnosticContext?.Report(UnexpectedValue, node.Span.StartToken?.Location);
             return;
         }
 
@@ -127,6 +127,6 @@ public class TypeMismatchAnalyzer : Analyzer
             return;
 
         if (!TypeConversions.CanImplicitlyConvert(assignedType, assignee))
-            Context.DiagnosticContext?.Report(TypeMismatch, assigned.StartToken?.Location, assignedType.Name, assignee.Name);
+            Context.DiagnosticContext?.Report(TypeMismatch, assigned.Span.StartToken?.Location, assignedType.Name, assignee.Name);
     }
 }

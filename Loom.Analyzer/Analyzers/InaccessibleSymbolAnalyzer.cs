@@ -41,7 +41,7 @@ public class InaccessibleSymbolAnalyzer : Analyzer
         var usageType = Context.FirstAncestorOrSelf<ITypeDeclarationNode>(node);
 
         if (declaringType != null && declaringType != usageType)
-            Context.DiagnosticContext?.Report(InaccessibleMemberDiagnostic, node.StartToken?.Location, member.Name);
+            Context.DiagnosticContext?.Report(InaccessibleMemberDiagnostic, node.Span.StartToken?.Location, member.Name);
     }
 
     [Visitor]
@@ -64,7 +64,7 @@ public class InaccessibleSymbolAnalyzer : Analyzer
         var declaringType = Context.FirstAncestorOrSelf<ITypeDeclarationNode>(method.DeclaringNode!);
         var usageType = Context.FirstAncestorOrSelf<ITypeDeclarationNode>(node);
         if (declaringType != null && declaringType != usageType)
-            Context.DiagnosticContext?.Report(InaccessibleMemberDiagnostic, node.StartToken?.Location ?? node.Receiver.StartToken?.Location, "operator[]");
+            Context.DiagnosticContext?.Report(InaccessibleMemberDiagnostic, node.Span.StartToken?.Location ?? node.Receiver.Span.StartToken?.Location, "operator[]");
     }
 
     [Visitor]
@@ -98,7 +98,7 @@ public class InaccessibleSymbolAnalyzer : Analyzer
             var usageType = Context.FirstAncestorOrSelf<ITypeDeclarationNode>(node);
 
             if (declaringType != null && declaringType != usageType)
-                Context.DiagnosticContext?.Report(InaccessibleMemberDiagnostic, node.StartToken?.Location, constructor.Name);
+                Context.DiagnosticContext?.Report(InaccessibleMemberDiagnostic, node.Span.StartToken?.Location, constructor.Name);
         }
     }
 
@@ -123,6 +123,6 @@ public class InaccessibleSymbolAnalyzer : Analyzer
         var symbolModule = symbolModuleNode is not null ? Context.GetSymbol(symbolModuleNode).Symbol as ModuleSymbol : null;
 
         if (usageModule != symbolModule && !exportable.IsExported)
-            Context.DiagnosticContext?.Report(UnexportedSymbolDiagnostic, node.StartToken?.Location, symbol.Name);
+            Context.DiagnosticContext?.Report(UnexportedSymbolDiagnostic, node.Span.StartToken?.Location, symbol.Name);
     }
 }

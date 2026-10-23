@@ -33,11 +33,11 @@ internal static class InheritanceBinder
                     continue;
 
                 if (owner.IsStatic || type.IsStatic || syntax.Modifiers.Count != 0 || syntax.ArraySize != null)
-                    context.DiagnosticContext?.Report(InvalidBase, syntax.StartToken?.Location, owner.Name, type.FullyQualifiedName);
+                    context.DiagnosticContext?.Report(InvalidBase, syntax.Span.StartToken?.Location, owner.Name, type.FullyQualifiedName);
                 else if (type.KnownType == TypeSymbol.DefaultType.Interface)
                 {
                     if (interfaces.Contains(type))
-                        context.DiagnosticContext?.Report(DuplicateInterface, syntax.StartToken?.Location, type.FullyQualifiedName, owner.Name);
+                        context.DiagnosticContext?.Report(DuplicateInterface, syntax.Span.StartToken?.Location, type.FullyQualifiedName, owner.Name);
                     else
                         interfaces.Add(type);
                 }
@@ -45,10 +45,10 @@ internal static class InheritanceBinder
                 {
                     owner.BaseType = type;
                     if (syntax != inheritance[0])
-                        context.DiagnosticContext?.Report(BaseClassOrder, syntax.StartToken?.Location, type.FullyQualifiedName, owner.Name);
+                        context.DiagnosticContext?.Report(BaseClassOrder, syntax.Span.StartToken?.Location, type.FullyQualifiedName, owner.Name);
                 }
                 else
-                    context.DiagnosticContext?.Report(InvalidBase, syntax.StartToken?.Location, owner.Name, type.FullyQualifiedName);
+                    context.DiagnosticContext?.Report(InvalidBase, syntax.Span.StartToken?.Location, owner.Name, type.FullyQualifiedName);
             }
 
             owner.Interfaces = interfaces.ToArray();
@@ -57,7 +57,7 @@ internal static class InheritanceBinder
         foreach (var declaration in declarations)
         {
             if (context.GetSymbol(declaration).Symbol is TypeSymbol owner && HasCycle(owner, owner, []))
-                context.DiagnosticContext?.Report(CircularInheritance, declaration.StartToken?.Location, owner.Name);
+                context.DiagnosticContext?.Report(CircularInheritance, declaration.Span.StartToken?.Location, owner.Name);
         }
     }
 

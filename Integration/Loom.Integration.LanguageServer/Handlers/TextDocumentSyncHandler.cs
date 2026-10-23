@@ -17,7 +17,6 @@ internal class TextDocumentSyncHandler(ParsedDocumentStore documents) : TextDocu
     public override Task<Unit> Handle(DidOpenTextDocumentParams request, CancellationToken cancellationToken)
     {
         documents.Open(request.TextDocument);
-
         return Unit.Task;
     }
 
@@ -25,7 +24,6 @@ internal class TextDocumentSyncHandler(ParsedDocumentStore documents) : TextDocu
     public override Task<Unit> Handle(DidCloseTextDocumentParams request, CancellationToken cancellationToken)
     {
         documents.Close(request.TextDocument.Uri);
-
         return Unit.Task;
     }
 

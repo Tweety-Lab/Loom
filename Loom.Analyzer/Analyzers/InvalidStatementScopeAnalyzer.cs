@@ -17,6 +17,6 @@ public class InvalidStatementScopeAnalyzer : Analyzer
     public void Visit(StatementNode node)
     {
         if (Context.FirstAncestorOrSelf<MethodDeclarationNode>(node) == null && Context.FirstAncestorOrSelf<ConstructorDeclarationNode>(node) == null && Context.FirstAncestorOrSelf<DestructorDeclarationNode>(node) == null && Context.FirstAncestorOrSelf<ModuleNode>(node) == null && Context.FirstAncestorOrSelf<OperatorDeclarationNode>(node) == null)
-            Context.DiagnosticContext?.Report(InvalidStatementScope, node.StartToken?.Location);
+            Context.DiagnosticContext?.Report(InvalidStatementScope, node.Span.StartToken?.Location);
     }
 }

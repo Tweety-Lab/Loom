@@ -123,7 +123,7 @@ internal class OwnershipWalker : ASTVisitor
         if (expr is IdentifierNameNode identifier && ResolvePlace(identifier) is { } place)
         {
             if (TryGetState(identifier, out var state) && state == OwnershipState.Moved)
-                Context.DiagnosticContext?.Report(UseOfMovedValue, identifier.StartToken?.Location, identifier.BaseName);
+                Context.DiagnosticContext?.Report(UseOfMovedValue, identifier.Span.StartToken?.Location, identifier.BaseName);
             else
                 states[place] = OwnershipState.Moved;
         }
@@ -136,7 +136,7 @@ internal class OwnershipWalker : ASTVisitor
         if (expr is IdentifierNameNode identifier && ResolvePlace(identifier) is { } place)
         {
             if (TryGetState(identifier, out var state) && state == OwnershipState.Moved)
-                Context.DiagnosticContext?.Report(UseOfMovedValue, identifier.StartToken?.Location, identifier.BaseName);
+                Context.DiagnosticContext?.Report(UseOfMovedValue, identifier.Span.StartToken?.Location, identifier.BaseName);
         }
         else
             Dispatch(expr);

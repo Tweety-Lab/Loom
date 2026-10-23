@@ -34,7 +34,11 @@ public class TokenReader
         while (Match(TokenType.ColonColon))
             segments.Add(Expect(TokenType.Identifier).Text);
 
-        return new Token(TokenType.Identifier, string.Join("::", segments), first.Location);
+        return new Token(TokenType.Identifier, string.Join("::", segments), first.Location)
+        {
+            Start = first.Start,
+            End = Tokens[Position - 1].End
+        };
     }
 
     public Token Peek(int offset = 1)

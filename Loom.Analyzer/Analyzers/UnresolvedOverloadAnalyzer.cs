@@ -22,9 +22,9 @@ public class UnresolvedOverloadAnalyzer : Analyzer
         var name = Name(node.Callee);
 
         if (failure == OverloadFailure.Ambiguous)
-            Context.DiagnosticContext?.Report(AmbiguousOverload, node.StartToken?.Location, name);
+            Context.DiagnosticContext?.Report(AmbiguousOverload, node.Span.StartToken?.Location, name);
         else
-            Context.DiagnosticContext?.Report(NoMatchingOverload, node.StartToken?.Location, name, node.Arguments.Count);
+            Context.DiagnosticContext?.Report(NoMatchingOverload, node.Span.StartToken?.Location, name, node.Arguments.Count);
     }
 
     private static string Name(ExpressionNode callee) => callee switch

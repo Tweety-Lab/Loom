@@ -21,10 +21,8 @@ public abstract class ParserRule<T> : IParserRule where T : ASTNode
 
     public T Parse()
     {
-        var startToken = Parser.Reader.Current;
-        var node = ParseNode();
-        node.StartToken = startToken;
-        return node;
+        var startPosition = Parser.Reader.Position;
+        return Parser.Complete(ParseNode(), startPosition);
     }
 
     /// <inheritdoc/>

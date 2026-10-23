@@ -23,7 +23,7 @@ public class UnsafeCodeAnalyzer : Analyzer
                 return;
 
             if (symbol.FullyQualifiedName.StartsWith("Standard::Memory::Unsafe") && Context.FirstAncestorOrSelf<UnsafeStatementNode>(node) == null)
-                Context.DiagnosticContext?.Report(SymbolUsedOutsideUnsafe, node.StartToken?.Location, symbol.FullyQualifiedName);
+                Context.DiagnosticContext?.Report(SymbolUsedOutsideUnsafe, node.Span.StartToken?.Location, symbol.FullyQualifiedName);
         }
     }
 }

@@ -42,7 +42,7 @@ public class InterfaceImplementationAnalyzer : Analyzer
                 };
 
                 if (implemented == false)
-                    Context.DiagnosticContext?.Report(MissingImplementation, node.StartToken?.Location, type.FullyQualifiedName, Display(required));
+                    Context.DiagnosticContext?.Report(MissingImplementation, node.Span.StartToken?.Location, type.FullyQualifiedName, Display(required));
             }
         }
     }

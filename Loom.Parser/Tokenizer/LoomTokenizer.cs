@@ -56,7 +56,11 @@ public class LoomTokenizer
                 if (rule.CanHandle(current))
                 {
                     rule.Reader = Reader;
-                    Tokens.Add(rule.Read());
+                    var start = Reader.Position;
+                    var token = rule.Read();
+                    token.Start = start;
+                    token.End = Reader.Position;
+                    Tokens.Add(token);
                     matched = true;
                     break;
                 }
@@ -65,7 +69,11 @@ public class LoomTokenizer
                 Reader.Read();
         }
 
-        Tokens.Add(new Token(Token.TokenType.EOF, "", new TokenLocation(Reader.Line, Reader.Column)));
+        Tokens.Add(new Token(Token.TokenType.EOF, "", new TokenLocation(Reader.Line, Reader.Column))
+        {
+            Start = Reader.Position,
+            End = Reader.Position
+        });
         return Tokens;
     }
 }

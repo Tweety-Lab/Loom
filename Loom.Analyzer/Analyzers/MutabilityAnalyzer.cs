@@ -19,7 +19,7 @@ public class MutabilityAnalyzer : Analyzer
         if (FindBorrowedParameter(node.Target) is not { IsMutable: false } parameter)
             return;
 
-        Context.DiagnosticContext?.Report(CannotMutateRef, node.StartToken?.Location, parameter.Name);
+        Context.DiagnosticContext?.Report(CannotMutateRef, node.Span.StartToken?.Location, parameter.Name);
     }
 
     [Visitor]
@@ -28,7 +28,7 @@ public class MutabilityAnalyzer : Analyzer
         if (FindBorrowedParameter(node.Target) is not { IsMutable: false } parameter)
             return;
 
-        Context.DiagnosticContext?.Report(CannotMutateRef, node.StartToken?.Location, parameter.Name);
+        Context.DiagnosticContext?.Report(CannotMutateRef, node.Span.StartToken?.Location, parameter.Name);
     }
 
     private ParameterSymbol? FindBorrowedParameter(ExpressionNode target) => target switch

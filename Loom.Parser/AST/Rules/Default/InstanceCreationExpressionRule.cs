@@ -1,4 +1,4 @@
-﻿using static Loom.Parser.Tokenizer.Token;
+using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.AST.Rules.Default;
 
@@ -30,10 +30,10 @@ public class InstanceCreationExpressionRule : ParserRule<InstanceCreationExpress
         var args = new List<ExpressionNode>();
         if (Parser.Reader.Peek(0).Type != TokenType.RParen)
         {
-            args.Add(Parser.GetRule<ExpressionRule>().ParseNode());
+            args.Add(Parser.GetRule<ExpressionRule>().Parse());
 
             while (Parser.Reader.Match(TokenType.Comma))
-                args.Add(Parser.GetRule<ExpressionRule>().ParseNode());
+                args.Add(Parser.GetRule<ExpressionRule>().Parse());
         }
 
         Parser.Reader.Expect(TokenType.RParen); // )

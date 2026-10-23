@@ -27,30 +27,30 @@ public class ArrayBoundsAnalyzer : Analyzer
             if (OverloadResolver.DiagnoseIndexOperator(Context, node) is { } failure)
             {
                 var diagnostic = failure == OverloadFailure.Ambiguous ? UnresolvedOverloadAnalyzer.AmbiguousOverload : UnresolvedOverloadAnalyzer.NoMatchingOverload;
-                Context.DiagnosticContext?.Report(diagnostic, node.StartToken?.Location ?? node.Receiver.StartToken?.Location, "operator[]", 2);
+                Context.DiagnosticContext?.Report(diagnostic, node.Span.StartToken?.Location ?? node.Receiver.Span.StartToken?.Location, "operator[]", 2);
                 return;
             }
 
             if (Context.GetSymbol(node).Symbol is MethodSymbol { Kind: MethodSymbol.MethodKind.Operator })
             {
                 if (Context.GetParent(node) is AssignmentStatementNode assignment && assignment.Target == node || Context.GetParent(node) is IncrementExpressionNode increment && increment.Target == node)
-                    Context.DiagnosticContext?.Report(IndexOperatorResultNotAssignable, node.StartToken?.Location ?? node.Receiver.StartToken?.Location);
+                    Context.DiagnosticContext?.Report(IndexOperatorResultNotAssignable, node.Span.StartToken?.Location ?? node.Receiver.Span.StartToken?.Location);
 
                 return;
             }
 
-            Context.DiagnosticContext?.Report(NonArrayIndex, node.Receiver.StartToken?.Location, name);
+            Context.DiagnosticContext?.Report(NonArrayIndex, node.Receiver.Span.StartToken?.Location, name);
             return;
         }
 
         if (!Context.ExpressionTypes.TryGetValue(node.Index, out var indexType) || indexType.KnownType != TypeSymbol.DefaultType.I32)
         {
-            Context.DiagnosticContext?.Report(InvalidIndexType, node.Index.StartToken?.Location);
+            Context.DiagnosticContext?.Report(InvalidIndexType, node.Index.Span.StartToken?.Location);
             return;
         }
 
         if (node.Index is NumberLiteralNode literal && literal.Value >= array.Size)
-            Context.DiagnosticContext?.Report(IndexOutOfBounds, literal.StartToken?.Location, literal.Value, name, array.Size);
+            Context.DiagnosticContext?.Report(IndexOutOfBounds, literal.Span.StartToken?.Location, literal.Value, name, array.Size);
     }
 
     [Visitor]
@@ -60,7 +60,7 @@ public class ArrayBoundsAnalyzer : Analyzer
             return;
 
         if (node.Elements.Count > array.Size)
-            Context.DiagnosticContext?.Report(TooManyElements, node.StartToken?.Location, node.Elements.Count, array.Name, array.Size);
+            Context.DiagnosticContext?.Report(TooManyElements, node.Span.StartToken?.Location, node.Elements.Count, array.Name, array.Size);
     }
 
     private static string Describe(ExpressionNode node) => node switch

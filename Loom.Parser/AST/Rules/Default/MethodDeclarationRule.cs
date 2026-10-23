@@ -1,4 +1,4 @@
-﻿using Loom.Parser.Tokenizer;
+using Loom.Parser.Tokenizer;
 using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.AST.Rules.Default;
@@ -25,7 +25,7 @@ public class MethodDeclarationRule : TypeMemberParserRule
         var methodName = Parser.Reader.Expect(TokenType.Identifier); // name
 
         // Type Parameters
-        var typeParameters = Parser.Reader.Check(TokenType.Less) ? RunRule<TypeParameterListRule, TypeParameterListNode>(): new TypeParameterListNode([]); // TODO: this should be nullable probably
+        var typeParameters = Parser.Reader.Check(TokenType.Less) ? RunRule<TypeParameterListRule, TypeParameterListNode>(): Parser.Empty(new TypeParameterListNode([])); // TODO: this should be nullable probably
 
         var parameters = RunRule<ParameterListRule, ParameterListNode>();
 
