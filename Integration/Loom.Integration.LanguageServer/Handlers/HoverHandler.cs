@@ -4,6 +4,8 @@ using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using Loom.Integration.LanguageServer.Presentation;
 using Loom.Integration.LanguageServer.Presentation.Generic;
 using Loom.Integration.LanguageServer.Documents;
+using Loom.Analyzer.Symbols;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Loom.Integration.LanguageServer.Handlers;
 
@@ -24,7 +26,14 @@ internal class HoverHandler(ParsedDocumentStore documents, DocumentAnalysisServi
 
         var analysis = await analyses.AnalyzeAsync(parsed, cancellationToken);
         var symbol = analysis.GetSymbol(node).Symbol;
-        return symbol is null ? null : new ClassifiedTextBuilder(backend).StructName(symbol.FullyQualifiedName).BuildHover();
+
+        if (symbol is null)
+            return null;
+
+        if (!TryBuildSymbolName(symbol, out var builder))
+            return null;
+
+        return builder.BuildHover();
     }
 
     /// <inheritdoc/>
@@ -35,5 +44,44 @@ internal class HoverHandler(ParsedDocumentStore documents, DocumentAnalysisServi
         {
             DocumentSelector = new TextDocumentSelector(new TextDocumentFilter { Pattern = "**/*.loom" })
         };
+    }
+
+    private bool TryBuildSymbolName(Symbol symbol, [NotNullWhen(true)] out ClassifiedTextBuilder? builder)
+    {
+        switch (symbol)
+        {
+            case TypeSymbol type:
+                builder = BuildTypeSymbolName(type);
+                return true;
+            default:
+                builder = null;
+                return false;
+        }
+    }
+
+    private ClassifiedTextBuilder BuildTypeSymbolName(TypeSymbol symbol)
+    {
+        ClassifiedTextBuilder builder = new ClassifiedTextBuilder(backend);
+
+        builder.Keyword(symbol.IsExported ? "export " : "");
+        builder.Keyword(symbol.IsStatic ? "static " : "");
+        builder.Keyword(symbol.IsStackOnly ? "stack " : "");
+
+        ReadOnlySpan<string> parts = symbol.FullyQualifiedName.Split("::");
+
+        builder.Keyword(symbol.IsValueType ? "struct " : "class ");
+
+        for (int i = 0; i < parts.Length - 1; i++)
+        {
+            builder.Namespace(parts[i]);
+            builder.Punctuation("::");
+        }
+
+        if (symbol.IsValueType)
+            builder.StructName(parts[^1]);
+        else
+            builder.ClassName(parts[^1]);
+
+        return builder;
     }
 }
