@@ -3,6 +3,7 @@
     <Project Path="CodeGen/Loom.CodeGen.LLVM/Loom.CodeGen.LLVM.csproj" Id="717ccacf-c04c-4319-a039-0520e662fa26" />
   </Folder>
   <Folder Name="/Integration/">
+    <Project Path="Integration/Loom.Integration.LanguageServer/Loom.Integration.LanguageServer.csproj" Id="a990c356-a569-4090-bf23-a60e0fc7772c" />
     <Project Path="Integration/Loom.Integration.VisualStudio/Loom.Integration.VisualStudio.csproj" Id="69c9250d-87f9-4f44-81d8-ff7c5fc4a88c">
       <Deploy />
     </Project>

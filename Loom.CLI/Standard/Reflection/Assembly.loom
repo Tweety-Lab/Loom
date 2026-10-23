@@ -3,10 +3,10 @@ import Standard::Memory;
 
 module Standard::Reflection
 {
-	/// @brief Represents compiled assembly used to load and execute code.
+	/// @brief Represents a compiled Loom assembly.
 	export struct Assembly
 	{
-		/// @brief The assembly executing this code.
+		/// @brief The /ref Assembly that contains the currently executing code.
 		public static Assembly Current { get; }
 
 		/// @brief The name of this assembly.
