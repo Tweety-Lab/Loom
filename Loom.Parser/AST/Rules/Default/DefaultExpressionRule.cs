@@ -5,7 +5,7 @@ namespace Loom.Parser.AST.Rules.Default;
 public record DefaultExpressionNode(TypeNode? Type = null) : ExpressionNode
 {
     /// <inheritdoc/>
-    public override IEnumerable<ASTNode> Children => Enumerable.Empty<ASTNode>();
+    public override IEnumerable<ASTNode> Children => Type is null ? [] : [Type];
 }
 
 [ParserRule]

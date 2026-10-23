@@ -150,6 +150,16 @@ public class AnalysisContext
     /// <summary> Gets the <see cref="SymbolInfo"/> bound to <paramref name="node"/>. </summary>
     public SymbolInfo GetSymbol(ASTNode node)
     {
+        if (node is IdentifierNameNode && GetParent(node) is MemberAccessExpressionNode access
+            && ReferenceEquals(access.Name, node))
+            return GetSymbol(access);
+
+        if (node is IdentifierNameNode or MemberAccessExpressionNode && GetParent(node) is CallExpressionNode call && ReferenceEquals(call.Callee, node) && Symbols.TryGetValue(call, out var invocation))
+            return invocation;
+
+        if (node is VariableDeclarationNode && GetParent(node) is FieldDeclarationNode or LocalDeclarationStatementNode)
+            return GetSymbol(GetParent(node)!);
+
         if (Symbols.TryGetValue(node, out var info))
             return info;
 

@@ -43,11 +43,24 @@ public abstract record ASTNode
     /// <summary> The children of this node. </summary>
     public abstract IEnumerable<ASTNode> Children { get; }
 
-    /// <summary> Every node below this node, outermost first. </summary>
+    /// <summary> Every node below this node. </summary>
     public IEnumerable<ASTNode> Descendants => Children.SelectMany(child => child.Descendants.Prepend(child));
 
     /// <summary> The source range and first token that make up this node. </summary>
     public Span Span { get; set; }
+
+    /// <summary> Finds the node at the given source offset. </summary>
+    public ASTNode? FindNode(int offset)
+    {
+        if (!Span.Contains(offset))
+            return null;
+
+        foreach (var child in Children)
+            if (child.FindNode(offset) is { } node)
+                return node;
+
+        return this;
+    }
 
     /// <summary> Accepts a visitor. </summary>
     public void Accept(ASTVisitor visitor) => visitor.Dispatch(this);

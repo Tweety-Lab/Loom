@@ -6,7 +6,7 @@ namespace Loom.Parser.AST.Rules.Default;
 public record ParameterNode(TypeNode Type, Token Name) : ASTNode(Span.Cover(Type.Span, Span.FromToken(Name)))
 {
     /// <inheritdoc/>
-    public override IEnumerable<ASTNode> Children => Enumerable.Empty<ASTNode>();
+    public override IEnumerable<ASTNode> Children => [Type];
 }
 
 public record ParameterListNode : ListNode<ParameterNode>

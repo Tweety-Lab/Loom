@@ -12,7 +12,9 @@ internal class Program
         var server = await OmniSharp.Extensions.LanguageServer.Server.LanguageServer.From(options => options
             .WithInput(Console.OpenStandardInput())
             .WithOutput(Console.OpenStandardOutput())
-            .WithServices(services => services.AddSingleton<ParsedDocumentStore>())
+            .WithServices(services => services
+                .AddSingleton<ParsedDocumentStore>()
+                .AddSingleton<DocumentAnalysisService>())
             .WithHandler<TextDocumentSyncHandler>()
             .WithHandler<HoverHandler>()
         );

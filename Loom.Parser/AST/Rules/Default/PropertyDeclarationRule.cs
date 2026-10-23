@@ -7,7 +7,7 @@ public record PropertyDeclarationNode(List<Token> Modifiers, TypeNode Type, Toke
 {
     // TODO: Visit the accessor bodies once declared accessors are supported instead of being auto-implemented
     /// <inheritdoc/>
-    public override IEnumerable<ASTNode> Children => Initializer is not null ? [Initializer] : Enumerable.Empty<ASTNode>();
+    public override IEnumerable<ASTNode> Children => Initializer is not null ? [Type, Initializer] : [Type];
 }
 
 public record AccessorNode(Token AccessorType, BlockNode? Body) : ASTNode

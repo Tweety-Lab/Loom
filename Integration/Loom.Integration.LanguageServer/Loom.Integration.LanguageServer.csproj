@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Loom.Parser\Loom.Parser.csproj" />
+    <ProjectReference Include="..\..\Loom.Analyzer\Loom.Analyzer.csproj" />
   </ItemGroup>
 
 </Project>

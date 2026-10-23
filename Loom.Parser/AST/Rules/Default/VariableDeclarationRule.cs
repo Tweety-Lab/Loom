@@ -6,7 +6,7 @@ namespace Loom.Parser.AST.Rules.Default;
 public record VariableDeclarationNode(TypeNode Type, Token Name, ExpressionNode Initializer) : ASTNode
 {
     /// <inheritdoc/>
-    public override IEnumerable<ASTNode> Children => [Initializer];
+    public override IEnumerable<ASTNode> Children => [Type, Initializer];
 }
 
 [ParserRule]

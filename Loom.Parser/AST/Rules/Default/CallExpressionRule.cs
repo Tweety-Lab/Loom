@@ -5,7 +5,7 @@ namespace Loom.Parser.AST.Rules.Default;
 public record CallExpressionNode(ExpressionNode Callee, TypeArgumentListNode TypeArguments, List<ExpressionNode> Arguments) : ExpressionNode(Callee.Span)
 {
     /// <inheritdoc/>
-    public override IEnumerable<ASTNode> Children => Arguments.Prepend(Callee);
+    public override IEnumerable<ASTNode> Children => Arguments.Cast<ASTNode>().Prepend(TypeArguments).Prepend(Callee);
 }
 
 [ParserRule]
