@@ -17,28 +17,33 @@ internal class TextDocumentSyncHandler(ParsedDocumentStore documents, DocumentDi
     public override async Task<Unit> Handle(DidOpenTextDocumentParams request, CancellationToken cancellationToken)
     {
         documents.Open(request.TextDocument);
-        await diagnostics.PublishAsync(request.TextDocument.Uri, cancellationToken);
+        await diagnostics.PublishOpenDocumentsAsync(cancellationToken);
         return Unit.Value;
     }
 
     /// <inheritdoc/>
-    public override Task<Unit> Handle(DidCloseTextDocumentParams request, CancellationToken cancellationToken)
+    public override async Task<Unit> Handle(DidCloseTextDocumentParams request, CancellationToken cancellationToken)
     {
         documents.Close(request.TextDocument.Uri);
         diagnostics.Clear(request.TextDocument.Uri);
-        return Unit.Task;
+        await diagnostics.PublishOpenDocumentsAsync(cancellationToken);
+        return Unit.Value;
     }
 
     /// <inheritdoc/>
     public override async Task<Unit> Handle(DidChangeTextDocumentParams request, CancellationToken cancellationToken)
     {
         if (documents.Update(request.TextDocument.Uri, request.TextDocument.Version, request.ContentChanges))
-            await diagnostics.PublishAsync(request.TextDocument.Uri, cancellationToken);
+            await diagnostics.PublishOpenDocumentsAsync(cancellationToken);
         return Unit.Value;
     }
 
     /// <inheritdoc/>
-    public override Task<Unit> Handle(DidSaveTextDocumentParams request, CancellationToken cancellationToken) => Unit.Task;
+    public override async Task<Unit> Handle(DidSaveTextDocumentParams request, CancellationToken cancellationToken)
+    {
+        await diagnostics.PublishOpenDocumentsAsync(cancellationToken);
+        return Unit.Value;
+    }
 
     /// <inheritdoc/>
     protected override TextDocumentSyncRegistrationOptions CreateRegistrationOptions(TextSynchronizationCapability capability, ClientCapabilities clientCapabilities)

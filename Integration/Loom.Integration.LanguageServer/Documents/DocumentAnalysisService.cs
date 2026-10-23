@@ -6,7 +6,7 @@ namespace Loom.Integration.LanguageServer.Documents;
 /// <summary>
 /// Builds semantic analysis for <see cref="ParsedDocument"/>s.
 /// </summary>
-internal sealed class DocumentAnalysisService(ParsedDocumentStore documents)
+internal sealed class DocumentAnalysisService(ParsedDocumentStore documents, WorkspaceDocumentStore workspace)
 {
     public async Task<AnalysisContext> AnalyzeAsync(ParsedDocument document, CancellationToken cancellationToken = default)
     {
@@ -23,6 +23,10 @@ internal sealed class DocumentAnalysisService(ParsedDocumentStore documents)
             if (parsed?.Root is { } root)
                 roots.Add(root);
         }
+
+        foreach (var parsed in await workspace.GetDocumentsAsync(document.Document.Uri, cancellationToken))
+            if (parsed.Root is { } root)
+                roots.Add(root);
 
         cancellationToken.ThrowIfCancellationRequested();
         var analysis = new AnalysisContext();

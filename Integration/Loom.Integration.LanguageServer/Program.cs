@@ -14,9 +14,11 @@ internal class Program
             .WithOutput(Console.OpenStandardOutput())
             .WithServices(services => services
                 .AddSingleton<ParsedDocumentStore>()
+                .AddSingleton<WorkspaceDocumentStore>()
                 .AddSingleton<DocumentAnalysisService>()
                 .AddSingleton<DocumentDiagnosticService>())
             .WithHandler<TextDocumentSyncHandler>()
+            .WithHandler<WorkspaceFilesHandler>()
             .WithHandler<HoverHandler>()
         );
 

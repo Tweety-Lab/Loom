@@ -72,7 +72,7 @@ internal sealed class ParsedDocumentStore
         public Lazy<Task<ParsedDocument>> Parse { get; } = new(() => Task.Run(() => ParseDocument(document)));
     }
 
-    private static ParsedDocument ParseDocument(TextDocumentSnapshot document)
+    internal static ParsedDocument ParseDocument(TextDocumentSnapshot document)
     {
         var diagnostics = new DiagnosticContext();
         ProgramNode? root = null;

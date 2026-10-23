@@ -13,6 +13,12 @@ namespace Loom.Integration.LanguageServer.Documents;
 
 internal sealed class DocumentDiagnosticService(ParsedDocumentStore documents, DocumentAnalysisService analyses, ILanguageServerFacade server)
 {
+    public async Task PublishOpenDocumentsAsync(CancellationToken cancellationToken)
+    {
+        foreach (var document in documents.GetOpenDocuments())
+            await PublishAsync(document.Uri, cancellationToken);
+    }
+
     public async Task PublishAsync(DocumentUri uri, CancellationToken cancellationToken)
     {
         var parsed = await documents.GetOrParseAsync(uri, cancellationToken);
