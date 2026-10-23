@@ -7,7 +7,7 @@
 
     <!-- VSIX settings -->
     <VSSDKBuildToolsAutoSetup>true</VSSDKBuildToolsAutoSetup>
-    <GeneratePkgDefFile>true</GeneratePkgDefFile>
+    <GeneratePkgDefFile>false</GeneratePkgDefFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,12 +18,15 @@
 
   <ItemGroup>
     <Content Include="languages.pkgdef">
+      <IncludeInVSIX>true</IncludeInVSIX>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Language\loom-language-configuration.json">
+      <IncludeInVSIX>true</IncludeInVSIX>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Language\loom.tmLanguage.json">
+      <IncludeInVSIX>true</IncludeInVSIX>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
@@ -32,6 +35,28 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.VisualStudio.SDK" Version="17.14.40265" ExcludeAssets="runtime" />
+    <PackageReference Include="Microsoft.VisualStudio.LanguageServer.Client" Version="17.14.60" ExcludeAssets="runtime" />
     <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="18.9.820" />
   </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System.ComponentModel.Composition" />
+    <ProjectReference Include="..\Loom.Integration.LanguageServer\Loom.Integration.LanguageServer.csproj"
+                      ReferenceOutputAssembly="false" SkipGetTargetFrameworkProperties="true" IncludeInVSIX="false" />
+  </ItemGroup>
+
+  <Target Name="PublishLanguageServer" BeforeTargets="GetVsixSourceItems" Condition="'$(DesignTimeBuild)' != 'true'">
+    <PropertyGroup>
+      <LanguageServerPublishDir>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)Server\</LanguageServerPublishDir>
+    </PropertyGroup>
+    <MSBuild Projects="..\Loom.Integration.LanguageServer\Loom.Integration.LanguageServer.csproj"
+             Targets="Publish"
+             Properties="Configuration=$(Configuration);PublishDir=$(LanguageServerPublishDir);UseAppHost=false" />
+    <ItemGroup>
+      <_LanguageServerFile Include="$(LanguageServerPublishDir)**\*" Exclude="$(LanguageServerPublishDir)**\*.pdb" />
+      <Content Include="@(_LanguageServerFile)">
+        <IncludeInVSIX>true</IncludeInVSIX>
+        <VSIXSubPath>Server\%(_LanguageServerFile.RecursiveDir)</VSIXSubPath>
+      </Content>
+    </ItemGroup>
+  </Target>
 </Project>

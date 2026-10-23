@@ -23,6 +23,9 @@ internal class HoverHandler : HoverHandlerBase
     /// <inheritdoc/>
     protected override HoverRegistrationOptions CreateRegistrationOptions(HoverCapability capability, ClientCapabilities clientCapabilities)
     {
-        return new HoverRegistrationOptions();
+        return new HoverRegistrationOptions
+        {
+            DocumentSelector = new TextDocumentSelector(new TextDocumentFilter { Pattern = "**/*.loom" })
+        };
     }
 }

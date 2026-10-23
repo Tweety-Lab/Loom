@@ -1,4 +1,5 @@
 ﻿using Loom.Integration.LanguageServer.Handlers;
+using System.Diagnostics;
 
 namespace Loom.Integration.LanguageServer;
 

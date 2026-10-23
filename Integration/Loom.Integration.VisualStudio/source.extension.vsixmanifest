@@ -17,7 +17,7 @@
     <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" DisplayName="Visual Studio core editor" Version="[17.14, )" />
   </Prerequisites>
   <Assets>
-    <Asset Type="Microsoft.VisualStudio.VsPackage" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" d:Source="Project" d:ProjectName="%CurrentProject%" />
+    <Asset Type="Microsoft.VisualStudio.MefComponent" Path="|%CurrentProject%|" d:Source="Project" d:ProjectName="%CurrentProject%" />
     <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="File" Path="languages.pkgdef" />
   </Assets>
 </PackageManifest>
