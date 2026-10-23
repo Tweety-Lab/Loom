@@ -11,4 +11,8 @@
     <PackageReference Include="OmniSharp.Extensions.LanguageServer" Version="0.19.11" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\Loom.Parser\Loom.Parser.csproj" />
+  </ItemGroup>
+
 </Project>

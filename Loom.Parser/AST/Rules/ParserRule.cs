@@ -81,7 +81,7 @@ public abstract class ParserRule<T> : IParserRule where T : ASTNode
     /// <summary> Loops until <paramref name="until"/> is matched, dispatching to handlers by token type. Reports diagnostics on unregistered tokens and on rules that fail. </summary>
     protected void ParseUntil(TokenType until, Dictionary<TokenType, Action> handlers, Action? fallback = null)
     {
-        while (!Parser.Reader.Check(until))
+        while (!Parser.Reader.Check(until) && !Parser.Reader.Check(TokenType.EOF))
         {
             var position = Parser.Reader.Position;
             var token = Parser.Reader.Current;

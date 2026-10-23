@@ -13,7 +13,7 @@ internal class HoverHandler : HoverHandlerBase
     /// <inheritdoc/>
     public override Task<Hover?> Handle(HoverParams request, CancellationToken cancellationToken)
     {
-        var hover = new ClassifiedTextBuilder(backend).ClassName("Class").Text("\nLoom Hover Text!").BuildHover();
+        var hover = new ClassifiedTextBuilder(backend).StructName("Class").Text("\nLoom Hover Text!").BuildHover();
 
         return Task.FromResult<Hover?>(hover);
     }
