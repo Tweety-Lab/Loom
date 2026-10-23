@@ -21,6 +21,12 @@ internal sealed class ClassifiedTextBuilder(IClassifiedTextBackend backend)
         return this;
     }
 
+    public ClassifiedTextBuilder Append(ClassifiedTextBuilder other)
+    {
+        runs.AddRange(other.runs);
+        return this;
+    }
+
     public ClassifiedTextBuilder Text(string text) => Append(TextClassification.Text, text);
     public ClassifiedTextBuilder Space() => Text(" ");
     public ClassifiedTextBuilder Keyword(string text) => Append(TextClassification.Keyword, text);

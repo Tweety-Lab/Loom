@@ -6,6 +6,7 @@ using Loom.Integration.LanguageServer.Presentation.Generic;
 using Loom.Integration.LanguageServer.Documents;
 using Loom.Analyzer.Symbols;
 using System.Diagnostics.CodeAnalysis;
+using Loom.Parser.AST.Rules.Default;
 
 namespace Loom.Integration.LanguageServer.Handlers;
 
@@ -32,6 +33,12 @@ internal class HoverHandler(ParsedDocumentStore documents, DocumentAnalysisServi
 
         if (!TryBuildSymbolName(symbol, out var builder))
             return null;
+
+        if (TryBuildSymbolDocumentation(symbol, out var documentation))
+        {
+            builder.Append(TextClassification.Punctuation, "\n");
+            builder.Append(documentation);
+        }
 
         return builder.BuildHover();
     }
@@ -60,6 +67,40 @@ internal class HoverHandler(ParsedDocumentStore documents, DocumentAnalysisServi
                 builder = null;
                 return false;
         }
+    }
+
+    private bool TryBuildSymbolDocumentation(Symbol symbol, [NotNullWhen(true)] out ClassifiedTextBuilder? builder)
+    {
+        switch (symbol.DeclaringNode)
+        {
+            case ClassDeclarationNode type:
+                builder = BuildSymbolDocumentation(type.DocumentComments);
+                return true;
+            default:
+                builder = null;
+                return false;
+        }
+    }
+
+    private ClassifiedTextBuilder BuildSymbolDocumentation(DocumentCommentListNode documentation)
+    {
+        ClassifiedTextBuilder builder = new ClassifiedTextBuilder(backend);
+
+        foreach (var comment in documentation.Items)
+        {
+            switch (comment.Directive)
+            {
+                case DocumentCommentDirective.Brief:
+                    builder.Text(comment.Body);
+                    break;
+                case DocumentCommentDirective.Remark:
+                    builder.Append(TextClassification.Punctuation, "\n\n");
+                    builder.Text(comment.Body);
+                    break;
+            }
+        }
+
+        return builder;
     }
 
     private ClassifiedTextBuilder BuildTypeSymbolName(TypeSymbol symbol)
