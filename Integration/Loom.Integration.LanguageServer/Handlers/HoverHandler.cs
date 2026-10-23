@@ -21,7 +21,7 @@ internal class HoverHandler : HoverHandlerBase
     /// <inheritdoc/>
     protected override HoverRegistrationOptions CreateRegistrationOptions(HoverCapability capability, ClientCapabilities clientCapabilities)
     {
-        backend = ClassifiedTextBackend.ForClient(clientCapabilities);
+        backend = IClassifiedTextBackend.ForClient(clientCapabilities);
         return new HoverRegistrationOptions
         {
             DocumentSelector = new TextDocumentSelector(new TextDocumentFilter { Pattern = "**/*.loom" })
