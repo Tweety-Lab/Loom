@@ -1,6 +1,8 @@
 ﻿using Loom.Analyzer;
 using Loom.CLI.JustInTime;
 using Loom.Common.Diagnostics;
+using Loom.Parser;
+using Loom.Parser.AST.Rules.Default;
 
 namespace Loom.CLI;
 
@@ -9,7 +11,13 @@ public class Program
     static void Main(string[] args)
     {
         LoomProject sample = new LoomProject("Standard/Standard.lmproj");
-        if (sample.Build() != LoomProject.BuildResult.Success)
+        var buildResult = sample.Build();
+
+        var firstClass = sample.CompilationContext.SyntaxTrees.SelectMany(tree => tree.Descendants).OfType<ClassDeclarationNode>().FirstOrDefault(node => node.DocumentComments.Items.Any());
+        if (firstClass is not null)
+            Console.WriteLine(firstClass.DocumentComments.Items.First().Body);
+
+        if (buildResult != LoomProject.BuildResult.Success)
         {
             PrintDiagnostics(sample.CompilationContext.DiagnosticContext);
             return;

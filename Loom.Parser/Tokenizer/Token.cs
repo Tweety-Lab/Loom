@@ -93,6 +93,7 @@ public class Token
     public enum TokenType
     {
         Identifier,
+        DocumentComment,
         Number,
         CharacterLiteral,
         StringLiteral,

@@ -28,8 +28,15 @@ public abstract class BlockRule : ParserRule<BlockNode>
 
         ParseUntil(TokenType.RBrace, dispatch, () =>
         {
+            var comments = Parser.Reader.Check(TokenType.DocumentComment) ? RunRule<DocumentCommentListRule, DocumentCommentListNode>() : null;
+
             if (TryParseMember(out var node))
+            {
+                if (node is ClassDeclarationNode declaration && comments is not null)
+                    node = declaration with { DocumentComments = comments };
+
                 body.Add(node);
+            }
             else
                 body.Add(RunRule<StatementRule, StatementNode>());
         });

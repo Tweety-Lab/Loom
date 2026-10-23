@@ -42,7 +42,7 @@ public class LoomTokenizer
                 continue;
             }
 
-            if ((current == '/' && Reader.Peek(1) == '/') || current == '#')
+            if ((current == '/' && Reader.Peek(1) == '/' && Reader.Peek(2) != '/') || current == '#')
             {
                 while (Reader.Peek() != '\n' && !Reader.IsEnd)
                     Reader.Read();
@@ -53,9 +53,10 @@ public class LoomTokenizer
             var matched = false;
 
             foreach (var rule in Rules)
+            {
+                rule.Reader = Reader;
                 if (rule.CanHandle(current))
                 {
-                    rule.Reader = Reader;
                     var start = Reader.Position;
                     var token = rule.Read();
                     token.Start = start;
@@ -64,6 +65,7 @@ public class LoomTokenizer
                     matched = true;
                     break;
                 }
+            }
 
             if (!matched)
                 Reader.Read();

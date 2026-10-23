@@ -24,6 +24,11 @@ public interface ITypeParameterizableNode
     TypeParameterListNode TypeParameters { get; }
 }
 
+public interface IDocumentableNode
+{
+    DocumentCommentListNode DocumentComments { get; }
+}
+
 public interface IInheritableNode
 {
     InheritanceListNode Inheritance { get; }
