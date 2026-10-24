@@ -41,7 +41,7 @@ module Standard::Program
             char letter = Unsafe.Read<char>(addr + sizeof(char) * 2);
             println(letter); // "c"
         }
-
+        
         unique Vector<i32> vec = [10, 3, 6, 64, 12];
         
         return GetFieldFromBorrow(obj) + vec[2];

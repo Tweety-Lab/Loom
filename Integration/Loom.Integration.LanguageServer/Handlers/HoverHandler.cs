@@ -101,6 +101,11 @@ internal class HoverHandler(ParsedDocumentStore documents, DocumentAnalysisServi
                     builder.Append(TextClassification.Punctuation, "\n\n");
                     builder.Text(comment.Body);
                     break;
+                case DocumentCommentDirective.Return:
+                    builder.Append(TextClassification.Punctuation, "\n\n");
+                    builder.Keyword("Returns:\n");
+                    builder.Text($"     {comment.Body}");
+                    break;
             }
         }
 
