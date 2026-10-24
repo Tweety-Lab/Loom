@@ -3,8 +3,11 @@ using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.AST.Rules.Default;
 
-public record MethodDeclarationNode(TypeNode ReturnType, Token MethodName, ParameterListNode Parameters, TypeParameterListNode TypeParameters, List<Token> Modifiers, BlockNode? Body) : ASTNode, IModifiableNode, ITypeParameterizableNode
+public record MethodDeclarationNode(TypeNode ReturnType, Token MethodName, ParameterListNode Parameters, TypeParameterListNode TypeParameters, List<Token> Modifiers, BlockNode? Body, DocumentCommentListNode DocumentComments) : ASTNode, IModifiableNode, ITypeParameterizableNode, IDocumentableNode
 {
+    /// <inheritdoc/>
+    public DocumentCommentListNode DocumentComments { get; set; } = DocumentComments;
+
     /// <inheritdoc/>
     public override IEnumerable<ASTNode> Children => Parameters.Concat(TypeParameters.Concat(Body is not null ? [Body] : Enumerable.Empty<ASTNode>())).Prepend(ReturnType);
 }
@@ -19,6 +22,8 @@ public class MethodDeclarationRule : TypeMemberParserRule
     /// <inheritdoc/>
     public override MethodDeclarationNode ParseNode()
     {
+        var documentComments = RunRule<DocumentCommentListRule, DocumentCommentListNode>();
+
         var modifiers = Parser.Reader.ExpectMany(t => TokenRegistry.IsMemberModifier(t.Type));
 
         var returnType = RunRule<TypeRule, TypeNode>(); // return type
@@ -35,6 +40,6 @@ public class MethodDeclarationRule : TypeMemberParserRule
         else
             body = RunRule<MethodBlockRule, BlockNode>();
 
-        return new MethodDeclarationNode(returnType, methodName, parameters, typeParameters, modifiers, body);
+        return new MethodDeclarationNode(returnType, methodName, parameters, typeParameters, modifiers, body, documentComments);
     }
 }
