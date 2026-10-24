@@ -85,6 +85,7 @@ internal class DeclarationWalker : ASTVisitor
             DeclaringSymbol = CurrentSymbol,
             Ordinal = (CurrentSymbol as IGenericSymbol)?.TypeParameters.Count ?? 0
         };
+
         symbol.DeclaringNode = node;
 
         CurrentTable.Define(symbol);
@@ -102,7 +103,11 @@ internal class DeclarationWalker : ASTVisitor
     [Visitor]
     public void Visit(ParameterNode node)
     {
-        var paramSymbol = new ParameterSymbol(node.Name.Text);
+        var paramSymbol = new ParameterSymbol(node.Name.Text)
+        {
+            DeclaringSymbol = CurrentSymbol
+        };
+
         paramSymbol.IsMutable = true;
         paramSymbol.DeclaringNode = node;
         

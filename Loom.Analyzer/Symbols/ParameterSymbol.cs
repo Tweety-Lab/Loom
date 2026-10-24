@@ -8,6 +8,9 @@ public class ParameterSymbol : Symbol
     /// <summary> The resolved type. </summary>
     public virtual TypeSymbol? Type { get; internal set; }
 
+    /// <summary> The method declaration introducing this parameter. </summary>
+    public Symbol? DeclaringSymbol { get; internal init; }
+
     /// <summary> Whether this parameter is a borrow. </summary>
     public bool IsBorrow { get; set; }
 
@@ -20,6 +23,7 @@ public class ParameterSymbol : Symbol
     /// <summary> Initializes a substituted view of a parameter declaration. </summary>
     protected ParameterSymbol(ParameterSymbol definition) : base(definition)
     {
+        DeclaringSymbol = definition.DeclaringSymbol;
         IsBorrow = definition.IsBorrow;
         IsMutable = definition.IsMutable;
     }

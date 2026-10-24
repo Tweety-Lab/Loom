@@ -67,6 +67,9 @@ internal class HoverHandler(ParsedDocumentStore documents, DocumentAnalysisServi
             case PropertySymbol property:
                 builder = BuildPropertySymbolName(property);
                 return true;
+            case ParameterSymbol parameter:
+                builder = BuildParameterSymbolName(parameter);
+                return true;
             default:
                 builder = null;
                 return false;
@@ -86,11 +89,27 @@ internal class HoverHandler(ParsedDocumentStore documents, DocumentAnalysisServi
             return true;
         }
 
-        if (symbol is TypeParameterSymbol parameter && parameter.DeclaringSymbol?.DeclaringNode is IDocumentableNode owner)
+        if (symbol is TypeParameterSymbol typeParam && typeParam.DeclaringSymbol?.DeclaringNode is IDocumentableNode typeParamOwner)
         {
-            var comments = owner.DocumentComments.Items.Where(comment =>
+            var comments = typeParamOwner.DocumentComments.Items.Where(comment =>
                 comment.Directive == DocumentCommentDirective.TParam &&
-                string.Equals(comment.Target, parameter.Name, StringComparison.Ordinal) &&
+                string.Equals(comment.Target, typeParam.Name, StringComparison.Ordinal) &&
+                !string.IsNullOrWhiteSpace(comment.Body))
+            .ToArray();
+
+            if (comments.Length == 0)
+                return false;
+
+            builder = new ClassifiedTextBuilder(backend).Text(string.Join("\n\n", comments.Select(comment => comment.Body)));
+
+            return true;
+        }
+
+        if (symbol is ParameterSymbol param && param.DeclaringSymbol?.DeclaringNode is IDocumentableNode paramOwner)
+        {
+            var comments = paramOwner.DocumentComments.Items.Where(comment =>
+                comment.Directive == DocumentCommentDirective.Param &&
+                string.Equals(comment.Target, param.Name, StringComparison.Ordinal) &&
                 !string.IsNullOrWhiteSpace(comment.Body))
             .ToArray();
 
@@ -192,6 +211,29 @@ internal class HoverHandler(ParsedDocumentStore documents, DocumentAnalysisServi
         builder.Punctuation("}");
 
         return builder;
+    }
+
+    private ClassifiedTextBuilder BuildParameterSymbolName(ParameterSymbol symbol)
+    {
+        var builder = new ClassifiedTextBuilder(backend);
+
+        if (symbol.IsBorrow)
+        {
+            builder.Keyword("ref ");
+            if (symbol.IsMutable)
+                builder.Keyword("mut ");
+        }
+
+        if (symbol.Type is not { } type)
+            builder.Text("? ");
+        else if (type.KnownType == TypeSymbol.DefaultType.TypeParameter)
+            builder.TypeParameter(type.Name + " ");
+        else if (type.IsValueType)
+            builder.StructName(type.Name + " ");
+        else
+            builder.ClassName(type.Name + " ");
+
+        return builder.ParameterName(symbol.Name);
     }
 
     private ClassifiedTextBuilder BuildMethodSymbolName(MethodSymbol symbol)
