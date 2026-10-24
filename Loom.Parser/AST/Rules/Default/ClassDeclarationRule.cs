@@ -6,6 +6,9 @@ namespace Loom.Parser.AST.Rules.Default;
 public record ClassDeclarationNode(Token Name, TypeParameterListNode TypeParameters, InheritanceListNode Inheritance, BlockNode Body, List<Token> Modifiers, DocumentCommentListNode DocumentComments) : ASTNode, ITypeDeclarationNode, ITypeParameterizableNode, IInheritableNode, IDocumentableNode
 {
     /// <inheritdoc/>
+    public DocumentCommentListNode DocumentComments { get; set; } = DocumentComments;
+
+    /// <inheritdoc/>
     public override IEnumerable<ASTNode> Children => [TypeParameters, Inheritance, Body];
 }
 

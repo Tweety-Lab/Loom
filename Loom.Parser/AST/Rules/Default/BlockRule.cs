@@ -32,8 +32,8 @@ public abstract class BlockRule : ParserRule<BlockNode>
 
             if (TryParseMember(out var node))
             {
-                if (node is ClassDeclarationNode declaration && comments is not null)
-                    node = declaration with { DocumentComments = comments };
+                if (node is IDocumentableNode declaration && comments is not null)
+                    declaration.DocumentComments = comments;
 
                 body.Add(node);
             }

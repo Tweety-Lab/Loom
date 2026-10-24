@@ -3,8 +3,11 @@ using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.AST.Rules.Default;
 
-public record StructDeclarationNode(Token Name, TypeParameterListNode TypeParameters, InheritanceListNode Inheritance, BlockNode Body, List<Token> Modifiers) : ASTNode, ITypeDeclarationNode, ITypeParameterizableNode, IInheritableNode
+public record StructDeclarationNode(Token Name, TypeParameterListNode TypeParameters, InheritanceListNode Inheritance, BlockNode Body, List<Token> Modifiers, DocumentCommentListNode DocumentComments) : ASTNode, ITypeDeclarationNode, ITypeParameterizableNode, IInheritableNode, IDocumentableNode
 {
+    /// <inheritdoc/>
+    public DocumentCommentListNode DocumentComments { get; set; } = DocumentComments;
+
     /// <inheritdoc/>
     public override IEnumerable<ASTNode> Children => [TypeParameters, Inheritance, Body];
 }
@@ -19,6 +22,8 @@ public class StructDeclarationRule : TypeMemberParserRule
     /// <inheritdoc/>
     public override StructDeclarationNode ParseNode()
     {
+        var documentComments = RunRule<DocumentCommentListRule, DocumentCommentListNode>();
+
         var modifiers = Parser.Reader.ExpectMany(t => TokenRegistry.IsMemberModifier(t.Type));
 
         Parser.Reader.Expect(TokenType.Struct); // struct
@@ -31,6 +36,6 @@ public class StructDeclarationRule : TypeMemberParserRule
 
         BlockNode body = RunRule<TypeDeclarationBlockRule, BlockNode>();
 
-        return new StructDeclarationNode(structName, typeParameters, inheritance, body, modifiers);
+        return new StructDeclarationNode(structName, typeParameters, inheritance, body, modifiers, documentComments);
     }
 }

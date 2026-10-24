@@ -7,6 +7,7 @@ using Loom.Integration.LanguageServer.Documents;
 using Loom.Analyzer.Symbols;
 using System.Diagnostics.CodeAnalysis;
 using Loom.Parser.AST.Rules.Default;
+using Loom.Parser.AST;
 
 namespace Loom.Integration.LanguageServer.Handlers;
 
@@ -74,15 +75,15 @@ internal class HoverHandler(ParsedDocumentStore documents, DocumentAnalysisServi
 
     private bool TryBuildSymbolDocumentation(Symbol symbol, [NotNullWhen(true)] out ClassifiedTextBuilder? builder)
     {
-        switch (symbol.DeclaringNode)
+        builder = null;
+
+        if (symbol.DeclaringNode is IDocumentableNode documentableNode)
         {
-            case ClassDeclarationNode type:
-                builder = BuildSymbolDocumentation(type.DocumentComments);
-                return true;
-            default:
-                builder = null;
-                return false;
+            builder = BuildSymbolDocumentation(documentableNode.DocumentComments);
+            return true;
         }
+
+        return false;
     }
 
     private ClassifiedTextBuilder BuildSymbolDocumentation(DocumentCommentListNode documentation)

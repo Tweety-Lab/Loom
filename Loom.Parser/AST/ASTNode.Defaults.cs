@@ -26,7 +26,7 @@ public interface ITypeParameterizableNode
 
 public interface IDocumentableNode
 {
-    DocumentCommentListNode DocumentComments { get; }
+    DocumentCommentListNode DocumentComments { get; set; }
 }
 
 public interface IInheritableNode
