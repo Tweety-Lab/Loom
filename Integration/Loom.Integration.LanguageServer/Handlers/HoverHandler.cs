@@ -121,7 +121,10 @@ internal class HoverHandler(ParsedDocumentStore documents, DocumentAnalysisServi
         builder.Keyword(symbol.IsStatic ? "static " : "");
         builder.Keyword(symbol.IsStackOnly ? "stack " : "");
 
-        builder.Keyword(symbol.IsValueType ? "struct " : "class ");
+        if (symbol.KnownType == TypeSymbol.DefaultType.TypeParameter)
+            builder.Keyword("typeparam ");
+        else
+            builder.Keyword(symbol.IsValueType ? "struct " : "class ");
 
         builder.Append(BuildFullyQualifiedName(symbol));
 
@@ -146,6 +149,8 @@ internal class HoverHandler(ParsedDocumentStore documents, DocumentAnalysisServi
 
         if (symbol.BackingField?.Type is not { } returnType)
             builder.Text("? ");
+        else if (returnType.KnownType == TypeSymbol.DefaultType.TypeParameter)
+            builder.TypeParameter(returnType.Name + " ");
         else if (returnType.IsValueType)
             builder.StructName(returnType.Name + " ");
         else
@@ -191,6 +196,8 @@ internal class HoverHandler(ParsedDocumentStore documents, DocumentAnalysisServi
 
         if (symbol.ReturnType is not { } returnType)
             builder.Text("? ");
+        else if (returnType.KnownType == TypeSymbol.DefaultType.TypeParameter)
+            builder.TypeParameter(returnType.Name + " ");
         else if (returnType.IsValueType)
             builder.StructName(returnType.Name + " ");
         else
@@ -208,6 +215,8 @@ internal class HoverHandler(ParsedDocumentStore documents, DocumentAnalysisServi
 
             if (param.Type is not { } parameterType)
                 builder.Text("? ");
+            else if (parameterType.KnownType == TypeSymbol.DefaultType.TypeParameter)
+                builder.TypeParameter(parameterType.Name + " ");
             else if (parameterType.IsValueType)
                 builder.StructName(parameterType.Name + " ");
             else
@@ -244,7 +253,9 @@ internal class HoverHandler(ParsedDocumentStore documents, DocumentAnalysisServi
                 builder.PropertyName(parts[^1]);
                 break;
             case TypeSymbol type:
-                if (type.IsValueType)
+                if (type.KnownType == TypeSymbol.DefaultType.TypeParameter)
+                    builder.TypeParameter(parts[^1]);
+                else if (type.IsValueType)
                     builder.StructName(parts[^1]);
                 else
                     builder.ClassName(parts[^1]);
