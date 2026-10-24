@@ -3,8 +3,11 @@ using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.AST.Rules.Default;
 
-public record PropertyDeclarationNode(List<Token> Modifiers, TypeNode Type, Token Name, List<AccessorNode> Accessors, ExpressionNode? Initializer) : ASTNode, IModifiableNode
+public record PropertyDeclarationNode(List<Token> Modifiers, TypeNode Type, Token Name, List<AccessorNode> Accessors, ExpressionNode? Initializer, DocumentCommentListNode DocumentComments) : ASTNode, IModifiableNode, IDocumentableNode
 {
+    /// <inheritdoc/>
+    public DocumentCommentListNode DocumentComments { get; set; } = DocumentComments;
+
     // TODO: Visit the accessor bodies once declared accessors are supported instead of being auto-implemented
     /// <inheritdoc/>
     public override IEnumerable<ASTNode> Children => Initializer is not null ? [Type, Initializer] : [Type];
@@ -25,6 +28,8 @@ public class PropertyDeclarationRule : TypeMemberParserRule
     /// <inheritdoc/>
     public override PropertyDeclarationNode ParseNode()
     {
+        var documentComments = RunRule<DocumentCommentListRule, DocumentCommentListNode>();
+
         var modifiers = Parser.Reader.ExpectMany(t => TokenRegistry.IsMemberModifier(t.Type)); // modifiers
 
         var type = RunRule<TypeRule, TypeNode>(); // type
@@ -45,7 +50,7 @@ public class PropertyDeclarationRule : TypeMemberParserRule
             Parser.Reader.Expect(TokenType.Semicolon); // ;
         }
 
-        return new PropertyDeclarationNode(modifiers, type, name, accessors, initializer);
+        return new PropertyDeclarationNode(modifiers, type, name, accessors, initializer, documentComments);
     }
 }
 
