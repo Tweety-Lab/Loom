@@ -21,6 +21,7 @@ internal class Program
             .WithHandler<WorkspaceFilesHandler>()
             .WithHandler<HoverHandler>()
             .WithHandler<DefinitionHandler>()
+            .WithHandler<CompletionHandler>()
         );
 
         await server.WaitForExit;
