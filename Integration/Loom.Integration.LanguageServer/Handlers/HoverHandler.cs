@@ -77,14 +77,32 @@ internal class HoverHandler(ParsedDocumentStore documents, DocumentAnalysisServi
     {
         builder = null;
 
-        if (symbol.DeclaringNode is not IDocumentableNode node)
-            return false;
+        if (symbol.DeclaringNode is IDocumentableNode node)
+        {
+            if (!node.DocumentComments.Items.Any(comment => comment.Directive is DocumentCommentDirective.Brief or DocumentCommentDirective.Remark && !string.IsNullOrWhiteSpace(comment.Body)))
+                return false;
 
-        if (!node.DocumentComments.Items.Any(comment => comment.Directive is DocumentCommentDirective.Brief or DocumentCommentDirective.Remark && !string.IsNullOrWhiteSpace(comment.Body)))
-            return false;
+            builder = BuildSymbolDocumentation(node.DocumentComments);
+            return true;
+        }
 
-        builder = BuildSymbolDocumentation(node.DocumentComments);
-        return true;
+        if (symbol is TypeParameterSymbol parameter && parameter.DeclaringSymbol?.DeclaringNode is IDocumentableNode owner)
+        {
+            var comments = owner.DocumentComments.Items.Where(comment =>
+                comment.Directive == DocumentCommentDirective.TParam &&
+                string.Equals(comment.Target, parameter.Name, StringComparison.Ordinal) &&
+                !string.IsNullOrWhiteSpace(comment.Body))
+            .ToArray();
+
+            if (comments.Length == 0)
+                return false;
+
+            builder = new ClassifiedTextBuilder(backend).Text(string.Join("\n\n", comments.Select(comment => comment.Body)));
+
+            return true;
+        }
+
+        return false;
     }
 
     private ClassifiedTextBuilder BuildSymbolDocumentation(DocumentCommentListNode documentation)
