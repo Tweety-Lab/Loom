@@ -77,13 +77,14 @@ internal class HoverHandler(ParsedDocumentStore documents, DocumentAnalysisServi
     {
         builder = null;
 
-        if (symbol.DeclaringNode is IDocumentableNode documentableNode)
-        {
-            builder = BuildSymbolDocumentation(documentableNode.DocumentComments);
-            return true;
-        }
+        if (symbol.DeclaringNode is not IDocumentableNode node)
+            return false;
 
-        return false;
+        if (!node.DocumentComments.Items.Any(comment => comment.Directive is DocumentCommentDirective.Brief or DocumentCommentDirective.Remark && !string.IsNullOrWhiteSpace(comment.Body)))
+            return false;
+
+        builder = BuildSymbolDocumentation(node.DocumentComments);
+        return true;
     }
 
     private ClassifiedTextBuilder BuildSymbolDocumentation(DocumentCommentListNode documentation)
