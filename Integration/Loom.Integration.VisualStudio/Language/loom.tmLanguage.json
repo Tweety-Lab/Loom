@@ -94,10 +94,9 @@
           }
         },
         {
-          "match": "\\b(module|import)\\b(?:\\s+([A-Za-z_][A-Za-z0-9_.]*))?",
+          "match": "\\b(module|import)\\b(?:\\s+([A-Za-z_][A-Za-z0-9_]*(?:\\s*::\\s*[A-Za-z_][A-Za-z0-9_]*)*))?",
           "captures": {
-            "1": { "name": "keyword.declaration.module.loom" },
-            "2": { "name": "entity.name.namespace.loom" }
+            "1": { "name": "keyword.declaration.module.loom" }
           }
         },
         {
