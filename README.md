@@ -24,7 +24,7 @@ module Standard::Program
 
         // 'Slice' doesn't need to use pointers because it's a value type (struct)
         // Value types use copy semantics and typically live on the stack
-        Slice myString = "Hello!";
+        Slice<char> myString = "Hello!";
         println(myString); // "Hello!"
 
         // Loom also allows unsafe operations inside an 'unsafe' block via the 'Standard::Memory::Unsafe' class
@@ -58,7 +58,7 @@ module Standard::IO
     extern void putchar(char c);
 
     /// @brief Prints a char slice to the console and appends a newline.
-    export void println(Slice s)
+    export void println(Slice<char> s)
     {
         for (i32 i = 0; i < s.Length; i = i + 1)
             putchar(s.ElementAt<char>(i));
