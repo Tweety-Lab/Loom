@@ -22,6 +22,7 @@ internal class Program
             .WithHandler<HoverHandler>()
             .WithHandler<DefinitionHandler>()
             .WithHandler<CompletionHandler>()
+            .WithHandler<SemanticTokensHandler>()
         );
 
         await server.WaitForExit;
