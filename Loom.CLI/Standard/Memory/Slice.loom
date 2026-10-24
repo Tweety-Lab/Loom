@@ -3,6 +3,7 @@ import Standard;
 module Standard::Memory
 {
 	/// @brief Immutable unowning slice of contiguous memory.
+    /// @tparam(T) The type of elements stored in the Slice.
     export stack struct Slice<T>
     {
         /// @brief The number of elements in the slice.

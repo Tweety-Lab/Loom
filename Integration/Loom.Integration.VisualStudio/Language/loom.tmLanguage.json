@@ -17,11 +17,11 @@
     { "include": "#generic-arguments" },
     { "include": "#generic-call" },
     { "include": "#generic-type" },
-    { "include": "#qualifiers" },
     { "include": "#function-call" },
     { "include": "#type-annotation" },
     { "include": "#property" },
     { "include": "#member" },
+    { "include": "#qualifiers" },
     { "include": "#operators" },
     { "include": "#punctuation" },
     { "include": "#identifiers" }
