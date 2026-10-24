@@ -367,7 +367,7 @@ module Test
     private static LocalDeclarationStatementNode UniqueLocalDeclaration(CompilationContext context)
     {
         var module = context.SyntaxTrees.First().Modules.First();
-        var method = (MethodDeclarationNode)module.Body.Contents.First(n => n is MethodDeclarationNode { MethodName.Text: "MyMethod" });
+        var method = (MethodDeclarationNode)module.Body.Contents.First(n => n is MethodDeclarationNode { Name.Text: "MyMethod" });
         return (LocalDeclarationStatementNode)method.Body!.Contents.First();
     }
 }

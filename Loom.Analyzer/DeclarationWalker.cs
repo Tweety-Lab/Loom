@@ -45,7 +45,7 @@ internal class DeclarationWalker : ASTVisitor
     [Visitor]
     public void Visit(MethodDeclarationNode node)
     {
-        var symbol = new MethodSymbol(node.MethodName.Text, MethodSymbol.MethodKind.Method);
+        var symbol = new MethodSymbol(node.Name.Text, MethodSymbol.MethodKind.Method);
         symbol.ContainingType = CurrentSymbol as TypeSymbol;
         symbol.IsStatic = node.HasModifier(Parser.Tokenizer.Token.TokenType.Static);
         symbol.IsExported = node.HasModifier(Parser.Tokenizer.Token.TokenType.Export);
@@ -65,9 +65,9 @@ internal class DeclarationWalker : ASTVisitor
         symbol.DeclaringNode = node;
 
         if (symbol.IsExtern && symbol.ContainingType == null)
-            symbol.FullyQualifiedName = node.MethodName.Text;
+            symbol.FullyQualifiedName = node.Name.Text;
         else
-            symbol.FullyQualifiedName = BuildQualifiedName(node.MethodName.Text);
+            symbol.FullyQualifiedName = BuildQualifiedName(node.Name.Text);
 
         CurrentTable.Define(symbol);
 

@@ -11,7 +11,7 @@ using Loom.Parser.AST;
 
 namespace Loom.Integration.LanguageServer.Handlers;
 
-internal class HoverHandler(ParsedDocumentStore documents, DocumentAnalysisService analyses) : HoverHandlerBase
+internal sealed class HoverHandler(ParsedDocumentStore documents, DocumentAnalysisService analyses) : HoverHandlerBase
 {
     private IClassifiedTextBackend backend = new GenericClassifiedTextBackend();
 

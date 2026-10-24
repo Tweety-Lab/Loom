@@ -20,6 +20,7 @@ internal class Program
             .WithHandler<TextDocumentSyncHandler>()
             .WithHandler<WorkspaceFilesHandler>()
             .WithHandler<HoverHandler>()
+            .WithHandler<DefinitionHandler>()
         );
 
         await server.WaitForExit;

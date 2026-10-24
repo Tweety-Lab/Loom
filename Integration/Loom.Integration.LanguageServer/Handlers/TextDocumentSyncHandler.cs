@@ -8,7 +8,7 @@ using Loom.Integration.LanguageServer.Documents;
 
 namespace Loom.Integration.LanguageServer.Handlers;
 
-internal class TextDocumentSyncHandler(ParsedDocumentStore documents, DocumentDiagnosticService diagnostics) : TextDocumentSyncHandlerBase
+internal sealed class TextDocumentSyncHandler(ParsedDocumentStore documents, DocumentDiagnosticService diagnostics) : TextDocumentSyncHandlerBase
 {
     /// <inheritdoc/>
     public override TextDocumentAttributes GetTextDocumentAttributes(DocumentUri uri) => new(uri, "Loom");

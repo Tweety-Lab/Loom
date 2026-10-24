@@ -3,7 +3,7 @@ using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.AST.Rules.Default;
 
-public record MethodDeclarationNode(TypeNode ReturnType, Token MethodName, ParameterListNode Parameters, TypeParameterListNode TypeParameters, List<Token> Modifiers, BlockNode? Body, DocumentCommentListNode DocumentComments) : ASTNode, IModifiableNode, ITypeParameterizableNode, IDocumentableNode
+public record MethodDeclarationNode(TypeNode ReturnType, Token Name, ParameterListNode Parameters, TypeParameterListNode TypeParameters, List<Token> Modifiers, BlockNode? Body, DocumentCommentListNode DocumentComments) : ASTNode, IModifiableNode, ITypeParameterizableNode, IDocumentableNode
 {
     /// <inheritdoc/>
     public DocumentCommentListNode DocumentComments { get; set; } = DocumentComments;

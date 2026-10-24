@@ -25,7 +25,7 @@ public class InterfaceAnalyzer : Analyzer
             {
                 case MethodDeclarationNode method:
                     if (method.Body != null)
-                        Context.DiagnosticContext?.Report(MemberHasBody, method.Span.StartToken?.Location, method.MethodName.Text);
+                        Context.DiagnosticContext?.Report(MemberHasBody, method.Span.StartToken?.Location, method.Name.Text);
 
                     break;
                 case PropertyDeclarationNode property:

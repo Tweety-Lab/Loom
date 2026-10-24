@@ -8,11 +8,11 @@ namespace Loom.Integration.LanguageServer.Documents;
 /// </summary>
 internal sealed class DocumentAnalysisService(ParsedDocumentStore documents, WorkspaceDocumentStore workspace)
 {
-    public async Task<AnalysisContext> AnalyzeAsync(ParsedDocument document, CancellationToken cancellationToken = default)
+    public async Task<AnalysisContext> AnalyzeAsync(ParsedDocument document, CancellationToken cancellationToken = default) => (await AnalyzeWithDocumentsAsync(document, cancellationToken)).Analysis;
+
+    public async Task<(AnalysisContext Analysis, IReadOnlyList<ParsedDocument> Documents)> AnalyzeWithDocumentsAsync(ParsedDocument document, CancellationToken cancellationToken = default)
     {
-        var roots = new List<ProgramNode>();
-        if (document.Root is { } current)
-            roots.Add(current);
+        var sources = new List<ParsedDocument> { document };
 
         foreach (var snapshot in documents.GetOpenDocuments())
         {
@@ -20,18 +20,17 @@ internal sealed class DocumentAnalysisService(ParsedDocumentStore documents, Wor
                 continue;
 
             var parsed = await documents.GetOrParseAsync(snapshot.Uri, cancellationToken);
-            if (parsed?.Root is { } root)
-                roots.Add(root);
+            if (parsed is not null)
+                sources.Add(parsed);
         }
 
         foreach (var parsed in await workspace.GetDocumentsAsync(document.Document.Uri, cancellationToken))
-            if (parsed.Root is { } root)
-                roots.Add(root);
+            sources.Add(parsed);
 
         cancellationToken.ThrowIfCancellationRequested();
         var analysis = new AnalysisContext();
-        analysis.Analyze(roots);
+        analysis.Analyze(sources.Select(source => source.Root).OfType<ProgramNode>());
         cancellationToken.ThrowIfCancellationRequested();
-        return analysis;
+        return (analysis, sources);
     }
 }
