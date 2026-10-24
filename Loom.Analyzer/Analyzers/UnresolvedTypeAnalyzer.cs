@@ -14,6 +14,20 @@ public class UnresolvedTypeAnalyzer : Analyzer
     public static Diagnostic UnresolvedType = new(Diagnostic.DiagnosticLevel.Error, "The type '{0}' could not be found.");
 
     [Visitor]
+    public void Visit(PropertyDeclarationNode node)
+    {
+        if (node.Type.Base.Type == Token.TokenType.Identifier && TypeResolver.Resolve(Context, node, node.Type.Base.Text) == null)
+            Context.DiagnosticContext?.Report(UnresolvedType, node.Type.Base.Location, node.Type.Base.Text);
+    }
+
+    [Visitor]
+    public void Visit(LocalDeclarationStatementNode node)
+    {
+        if (node.Variable.Type.Base.Type == Token.TokenType.Identifier && TypeResolver.Resolve(Context, node, node.Variable.Type.Base.Text) == null)
+            Context.DiagnosticContext?.Report(UnresolvedType, node.Variable.Type.Base.Location, node.Variable.Type.Base.Text);
+    }
+
+    [Visitor]
     public void Visit(ParameterNode node)
     {
         if (node.Type is { } type && type.Base.Type == Token.TokenType.Identifier)
@@ -35,13 +49,6 @@ public class UnresolvedTypeAnalyzer : Analyzer
             if (symbol == null)
                 Context.DiagnosticContext?.Report(UnresolvedType, node.ReturnType.Base.Location, node.ReturnType.Base.Text);
         }
-    }
-
-    [Visitor]
-    public void Visit(PropertyDeclarationNode node)
-    {
-        if (node.Type.Base.Type == Token.TokenType.Identifier && TypeResolver.Resolve(Context, node, node.Type.Base.Text) == null)
-            Context.DiagnosticContext?.Report(UnresolvedType, node.Type.Base.Location, node.Type.Base.Text);
     }
 
     [Visitor]
