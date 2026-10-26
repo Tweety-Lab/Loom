@@ -105,6 +105,7 @@ internal sealed class SemanticTokensHandler(ParsedDocumentStore documents, Docum
     {
         ITypeDeclarationNode declaration => declaration.Name,
         MethodDeclarationNode declaration => declaration.Name,
+        OperatorDeclarationNode declaration => declaration.Operator,
         ParameterNode parameter => parameter.Name,
         TypeParameterNode parameter => parameter.Token,
         TypeNode type => type.Base,
@@ -126,6 +127,7 @@ internal sealed class SemanticTokensHandler(ParsedDocumentStore documents, Docum
             TypeSymbol { KnownType: TypeSymbol.DefaultType.Interface } => SemanticTokenType.Interface,
             TypeSymbol { KnownType: TypeSymbol.DefaultType.Enum } => SemanticTokenType.Enum,
             MethodSymbol { Kind: MethodSymbol.MethodKind.Method } => SemanticTokenType.Method,
+            MethodSymbol { Kind: MethodSymbol.MethodKind.Operator } => SemanticTokenType.Method,
             ParameterSymbol => SemanticTokenType.Parameter,
             LocalVariableSymbol => SemanticTokenType.Variable,
             null when info.Candidates.Count > 0 && info.Candidates.All(candidate => candidate is MethodSymbol { Kind: MethodSymbol.MethodKind.Method }) => SemanticTokenType.Method,
