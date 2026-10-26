@@ -3,6 +3,9 @@
 
 Loom is an object-oriented systems programming language that combines the performance and portability of low-level languages with the developer experience of high-level languages.
 
+## Samples
+Samples of various language features can be found in `Loom.Standard/Samples`.
+
 ```Loom
 import Standard::IO;
 import Standard::Memory;
