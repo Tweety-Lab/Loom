@@ -31,7 +31,8 @@ internal sealed class SemanticTokensHandler(ParsedDocumentStore documents, Docum
         {
             cancellationToken.ThrowIfCancellationRequested();
             var position = parsed.Document.GetPosition(name.Start);
-            builder.Push(position.Line, position.Character, name.End - name.Start, tokenTypes[type], Array.Empty<SemanticTokenModifier>());
+            builder.Push(position.Line, position.Character, name.End - name.Start, tokenTypes[type],
+                type == SemanticTokenType.Comment ? new[] { SemanticTokenModifier.Documentation } : Array.Empty<SemanticTokenModifier>());
         }
     }
 
@@ -53,7 +54,7 @@ internal sealed class SemanticTokensHandler(ParsedDocumentStore documents, Docum
     private static SemanticTokensLegend CreateLegend(IEnumerable<SemanticTokenType> types) => new()
     {
         TokenTypes = new(types),
-        TokenModifiers = new()
+        TokenModifiers = new(SemanticTokenModifier.Documentation)
     };
 
     public static Dictionary<SemanticTokenType, SemanticTokenType> CreateTokenTypes(bool isVisualStudio, IEnumerable<SemanticTokenType> supportedTypes)
@@ -66,6 +67,7 @@ internal sealed class SemanticTokensHandler(ParsedDocumentStore documents, Docum
             (Type: SemanticTokenType.TypeParameter, VisualStudioName: "type parameter name"),
             (Type: SemanticTokenType.Parameter, VisualStudioName: "parameter name"),
             (Type: SemanticTokenType.Variable, VisualStudioName: "local name"),
+            (Type: SemanticTokenType.Comment, VisualStudioName: "xml doc comment - text"),
         }.ToDictionary(entry => entry.Type, entry =>
         {
             var visualStudioType = new SemanticTokenType(entry.VisualStudioName);
@@ -79,6 +81,15 @@ internal sealed class SemanticTokensHandler(ParsedDocumentStore documents, Docum
         foreach (var node in root.Descendants.Prepend(root))
         {
             cancellationToken.ThrowIfCancellationRequested();
+
+            if (node is IDocumentableNode documentable)
+                foreach (var comment in documentable.DocumentComments)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    if (comment.Span.StartToken is { } token && token.End > token.Start)
+                        tokens.Add((token, SemanticTokenType.Comment));
+                }
+
             if (GetName(node) is not { } name || name.End <= name.Start)
                 continue;
 

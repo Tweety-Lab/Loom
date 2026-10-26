@@ -11,14 +11,14 @@ module Standard::Program
         public i32 MutableField { get; set; } = default;
     }
 
-    /// @brief Program Entry Point
+    /// @brief Program Entry Point.
     export i32 Main()
     {
         // A Unique pointer to an object can only have one owner at a time
         unique Object obj = new Object();
         SetFieldFromMutableBorrow(obj, 10);
 
-        // 'Slice' doesn't need to use pointers because it's a value type (struct)
+        // 'Slice<T>' doesn't need to use pointers because it's a value type (struct)
         // Value types use copy semantics and typically live on the stack
         Slice<char> myString = "Hello!";
         println(myString); // "Hello!"
