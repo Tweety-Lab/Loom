@@ -2,6 +2,7 @@ using Loom.Analyzer.Symbols;
 using Loom.LIR.Intrinsics;
 using Loom.LIR.Metadata;
 using Loom.LIR.Objects;
+using Loom.Parser.AST.Rules.Default;
 
 namespace Loom.LIR.Generation;
 
@@ -16,23 +17,21 @@ internal partial class MethodGenerator
             if (!symbol.IsStatic)
                 owningType.DeclareField(symbol.BackingField.Name, storageType);
             else if (symbol.ContainingType?.ContainsTypeParameters != true)
-                unit.Metadata[MetadataType.Static].Add(LIRMetadataValue.Define(
-                    $"{owningType.Name}::{symbol.BackingField.Name}", storageType, new LIRDefaultValue(storageType), isConstant: false));
+                unit.Metadata[MetadataType.Static].Add(LIRMetadataValue.Define($"{owningType.Name}::{symbol.BackingField.Name}", storageType, new LIRDefaultValue(storageType), isConstant: false));
         }
 
         DeclareAccessor(symbol.Getter, owningType, typeParameters, substitution);
         DeclareAccessor(symbol.Setter, owningType, typeParameters, substitution);
     }
 
-    /// <summary> Emits the auto-implemented bodies of the accessors of the property <paramref name="symbol"/>. </summary>
+    /// <summary> Emits declared accessor bodies, or backing-field access for auto-implemented accessors. </summary>
     public void GeneratePropertyBody(PropertySymbol symbol, LIRTypeDeclaration owningType, TypeSubstitution? substitution = null, TypeSymbol? ownerType = null)
     {
-        GenerateAccessorBody(symbol, symbol.Getter, owningType, false);
-        GenerateAccessorBody(symbol, symbol.Setter, owningType, true);
+        GenerateAccessorBody(symbol, symbol.Getter, owningType, false, substitution, ownerType);
+        GenerateAccessorBody(symbol, symbol.Setter, owningType, true, substitution, ownerType);
     }
 
-    // TODO: Emit the declared accessor body once it is supported instead of the auto-implemented field access
-    private void GenerateAccessorBody(PropertySymbol property, MethodSymbol? accessor, LIRTypeDeclaration owningType, bool isSetter)
+    private void GenerateAccessorBody(PropertySymbol property, MethodSymbol? accessor, LIRTypeDeclaration owningType, bool isSetter, TypeSubstitution? substitution, TypeSymbol? ownerType)
     {
         if (accessor == null || (accessor.IsStatic && property.ContainingType?.ContainsTypeParameters == true))
             return;
@@ -40,6 +39,12 @@ internal partial class MethodGenerator
         LIRFunction function = GetFunction(LinkageNameResolver.LinkageName(accessor), owningType);
         if (IIntrinsicEmitter.TryEmitIntrinsic(accessor, function, unit))
             return;
+
+        if (accessor.DeclaringNode is AccessorNode { Body: not null } node)
+        {
+            GenerateBody(node, function, substitution, ownerType);
+            return;
+        }
 
         if (property.BackingField?.Type == null)
             return;

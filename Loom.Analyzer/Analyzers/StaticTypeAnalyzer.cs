@@ -31,7 +31,7 @@ public class StaticTypeAnalyzer : Analyzer
 
         for (var enclosing = parent; enclosing != null; enclosing = Context.GetParent(enclosing))
         {
-            if (enclosing is MethodDeclarationNode or OperatorDeclarationNode or ConstructorDeclarationNode or DestructorDeclarationNode && Context.GetSymbol(enclosing).Symbol is MethodSymbol function)
+            if (enclosing is MethodDeclarationNode or OperatorDeclarationNode or ConstructorDeclarationNode or DestructorDeclarationNode or AccessorNode && Context.GetSymbol(enclosing).Symbol is MethodSymbol function)
             {
                 if (function.IsStatic)
                     Context.DiagnosticContext?.Report(InstanceMemberRequiresReceiver, node.Span.StartToken?.Location, symbol!.Name);

@@ -38,6 +38,9 @@ internal class TypeWalker : ASTWalker
         if (parent is ReturnStatementNode && Context.FirstAncestorOrSelf<OperatorDeclarationNode>(node) is { } op)
             return Context.GetSymbol(op).As<MethodSymbol>()?.ReturnType;
 
+        if (parent is ReturnStatementNode && Context.FirstAncestorOrSelf<AccessorNode>(node) is { } accessor)
+            return Context.GetSymbol(accessor).As<MethodSymbol>()?.ReturnType;
+
         if (parent is ArrayAccessExpressionNode access && node == access.Index)
             return ResolveArgumentType(access.Index, [access.Receiver, access.Index], OverloadResolver.IndexOperatorCandidates(Context, access));
 

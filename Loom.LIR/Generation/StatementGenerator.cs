@@ -87,16 +87,13 @@ internal partial class StatementGenerator
         CurrentScope.Bindings.TryAdd(symbol.Name, locals.GetValueOrDefault(symbol.Name));
         locals[symbol.Name] = address;
 
-        // Value destructors operate on local storage; unique references additionally release their allocation
-        if ((type.IsValueType && type.Members.OfType<MethodSymbol>().Any(method => method.Kind == MethodSymbol.MethodKind.Destructor)) ||
-            (symbol.PointerType == PointerType.Unique && storageType is LIRPointerType && !context.AnalysisContext.MovedValues.Contains(symbol)))
+        if ((type.IsValueType && type.Members.OfType<MethodSymbol>().Any(method => method.Kind == MethodSymbol.MethodKind.Destructor)) || (symbol.PointerType == PointerType.Unique && storageType is LIRPointerType && !context.AnalysisContext.MovedValues.Contains(symbol)))
             CurrentScope.Owned.Add((address, type));
 
         if (declaration.Initializer is InstanceCreationExpresssionNode creation)
         {
             var expressionGen = new ExpressionGenerator(context, unit, function, locals, methodGenerator, substitution, ownerType);
 
-            // The storage of a value type is the instance itself, so it is constructed in place; a reference type stores a pointer to it
             if (type.IsValueType)
             {
                 expressionGen.EmitInstanceCreation(creation, address);
@@ -115,8 +112,8 @@ internal partial class StatementGenerator
 
     private void EmitReturn(ReturnStatementNode node)
     {
-        ASTNode? method = context.AnalysisContext.FirstAncestorOrSelf<MethodDeclarationNode>(node)
-            ?? (ASTNode?)context.AnalysisContext.FirstAncestorOrSelf<OperatorDeclarationNode>(node);
+        ASTNode? method = context.AnalysisContext.FirstAncestorOrSelf<MethodDeclarationNode>(node) ?? (ASTNode?)context.AnalysisContext.FirstAncestorOrSelf<OperatorDeclarationNode>(node) ?? context.AnalysisContext.FirstAncestorOrSelf<AccessorNode>(node);
+
         var returnType = method == null ? null : context.AnalysisContext.GetSymbol(method).As<MethodSymbol>()?.ReturnType;
         var result = node.Expression == null ? null : EmitValue(node.Expression, returnType);
 

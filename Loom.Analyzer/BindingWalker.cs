@@ -68,7 +68,7 @@ internal class BindingWalker : ASTWalker
         if (symbol.Setter != null)
         {
             symbol.Setter.ReturnType = TypeResolver.Resolve(Context, node, "void");
-            symbol.Setter.Parameters = [new ParameterSymbol("value") { Type = symbol.Type, DeclaringNode = node }];
+            symbol.Setter.Parameters[0].Type = symbol.Type;
         }
     }
 

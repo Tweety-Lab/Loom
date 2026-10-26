@@ -298,9 +298,12 @@ internal class DeclarationWalker : ASTVisitor
 
         symbol.FullyQualifiedName = BuildQualifiedName(node.Name.Text);
 
-        // Interface properties describe accessors without allocating instance storage.
+        // Interface properties describe accessors without allocating instance storage
         var backingFieldName = $"{node.Name.Text}.field";
-        symbol.BackingField = symbol.ContainingType?.KnownType == TypeSymbol.DefaultType.Interface ? null : new FieldSymbol(backingFieldName)
+        if (symbol.ContainingType?.KnownType == TypeSymbol.DefaultType.Interface)
+            symbol.BackingField = null;
+
+        symbol.BackingField = new FieldSymbol(backingFieldName)
         {
             Accessibility = MemberAccessibility.Private,
             ContainingType = CurrentSymbol as TypeSymbol,
@@ -310,7 +313,6 @@ internal class DeclarationWalker : ASTVisitor
 
         foreach (var accessor in node.Accessors)
         {
-            // TODO: Emit declared accessor bodies instead of always auto-implementing
             var method = new MethodSymbol($"{accessor.AccessorType.Text}.{node.Name.Text}", MethodSymbol.MethodKind.Accessor)
             {
                 IsStatic = symbol.IsStatic,
@@ -323,7 +325,10 @@ internal class DeclarationWalker : ASTVisitor
             if (accessor.AccessorType.Type == Parser.Tokenizer.Token.TokenType.Get)
                 symbol.Getter = method;
             else
+            {
                 symbol.Setter = method;
+                method.Parameters = [new ParameterSymbol("value") { DeclaringSymbol = method, DeclaringNode = accessor, IsMutable = true }];
+            }
 
             Context.Bind(accessor, method);
         }
@@ -335,6 +340,18 @@ internal class DeclarationWalker : ASTVisitor
             typeSymbol.Members = [.. typeSymbol.Members, symbol];
 
         VisitChildren(node);
+    }
+
+    [Visitor]
+    public void Visit(AccessorNode node)
+    {
+        var method = Context.GetSymbol(node).As<MethodSymbol>()!;
+        WithScope(node, () =>
+        {
+            foreach (var parameter in method.Parameters)
+                CurrentTable.Define(parameter);
+            VisitChildren(node);
+        }, method);
     }
 
     [Visitor]

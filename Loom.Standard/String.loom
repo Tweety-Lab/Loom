@@ -7,9 +7,14 @@ module Standard
 
 	export class string
 	{
-		// TODO: Make this just call into characters.Count
 		/// @brief The amount of characters in this string.
-		public i32 Length { get; }
+		public i32 Length
+		{
+			get
+			{
+				return characters.Count;
+			}
+		}
 
 		Vector<char> characters = default;
 
@@ -26,8 +31,6 @@ module Standard
 
 			for (i32 i = 0; i < slice.Length; i++)
 				characters.Add(slice[i]);
-
-			Length = slice.Length;
 		}
 
 		/// @brief Returns the character at the specified index.

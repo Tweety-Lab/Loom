@@ -123,6 +123,7 @@ internal partial class MethodGenerator
         {
             MethodDeclarationNode method => method.Body,
             OperatorDeclarationNode op => op.Body,
+            AccessorNode accessor => accessor.Body,
             _ => throw new InvalidOperationException($"Unsupported method declaration: {node.GetType().Name}.")
         };
 

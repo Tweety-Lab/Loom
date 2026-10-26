@@ -44,6 +44,9 @@ internal class OwnershipWalker : ASTVisitor
     [Visitor]
     public void Visit(OperatorDeclarationNode node) => VisitFunction(node);
 
+    [Visitor]
+    public void Visit(AccessorNode node) => VisitFunction(node);
+
     private void VisitFunction(ASTNode node)
     {
         states.Clear();
