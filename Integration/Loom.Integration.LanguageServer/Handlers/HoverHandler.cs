@@ -160,6 +160,8 @@ internal sealed class HoverHandler(ParsedDocumentStore documents, DocumentAnalys
 
         if (symbol.KnownType == TypeSymbol.DefaultType.TypeParameter)
             builder.Keyword("typeparam ");
+        else if (symbol.KnownType == TypeSymbol.DefaultType.Interface)
+            builder.Keyword("interface ");
         else
             builder.Keyword(symbol.IsValueType ? "struct " : "class ");
 
@@ -315,6 +317,8 @@ internal sealed class HoverHandler(ParsedDocumentStore documents, DocumentAnalys
             case TypeSymbol type:
                 if (type.KnownType == TypeSymbol.DefaultType.TypeParameter)
                     builder.TypeParameter(parts[^1]);
+                else if (type.KnownType == TypeSymbol.DefaultType.Interface)
+                    builder.InterfaceName(parts[^1]);
                 else if (type.IsValueType)
                     builder.StructName(parts[^1]);
                 else

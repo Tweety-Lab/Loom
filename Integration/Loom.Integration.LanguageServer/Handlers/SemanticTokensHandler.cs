@@ -64,6 +64,7 @@ internal sealed class SemanticTokensHandler(ParsedDocumentStore documents, Docum
         {
             (Type: SemanticTokenType.Struct, VisualStudioName: "struct name"),
             (Type: SemanticTokenType.Method, VisualStudioName: "method name"),
+            (Type: SemanticTokenType.Interface, VisualStudioName: "interface name"),
             (Type: SemanticTokenType.TypeParameter, VisualStudioName: "type parameter name"),
             (Type: SemanticTokenType.Parameter, VisualStudioName: "parameter name"),
             (Type: SemanticTokenType.Variable, VisualStudioName: "local name"),
@@ -122,6 +123,7 @@ internal sealed class SemanticTokensHandler(ParsedDocumentStore documents, Docum
         {
             TypeSymbol { KnownType: TypeSymbol.DefaultType.Struct } => SemanticTokenType.Struct,
             TypeSymbol { KnownType: TypeSymbol.DefaultType.TypeParameter } => SemanticTokenType.TypeParameter,
+            TypeSymbol { KnownType: TypeSymbol.DefaultType.Interface } => SemanticTokenType.Interface,
             MethodSymbol { Kind: MethodSymbol.MethodKind.Method } => SemanticTokenType.Method,
             ParameterSymbol => SemanticTokenType.Parameter,
             LocalVariableSymbol => SemanticTokenType.Variable,
