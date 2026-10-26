@@ -1,0 +1,53 @@
+module Standard::Samples::Syntax
+{
+	/// @brief Showcases Loom's C-Inspired syntax.
+	export void SyntaxSample()
+	{
+		unique MyClassDeclaration refInstance = new MyClassDeclaration();
+		unique MyGenericClass<i32> genericInstance = new MyGenericClass<i32>();
+		MyStructDeclaration structInstance = new MyStructDeclaration();
+
+		refInstance.Method(1, 2);
+		structInstance.Property = 3;
+
+		i32 local = genericInstance.GenericMethod(1, 2);
+		i32 secondLocal = MyClassDeclaration.StaticMethod(1, 2);
+
+		i32 finalLocaal = local * secondLocal;
+	}
+
+	export class MyClassDeclaration
+	{
+		public i32 MutableProperty { get; set; } = 10;
+		public i32 ImmutableProperty { get; } = 20;
+
+		bool awesomeField = false;
+
+		public void Method(i32 x, i32 y)
+		{
+			MutableProperty = x + y;
+		}
+
+		public static i32 StaticMethod(i32 x, i32 y)
+		{
+			return x + y;
+		}
+	}
+
+	export class MyGenericClass<T>
+	{
+		public T Property { get; set; }
+
+		public unique T GenericMethod(T x, T y)
+		{
+			return x + y + Property;
+		}
+	}
+
+	export struct MyStructDeclaration
+	{
+		public i32 Property { get; set; }
+	}
+
+	stack struct MyNonexportedStackonlyStructDeclaration { }
+}
