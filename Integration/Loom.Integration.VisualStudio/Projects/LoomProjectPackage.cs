@@ -51,7 +51,8 @@ public sealed class LoomProjectFactory : IVsProjectFactory
     /// <inheritdoc/>
     public int CanCreateProject(string filename, uint flags, out int canCreate)
     {
-        canCreate = string.Equals(Path.GetExtension(filename), ".lmproj", StringComparison.OrdinalIgnoreCase) ? 1 : 0;
+        bool fromTemplate = (flags & (uint)__VSCREATEPROJFLAGS.CPF_CLONEFILE) != 0;
+        canCreate = fromTemplate || string.Equals(Path.GetExtension(filename), ".lmproj", StringComparison.OrdinalIgnoreCase) ? 1 : 0;
         return VSConstants.S_OK;
     }
 

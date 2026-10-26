@@ -67,6 +67,7 @@ public sealed class LoomProjectHierarchy : IVsUIHierarchy, IVsProject, IPersistF
     }
 
 #pragma warning disable VSSDK007
+#pragma warning disable VSTHRD010
     private void OnFilesChanged(object sender, FileSystemEventArgs args) => QueueRefresh();
     private void OnWatcherError(object sender, ErrorEventArgs args) => QueueRefresh();
 
@@ -80,6 +81,7 @@ public sealed class LoomProjectHierarchy : IVsUIHierarchy, IVsProject, IPersistF
         }).FileAndForget("Loom/ProjectRefresh");
     }
 #pragma warning restore VSSDK007
+#pragma warning restore VSTHRD010
 
     private void Refresh()
     {
@@ -161,11 +163,14 @@ public sealed class LoomProjectHierarchy : IVsUIHierarchy, IVsProject, IPersistF
             return VSConstants.E_INVALIDARG;
 
         bool root = itemid == VSConstants.VSITEMID_ROOT;
+
+        if (root && (propid == (int)__VSHPROPID.VSHPROPID_Caption || propid == (int)__VSHPROPID.VSHPROPID_ProjectName))
+        { value = Path.GetFileNameWithoutExtension(projectFile); return VSConstants.S_OK; }
+
         var icon = root ? KnownMonikers.Application : node.Folder ? KnownMonikers.FolderClosed : KnownMonikers.DocumentSource;
         if (propid == (int)__VSHPROPID8.VSHPROPID_SupportsIconMonikers)
         { value = true; return VSConstants.S_OK; }
 
-        // Solution Explorer queries the GUID through GetProperty as well as GetGuidProperty.
         if (propid == (int)__VSHPROPID8.VSHPROPID_IconMonikerGuid || propid == (int)__VSHPROPID8.VSHPROPID_OpenFolderIconMonikerGuid)
         { value = icon.Guid; return VSConstants.S_OK; }
 
