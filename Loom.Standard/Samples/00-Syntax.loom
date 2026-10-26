@@ -34,6 +34,16 @@ module Standard::Samples::Syntax
 		}
 	}
 
+	export interface IMyInterfaceDeclaration
+	{
+		void Method(i32 x, i32 y);
+	}
+
+	export class MyClassWithInterface : IMyInterfaceDeclaration
+	{
+		public void Method(i32 x, i32 y) { }
+	}
+
 	export class MyGenericClass<T>
 	{
 		public T Property { get; set; }
