@@ -73,6 +73,9 @@ internal partial class ExpressionGenerator
 
     private LIRValue EmitBinary(BinaryExpressionNode node)
     {
+        if (context.AnalysisContext.GetSymbol(node).Symbol is MethodSymbol { Kind: MethodSymbol.MethodKind.Operator } method)
+            return Generator.EmitCall(GetCallTarget(method), EmitArguments([node.Left, node.Right], method));
+
         var left = Emit(node.Left);
         var right = Emit(node.Right);
 

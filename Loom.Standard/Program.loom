@@ -35,8 +35,8 @@ module Standard::Program
         Slice<char> rangedWindow = myString[0..3];
 		println(rangedWindow); // "Hel"
 
-        unique string name = Assembly.Current.Name;
-        println(name); // "Standard"
+        unique string name = "Project: " + Assembly.Current.Name;
+        println(name); // "Project: Loom.Standard"
 
         // Loom also allows unsafe operations inside an 'unsafe' block via the 'Standard::Memory::Unsafe' class
         unsafe

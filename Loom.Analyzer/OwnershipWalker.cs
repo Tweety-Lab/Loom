@@ -92,8 +92,19 @@ internal class OwnershipWalker : ASTVisitor
     }
 
     [Visitor]
-    public void Visit(CallExpressionNode node)
-        => VisitArguments(node.Arguments, Context.GetSymbol(node).As<MethodSymbol>()?.Parameters);
+    public void Visit(CallExpressionNode node) => VisitArguments(node.Arguments, Context.GetSymbol(node).As<MethodSymbol>()?.Parameters);
+
+    [Visitor]
+    public void Visit(BinaryExpressionNode node)
+    {
+        if (Context.GetSymbol(node).Symbol is MethodSymbol { Kind: MethodSymbol.MethodKind.Operator } method)
+            VisitArguments([node.Left, node.Right], method.Parameters);
+        else
+        {
+            UseWithoutMove(node.Left);
+            UseWithoutMove(node.Right);
+        }
+    }
 
     [Visitor]
     public void Visit(ArrayAccessExpressionNode node)

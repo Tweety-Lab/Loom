@@ -56,6 +56,17 @@ public class InaccessibleSymbolAnalyzer : Analyzer
     public void Visit(LocalDeclarationStatementNode node) => CheckTypeAccess(node, node.Variable.Type.Base.Text);
 
     [Visitor]
+    public void Visit(BinaryExpressionNode node)
+    {
+        if (Context.GetSymbol(node).Symbol is not MethodSymbol { Kind: MethodSymbol.MethodKind.Operator, Accessibility: MemberAccessibility.Private } method)
+            return;
+
+        var declaringType = Context.FirstAncestorOrSelf<ITypeDeclarationNode>(method.DeclaringNode!);
+        if (declaringType != Context.FirstAncestorOrSelf<ITypeDeclarationNode>(node))
+            Context.DiagnosticContext?.Report(InaccessibleMemberDiagnostic, node.Operator.Location, "operator+");
+    }
+
+    [Visitor]
     public void Visit(ArrayAccessExpressionNode node)
     {
         if (Context.GetSymbol(node).Symbol is not MethodSymbol { Kind: MethodSymbol.MethodKind.Operator, Accessibility: MemberAccessibility.Private } method)

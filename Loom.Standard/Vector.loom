@@ -70,6 +70,14 @@ module Standard
 			Count++;
 		}
 
+		/// @brief Adds a range of elements to the end of the \ref Vector.
+		/// @param(range) The range of elements to add to the \ref Vector.
+		public void AddRange(ref Vector<T> range)
+		{
+			for (i32 i = 0; i < range.Count; i++)
+				Add(range[i]);
+		}
+
 		/// @brief Returns the element at the specified index.
 		/// @param(index) The index of the element to return.
 		/// @return The element at the specified index.

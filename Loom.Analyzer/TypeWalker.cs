@@ -176,6 +176,23 @@ internal class TypeWalker : ASTWalker
     }
 
     [Visitor]
+    public void Visit(BinaryExpressionNode node)
+    {
+        if (node.Operator.Type != Parser.Tokenizer.Token.TokenType.Plus)
+            return;
+
+        var invocation = OverloadResolver.ResolveAdditionOperator(Context, node);
+        Context.Bind(node, invocation);
+        if (invocation.Symbol is MethodSymbol { ReturnType: { } returnType })
+            Context.ExpressionTypes[node] = returnType;
+        else if (invocation.Candidates.Count == 0 && Context.ExpressionTypes.TryGetValue(node.Left, out var left)
+            && Context.ExpressionTypes.TryGetValue(node.Right, out var right)
+            && left.KnownType is TypeSymbol.DefaultType.I32 or TypeSymbol.DefaultType.I64 or TypeSymbol.DefaultType.IPtr or TypeSymbol.DefaultType.Char
+            && right.KnownType is TypeSymbol.DefaultType.I32 or TypeSymbol.DefaultType.I64 or TypeSymbol.DefaultType.IPtr or TypeSymbol.DefaultType.Char)
+            Context.ExpressionTypes[node] = left.KnownType is TypeSymbol.DefaultType.I64 or TypeSymbol.DefaultType.IPtr ? left : right;
+    }
+
+    [Visitor]
     public void Visit(ArrayAccessExpressionNode node)
     {
         if (TryGetArrayType(node.Receiver, out var array))

@@ -30,6 +30,26 @@ internal enum MatchQuality
 /// </summary>
 internal static class OverloadResolver
 {
+    /// <summary> Finds addition operators declared on either operand type. </summary>
+    public static IReadOnlyList<MethodSymbol> AdditionOperatorCandidates(AnalysisContext context, BinaryExpressionNode node) =>
+        [.. new[] { node.Left, node.Right }
+            .Select(operand => context.ExpressionTypes.GetValueOrDefault(operand))
+            .OfType<TypeSymbol>()
+            .Distinct()
+            .SelectMany(type => type.Members.OfType<MethodSymbol>())
+            .Where(method => method is { Kind: MethodSymbol.MethodKind.Operator, Name: ".+", IsStatic: true, Arity: 0 })
+            .Distinct()];
+
+    public static SymbolInfo ResolveAdditionOperator(AnalysisContext context, BinaryExpressionNode node)
+    {
+        var candidates = AdditionOperatorCandidates(context, node);
+        var call = new CallExpressionNode(node.Left, new TypeArgumentListNode([]), [node.Left, node.Right]);
+        var (best, tied) = Best(context, call, candidates);
+        return best == null || tied ? SymbolInfo.OfCandidates(candidates) : SymbolInfo.OfCandidates(candidates).Resolved(best);
+    }
+
+    public static OverloadFailure? DiagnoseAdditionOperator(AnalysisContext context, BinaryExpressionNode node) => Diagnose(context, new CallExpressionNode(node.Left, new TypeArgumentListNode([]), [node.Left, node.Right]), AdditionOperatorCandidates(context, node));
+
     /// <summary> Finds static index operators on the receiver's type. </summary>
     public static IReadOnlyList<MethodSymbol> IndexOperatorCandidates(AnalysisContext context, ArrayAccessExpressionNode node) => context.ExpressionTypes.TryGetValue(node.Receiver, out var type) ? type.Members.OfType<MethodSymbol>().Where(method => method is { Kind: MethodSymbol.MethodKind.Operator, Name: ".[]", IsStatic: true, Arity: 0 }).ToArray() : [];
 

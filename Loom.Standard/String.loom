@@ -5,7 +5,7 @@ module Standard
 	// Its a little strange that we make string lowercase like C#, but it enforces it as a base type.
 	// Worth checking back on though.
 
-	export class string
+	export class string : IStringFormattable
 	{
 		/// @brief The amount of characters in this string.
 		public i32 Length
@@ -33,12 +33,72 @@ module Standard
 				characters.Add(slice[i]);
 		}
 
-		/// @brief Returns the character at the specified index.
+		/// @brief Initializes a new string from a vector of characters.
+		public string(ref Vector<char> vector)
+		{
+			characters = new Vector<char>(vector.Count);
+
+			for (i32 i = 0; i < vector.Count; i++)
+				characters.Add(vector[i]);
+		}
+
+		/// @inheritdoc
+		public unique string ToString()
+		{
+			return new string(characters);
+		}
+
+		/// @brief Gets the character at the specified index.
 		/// @param(index) The index of the element to return.
 		/// @return The character at the specified index.
         public static char operator[](string str, i32 index)
         {
 			return str.characters[index];
         }
+
+#region Operators
+		/// @brief Adds two strings together.
+		/// @return New string containing the result.
+		public static string operator+(string left, string right)
+		{
+			unique Vector<char> characters = new Vector<char>(left.characters.Count + right.characters.Count);
+			characters.AddRange(left.characters);
+			characters.AddRange(right.characters);
+			return new string(characters);
+		}
+
+		/// @brief Adds a char slice to a string.
+		/// @return New string containing the result.
+		public static string operator+(Slice<char> left, string right)
+		{
+			unique Vector<char> characters = new Vector<char>(left.Length + right.characters.Count);
+			for (i32 i = 0; i < left.Length; i++)
+				characters.Add(left[i]);
+
+			characters.AddRange(right.characters);
+			return new string(characters);
+		}
+
+		/// @brief Adds a string to a char slice.
+		/// @return New string containing the result.
+		public static string operator+(string left, Slice<char> right)
+		{
+			unique Vector<char> characters = new Vector<char>(left.characters.Count + right.Length);
+			characters.AddRange(left.characters);
+			for (i32 i = 0; i < right.Length; i++)
+				characters.Add(right[i]);
+
+			return new string(characters);
+		}
+#endregion
+	}
+
+	/// @brief Defines a type that can be converted to a string.
+	/// @remark String formattable types can be used in string interpolation.
+	export interface IStringFormattable
+	{
+		/// @brief Converts this instance to a string.
+		/// @return String representation of the instance.
+		unique string ToString();
 	}
 }

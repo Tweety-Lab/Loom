@@ -1,4 +1,5 @@
 using Loom.Common.Diagnostics;
+using Loom.Analyzer.Symbols;
 using Loom.Parser.AST;
 using Loom.Parser.AST.Rules.Default;
 
@@ -12,6 +13,22 @@ public class UnresolvedOverloadAnalyzer : Analyzer
 {
     public static Diagnostic AmbiguousOverload = new(Diagnostic.DiagnosticLevel.Error, "The call to '{0}' is ambiguous.");
     public static Diagnostic NoMatchingOverload = new(Diagnostic.DiagnosticLevel.Error, "No overload of '{0}' accepts {1} argument(s).");
+
+    [Visitor]
+    public void Visit(BinaryExpressionNode node)
+    {
+        if (node.Operator.Type != Parser.Tokenizer.Token.TokenType.Plus)
+            return;
+
+        var failure = OverloadResolver.DiagnoseAdditionOperator(Context, node);
+        if (failure == null && OverloadResolver.AdditionOperatorCandidates(Context, node).Count == 0
+            && new[] { node.Left, node.Right }.Any(operand => Context.ExpressionTypes.GetValueOrDefault(operand)?.KnownType is TypeSymbol.DefaultType.Class or TypeSymbol.DefaultType.Struct))
+            failure = OverloadFailure.NoMatchingOverload;
+
+        if (failure is { } reason)
+            Context.DiagnosticContext?.Report(reason == OverloadFailure.Ambiguous ? AmbiguousOverload : NoMatchingOverload,
+                node.Operator.Location, "operator+", 2);
+    }
 
     [Visitor]
     public void Visit(CallExpressionNode node)
