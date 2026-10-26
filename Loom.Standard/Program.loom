@@ -11,6 +11,12 @@ module Standard::Program
         public i32 MutableField { get; set; } = default;
     }
 
+    export enum PrintType
+    {
+        Print,
+        DontPrint
+    }
+
     /// @brief Program Entry Point.
     export i32 Main()
     {
@@ -43,8 +49,21 @@ module Standard::Program
         }
         
         unique Vector<i32> vec = [10, 3, 6, 64, 12];
+
+        OptionalPrint(PrintType.Print);
         
         return GetFieldFromBorrow(obj) + vec[2];
+    }
+
+    export bool OptionalPrint(PrintType type)
+    {
+        if (type == PrintType.Print)
+        {
+            println("Printing!");
+            return true;
+        }
+
+        return false;
     }
 
     /// @brief 'ref' is used to borrow a reference to an object without claiming ownership.

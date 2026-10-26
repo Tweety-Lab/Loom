@@ -12,10 +12,12 @@ namespace Loom.Analyzer.Analyzers;
 public class MutabilityAnalyzer : Analyzer
 {
     public static Diagnostic CannotMutateRef = new(Diagnostic.DiagnosticLevel.Error, "Cannot mutate borrowed parameter '{0}' because it is not marked 'mut'.");
+    public static Diagnostic CannotMutateConstant = new(Diagnostic.DiagnosticLevel.Error, "Cannot mutate constant '{0}'.");
 
     [Visitor]
     public void Visit(AssignmentStatementNode node)
     {
+        CheckConstant(node.Target);
         if (FindBorrowedParameter(node.Target) is not { IsMutable: false } parameter)
             return;
 
@@ -25,10 +27,17 @@ public class MutabilityAnalyzer : Analyzer
     [Visitor]
     public void Visit(IncrementExpressionNode node)
     {
+        CheckConstant(node.Target);
         if (FindBorrowedParameter(node.Target) is not { IsMutable: false } parameter)
             return;
 
         Context.DiagnosticContext?.Report(CannotMutateRef, node.Span.StartToken?.Location, parameter.Name);
+    }
+
+    private void CheckConstant(ExpressionNode target)
+    {
+        if (Context.GetSymbol(target).Symbol is FieldSymbol { IsConstant: true } field)
+            Context.DiagnosticContext?.Report(CannotMutateConstant, target.Span.StartToken?.Location, field.Name);
     }
 
     private ParameterSymbol? FindBorrowedParameter(ExpressionNode target) => target switch

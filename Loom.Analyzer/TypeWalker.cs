@@ -168,7 +168,7 @@ internal class TypeWalker : ASTWalker
         if (member is MethodSymbol method && TypeResolver.Resolve(Context, node, "Function") is { } function && (receiverIsValue || method.IsStatic))
             Context.ExpressionTypes[node] = function;
 
-        else if (receiverIsValue && member is FieldSymbol field && field.Type is { } fieldType)
+        else if (member is FieldSymbol field && field.Type is { } fieldType && (receiverIsValue || field.IsStatic))
             Context.ExpressionTypes[node] = fieldType;
 
         else if (member is PropertySymbol property && property.Type is { } propertyType && (receiverIsValue || property.IsStatic))

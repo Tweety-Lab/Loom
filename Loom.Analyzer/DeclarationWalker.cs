@@ -1,5 +1,6 @@
 ﻿using Loom.Analyzer.Symbols;
 using Loom.Parser.AST;
+using Loom.Common.Diagnostics;
 using Loom.Parser.AST.Rules.Default;
 
 namespace Loom.Analyzer;
@@ -212,6 +213,48 @@ internal class DeclarationWalker : ASTVisitor
             type.Members = [.. type.Members, symbol];
 
         WithScope(node, () => VisitChildren(node), symbol);
+    }
+
+    [Visitor]
+    public void Visit(EnumDeclarationNode node)
+    {
+        var symbol = new TypeSymbol(node.Name.Text, TypeSymbol.DefaultType.Enum)
+        {
+            FullyQualifiedName = BuildQualifiedName(node.Name.Text),
+            IsExported = node.HasModifier(Parser.Tokenizer.Token.TokenType.Export),
+            DeclaringNode = node,
+            IsValueType = true
+        };
+        CurrentTable.Define(symbol);
+        WithScope(node, () =>
+        {
+            long next = 0;
+            foreach (var member in node.Body.Contents.OfType<EnumMemberNode>())
+            {
+                long value = member.Value ?? next;
+                if (value > int.MaxValue)
+                {
+                    Context.DiagnosticContext?.Report(new Diagnostic(Diagnostic.DiagnosticLevel.Error, "Enum value exceeds the signed 32-bit range."), member.Name.Location);
+                    value = 0;
+                }
+                var constant = new FieldSymbol(member.Name.Text)
+                {
+                    Type = symbol,
+                    IsStatic = true,
+                    ConstantValue = (int)value,
+                    ContainingType = symbol,
+                    Accessibility = MemberAccessibility.Public,
+                    DeclaringNode = member,
+                    FullyQualifiedName = BuildQualifiedName(member.Name.Text)
+                };
+                CurrentTable.Define(constant);
+                if (symbol.Members.Any(existing => existing.Name == constant.Name))
+                    Context.DiagnosticContext?.Report(new Diagnostic(Diagnostic.DiagnosticLevel.Error, "Duplicate enum member '{0}'."), member.Name.Location, constant.Name);
+                symbol.Members = [.. symbol.Members, constant];
+                Context.Bind(member, constant);
+                next = value + 1;
+            }
+        }, symbol);
     }
 
     [Visitor]

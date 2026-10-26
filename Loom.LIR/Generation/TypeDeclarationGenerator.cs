@@ -26,7 +26,7 @@ internal partial class TypeDeclarationGenerator
 
     public void DeclareTypeDeclaration(ITypeDeclarationNode node)
     {
-        if (node is InterfaceDeclarationNode)
+        if (node is InterfaceDeclarationNode or EnumDeclarationNode)
             return;
 
         TypeSymbol? symbol = GetTypeSymbol(node);
@@ -74,7 +74,7 @@ internal partial class TypeDeclarationGenerator
 
     public void GenerateTypeDeclarationBodies(ITypeDeclarationNode node)
     {
-        if (node is InterfaceDeclarationNode)
+        if (node is InterfaceDeclarationNode or EnumDeclarationNode)
             return;
 
         TypeSymbol? symbol = GetTypeSymbol(node);

@@ -26,7 +26,7 @@ public class StaticTypeAnalyzer : Analyzer
 
         var symbol = parent is CallExpressionNode call && call.Callee == node ? Context.GetSymbol(call).Symbol : Context.GetSymbol(node).Symbol;
 
-        if (!(symbol is FieldSymbol or PropertySymbol { IsStatic: false } or MethodSymbol { IsStatic: false, ContainingType: not null }))
+        if (!(symbol is FieldSymbol { IsStatic: false } or PropertySymbol { IsStatic: false } or MethodSymbol { IsStatic: false, ContainingType: not null }))
             return;
 
         for (var enclosing = parent; enclosing != null; enclosing = Context.GetParent(enclosing))

@@ -36,6 +36,7 @@ internal partial class ExpressionGenerator
 
     public LIRValue Emit(ExpressionNode node) => node switch
     {
+        IdentifierNameNode or MemberAccessExpressionNode when context.AnalysisContext.GetSymbol(node).Symbol is FieldSymbol { ConstantValue: { } value } => new LIRConstantIntValue(value),
         IdentifierNameNode or MemberAccessExpressionNode when context.AnalysisContext.GetSymbol(node).Symbol is MethodSymbol method => EmitMethodReference(node, method),
         CharacterLiteralNode character => new LIRConstantCharValue(character.Value),
         NumberLiteralNode num => new LIRConstantIntValue(num.Value),
