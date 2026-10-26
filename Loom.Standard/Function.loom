@@ -1,0 +1,17 @@
+module Standard
+{
+	/// @brief Represents a reusable, callable block of code.
+	/// @remark This type represents a function that returns 'void' and takes no arguments.
+	export struct Function
+	{
+		iptr pointer = default;
+
+		private Function(iptr ptr)
+		{
+			pointer = ptr;
+		}
+
+		/// @brief Invokes the function.
+		public extern void Invoke();
+	}
+}

@@ -32,6 +32,9 @@ module Standard::Program
         unique string name = Assembly.Current.Name;
         println(name); // "Standard"
 
+        Function testFunction = TestFunction;
+        DoThingThen(testFunction);
+
         // Loom also allows unsafe operations inside an 'unsafe' block via the 'Standard::Memory::Unsafe' class
         unsafe
         {
@@ -45,6 +48,17 @@ module Standard::Program
         unique Vector<i32> vec = [10, 3, 6, 64, 12];
         
         return GetFieldFromBorrow(obj) + vec[2];
+    }
+
+    export void DoThingThen(Function onComplete)
+    {
+        onComplete.Invoke();
+    }
+
+    export void TestFunction()
+    {
+        Slice<char> myString = "Hello!";
+        println(myString); // "Hello!"
     }
 
     /// @brief 'ref' is used to borrow a reference to an object without claiming ownership.

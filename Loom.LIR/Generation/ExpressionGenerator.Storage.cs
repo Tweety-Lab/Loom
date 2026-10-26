@@ -11,6 +11,9 @@ internal partial class ExpressionGenerator
     /// <summary> Emits the address of an addressable expression (a local variable or a field). </summary>
     public LIRValue EmitAddress(ExpressionNode node)
     {
+        if (node is IdentifierNameNode or MemberAccessExpressionNode && context.AnalysisContext.GetSymbol(node).Symbol is MethodSymbol method)
+            return EmitMethodReference(node, method);
+
         if (ResolveProperty(node) is { } property)
             return EmitPropertyAddress(property, node);
 
@@ -158,6 +161,7 @@ internal partial class ExpressionGenerator
     {
         instanceTypeSymbol = substitution?.Resolve(instanceTypeSymbol) ?? instanceTypeSymbol;
         fieldSymbol = instanceTypeSymbol.Members.OfType<FieldSymbol>().FirstOrDefault(field => field.Name == fieldSymbol.Name) ?? fieldSymbol;
+
         // An instantiated generic type shares the layout of its definition, whose declaration exists before monomorphization
         TypeSymbol layout = instanceTypeSymbol is ConstructedTypeSymbol instantiated ? instantiated.OriginalDefinition : instanceTypeSymbol;
 

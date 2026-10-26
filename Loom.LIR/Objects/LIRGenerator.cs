@@ -158,8 +158,12 @@ public class LIRGenerator
 
     private LIRTempValue EmitCallCore(LIRValue target, LIRValue? receiver, LIRValue[] arguments)
     {
-        if (target.Type is not LIRFunctionType signature)
-            throw new ArgumentException("A call target must have a function type.", nameof(target));
+        var signature = target.Type switch
+        {
+            LIRFunctionType direct => direct,
+            LIRPointerType { PointeeType: LIRFunctionType indirect } => indirect,
+            _ => throw new ArgumentException("A call target must have a function type or point to one.", nameof(target))
+        };
 
         var coerced = CoerceArguments(signature.Parameters, arguments, receiver == null ? 0 : 1);
         LIRValue[] operands = receiver == null ? [target, .. coerced] : [target, receiver, .. coerced];

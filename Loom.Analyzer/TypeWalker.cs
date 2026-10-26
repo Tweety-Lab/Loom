@@ -133,10 +133,13 @@ internal class TypeWalker : ASTWalker
     {
         var symbol = Context.GetSymbol(node).Symbol;
 
+        if (symbol == null)
+            return;
+
         var type = symbol switch
         {
             LocalVariableSymbol local => local.Type,
-            MethodSymbol method => method.ReturnType,
+            MethodSymbol => TypeResolver.Resolve(Context, node, "Function"),
             FieldSymbol field => field.Type,
             PropertySymbol property => property.Type,
             ParameterSymbol parameter => parameter.Type,
@@ -159,8 +162,8 @@ internal class TypeWalker : ASTWalker
 
         var member = receiverType.Members.FirstOrDefault(m => m.Name == node.Name.BaseName);
 
-        if (member is MethodSymbol method && method.ReturnType is { } returnType && (receiverIsValue || method.IsStatic))
-            Context.ExpressionTypes[node] = returnType;
+        if (member is MethodSymbol method && TypeResolver.Resolve(Context, node, "Function") is { } function && (receiverIsValue || method.IsStatic))
+            Context.ExpressionTypes[node] = function;
 
         else if (receiverIsValue && member is FieldSymbol field && field.Type is { } fieldType)
             Context.ExpressionTypes[node] = fieldType;

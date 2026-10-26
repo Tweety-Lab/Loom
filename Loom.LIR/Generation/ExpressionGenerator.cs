@@ -36,6 +36,7 @@ internal partial class ExpressionGenerator
 
     public LIRValue Emit(ExpressionNode node) => node switch
     {
+        IdentifierNameNode or MemberAccessExpressionNode when context.AnalysisContext.GetSymbol(node).Symbol is MethodSymbol method => EmitMethodReference(node, method),
         CharacterLiteralNode character => new LIRConstantCharValue(character.Value),
         NumberLiteralNode num => new LIRConstantIntValue(num.Value),
         IdentifierNameNode ident => ResolveProperty(ident) is { } identProperty ? EmitPropertyGet(identProperty, ident, EmitPropertySelf(identProperty, ident)) : EmitVariableValue(ident),

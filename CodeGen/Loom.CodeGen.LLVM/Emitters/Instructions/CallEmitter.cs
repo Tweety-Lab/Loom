@@ -18,15 +18,17 @@ internal class CallEmitter : IInstructionEmitter
         if (instruction.Operands.Count < 1)
             throw new InvalidOperationException("Call requires at least a function operand.");
 
-        if (instruction.Operands[0] is not LIRFunction funcValue)
-            throw new InvalidOperationException("Call operand[0] must be an LIRFunctionValue.");
+        var target = instruction.Operands[0];
+        var lirFuncType = target.Type switch
+        {
+            LIRFunctionType direct => direct,
+            LIRPointerType { PointeeType: LIRFunctionType indirect } => indirect,
+            _ => throw new InvalidOperationException("Call operand[0] must be a function or function pointer.")
+        };
 
-        if (!context.FunctionMap.TryGetValue(funcValue, out LLVMValueRef llvmFunc))
-            throw new InvalidOperationException($"Function '{funcValue.Name}' has not been declared.");
+        LLVMValueRef llvmFunc = context.ResolveValue(target);
 
         LLVMValueRef[] args = instruction.Operands.Skip(1).Select(context.ResolveValue).ToArray();
-
-        LIRFunctionType lirFuncType = funcValue.Type;
 
         LLVMTypeRef[] paramTypes = lirFuncType.Parameters.Select(p => context.ResolveType(p.Type)).ToArray();
 
@@ -34,7 +36,7 @@ internal class CallEmitter : IInstructionEmitter
         LLVMTypeRef llvmFuncType = LLVMTypeRef.CreateFunction(returnType, paramTypes);
 
         bool isVoid = lirFuncType.ReturnType == LIRType.Void;
-        string resultName = isVoid ? "" : ((LIRTempValue)instruction.Result).ID ?? ""; // Hack
+        string resultName = isVoid ? "" : (instruction.Result as LIRTempValue)?.ID ?? ""; // Hack
 
         LLVMValueRef callResult = context.Builder.BuildCall2(llvmFuncType, llvmFunc, args, resultName);
 

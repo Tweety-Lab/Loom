@@ -3,7 +3,6 @@ using Loom.Analyzer.Symbols;
 using Loom.Common;
 using Loom.LIR.Generation;
 using Loom.LIR.Objects;
-using Loom.LIR.OpCodes;
 
 namespace Loom.LIR.Passes.Default;
 
@@ -40,7 +39,7 @@ public class MonomorphizationPass : LIRCompilationPass
 
                 foreach (var function in pending)
                     foreach (var instruction in function.Blocks.SelectMany(block => block.Instructions).ToArray())
-                        RewriteCall(instruction);
+                        RewriteFunctionReferences(instruction);
             }
         }
 
@@ -56,13 +55,11 @@ public class MonomorphizationPass : LIRCompilationPass
             types.GenerateTypeDeclarationBodies(type, type.Substitution);
         }
 
-        private void RewriteCall(LIRInstruction call)
+        private void RewriteFunctionReferences(LIRInstruction instruction)
         {
-            if (call.OpCode != LIROpCode.Call && call.OpCode != LIROpCode.CallInstanced)
-                return;
-
-            if (call.Operands[0] is LIRFunctionReference reference)
-                call.Operands[0] = ResolveFunction(reference);
+            for (int index = 0; index < instruction.Operands.Count; index++)
+                if (instruction.Operands[index] is LIRFunctionReference reference)
+                    instruction.Operands[index] = ResolveFunction(reference);
         }
 
         private LIRFunction ResolveFunction(LIRFunctionReference reference)
