@@ -16,7 +16,7 @@ namespace Loom.Integration.VisualStudio.Projects;
 
 [ComVisible(true)]
 [ClassInterface(ClassInterfaceType.None)]
-public sealed class LoomProjectHierarchy : IVsUIHierarchy, IVsProject, IPersistFileFormat, IOleCommandTarget
+public sealed class LoomProjectHierarchy : IVsUIHierarchy, IVsProject, IVsPersistHierarchyItem, IPersistFileFormat, IOleCommandTarget
 {
     private sealed class Node(uint id, string path, uint parent, bool folder)
     {
@@ -461,6 +461,52 @@ public sealed class LoomProjectHierarchy : IVsUIHierarchy, IVsProject, IPersistF
     /// <inheritdoc/>
     public int Exec(ref Guid group, uint command, uint options, IntPtr input, IntPtr output)
     { ThreadHelper.ThrowIfNotOnUIThread(); return ExecCommand(contextItem, ref group, command, options, input, output); }
+
+    /// <inheritdoc/>
+    public int IsItemDirty(uint itemid, IntPtr docData, out int dirty)
+    {
+        ThreadHelper.ThrowIfNotOnUIThread();
+        dirty = 0;
+        if (!nodes.TryGetValue(itemid, out var node))
+            return VSConstants.E_INVALIDARG;
+
+        if (itemid == VSConstants.VSITEMID_ROOT)
+            return IsDirty(out dirty);
+
+        if (node.Folder || docData == IntPtr.Zero)
+            return VSConstants.S_OK;
+
+        return Marshal.GetObjectForIUnknown(docData) is IVsPersistDocData document
+            ? document.IsDocDataDirty(out dirty)
+            : VSConstants.E_NOINTERFACE;
+    }
+
+    /// <inheritdoc/>
+    public int SaveItem(VSSAVEFLAGS flags, string silentSaveAsName, uint itemid, IntPtr docData, out int canceled)
+    {
+        ThreadHelper.ThrowIfNotOnUIThread();
+        canceled = 0;
+        if (!nodes.TryGetValue(itemid, out var node) || node.Folder && itemid != VSConstants.VSITEMID_ROOT)
+            return VSConstants.E_INVALIDARG;
+
+        if (docData == IntPtr.Zero)
+            return itemid == VSConstants.VSITEMID_ROOT ? Save(silentSaveAsName, 1, 0) : VSConstants.S_OK;
+
+        object data = Marshal.GetObjectForIUnknown(docData);
+        if (flags == VSSAVEFLAGS.VSSAVE_SilentSave)
+        {
+            if (data is not IPersistFileFormat)
+                return VSConstants.E_NOINTERFACE;
+
+            using var services = new ServiceProvider(Site);
+            if (services.GetService(typeof(SVsUIShell)) is not IVsUIShell shell)
+                return VSConstants.E_NOINTERFACE;
+
+            return shell.SaveDocDataToFile(flags, data, silentSaveAsName, out _, out canceled);
+        }
+
+        return data is IVsPersistDocData document ? document.SaveDocData(flags, out _, out canceled) : VSConstants.E_NOINTERFACE;
+    }
 
     public int GetClassID(out Guid guid) { guid = new Guid(LoomProjectFactory.ProjectTypeGuid); return VSConstants.S_OK; }
     public int IsDirty(out int dirty) { dirty = 0; return VSConstants.S_OK; }

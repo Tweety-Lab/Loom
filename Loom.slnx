@@ -8,6 +8,13 @@
       <Deploy />
     </Project>
   </Folder>
+  <Folder Name="/Samples/">
+    <Project Path="Samples/Loom.Samples.Strings/Loom.Samples.Strings.lmproj" Type="fb8a16cb-22d3-4b29-a4cb-1c97627660dd" Id="d7440c3a-3d0e-4fdf-b951-304d7cfca6ef">
+      <BuildType Project="?" />
+      <Platform Project="?" />
+      <Build Project="false" />
+    </Project>
+  </Folder>
   <Project Path="Loom.Analyzer/Loom.Analyzer.csproj" Id="68bd67b2-4319-4aa5-9caa-07cc9737ab1f" />
   <Project Path="Loom.CLI/Loom.CLI.csproj" Id="f6b9f11f-342e-41c6-aecc-2de9b4c78d2f" />
   <Project Path="Loom.Common/Loom.Common.csproj" />
