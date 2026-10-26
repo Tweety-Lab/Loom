@@ -42,5 +42,22 @@ module Standard::Memory
         {
 			return slice.Subslice(range.Start, range.End - range.Start);
         }
+
+#region Operators
+		/// @brief Adds a char slice to a char slice.
+		/// @return New string containing the result.
+		public static string operator+(Slice<char> left, Slice<char> right)
+		{
+			unique Vector<char> characters = new Vector<char>(left.Length + right.Length);
+
+			for (i32 i = 0; i < left.Length; i++)
+				characters.Add(left[i]);
+
+			for (i32 x = 0; x < right.Length; x++)
+				characters.Add(right[x]);
+
+			return new string(characters);
+		}
+#endregion
     }
 }
