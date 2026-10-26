@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<VSTemplate Version="3.0.0" Type="Project" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005">
+  <TemplateData>
+    <Name>Loom Project</Name>
+    <Description>A container for Loom source files.</Description>
+    <ProjectType>Loom</ProjectType>
+    <DefaultName>LoomProject</DefaultName>
+    <CreateNewFolder>true</CreateNewFolder>
+    <ProvideDefaultName>true</ProvideDefaultName>
+    <LanguageTag>Loom</LanguageTag>
+    <ProjectTypeTag>Loom</ProjectTypeTag>
+  </TemplateData>
+  <TemplateContent>
+    <Project File="LoomProject.lmproj" TargetFileName="$projectname$.lmproj" ReplaceParameters="false">
+      <ProjectItem ReplaceParameters="true" TargetFileName="Main.loom" OpenInEditor="true">Main.loom</ProjectItem>
+    </Project>
+  </TemplateContent>
+</VSTemplate>

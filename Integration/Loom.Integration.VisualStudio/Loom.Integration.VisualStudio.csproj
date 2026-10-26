@@ -7,7 +7,7 @@
 
     <!-- VSIX settings -->
     <VSSDKBuildToolsAutoSetup>true</VSSDKBuildToolsAutoSetup>
-    <GeneratePkgDefFile>false</GeneratePkgDefFile>
+    <GeneratePkgDefFile>true</GeneratePkgDefFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -56,6 +56,18 @@
       <Content Include="@(_LanguageServerFile)">
         <IncludeInVSIX>true</IncludeInVSIX>
         <VSIXSubPath>Server\%(_LanguageServerFile.RecursiveDir)</VSIXSubPath>
+      </Content>
+    </ItemGroup>
+  </Target>
+
+  <Target Name="PackageLoomProjectTemplate" BeforeTargets="GetVsixSourceItems" Condition="'$(DesignTimeBuild)' != 'true'">
+    <MakeDir Directories="$(IntermediateOutputPath)ProjectTemplates" />
+    <ZipDirectory SourceDirectory="$(MSBuildProjectDirectory)\ProjectTemplates\LoomProject"
+                  DestinationFile="$(IntermediateOutputPath)ProjectTemplates\LoomProject.zip" Overwrite="true" />
+    <ItemGroup>
+      <Content Include="$(IntermediateOutputPath)ProjectTemplates\LoomProject.zip">
+        <IncludeInVSIX>true</IncludeInVSIX>
+        <VSIXSubPath>ProjectTemplates</VSIXSubPath>
       </Content>
     </ItemGroup>
   </Target>
