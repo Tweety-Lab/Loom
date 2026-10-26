@@ -34,6 +34,7 @@ internal sealed class ClassifiedTextBuilder(IClassifiedTextBackend backend)
     public ClassifiedTextBuilder ClassName(string text) => Append(TextClassification.Class, text);
     public ClassifiedTextBuilder ParameterName(string text) => Append(TextClassification.Parameter, text);
     public ClassifiedTextBuilder StructName(string text) => Append(TextClassification.Struct, text);
+    public ClassifiedTextBuilder EnumName(string text) => Append(TextClassification.Enum, text);
     public ClassifiedTextBuilder MethodName(string text) => Append(TextClassification.Method, text);
     public ClassifiedTextBuilder PropertyName(string text) => Append(TextClassification.Property, text);
     public ClassifiedTextBuilder FieldName(string text) => Append(TextClassification.Field, text);

@@ -9,6 +9,7 @@ internal enum TextClassification
     Namespace,
     Class,
     Struct,
+    Enum,
     Interface,
     TypeParameter,
     Method,

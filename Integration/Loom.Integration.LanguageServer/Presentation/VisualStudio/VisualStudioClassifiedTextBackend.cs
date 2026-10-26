@@ -28,6 +28,7 @@ internal sealed class VisualStudioClassifiedTextBackend : IClassifiedTextBackend
         TextClassification.Namespace => "namespace name",
         TextClassification.Class => "class name",
         TextClassification.Struct => "struct name",
+        TextClassification.Enum => "enum name",
         TextClassification.Interface => "interface name",
         TextClassification.TypeParameter => "type parameter name",
         TextClassification.Method => "method name",

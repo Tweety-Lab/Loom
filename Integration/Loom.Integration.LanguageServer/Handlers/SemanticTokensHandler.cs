@@ -31,8 +31,7 @@ internal sealed class SemanticTokensHandler(ParsedDocumentStore documents, Docum
         {
             cancellationToken.ThrowIfCancellationRequested();
             var position = parsed.Document.GetPosition(name.Start);
-            builder.Push(position.Line, position.Character, name.End - name.Start, tokenTypes[type],
-                type == SemanticTokenType.Comment ? new[] { SemanticTokenModifier.Documentation } : Array.Empty<SemanticTokenModifier>());
+            builder.Push(position.Line, position.Character, name.End - name.Start, tokenTypes[type], type == SemanticTokenType.Comment ? new[] { SemanticTokenModifier.Documentation } : Array.Empty<SemanticTokenModifier>());
         }
     }
 
@@ -64,6 +63,7 @@ internal sealed class SemanticTokensHandler(ParsedDocumentStore documents, Docum
         {
             (Type: SemanticTokenType.Struct, VisualStudioName: "struct name"),
             (Type: SemanticTokenType.Method, VisualStudioName: "method name"),
+            (Type: SemanticTokenType.Enum, VisualStudioName: "enum name"),
             (Type: SemanticTokenType.Interface, VisualStudioName: "interface name"),
             (Type: SemanticTokenType.TypeParameter, VisualStudioName: "type parameter name"),
             (Type: SemanticTokenType.Parameter, VisualStudioName: "parameter name"),
@@ -124,6 +124,7 @@ internal sealed class SemanticTokensHandler(ParsedDocumentStore documents, Docum
             TypeSymbol { KnownType: TypeSymbol.DefaultType.Struct } => SemanticTokenType.Struct,
             TypeSymbol { KnownType: TypeSymbol.DefaultType.TypeParameter } => SemanticTokenType.TypeParameter,
             TypeSymbol { KnownType: TypeSymbol.DefaultType.Interface } => SemanticTokenType.Interface,
+            TypeSymbol { KnownType: TypeSymbol.DefaultType.Enum } => SemanticTokenType.Enum,
             MethodSymbol { Kind: MethodSymbol.MethodKind.Method } => SemanticTokenType.Method,
             ParameterSymbol => SemanticTokenType.Parameter,
             LocalVariableSymbol => SemanticTokenType.Variable,

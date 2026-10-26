@@ -158,12 +158,24 @@ internal sealed class HoverHandler(ParsedDocumentStore documents, DocumentAnalys
         builder.Keyword(symbol.IsStatic ? "static " : "");
         builder.Keyword(symbol.IsStackOnly ? "stack " : "");
 
-        if (symbol.KnownType == TypeSymbol.DefaultType.TypeParameter)
-            builder.Keyword("typeparam ");
-        else if (symbol.KnownType == TypeSymbol.DefaultType.Interface)
-            builder.Keyword("interface ");
-        else
-            builder.Keyword(symbol.IsValueType ? "struct " : "class ");
+        switch (symbol.KnownType)
+        {
+            case TypeSymbol.DefaultType.TypeParameter:
+                builder.Keyword("typeparam ");
+                break;
+
+            case TypeSymbol.DefaultType.Interface:
+                builder.Keyword("interface ");
+                break;
+
+            case TypeSymbol.DefaultType.Enum:
+                builder.Keyword("enum ");
+                break;
+
+            default:
+                builder.Keyword(symbol.IsValueType ? "struct " : "class ");
+                break;
+        }
 
         builder.Append(BuildFullyQualifiedName(symbol));
 
@@ -188,12 +200,26 @@ internal sealed class HoverHandler(ParsedDocumentStore documents, DocumentAnalys
 
         if (symbol.BackingField?.Type is not { } returnType)
             builder.Text("? ");
-        else if (returnType.KnownType == TypeSymbol.DefaultType.TypeParameter)
-            builder.TypeParameter(returnType.Name + " ");
-        else if (returnType.IsValueType)
-            builder.StructName(returnType.Name + " ");
         else
-            builder.ClassName(returnType.Name + " ");
+        {
+            switch (returnType.KnownType)
+            {
+                case TypeSymbol.DefaultType.TypeParameter:
+                    builder.TypeParameter(returnType.Name + " ");
+                    break;
+
+                case TypeSymbol.DefaultType.Enum:
+                    builder.EnumName(returnType.Name + " ");
+                    break;
+
+                default:
+                    if (returnType.IsValueType)
+                        builder.StructName(returnType.Name + " ");
+                    else
+                        builder.ClassName(returnType.Name + " ");
+                    break;
+            }
+        }
 
         builder.Append(BuildFullyQualifiedName(symbol));
 
@@ -230,6 +256,8 @@ internal sealed class HoverHandler(ParsedDocumentStore documents, DocumentAnalys
             builder.Text("? ");
         else if (type.KnownType == TypeSymbol.DefaultType.TypeParameter)
             builder.TypeParameter(type.Name + " ");
+        else if (type.KnownType == TypeSymbol.DefaultType.Enum)
+            builder.EnumName(type.Name + " ");
         else if (type.IsValueType)
             builder.StructName(type.Name + " ");
         else
@@ -260,6 +288,8 @@ internal sealed class HoverHandler(ParsedDocumentStore documents, DocumentAnalys
             builder.Text("? ");
         else if (returnType.KnownType == TypeSymbol.DefaultType.TypeParameter)
             builder.TypeParameter(returnType.Name + " ");
+        else if (returnType.KnownType == TypeSymbol.DefaultType.Enum)
+            builder.EnumName(returnType.Name + " ");
         else if (returnType.IsValueType)
             builder.StructName(returnType.Name + " ");
         else
@@ -279,6 +309,8 @@ internal sealed class HoverHandler(ParsedDocumentStore documents, DocumentAnalys
                 builder.Text("? ");
             else if (parameterType.KnownType == TypeSymbol.DefaultType.TypeParameter)
                 builder.TypeParameter(parameterType.Name + " ");
+            else if (parameterType.KnownType == TypeSymbol.DefaultType.Enum)
+                builder.EnumName(parameterType.Name + " ");
             else if (parameterType.IsValueType)
                 builder.StructName(parameterType.Name + " ");
             else
@@ -319,6 +351,8 @@ internal sealed class HoverHandler(ParsedDocumentStore documents, DocumentAnalys
                     builder.TypeParameter(parts[^1]);
                 else if (type.KnownType == TypeSymbol.DefaultType.Interface)
                     builder.InterfaceName(parts[^1]);
+                else if (type.KnownType == TypeSymbol.DefaultType.Enum)
+                    builder.EnumName(parts[^1]);
                 else if (type.IsValueType)
                     builder.StructName(parts[^1]);
                 else
