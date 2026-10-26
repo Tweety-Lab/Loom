@@ -10,7 +10,7 @@ public class Program
 {
     static void Main(string[] args)
     {
-        LoomProject sample = new LoomProject("Standard/Standard.lmproj");
+        LoomProject sample = new LoomProject(GetStandardPath());
         var buildResult = sample.Build();
 
         var firstClass = sample.CompilationContext.SyntaxTrees.SelectMany(tree => tree.Descendants).OfType<ClassDeclarationNode>().FirstOrDefault(node => node.DocumentComments.Items.Any());
@@ -56,5 +56,22 @@ public class Program
         }
 
         Console.ResetColor();
+    }
+
+    private static string GetStandardPath()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+
+        while (directory is not null)
+        {
+            var path = Path.Combine(directory.FullName, "Loom.Standard", "Loom.Standard.lmproj");
+
+            if (File.Exists(path))
+                return path;
+
+            directory = directory.Parent;
+        }
+
+        throw new FileNotFoundException("Could not find Standard/Standard.lmproj.");
     }
 }
