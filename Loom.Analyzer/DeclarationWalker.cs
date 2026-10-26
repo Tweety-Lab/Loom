@@ -290,26 +290,24 @@ internal class DeclarationWalker : ASTVisitor
         symbol.IsStatic = node.HasModifier(Parser.Tokenizer.Token.TokenType.Static);
         symbol.DeclaringNode = node;
 
-        if (node.HasModifier(Parser.Tokenizer.Token.TokenType.Public) ||
-            (symbol.ContainingType?.KnownType == TypeSymbol.DefaultType.Interface && !node.HasModifier(Parser.Tokenizer.Token.TokenType.Private)))
+        if (node.HasModifier(Parser.Tokenizer.Token.TokenType.Public) || (symbol.ContainingType?.KnownType == TypeSymbol.DefaultType.Interface && !node.HasModifier(Parser.Tokenizer.Token.TokenType.Private)))
             symbol.Accessibility = MemberAccessibility.Public;
         else
             symbol.Accessibility = MemberAccessibility.Private;
 
         symbol.FullyQualifiedName = BuildQualifiedName(node.Name.Text);
 
-        // Interface properties describe accessors without allocating instance storage
-        var backingFieldName = $"{node.Name.Text}.field";
-        if (symbol.ContainingType?.KnownType == TypeSymbol.DefaultType.Interface)
-            symbol.BackingField = null;
-
-        symbol.BackingField = new FieldSymbol(backingFieldName)
+        if (symbol.ContainingType?.KnownType != TypeSymbol.DefaultType.Interface && node.Accessors.Any(accessor => accessor.Body == null))
         {
-            Accessibility = MemberAccessibility.Private,
-            ContainingType = CurrentSymbol as TypeSymbol,
-            DeclaringNode = node,
-            FullyQualifiedName = BuildQualifiedName(backingFieldName)
-        };
+            var backingFieldName = $"{node.Name.Text}.field";
+            symbol.BackingField = new FieldSymbol(backingFieldName)
+            {
+                Accessibility = MemberAccessibility.Private,
+                ContainingType = CurrentSymbol as TypeSymbol,
+                DeclaringNode = node,
+                FullyQualifiedName = BuildQualifiedName(backingFieldName)
+            };
+        }
 
         foreach (var accessor in node.Accessors)
         {

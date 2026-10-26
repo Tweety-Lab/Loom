@@ -11,7 +11,7 @@ public class PropertySymbol : MemberSymbol
     /// <summary> Whether this property is static. </summary>
     public bool IsStatic { get; set; }
 
-    /// <summary> The hidden field the property's accessors read and write. </summary>
+    /// <summary> The hidden field the property's auto accessors read and write. </summary>
     public virtual FieldSymbol? BackingField { get; internal set; }
 
     /// <summary> The accessor that reads the property, or null when it declares no get accessor. </summary>
