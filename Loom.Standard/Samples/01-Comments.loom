@@ -1,0 +1,40 @@
+module Standard::Samples::Comments
+{
+	/// @brief Showcases Loom's document and regular comment system.
+	export void CommentSample()
+	{
+		// Loom supports two types of comments: Document and Regular.
+
+		// Regular comments (//) are like comments in any other language, any text after them is entirely ignored.
+
+		// Document comments (///) are language-integrated comments used to document code.
+		// Document comments can be applied to declarations and provide IDE integration aswell as being in the final binary, allowing them to be reflected on.
+
+		// Hovering over 'TypeExample' in a supported IDE will show the documentation for the type!
+		unique TypeExample<i32> typeExample = new TypeExample<i32>();
+	}
+
+	/// @brief 'brief' is used to document the type.
+	/// @remark 'remark' is used to provide additional information about the type.
+	/// @tparam(T) 'tparam' is used to document generic type parameters.
+	export class TypeExample<T> : IInterface
+	{
+		/// @brief Some directives only work on specific declarations.
+		/// @param(x) 'param' is used to document information about method parameters.
+		/// @param(y) In this instance, we're targeting the 'y' parameter.
+		/// @return 'return' is used to document information about what a method returns.
+		public i32 PublicMethod(i32 x, i32 y)
+		{
+			return x + y;
+		}
+
+		/// @inheritdoc
+		public void InheritedMethod() { }
+	}
+
+	export interface IInterface
+	{
+		/// @brief Document comments can be inherited using the '@inheritdoc' directive.
+		void InheritedMethod();
+	}
+}
