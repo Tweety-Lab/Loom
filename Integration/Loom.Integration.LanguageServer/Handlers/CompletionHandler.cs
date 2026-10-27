@@ -1,6 +1,8 @@
 ﻿using Loom.Integration.LanguageServer.Documents;
 using Loom.Analyzer;
 using Loom.Analyzer.Symbols;
+using Loom.Integration.LanguageServer.Presentation;
+using Loom.Integration.LanguageServer.Presentation.Generic;
 using Loom.Parser.AST;
 using Loom.Parser.AST.Rules.Default;
 using OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities;
@@ -12,6 +14,8 @@ namespace Loom.Integration.LanguageServer.Handlers;
 
 internal sealed class CompletionHandler(ParsedDocumentStore documents, DocumentAnalysisService analyses) : CompletionHandlerBase
 {
+    private static SymbolTextBuilder symbolText = new(new GenericClassifiedTextBackend());
+
     /// <inheritdoc/>
     public override Task<CompletionItem> Handle(CompletionItem request, CancellationToken cancellationToken) => Task.FromResult(request);
 
@@ -98,22 +102,22 @@ internal sealed class CompletionHandler(ParsedDocumentStore documents, DocumentA
         _ => null
     };
 
-    private static CompletionItem BuildPropertyCompletion(PropertySymbol property, Range range) => new()
-    {
-        Label = property.Name,
-        Kind = CompletionItemKind.Property,
-        Detail = $"{(property.IsStatic ? "static " : "")}{property.Type?.Name ?? "?"} {property.Name}",
-        InsertText = property.Name,
-        TextEdit = new TextEdit { Range = range, NewText = property.Name }
-    };
+    private static CompletionItem BuildPropertyCompletion(PropertySymbol property, Range range) => BuildCompletion(property, CompletionItemKind.Property, range);
 
-    private static CompletionItem BuildMethodCompletion(MethodSymbol method, Range range) => new()
+    private static CompletionItem BuildMethodCompletion(MethodSymbol method, Range range) => BuildCompletion(method, CompletionItemKind.Method, range);
+
+    private static CompletionItem BuildCompletion(Symbol symbol, CompletionItemKind kind, Range range)
     {
-        Label = method.Name,
-        Kind = CompletionItemKind.Method,
-        Detail = $"{method.ReturnType?.Name ?? "?"} {method.Name}()",
-        InsertText = method.Name,
-        TextEdit = new TextEdit { Range = range, NewText = method.Name }
-    };
+        return new CompletionItem
+        {
+            Label = symbol.Name,
+            Kind = kind,
+            Detail = symbolText.TryBuildSymbolName(symbol, out var signature) ? signature.Build().Text : null,
+            Documentation = symbolText.TryBuildSymbolDocumentation(symbol, out var documentation) ? new StringOrMarkupContent(new MarkupContent { Kind = MarkupKind.PlainText, Value = documentation.Build().Text }) : null,
+            InsertText = symbol.Name,
+            TextEdit = new TextEdit { Range = range, NewText = symbol.Name }
+        };
+    }
+
     private static bool IsIdentifierCharacter(char character) => char.IsLetterOrDigit(character) || character == '_';
 }
