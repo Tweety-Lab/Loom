@@ -14,7 +14,7 @@ namespace Loom.Integration.LanguageServer.Handlers;
 
 internal sealed class CompletionHandler(ParsedDocumentStore documents, DocumentAnalysisService analyses) : CompletionHandlerBase
 {
-    private static SymbolTextBuilder symbolText = new(new GenericClassifiedTextBackend());
+    private IClassifiedTextBackend backend = new GenericClassifiedTextBackend();
 
     /// <inheritdoc/>
     public override Task<CompletionItem> Handle(CompletionItem request, CancellationToken cancellationToken) => Task.FromResult(request);
@@ -47,6 +47,7 @@ internal sealed class CompletionHandler(ParsedDocumentStore documents, DocumentA
     /// <inheritdoc/>
     protected override CompletionRegistrationOptions CreateRegistrationOptions(CompletionCapability capability, ClientCapabilities clientCapabilities)
     {
+        backend = IClassifiedTextBackend.ForClient(clientCapabilities);
         return new CompletionRegistrationOptions
         {
             DocumentSelector = new TextDocumentSelector(new TextDocumentFilter { Pattern = "**/*.loom" }),
@@ -71,7 +72,7 @@ internal sealed class CompletionHandler(ParsedDocumentStore documents, DocumentA
         return dot >= 0 && text[dot] == '.';
     }
 
-    private static IEnumerable<CompletionItem> GetMemberCompletions(MemberAccessExpressionNode access, AnalysisContext analysis, string prefix, Range range)
+    private IEnumerable<CompletionItem> GetMemberCompletions(MemberAccessExpressionNode access, AnalysisContext analysis, string prefix, Range range)
     {
         var isInstance = analysis.ExpressionTypes.TryGetValue(access.Receiver, out var type);
         type ??= analysis.GetSymbol(access.Receiver).Symbol as TypeSymbol;
@@ -95,25 +96,26 @@ internal sealed class CompletionHandler(ParsedDocumentStore documents, DocumentA
         }
     }
 
-    private static CompletionItem? BuildSymbolCompletion(Symbol symbol, bool isInstance, Range range) => symbol switch
+    private CompletionItem? BuildSymbolCompletion(Symbol symbol, bool isInstance, Range range) => symbol switch
     {
         PropertySymbol property => BuildPropertyCompletion(property, range),
         MethodSymbol method when method.Kind == MethodSymbol.MethodKind.Method => BuildMethodCompletion(method, range),
         _ => null
     };
 
-    private static CompletionItem BuildPropertyCompletion(PropertySymbol property, Range range) => BuildCompletion(property, CompletionItemKind.Property, range);
+    private CompletionItem BuildPropertyCompletion(PropertySymbol property, Range range) => BuildCompletion(property, CompletionItemKind.Property, range);
 
-    private static CompletionItem BuildMethodCompletion(MethodSymbol method, Range range) => BuildCompletion(method, CompletionItemKind.Method, range);
+    private CompletionItem BuildMethodCompletion(MethodSymbol method, Range range) => BuildCompletion(method, CompletionItemKind.Method, range);
 
-    private static CompletionItem BuildCompletion(Symbol symbol, CompletionItemKind kind, Range range)
+    private CompletionItem BuildCompletion(Symbol symbol, CompletionItemKind kind, Range range)
     {
-        return new CompletionItem
+        var symbolText = new SymbolTextBuilder(backend);
+        var item = backend.CreateCompletionItem(symbolText.TryBuildSymbolName(symbol, out var signature) ? signature.Build() : null, symbolText.TryBuildSymbolDocumentation(symbol, out var documentation) ? documentation.Build() : null);
+
+        return item with
         {
             Label = symbol.Name,
             Kind = kind,
-            Detail = symbolText.TryBuildSymbolName(symbol, out var signature) ? signature.Build().Text : null,
-            Documentation = symbolText.TryBuildSymbolDocumentation(symbol, out var documentation) ? new StringOrMarkupContent(new MarkupContent { Kind = MarkupKind.PlainText, Value = documentation.Build().Text }) : null,
             InsertText = symbol.Name,
             TextEdit = new TextEdit { Range = range, NewText = symbol.Name }
         };

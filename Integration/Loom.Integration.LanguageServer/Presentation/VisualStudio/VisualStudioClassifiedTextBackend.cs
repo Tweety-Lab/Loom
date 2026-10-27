@@ -17,9 +17,36 @@ internal sealed class VisualStudioClassifiedTextBackend : IClassifiedTextBackend
         {
             Contents = fallback.Contents,
             Range = range,
-            RawContent = new ContainerElement([new TextElement([.. text.Runs.Select(run => new TextRun(ClassificationName(run.Classification), run.Text))])])
+            RawContent = new ContainerElement([CreateTextElement(text)])
         };
     }
+
+    public CompletionItem CreateCompletionItem(ClassifiedText? signature, ClassifiedText? documentation)
+    {
+        var fallback = new GenericClassifiedTextBackend().CreateCompletionItem(signature, documentation);
+        var builder = new ClassifiedTextBuilder(this);
+        if (signature is not null)
+            foreach (var run in signature.Runs)
+                builder.Append(run.Classification, run.Text);
+
+        if (documentation is not null)
+        {
+            if (signature is not null)
+                builder.Punctuation("\n");
+
+            foreach (var run in documentation.Runs)
+                builder.Append(run.Classification, run.Text);
+        }
+
+        return new VisualStudioCompletionItem
+        {
+            Detail = fallback.Detail,
+            Documentation = fallback.Documentation,
+            Description = CreateTextElement(builder.Build())
+        };
+    }
+
+    private static TextElement CreateTextElement(ClassifiedText text) => new([.. text.Runs.Select(run => new TextRun(ClassificationName(run.Classification), run.Text))]);
 
     private static string ClassificationName(TextClassification classification) => classification switch
     {
@@ -48,6 +75,12 @@ internal sealed class VisualStudioClassifiedTextBackend : IClassifiedTextBackend
         public required ContainerElement RawContent { get; init; }
     }
 
+    private record VisualStudioCompletionItem : CompletionItem
+    {
+        [JsonProperty("_vs_description")]
+        public required TextElement Description { get; init; }
+    }
+
     private sealed record ContainerElement([property: JsonProperty("Elements")] TextElement[] Elements)
     {
         [JsonProperty("_vs_type")] public string Type => "ContainerElement";
@@ -59,9 +92,7 @@ internal sealed class VisualStudioClassifiedTextBackend : IClassifiedTextBackend
         [JsonProperty("_vs_type")] public string Type => "ClassifiedTextElement";
     }
 
-    private sealed record TextRun(
-        [property: JsonProperty("ClassificationTypeName")] string ClassificationTypeName,
-        [property: JsonProperty("Text")] string Text)
+    private sealed record TextRun([property: JsonProperty("ClassificationTypeName")] string ClassificationTypeName, [property: JsonProperty("Text")] string Text)
     {
         [JsonProperty("_vs_type")] public string Type => "ClassifiedTextRun";
         [JsonProperty("Style")] public int Style => 0;

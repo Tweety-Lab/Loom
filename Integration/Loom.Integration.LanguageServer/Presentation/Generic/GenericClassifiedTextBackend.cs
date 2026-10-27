@@ -9,6 +9,16 @@ namespace Loom.Integration.LanguageServer.Presentation.Generic;
 /// </summary>
 internal sealed class GenericClassifiedTextBackend : IClassifiedTextBackend
 {
+    public CompletionItem CreateCompletionItem(ClassifiedText? signature, ClassifiedText? documentation) => new()
+    {
+        Detail = signature?.Text,
+        Documentation = documentation is null ? null : new StringOrMarkupContent(new MarkupContent
+        {
+            Kind = MarkupKind.PlainText,
+            Value = documentation.Text
+        })
+    };
+
     public Hover CreateHover(ClassifiedText text, LspRange? range = null) => new()
     {
         Contents = new MarkedStringsOrMarkupContent(new MarkupContent

@@ -17,9 +17,8 @@ internal interface IClassifiedTextBackend
     private static readonly IClassifiedTextBackend visualStudio = new VisualStudioClassifiedTextBackend();
 
     Hover CreateHover(ClassifiedText text, LspRange? range = null);
+    CompletionItem CreateCompletionItem(ClassifiedText? signature, ClassifiedText? documentation);
 
     /// <summary> Selects the appropriate backend based on the client capabilities. </summary>
-    public static IClassifiedTextBackend ForClient(ClientCapabilities capabilities)
-        => capabilities.ExtensionData?.TryGetValue("_vs_supportsVisualStudioExtensions", out var supported) == true
-        && supported.Type == JTokenType.Boolean && (bool)supported ? visualStudio : generic;
+    public static IClassifiedTextBackend ForClient(ClientCapabilities capabilities) => capabilities.ExtensionData?.TryGetValue("_vs_supportsVisualStudioExtensions", out var supported) == true && supported.Type == JTokenType.Boolean && (bool)supported ? visualStudio : generic;
 }
