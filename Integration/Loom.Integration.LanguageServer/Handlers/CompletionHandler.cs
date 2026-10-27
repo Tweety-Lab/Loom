@@ -1,20 +1,19 @@
 ﻿using Loom.Integration.LanguageServer.Documents;
+using Loom.Analyzer;
 using Loom.Analyzer.Symbols;
 using Loom.Parser.AST;
 using Loom.Parser.AST.Rules.Default;
 using OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities;
 using OmniSharp.Extensions.LanguageServer.Protocol.Document;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
+using Range = OmniSharp.Extensions.LanguageServer.Protocol.Models.Range;
 
 namespace Loom.Integration.LanguageServer.Handlers;
 
 internal sealed class CompletionHandler(ParsedDocumentStore documents, DocumentAnalysisService analyses) : CompletionHandlerBase
 {
     /// <inheritdoc/>
-    public override Task<CompletionItem> Handle(CompletionItem request, CancellationToken cancellationToken)
-    {
-        return Task.FromResult(request);
-    }
+    public override Task<CompletionItem> Handle(CompletionItem request, CancellationToken cancellationToken) => Task.FromResult(request);
 
     /// <inheritdoc/>
     public override async Task<CompletionList> Handle(CompletionParams request, CancellationToken cancellationToken)
@@ -23,20 +22,8 @@ internal sealed class CompletionHandler(ParsedDocumentStore documents, DocumentA
             return new CompletionList();
 
         var offset = document.GetOffset(request.Position);
-        var start = offset;
-        while (start > 0 && IsIdentifierCharacter(document.Text[start - 1]))
-            start--;
-
-        var dot = start - 1;
-        while (dot >= 0 && char.IsWhiteSpace(document.Text[dot]))
-            dot--;
-
-        if (dot < 0 || document.Text[dot] != '.')
+        if (!TryGetMemberCompletionSpan(document.Text, offset, out var start, out var end))
             return new CompletionList();
-
-        var end = offset;
-        while (end < document.Text.Length && IsIdentifierCharacter(document.Text[end]))
-            end++;
 
         // A missing name breaks parsing so we add a fake one
         var text = document.Text[..start] + "__completion" + document.Text[end..];
@@ -47,32 +34,11 @@ internal sealed class CompletionHandler(ParsedDocumentStore documents, DocumentA
             return new CompletionList();
 
         var analysis = await analyses.AnalyzeAsync(parsed, cancellationToken);
-        var isInstance = analysis.ExpressionTypes.TryGetValue(access.Receiver, out var type);
-        type ??= analysis.GetSymbol(access.Receiver).Symbol as TypeSymbol;
-
-        if (type is null)
-            return new CompletionList();
-
-        var enclosingDeclaration = analysis.FirstAncestor<ITypeDeclarationNode>(access) as ASTNode;
-        var enclosingType = enclosingDeclaration is null ? null : analysis.GetSymbol(enclosingDeclaration).Symbol as TypeSymbol;
         var prefix = document.Text[start..offset];
-        var range = new OmniSharp.Extensions.LanguageServer.Protocol.Models.Range(document.GetPosition(start), document.GetPosition(end));
+        var range = new Range(document.GetPosition(start), document.GetPosition(end));
 
-        return new CompletionList(type.Members.OfType<PropertySymbol>()
-            .Where(property => property.IsStatic == !isInstance)
-            .Where(property => property.Accessibility != MemberAccessibility.Private || ReferenceEquals(property.ContainingType?.OriginalDefinition, enclosingType?.OriginalDefinition))
-            .Where(property => property.Name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-            .Select(property => new CompletionItem
-            {
-                Label = property.Name,
-                Kind = CompletionItemKind.Property,
-                Detail = $"{property.Type?.Name ?? "?"} {property.Name}",
-                InsertText = property.Name,
-                TextEdit = new TextEdit { Range = range, NewText = property.Name }
-            }));
+        return new CompletionList(GetMemberCompletions(access, analysis, prefix, range));
     }
-
-    private static bool IsIdentifierCharacter(char character) => char.IsLetterOrDigit(character) || character == '_';
 
     /// <inheritdoc/>
     protected override CompletionRegistrationOptions CreateRegistrationOptions(CompletionCapability capability, ClientCapabilities clientCapabilities)
@@ -83,4 +49,71 @@ internal sealed class CompletionHandler(ParsedDocumentStore documents, DocumentA
             TriggerCharacters = new Container<string>(".")
         };
     }
+
+    private static bool TryGetMemberCompletionSpan(string text, int offset, out int start, out int end)
+    {
+        start = offset;
+        while (start > 0 && IsIdentifierCharacter(text[start - 1]))
+            start--;
+
+        var dot = start - 1;
+        while (dot >= 0 && char.IsWhiteSpace(text[dot]))
+            dot--;
+
+        end = offset;
+        while (end < text.Length && IsIdentifierCharacter(text[end]))
+            end++;
+
+        return dot >= 0 && text[dot] == '.';
+    }
+
+    private static IEnumerable<CompletionItem> GetMemberCompletions(MemberAccessExpressionNode access, AnalysisContext analysis, string prefix, Range range)
+    {
+        var isInstance = analysis.ExpressionTypes.TryGetValue(access.Receiver, out var type);
+        type ??= analysis.GetSymbol(access.Receiver).Symbol as TypeSymbol;
+
+        if (type is null)
+            yield break;
+
+        var enclosingDeclaration = analysis.FirstAncestor<ITypeDeclarationNode>(access) as ASTNode;
+        var enclosingType = enclosingDeclaration is null ? null : analysis.GetSymbol(enclosingDeclaration).Symbol as TypeSymbol;
+
+        foreach (var symbol in type.Members)
+        {
+            if (!symbol.Name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            if (symbol is MemberSymbol { Accessibility: MemberAccessibility.Private } member && !ReferenceEquals(member.ContainingType?.OriginalDefinition, enclosingType?.OriginalDefinition))
+                continue;
+
+            if (BuildSymbolCompletion(symbol, isInstance, range) is { } completion)
+                yield return completion;
+        }
+    }
+
+    private static CompletionItem? BuildSymbolCompletion(Symbol symbol, bool isInstance, Range range) => symbol switch
+    {
+        PropertySymbol property => BuildPropertyCompletion(property, range),
+        MethodSymbol method when method.Kind == MethodSymbol.MethodKind.Method => BuildMethodCompletion(method, range),
+        _ => null
+    };
+
+    private static CompletionItem BuildPropertyCompletion(PropertySymbol property, Range range) => new()
+    {
+        Label = property.Name,
+        Kind = CompletionItemKind.Property,
+        Detail = $"{(property.IsStatic ? "static " : "")}{property.Type?.Name ?? "?"} {property.Name}",
+        InsertText = property.Name,
+        TextEdit = new TextEdit { Range = range, NewText = property.Name }
+    };
+
+    private static CompletionItem BuildMethodCompletion(MethodSymbol method, Range range) => new()
+    {
+        Label = method.Name,
+        Kind = CompletionItemKind.Method,
+        Detail = $"{method.ReturnType?.Name ?? "?"} {method.Name}()",
+        InsertText = method.Name,
+        TextEdit = new TextEdit { Range = range, NewText = method.Name }
+    };
+    private static bool IsIdentifierCharacter(char character) => char.IsLetterOrDigit(character) || character == '_';
 }
