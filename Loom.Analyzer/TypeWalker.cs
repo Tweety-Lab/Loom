@@ -110,7 +110,7 @@ internal class TypeWalker : ASTWalker
     [Visitor]
     public void Visit(StringLiteralNode node)
     {
-        if (TypeResolver.Resolve(Context, node, "Slice") is not { } slice || TypeResolver.Resolve(Context, node, "char") is not { } charType)
+        if (TypeResolver.Resolve(Context, node, "Slice") is not { Arity: 1 } slice || TypeResolver.Resolve(Context, node, "char") is not { } charType)
             return;
 
         // String literal = Slice<char>
@@ -120,7 +120,7 @@ internal class TypeWalker : ASTWalker
     [Visitor]
     public void Visit(RangeExpressionNode node)
     {
-        if (TypeResolver.Resolve(Context, node, "Range") is not { } range || TypeResolver.Resolve(Context, node, "i32") is not { } intType)
+        if (TypeResolver.Resolve(Context, node, "Range") is not { Arity: 1 } range || TypeResolver.Resolve(Context, node, "i32") is not { } intType)
             return;
 
         // Range expression = Range<i32>
