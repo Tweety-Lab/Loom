@@ -62,6 +62,7 @@ internal sealed class SemanticTokensHandler(ParsedDocumentStore documents, Docum
         var supported = supportedTypes.ToHashSet();
         return new[]
         {
+            (Type: SemanticTokenType.Class, VisualStudioName: "class name"),
             (Type: SemanticTokenType.Struct, VisualStudioName: "struct name"),
             (Type: SemanticTokenType.Method, VisualStudioName: "method name"),
             (Type: SemanticTokenType.Enum, VisualStudioName: "enum name"),
@@ -69,6 +70,7 @@ internal sealed class SemanticTokensHandler(ParsedDocumentStore documents, Docum
             (Type: SemanticTokenType.TypeParameter, VisualStudioName: "type parameter name"),
             (Type: SemanticTokenType.Parameter, VisualStudioName: "parameter name"),
             (Type: SemanticTokenType.Variable, VisualStudioName: "local name"),
+            (Type: SemanticTokenType.Property, VisualStudioName: "property name"),
             (Type: SemanticTokenType.Comment, VisualStudioName: "xml doc comment - text"),
         }.ToDictionary(entry => entry.Type, entry =>
         {
@@ -107,6 +109,7 @@ internal sealed class SemanticTokensHandler(ParsedDocumentStore documents, Docum
         ITypeDeclarationNode declaration => declaration.Name,
         MethodDeclarationNode declaration => declaration.Name,
         OperatorDeclarationNode declaration => declaration.Operator,
+        PropertyDeclarationNode declaration => declaration.Name,
         ParameterNode parameter => parameter.Name,
         TypeParameterNode parameter => parameter.Token,
         TypeNode type => type.Base,
@@ -123,12 +126,14 @@ internal sealed class SemanticTokensHandler(ParsedDocumentStore documents, Docum
 
         return symbol switch
         {
+            TypeSymbol { KnownType: TypeSymbol.DefaultType.Class } => SemanticTokenType.Class,
             TypeSymbol { KnownType: TypeSymbol.DefaultType.Struct } => SemanticTokenType.Struct,
             TypeSymbol { KnownType: TypeSymbol.DefaultType.TypeParameter } => SemanticTokenType.TypeParameter,
             TypeSymbol { KnownType: TypeSymbol.DefaultType.Interface } => SemanticTokenType.Interface,
             TypeSymbol { KnownType: TypeSymbol.DefaultType.Enum } => SemanticTokenType.Enum,
             MethodSymbol { Kind: MethodSymbol.MethodKind.Method } => SemanticTokenType.Method,
             MethodSymbol { Kind: MethodSymbol.MethodKind.Operator } => SemanticTokenType.Method,
+            PropertySymbol => SemanticTokenType.Property,
             ParameterSymbol => SemanticTokenType.Parameter,
             LocalVariableSymbol => SemanticTokenType.Variable,
             null when info.Candidates.Count > 0 && info.Candidates.All(candidate => candidate is MethodSymbol { Kind: MethodSymbol.MethodKind.Method }) => SemanticTokenType.Method,

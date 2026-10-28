@@ -21,7 +21,6 @@
     { "include": "#type-annotation" },
     { "include": "#property" },
     { "include": "#member" },
-    { "include": "#qualifiers" },
     { "include": "#operators" },
     { "include": "#punctuation" },
     { "include": "#identifiers" }
@@ -276,12 +275,6 @@
       "comment": "Name<...>  -> generic type usage",
       "name": "entity.name.type.loom",
       "match": "\\b[A-Za-z_][A-Za-z0-9_]*(?=<[\\w\\s,.*<>\\[\\]]*>)"
-    },
-
-    "qualifiers": {
-      "comment": "PascalCase identifier directly followed by '.' is treated as a class/namespace, e.g. Unsafe in Unsafe.Generic<T>()",
-      "name": "entity.name.type.class.loom",
-      "match": "\\b[A-Z][A-Za-z0-9_]*(?=\\s*\\.\\s*[A-Za-z_])"
     },
 
     "function-call": {
