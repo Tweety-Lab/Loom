@@ -62,6 +62,7 @@ internal sealed class SemanticTokensHandler(ParsedDocumentStore documents, Docum
         var supported = supportedTypes.ToHashSet();
         return new[]
         {
+            (Type: SemanticTokenType.Keyword, VisualStudioName: "keyword"),
             (Type: SemanticTokenType.Class, VisualStudioName: "class name"),
             (Type: SemanticTokenType.Struct, VisualStudioName: "struct name"),
             (Type: SemanticTokenType.Method, VisualStudioName: "method name"),
@@ -126,6 +127,7 @@ internal sealed class SemanticTokensHandler(ParsedDocumentStore documents, Docum
 
         return symbol switch
         {
+            TypeSymbol { FullyQualifiedName: "Standard::string" } => SemanticTokenType.Keyword,
             TypeSymbol { KnownType: TypeSymbol.DefaultType.Class } => SemanticTokenType.Class,
             TypeSymbol { KnownType: TypeSymbol.DefaultType.Struct } => SemanticTokenType.Struct,
             TypeSymbol { KnownType: TypeSymbol.DefaultType.TypeParameter } => SemanticTokenType.TypeParameter,
