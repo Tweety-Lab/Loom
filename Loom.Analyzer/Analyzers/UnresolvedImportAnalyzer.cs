@@ -1,4 +1,5 @@
-﻿using Loom.Analyzer.Symbols;
+﻿using static Loom.Common.Diagnostics.DiagnosticDescription;
+using Loom.Analyzer.Symbols;
 using Loom.Common.Diagnostics;
 using Loom.Parser.AST;
 using Loom.Parser.AST.Rules.Default;
@@ -11,7 +12,7 @@ namespace Loom.Analyzer.Analyzers;
 [LoomAnalyzer]
 public class UnresolvedImportAnalyzer : Analyzer
 {
-    public static DiagnosticDescription UnresolvedImport = new("LM0035", Diagnostic.DiagnosticLevel.Error, "The module '{0}' could not be resolved.");
+    public static DiagnosticDescription UnresolvedImport = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "The module '{0}' could not be resolved.");
 
     [Visitor]
     public void Visit(ImportNode node)

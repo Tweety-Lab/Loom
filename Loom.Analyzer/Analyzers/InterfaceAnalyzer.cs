@@ -1,3 +1,4 @@
+using static Loom.Common.Diagnostics.DiagnosticDescription;
 using Loom.Analyzer.Symbols;
 using Loom.Common.Diagnostics;
 using Loom.Parser.AST;
@@ -11,10 +12,10 @@ namespace Loom.Analyzer.Analyzers;
 [LoomAnalyzer]
 public class InterfaceAnalyzer : Analyzer
 {
-    public static DiagnosticDescription InvalidMember = new("LM0009", Diagnostic.DiagnosticLevel.Error, "Interface '{0}' can only declare method and property signatures.");
-    public static DiagnosticDescription MemberHasBody = new("LM0010", Diagnostic.DiagnosticLevel.Error, "Interface member '{0}' cannot declare a body.");
-    public static DiagnosticDescription PropertyHasInitializer = new("LM0011", Diagnostic.DiagnosticLevel.Error, "Interface property '{0}' cannot declare an initializer.");
-    public static DiagnosticDescription CannotInstantiate = new("LM0012", Diagnostic.DiagnosticLevel.Error, "Cannot instantiate interface '{0}'.");
+    public static DiagnosticDescription InvalidMember = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Interface '{0}' can only declare method and property signatures.");
+    public static DiagnosticDescription MemberHasBody = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Interface member '{0}' cannot declare a body.");
+    public static DiagnosticDescription PropertyHasInitializer = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Interface property '{0}' cannot declare an initializer.");
+    public static DiagnosticDescription CannotInstantiate = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Cannot instantiate interface '{0}'.");
 
     [Visitor]
     public void Visit(InterfaceDeclarationNode node)

@@ -1,3 +1,4 @@
+using static Loom.Common.Diagnostics.DiagnosticDescription;
 using Loom.Analyzer.Symbols;
 using Loom.Common.Diagnostics;
 using Loom.Parser.AST;
@@ -11,7 +12,7 @@ namespace Loom.Analyzer.Analyzers;
 [LoomAnalyzer]
 public class InterfaceImplementationAnalyzer : Analyzer
 {
-    public static DiagnosticDescription MissingImplementation = new("LM0013", Diagnostic.DiagnosticLevel.Error, "Type '{0}' does not implement interface member '{1}'.");
+    public static DiagnosticDescription MissingImplementation = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Type '{0}' does not implement interface member '{1}'.");
 
     [Visitor]
     public void Visit(ClassDeclarationNode node) => Check(node);

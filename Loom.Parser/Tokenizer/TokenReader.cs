@@ -1,4 +1,5 @@
-﻿
+﻿using static Loom.Common.Diagnostics.DiagnosticDescription;
+
 using Loom.Common.Diagnostics;
 using static Loom.Parser.Tokenizer.Token;
 
@@ -6,6 +7,8 @@ namespace Loom.Parser.Tokenizer;
 
 public class TokenReader
 {
+    private static readonly DiagnosticDescription UnexpectedToken = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "{0}");
+
     /// <summary> The <see cref="Common.Diagnostics.DiagnosticContext"/> this reports to, if any. </summary>
     public DiagnosticContext? DiagnosticContext { get; set; }
 
@@ -84,7 +87,7 @@ public class TokenReader
     /// <summary> Reports <paramref name="message"/> at the current token, then aborts the calling rule. </summary>
     private void Fail(string message)
     {
-        DiagnosticContext?.Report(new DiagnosticDescription("LM0066", Diagnostic.DiagnosticLevel.Error, "{0}"), Current.Location, message);
+        DiagnosticContext?.Report(UnexpectedToken, Current.Location, message);
         throw new ParseFailureException(Current, message);
     }
 

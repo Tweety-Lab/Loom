@@ -1,4 +1,5 @@
-﻿using Loom.Parser.Tokenizer;
+﻿using static Loom.Common.Diagnostics.DiagnosticDescription;
+using Loom.Parser.Tokenizer;
 using static Loom.Parser.Tokenizer.Token;
 using Loom.Common.Diagnostics;
 using System.Text.RegularExpressions;
@@ -25,6 +26,9 @@ public record DocumentCommentNode(DocumentCommentDirective Directive, string? Ta
 [ParserRule]
 public class DocumentCommentRule : ParserRule<DocumentCommentNode>
 {
+    private static readonly DiagnosticDescription ExpectedDirective = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Expected documentation directive. (i.e., @brief)");
+    private static readonly DiagnosticDescription UnknownDirective = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Unknown documentation directive '{0}'.");
+
     /// <inheritdoc/>
     public DocumentCommentRule(LoomParser parser) : base(parser) { }
 
@@ -38,14 +42,14 @@ public class DocumentCommentRule : ParserRule<DocumentCommentNode>
         if (!match.Success)
         {
             string message = "Expected documentation directive. (i.e., @brief)";
-            Parser.DiagnosticContext?.Report(new DiagnosticDescription("LM0049", Diagnostic.DiagnosticLevel.Error, "Expected documentation directive. (i.e., @brief)"), token.Location);
+            Parser.DiagnosticContext?.Report(ExpectedDirective, token.Location);
             throw new ParseFailureException(token, message);
         }
 
         if (!Enum.TryParse<DocumentCommentDirective>(match.Groups["directive"].Value, ignoreCase: true, out var directive) || !Enum.IsDefined(directive))
         {
             string message = $"Unknown documentation directive '{match.Groups["directive"].Value}'.";
-            Parser.DiagnosticContext?.Report(new DiagnosticDescription("LM0050", Diagnostic.DiagnosticLevel.Error, "Unknown documentation directive '{0}'."), token.Location, match.Groups["directive"].Value);
+            Parser.DiagnosticContext?.Report(UnknownDirective, token.Location, match.Groups["directive"].Value);
             throw new ParseFailureException(token, message);
         }
 

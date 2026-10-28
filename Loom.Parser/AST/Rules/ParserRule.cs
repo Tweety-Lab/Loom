@@ -1,7 +1,13 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using static Loom.Common.Diagnostics.DiagnosticDescription;
+using System.Diagnostics.CodeAnalysis;
 using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.AST.Rules;
+
+internal static class ParserRuleDiagnostics
+{
+    internal static readonly Common.Diagnostics.DiagnosticDescription UnexpectedToken = new($"LM{Code:D4}", Common.Diagnostics.Diagnostic.DiagnosticLevel.Error, "Unexpected token: {0}");
+}
 
 public interface IParserRule
 {
@@ -91,7 +97,7 @@ public abstract class ParserRule<T> : IParserRule where T : ASTNode
                 else if (fallback != null)
                     fallback();
                 else
-                    Parser.DiagnosticContext?.Report(new Common.Diagnostics.DiagnosticDescription("LM0052", Common.Diagnostics.Diagnostic.DiagnosticLevel.Error, "Unexpected token: {0}"), token.Location, token.Text);
+                    Parser.DiagnosticContext?.Report(ParserRuleDiagnostics.UnexpectedToken, token.Location, token.Text);
             }
             catch (ParseFailureException)
             {

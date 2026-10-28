@@ -1,3 +1,4 @@
+using static Loom.Common.Diagnostics.DiagnosticDescription;
 using Loom.Common.Diagnostics;
 using Loom.Parser.Tokenizer;
 using System.Diagnostics.CodeAnalysis;
@@ -8,6 +9,8 @@ namespace Loom.Parser.Literals;
 /// <summary> Parses the 'true' and 'false' literals. </summary>
 public class BooleanLiteralParser : ILiteralParser<bool>
 {
+    public static readonly DiagnosticDescription ExpectedBoolean = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Expected 'true' or 'false', found '{0}'.");
+
     /// <inheritdoc/>
     public bool TryParse(Token token, [NotNullWhen(true)] out bool result, out DiagnosticDescription? diagnostic)
     {
@@ -24,7 +27,7 @@ public class BooleanLiteralParser : ILiteralParser<bool>
                 return true;
 
             default:
-                diagnostic = new DiagnosticDescription("LM0053", Diagnostic.DiagnosticLevel.Error, $"Expected 'true' or 'false', found '{token.Text}'.");
+                diagnostic = ExpectedBoolean with { Format = $"Expected 'true' or 'false', found '{token.Text}'." };
                 result = false;
                 return false;
         }

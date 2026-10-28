@@ -1,3 +1,4 @@
+using static Loom.Common.Diagnostics.DiagnosticDescription;
 using Loom.Common.Diagnostics;
 using Loom.Analyzer.Symbols;
 using Loom.Parser.AST;
@@ -11,8 +12,8 @@ namespace Loom.Analyzer.Analyzers;
 [LoomAnalyzer]
 public class UnresolvedOverloadAnalyzer : Analyzer
 {
-    public static DiagnosticDescription AmbiguousOverload = new("LM0036", Diagnostic.DiagnosticLevel.Error, "The call to '{0}' is ambiguous.");
-    public static DiagnosticDescription NoMatchingOverload = new("LM0037", Diagnostic.DiagnosticLevel.Error, "No overload of '{0}' accepts {1} argument(s).");
+    public static DiagnosticDescription AmbiguousOverload = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "The call to '{0}' is ambiguous.");
+    public static DiagnosticDescription NoMatchingOverload = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "No overload of '{0}' accepts {1} argument(s).");
 
     [Visitor]
     public void Visit(BinaryExpressionNode node)

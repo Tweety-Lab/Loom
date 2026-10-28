@@ -1,3 +1,4 @@
+using static Loom.Common.Diagnostics.DiagnosticDescription;
 using Loom.Parser.Tokenizer;
 using static Loom.Parser.Tokenizer.Token;
 using Loom.Common.Diagnostics;
@@ -19,6 +20,8 @@ public record EnumDeclarationNode(Token Name, BlockNode Body, List<Token> Modifi
 [ParserRule]
 public class EnumDeclarationRule : TypeMemberParserRule
 {
+    private static readonly DiagnosticDescription InvalidEnumValue = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Enum values must be signed 32-bit integers.");
+
     /// <inheritdoc/>
     public EnumDeclarationRule(LoomParser parser) : base(parser) { }
 
@@ -43,7 +46,7 @@ public class EnumDeclarationRule : TypeMemberParserRule
                 var number = Parser.Reader.Expect(TokenType.Number);
                 if (!int.TryParse(sign + number.Text, out var parsed))
                 {
-                    Parser.DiagnosticContext?.Report(new DiagnosticDescription("LM0051", Diagnostic.DiagnosticLevel.Error, "Enum values must be signed 32-bit integers."), number.Location);
+                    Parser.DiagnosticContext?.Report(InvalidEnumValue, number.Location);
                     throw new ParseFailureException(number, "Invalid enum value.");
                 }
                 value = parsed;

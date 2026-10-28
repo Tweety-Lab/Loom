@@ -1,4 +1,5 @@
-﻿using Loom.Analyzer.Symbols;
+﻿using static Loom.Common.Diagnostics.DiagnosticDescription;
+using Loom.Analyzer.Symbols;
 using Loom.Common.Diagnostics;
 using Loom.Parser.AST;
 using Loom.Parser.AST.Rules.Default;
@@ -12,9 +13,9 @@ namespace Loom.Analyzer.Analyzers;
 [LoomAnalyzer]
 public class StaticTypeAnalyzer : Analyzer
 {
-    public static DiagnosticDescription InstansiatedStaticType = new("LM0029", Diagnostic.DiagnosticLevel.Error, "Cannot instantiate static type '{0}'.");
-    public static DiagnosticDescription InstanceMemberInStaticType = new("LM0030", Diagnostic.DiagnosticLevel.Error, "Cannot declare instance member '{0}' in static type '{1}'.");
-    public static DiagnosticDescription InstanceMemberRequiresReceiver = new("LM0031", Diagnostic.DiagnosticLevel.Error, "Cannot access instance member '{0}' in a static function.");
+    public static DiagnosticDescription InstansiatedStaticType = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Cannot instantiate static type '{0}'.");
+    public static DiagnosticDescription InstanceMemberInStaticType = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Cannot declare instance member '{0}' in static type '{1}'.");
+    public static DiagnosticDescription InstanceMemberRequiresReceiver = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Cannot access instance member '{0}' in a static function.");
 
     [Visitor]
     public void Visit(IdentifierNameNode node)

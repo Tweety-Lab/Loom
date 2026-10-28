@@ -1,4 +1,5 @@
-﻿using Loom.Analyzer.Symbols;
+﻿using static Loom.Common.Diagnostics.DiagnosticDescription;
+using Loom.Analyzer.Symbols;
 using Loom.Common.Diagnostics;
 using Loom.Parser.AST;
 using Loom.Parser.AST.Rules.Default;
@@ -11,7 +12,7 @@ namespace Loom.Analyzer.Analyzers;
 [LoomAnalyzer]
 public class InvalidStatementScopeAnalyzer : Analyzer
 {
-    public static DiagnosticDescription InvalidStatementScope = new("LM0021", Diagnostic.DiagnosticLevel.Error, "Statement cannot exist outside of a method body.");
+    public static DiagnosticDescription InvalidStatementScope = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Statement cannot exist outside of a method body.");
 
     [Visitor]
     public void Visit(StatementNode node)

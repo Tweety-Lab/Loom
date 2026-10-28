@@ -1,3 +1,4 @@
+using static Loom.Common.Diagnostics.DiagnosticDescription;
 using Loom.Common.Diagnostics;
 using Loom.Parser.Tokenizer;
 using System.Diagnostics.CodeAnalysis;
@@ -8,6 +9,10 @@ namespace Loom.Parser.Literals;
 
 public class StringLiteralParser : ILiteralParser<int[]>
 {
+    public static readonly DiagnosticDescription ExpectedString = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Expected a string literal, found '{0}'.");
+    public static readonly DiagnosticDescription UnterminatedString = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Unterminated string literal '{0}'.");
+    public static readonly DiagnosticDescription InvalidString = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "{0}");
+
     /// <inheritdoc/>
     public bool TryParse(Token token, [NotNullWhen(true)] out int[]? result, out DiagnosticDescription? diagnostic)
     {
@@ -16,7 +21,7 @@ public class StringLiteralParser : ILiteralParser<int[]>
 
         if (token.Type != TokenType.StringLiteral)
         {
-            diagnostic = new DiagnosticDescription("LM0063", Diagnostic.DiagnosticLevel.Error, $"Expected a string literal, found '{token.Text}'.");
+            diagnostic = ExpectedString with { Format = $"Expected a string literal, found '{token.Text}'." };
             return false;
         }
 
@@ -24,7 +29,7 @@ public class StringLiteralParser : ILiteralParser<int[]>
 
         if (literal.Length < 2 || literal[0] != '"' || literal[^1] != '"')
         {
-            diagnostic = new DiagnosticDescription("LM0064", Diagnostic.DiagnosticLevel.Error, $"Unterminated string literal '{literal}'.");
+            diagnostic = UnterminatedString with { Format = $"Unterminated string literal '{literal}'." };
             return false;
         }
 
@@ -32,7 +37,7 @@ public class StringLiteralParser : ILiteralParser<int[]>
 
         if (!TryDecode(body, out result, out var error))
         {
-            diagnostic = new DiagnosticDescription("LM0065", Diagnostic.DiagnosticLevel.Error, error);
+            diagnostic = InvalidString with { Format = error };
 
             result = null;
             return false;

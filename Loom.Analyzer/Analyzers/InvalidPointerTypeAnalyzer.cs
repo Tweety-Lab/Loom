@@ -1,4 +1,5 @@
-﻿
+﻿using static Loom.Common.Diagnostics.DiagnosticDescription;
+
 using Loom.Analyzer.Symbols;
 using Loom.Common.Diagnostics;
 using Loom.Parser.AST;
@@ -12,9 +13,9 @@ namespace Loom.Analyzer.Analyzers;
 [LoomAnalyzer]
 public class InvalidPointerTypeAnalyzer : Analyzer
 {
-    public static DiagnosticDescription ValueTypePointer = new("LM0018", Diagnostic.DiagnosticLevel.Error, "'{0}' pointer type cannot be applied to value type '{1}'.");
-    public static DiagnosticDescription MissingPointer = new("LM0019", Diagnostic.DiagnosticLevel.Error, "Reference type '{0}' must be initialized with a pointer type.");
-    public static DiagnosticDescription MissingReturnPointer = new("LM0020", Diagnostic.DiagnosticLevel.Error, "Return reference type '{0}' must have a pointer type.");
+    public static DiagnosticDescription ValueTypePointer = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "'{0}' pointer type cannot be applied to value type '{1}'.");
+    public static DiagnosticDescription MissingPointer = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Reference type '{0}' must be initialized with a pointer type.");
+    public static DiagnosticDescription MissingReturnPointer = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Return reference type '{0}' must have a pointer type.");
 
     [Visitor]
     public void Visit(LocalDeclarationStatementNode node)

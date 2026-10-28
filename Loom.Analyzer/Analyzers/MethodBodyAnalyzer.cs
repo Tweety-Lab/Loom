@@ -1,4 +1,5 @@
-﻿using Loom.Analyzer.Symbols;
+﻿using static Loom.Common.Diagnostics.DiagnosticDescription;
+using Loom.Analyzer.Symbols;
 using Loom.Common.Diagnostics;
 using Loom.Parser.AST;
 using Loom.Parser.AST.Rules.Default;
@@ -12,7 +13,7 @@ namespace Loom.Analyzer.Analyzers;
 [LoomAnalyzer]
 public class MethodBodyAnalyzer : Analyzer
 {
-    public static DiagnosticDescription MethodNeedsBody = new("LM0022", Diagnostic.DiagnosticLevel.Error, "Method '{0}' must declare a body because it is not marked extern.");
+    public static DiagnosticDescription MethodNeedsBody = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Method '{0}' must declare a body because it is not marked extern.");
 
     [Visitor]
     public void Visit(MethodDeclarationNode node)

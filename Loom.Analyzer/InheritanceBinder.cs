@@ -1,3 +1,4 @@
+using static Loom.Common.Diagnostics.DiagnosticDescription;
 using Loom.Analyzer.Analyzers;
 using Loom.Analyzer.Symbols;
 using Loom.Common.Diagnostics;
@@ -8,11 +9,11 @@ namespace Loom.Analyzer;
 
 internal static class InheritanceBinder
 {
-    private static readonly DiagnosticDescription InvalidBase = new("LM0042", Diagnostic.DiagnosticLevel.Error, "Type '{0}' cannot inherit from '{1}'.");
-    private static readonly DiagnosticDescription DuplicateInterface = new("LM0043", Diagnostic.DiagnosticLevel.Error, "Interface '{0}' is listed more than once on type '{1}'.");
-    private static readonly DiagnosticDescription BaseClassOrder = new("LM0044", Diagnostic.DiagnosticLevel.Error, "Base class '{0}' must be declared before interfaces on type '{1}'.");
-    private static readonly DiagnosticDescription WrongArity = new("LM0045", Diagnostic.DiagnosticLevel.Error, "Type '{0}' expects {1} type argument(s), got {2}.");
-    private static readonly DiagnosticDescription CircularInheritance = new("LM0046", Diagnostic.DiagnosticLevel.Error, "Inheritance cycle involving type '{0}'.");
+    private static readonly DiagnosticDescription InvalidBase = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Type '{0}' cannot inherit from '{1}'.");
+    private static readonly DiagnosticDescription DuplicateInterface = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Interface '{0}' is listed more than once on type '{1}'.");
+    private static readonly DiagnosticDescription BaseClassOrder = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Base class '{0}' must be declared before interfaces on type '{1}'.");
+    private static readonly DiagnosticDescription WrongArity = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Type '{0}' expects {1} type argument(s), got {2}.");
+    private static readonly DiagnosticDescription CircularInheritance = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Inheritance cycle involving type '{0}'.");
 
     public static void Bind(AnalysisContext context, IEnumerable<ProgramNode> roots)
     {

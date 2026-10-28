@@ -1,4 +1,5 @@
-﻿using Loom.Analyzer.Symbols;
+﻿using static Loom.Common.Diagnostics.DiagnosticDescription;
+using Loom.Analyzer.Symbols;
 using Loom.Common.Diagnostics;
 using Loom.Parser.AST;
 using Loom.Parser.AST.Rules.Default;
@@ -19,7 +20,7 @@ internal enum OwnershipState
 /// </summary>
 internal class OwnershipWalker : ASTVisitor
 {
-    public static DiagnosticDescription UseOfMovedValue = new("LM0047", Diagnostic.DiagnosticLevel.Error, "Cannot use moved value '{0}'.");
+    public static DiagnosticDescription UseOfMovedValue = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Cannot use moved value '{0}'.");
 
     /// <summary> The owning <see cref="AnalysisContext"/>. </summary>
     public AnalysisContext Context { get; private set; }

@@ -1,4 +1,5 @@
-﻿using Loom.Common.Diagnostics;
+﻿using static Loom.Common.Diagnostics.DiagnosticDescription;
+using Loom.Common.Diagnostics;
 using Loom.Parser.Tokenizer;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -9,6 +10,14 @@ namespace Loom.Parser.Literals;
 /// <summary> Parses character literals into the Unicode scalar values they represent. </summary>
 public class CharacterLiteralParser : ILiteralParser<int>
 {
+    public static readonly DiagnosticDescription ExpectedCharacter = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Expected a character literal, found '{0}'.");
+    public static readonly DiagnosticDescription UnterminatedCharacter = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Unterminated character literal '{0}'.");
+    public static readonly DiagnosticDescription EmptyCharacter = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "A character literal must contain a single Unicode scalar value.");
+    public static readonly DiagnosticDescription InvalidEscape = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "{0}");
+    public static readonly DiagnosticDescription MultipleCharacters = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "A character literal must contain a single Unicode scalar value, found '{0}'.");
+    public static readonly DiagnosticDescription InvalidCharacter = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "{0}");
+    public static readonly DiagnosticDescription InvalidScalar = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "U+{0:X} is not a Unicode scalar value.");
+
     /// <summary> The highest Unicode scalar value. </summary>
     public const int MAX_SCALAR_VALUE = 0x10FFFF;
 
@@ -20,7 +29,7 @@ public class CharacterLiteralParser : ILiteralParser<int>
 
         if (token.Type != TokenType.CharacterLiteral)
         {
-            diagnostic = new DiagnosticDescription("LM0054", Diagnostic.DiagnosticLevel.Error, $"Expected a character literal, found '{token.Text}'.");
+            diagnostic = ExpectedCharacter with { Format = $"Expected a character literal, found '{token.Text}'." };
             return false;
         }
 
@@ -28,7 +37,7 @@ public class CharacterLiteralParser : ILiteralParser<int>
 
         if (literal.Length < 2 || literal[0] != '\'' || literal[^1] != '\'')
         {
-            diagnostic = new DiagnosticDescription("LM0055", Diagnostic.DiagnosticLevel.Error, $"Unterminated character literal '{literal}'.");
+            diagnostic = UnterminatedCharacter with { Format = $"Unterminated character literal '{literal}'." };
             return false;
         }
 
@@ -36,7 +45,7 @@ public class CharacterLiteralParser : ILiteralParser<int>
 
         if (body.Length == 0)
         {
-            diagnostic = new DiagnosticDescription("LM0056", Diagnostic.DiagnosticLevel.Error, "A character literal must contain a single Unicode scalar value.");
+            diagnostic = EmptyCharacter;
             return false;
         }
 
@@ -44,7 +53,7 @@ public class CharacterLiteralParser : ILiteralParser<int>
         {
             if (!TryDecodeEscape(body, out result, out var consumed, out var error))
             {
-                diagnostic = new DiagnosticDescription("LM0057", Diagnostic.DiagnosticLevel.Error, error);
+                diagnostic = InvalidEscape with { Format = error };
 
                 result = 0;
                 return false;
@@ -52,7 +61,7 @@ public class CharacterLiteralParser : ILiteralParser<int>
 
             if (consumed != body.Length)
             {
-                diagnostic = new DiagnosticDescription("LM0058", Diagnostic.DiagnosticLevel.Error, $"A character literal must contain a single Unicode scalar value, found '{body}'.");
+                diagnostic = MultipleCharacters with { Format = $"A character literal must contain a single Unicode scalar value, found '{body}'." };
 
                 result = 0;
                 return false;
@@ -60,7 +69,7 @@ public class CharacterLiteralParser : ILiteralParser<int>
         }
         else if (!TryDecodeRaw(body, out result, out var error))
         {
-            diagnostic = new DiagnosticDescription("LM0059", Diagnostic.DiagnosticLevel.Error, error);
+            diagnostic = InvalidCharacter with { Format = error };
 
             result = 0;
             return false;
@@ -68,7 +77,7 @@ public class CharacterLiteralParser : ILiteralParser<int>
 
         if (!IsScalarValue(result))
         {
-            diagnostic = new DiagnosticDescription("LM0060", Diagnostic.DiagnosticLevel.Error, $"U+{result:X} is not a Unicode scalar value.");
+            diagnostic = InvalidScalar with { Format = $"U+{result:X} is not a Unicode scalar value." };
 
             result = 0;
             return false;

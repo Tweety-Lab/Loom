@@ -1,4 +1,5 @@
-﻿using Loom.Analyzer.Symbols;
+﻿using static Loom.Common.Diagnostics.DiagnosticDescription;
+using Loom.Analyzer.Symbols;
 using Loom.Common.Diagnostics;
 using Loom.Parser.AST;
 using Loom.Parser.AST.Rules.Default;
@@ -11,7 +12,7 @@ namespace Loom.Analyzer.Analyzers;
 [LoomAnalyzer]
 public class UnsafeCodeAnalyzer : Analyzer
 {
-    public static DiagnosticDescription SymbolUsedOutsideUnsafe = new("LM0039", Diagnostic.DiagnosticLevel.Error, "Symbol '{0}' cannot be used outside of an 'unsafe' block.");
+    public static DiagnosticDescription SymbolUsedOutsideUnsafe = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Symbol '{0}' cannot be used outside of an 'unsafe' block.");
 
     [Visitor]
     public void Visit(CallExpressionNode node)

@@ -1,3 +1,4 @@
+using static Loom.Common.Diagnostics.DiagnosticDescription;
 using Loom.Analyzer.Symbols;
 using Loom.Common.Diagnostics;
 using Loom.Parser.AST;
@@ -11,8 +12,8 @@ namespace Loom.Analyzer.Analyzers;
 [LoomAnalyzer]
 public class InaccessibleSymbolAnalyzer : Analyzer
 {
-    public static DiagnosticDescription UnexportedSymbolDiagnostic = new("LM0007", Diagnostic.DiagnosticLevel.Error, "The symbol '{0}' cannot be accessed as it is not exported.");
-    public static DiagnosticDescription InaccessibleMemberDiagnostic = new("LM0008", Diagnostic.DiagnosticLevel.Error, "The member '{0}' cannot be accessed as it is not public.");
+    public static DiagnosticDescription UnexportedSymbolDiagnostic = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "The symbol '{0}' cannot be accessed as it is not exported.");
+    public static DiagnosticDescription InaccessibleMemberDiagnostic = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "The member '{0}' cannot be accessed as it is not public.");
 
     [Visitor]
     public void Visit(IdentifierNameNode node)

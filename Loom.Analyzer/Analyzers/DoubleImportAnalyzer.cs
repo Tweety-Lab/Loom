@@ -1,4 +1,5 @@
-﻿using Loom.Common.Diagnostics;
+﻿using static Loom.Common.Diagnostics.DiagnosticDescription;
+using Loom.Common.Diagnostics;
 using Loom.Parser.AST;
 using Loom.Parser.AST.Rules.Default;
 
@@ -10,7 +11,7 @@ namespace Loom.Analyzer.Analyzers;
 [LoomAnalyzer]
 public class DoubleImportAnalyzer : Analyzer
 {
-    public static DiagnosticDescription DoubleImport = new("LM0006", Diagnostic.DiagnosticLevel.Warning, "The module '{0}' has already been imported.");
+    public static DiagnosticDescription DoubleImport = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Warning, "The module '{0}' has already been imported.");
 
     [Visitor]
     public void Visit(ProgramNode node)
