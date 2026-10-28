@@ -46,7 +46,8 @@ internal sealed class SemanticTokensHandler(ParsedDocumentStore documents, Docum
         {
             DocumentSelector = new TextDocumentSelector(new TextDocumentFilter { Pattern = "**/*.loom" }),
             Legend = legend,
-            Full = true
+            Full = true,
+            Range = true
         };
     }
 
