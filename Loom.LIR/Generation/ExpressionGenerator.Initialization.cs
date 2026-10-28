@@ -35,9 +35,11 @@ internal partial class ExpressionGenerator
         if (type is ArrayTypeSymbol)
             throw new Exception("An array has no single default value; each of its elements is defaulted individually through EmitDefaultArray.");
 
-        // An unsubstituted type parameter has no concrete default yet; its instantiation supplies one
         if (type is TypeParameterSymbol)
             return new LIRDefaultValue(ASTGenerator.ConvertType(type));
+
+        if (type.KnownType == TypeSymbol.DefaultType.Interface)
+            return new LIRDefaultValue(ASTGenerator.ConvertStorageType(type, substitution));
 
         if (!type.IsValueType)
             return new LIRNullValue(new LIRPointerType(ASTGenerator.ConvertType(type, substitution)));
@@ -62,7 +64,6 @@ internal partial class ExpressionGenerator
 
         LIRPointerType instanceType = new(ASTGenerator.ConvertType(symbol, substitution));
 
-        // A value type is constructed in place; a reference type is allocated on the heap so that it stays valid after
         var instance = destination ?? (symbol.IsValueType ? Generator.EmitAlloca(instanceType.PointeeType) : methodGenerator.AllocateInstance(function, instanceType));
 
         var constructor = context.AnalysisContext.GetSymbol(node).As<MethodSymbol>() ?? symbol.Members.OfType<MethodSymbol>().FirstOrDefault(m => m.Kind == MethodSymbol.MethodKind.Constructor);

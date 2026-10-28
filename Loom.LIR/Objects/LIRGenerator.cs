@@ -110,6 +110,15 @@ public class LIRGenerator
 
     public LIRTempValue EmitAlloca(LIRType type) => Emit(LIROpCode.Alloca, new LIRPointerType(type));
 
+    /// <summary> Packs two pointer values into a fat pointer. </summary>
+    public LIRTempValue EmitMakeFatPointer(LIRValue first, LIRValue second, LIRFatPointerType type)
+    {
+        if (first.Type is not LIRPointerType || second.Type is not LIRPointerType)
+            throw new ArgumentException("Fat pointer components must be pointers.");
+
+        return Emit(LIROpCode.MakeFatPointer, type, first, second);
+    }
+
     /// <summary> Emits the address of <paramref name="field"/> within the instance pointed to by <paramref name="instancePointer"/>. </summary>
     public LIRTempValue EmitGetField(LIRValue instancePointer, LIRField field) => Emit(LIROpCode.GetField, new LIRPointerType(field.Type), instancePointer, field);
 

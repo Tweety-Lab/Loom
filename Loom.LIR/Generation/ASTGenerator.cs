@@ -59,11 +59,7 @@ public class ASTGenerator
             type = substitution.Resolve(type);
 
         if (type is ArrayTypeSymbol array)
-        {
-            var arrayElementType = ConvertType(array.ElementType, substitution);
-            bool elementIsValue = array.ElementType is TypeParameterSymbol || array.ElementType.IsValueType;
-            return new LIRArrayType(elementIsValue ? arrayElementType : new LIRPointerType(arrayElementType), array.Size);
-        }
+            return new LIRArrayType(ConvertStorageType(array.ElementType, substitution), array.Size);
 
         LIRType elementType = type.KnownType switch
         {
@@ -76,7 +72,7 @@ public class ASTGenerator
             TypeSymbol.DefaultType.IPtr => LIRType.IntPtr,
             TypeSymbol.DefaultType.Struct => new LIRTypeDeclarationType(type.FullyQualifiedName, true),
             TypeSymbol.DefaultType.Class => new LIRTypeDeclarationType(type.FullyQualifiedName, false),
-            TypeSymbol.DefaultType.Interface => throw new NotImplementedException(),
+            TypeSymbol.DefaultType.Interface => new LIRFatPointerType(new LIRPointerType(LIRType.Void), new LIRPointerType(LIRType.Void)),
             TypeSymbol.DefaultType.TypeParameter => new LIRTypeParameter(type.Name),
             _ => throw new Exception($"Unknown type {type.KnownType}")
         };
@@ -105,6 +101,6 @@ public class ASTGenerator
         if (substitution != null)
             type = substitution.Resolve(type);
 
-        return type is ArrayTypeSymbol || type is TypeParameterSymbol || type.IsValueType || type.KnownType == TypeSymbol.DefaultType.Void ? ConvertType(type, substitution) : new LIRPointerType(ConvertType(type, substitution));
+        return type is ArrayTypeSymbol || type is TypeParameterSymbol || type.IsValueType || type.KnownType is TypeSymbol.DefaultType.Void or TypeSymbol.DefaultType.Interface ? ConvertType(type, substitution) : new LIRPointerType(ConvertType(type, substitution));
     }
 }

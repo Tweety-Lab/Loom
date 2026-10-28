@@ -1,5 +1,6 @@
 using Loom.Analyzer;
 using Loom.Analyzer.Symbols;
+using Loom.LIR.Metadata;
 using Loom.Parser.AST.Rules.Default;
 
 namespace Loom.LIR.Generation;
@@ -18,10 +19,19 @@ internal partial class ExpressionGenerator
 
     private LIRValue EmitConversion(LIRValue value, TypeSymbol source, TypeSymbol target) => (source, target) switch
     {
+        ({ KnownType: TypeSymbol.DefaultType.Class }, { KnownType: TypeSymbol.DefaultType.Interface }) when TypeConversions.CanImplicitlyConvert(source, target) => EmitInterfaceConversion(value, source, target),
         (ArrayTypeSymbol array, ConstructedTypeSymbol vector) when TypeConversions.IsArrayToVectorConversion(array, vector) => EmitArrayToVector(value, array, vector),
         (ArrayTypeSymbol array, ArrayTypeSymbol converted) when !TypeConversions.IsIdentical(array, converted) => EmitArrayConversion(value, array, converted),
         _ => Generator.EmitConvert(value, ASTGenerator.ConvertStorageType(target))
     };
+
+    private LIRValue EmitInterfaceConversion(LIRValue value, TypeSymbol source, TypeSymbol target)
+    {
+        var type = (LIRFatPointerType)ASTGenerator.ConvertStorageType(target);
+        var table = new LIRMetadataReference(MetadataType.VirtualDispatch,
+            $"{source.FullyQualifiedName}::{target.FullyQualifiedName}::vtable", type.SecondPointee);
+        return Generator.EmitMakeFatPointer(value, table, type);
+    }
 
     private LIRValue EmitArrayStorage(LIRValue value, ArrayTypeSymbol type)
     {

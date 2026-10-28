@@ -100,7 +100,7 @@ internal partial class StatementGenerator
                 return;
             }
 
-            Generator.EmitStore(expressionGen.Emit(creation), address);
+            Generator.EmitStore(expressionGen.EmitValue(creation, type), address);
             return;
         }
 

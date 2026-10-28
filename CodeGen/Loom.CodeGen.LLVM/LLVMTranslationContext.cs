@@ -30,6 +30,17 @@ internal class LLVMTranslationContext
         if (type is LIRPointerType { PointeeType: var pointee })
             return LLVMTypeRef.CreatePointer(ResolveType(pointee), 0);
 
+        if (type is LIRFatPointerType fatPointer)
+        {
+            var aggregate = Context.GetStructType([
+                ResolveType(fatPointer.FirstPointee),
+                ResolveType(fatPointer.SecondPointee)
+            ], false);
+
+            TypeMap[type] = aggregate;
+            return aggregate;
+        }
+
         if (type is LIRArrayType { ElementType: var elementType, Size: var size })
             return LLVMTypeRef.CreateArray(ResolveType(elementType), (uint)size);
 
@@ -51,6 +62,15 @@ internal class LLVMTranslationContext
     {
         if (ValueMap.TryGetValue(value, out LLVMValueRef result))
             return result;
+
+        if (value is LIRMetadataReference reference)
+        {
+            var global = Module.GetNamedGlobal($"{reference.Category}::{reference.Name}");
+            if (global.Handle == IntPtr.Zero)
+                throw new InvalidOperationException($"Missing metadata '{reference.Category}::{reference.Name}'.");
+            ValueMap[value] = global;
+            return global;
+        }
 
         if (value is LIRConstantCharValue charConst)
         {

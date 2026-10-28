@@ -14,7 +14,7 @@ internal partial class TypeDeclarationGenerator
             return;
 
         var members = InterfaceImplementationAnalyzer.ImplementationMembers(type).ToArray();
-        foreach (var contract in type.Interfaces.SelectMany(contract => contract.AllInterfaces.Prepend(contract)).Distinct())
+        foreach (var contract in type.AllInterfaces)
         {
             var slots = new List<LIRVirtualTableSlot>();
             foreach (var inherited in contract.AllInterfaces.Prepend(contract).Distinct())

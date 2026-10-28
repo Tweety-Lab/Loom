@@ -66,9 +66,7 @@ internal partial class ExpressionGenerator
     {
         var one = Generator.EmitConvert(new LIRConstantIntValue(1), value.Type);
 
-        return op.Type == Parser.Tokenizer.Token.TokenType.PlusPlus
-            ? Generator.EmitAdd(value, one)
-            : Generator.EmitSub(value, one);
+        return op.Type == Parser.Tokenizer.Token.TokenType.PlusPlus ? Generator.EmitAdd(value, one) : Generator.EmitSub(value, one);
     }
 
     private LIRValue EmitBinary(BinaryExpressionNode node)
