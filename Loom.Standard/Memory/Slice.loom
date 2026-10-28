@@ -26,6 +26,7 @@ module Standard::Memory
 			return new Slice<T>(pointer + start * sizeof(T), length);
         }
 
+#region Operators
         /// @brief Returns the element at the specified index.
 		/// @param(index) The index of the element to return.
         public static unique T operator[](Slice<T> slice, i32 index)
@@ -43,7 +44,6 @@ module Standard::Memory
 			return slice.Subslice(range.Start, range.End - range.Start);
         }
 
-#region Operators
 		/// @brief Adds a char slice to a char slice.
 		/// @return New string containing the result.
 		public static string operator+(Slice<char> left, Slice<char> right)

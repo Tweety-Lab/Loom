@@ -22,7 +22,7 @@ internal class DivEmitter : IInstructionEmitter
         LLVMValueRef lhs = context.ResolveValue(instruction.Operands[0]);
         LLVMValueRef rhs = context.ResolveValue(instruction.Operands[1]);
 
-        LLVMValueRef result = context.Builder.BuildSDiv(lhs, rhs, "divtmp");
+        LLVMValueRef result = !instruction.Operands[0].Type.IsSigned? context.Builder.BuildUDiv(lhs, rhs, "divtmp") : context.Builder.BuildSDiv(lhs, rhs, "divtmp");
 
         context.ValueMap[instruction.Result] = result;
     }

@@ -178,6 +178,7 @@ public class Token
         [Keyword("iptr"), Type] IPtr,
         [Keyword("bool"), Type] Bool,
         [Keyword("char"), Type] Char,
+        [Keyword("byte"), Type] Byte,
 
         EOF
     }

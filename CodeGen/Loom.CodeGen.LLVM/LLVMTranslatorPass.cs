@@ -29,9 +29,10 @@ public class LLVMTranslatorPass : LIRLayeredPass
             TypeMap =
             {
                 [LIRType.Void] = LLVMTypeRef.Void,
+                [LIRType.Boolean] = LLVMTypeRef.Int1,
+                [LIRType.Byte] = LLVMTypeRef.Int8,
                 [LIRType.Int32] = LLVMTypeRef.Int32,
                 [LIRType.Int64] = LLVMTypeRef.Int64,
-                [LIRType.Boolean] = LLVMTypeRef.Int1,
                 [LIRType.Char] = LLVMTypeRef.Int32,
                 [LIRType.IntPtr] = LLVMTypeRef.CreateIntPtr(LLVMTargetDataRef.FromStringRepresentation($"p:{System.IntPtr.Size * 8}:{System.IntPtr.Size * 8}:{System.IntPtr.Size * 8}")),
             },
@@ -56,11 +57,12 @@ public class LLVMTranslatorPass : LIRLayeredPass
             structType.StructSetBody(fieldTypes, false);
         }
 
-        // Dispatch table initializers contain function addresses, so declare them before globals
+        // Dispatch table initializers contain function addresses so declare them before metadata (globals)
         functionEmitter = new FunctionEmitter(translationContext);
         foreach (var function in unit.AllFunctions)
             RunOnFunction(function);
 
+        // Emit metadata (globals)
         MetadataEmitter metaEmitter = new MetadataEmitter(translationContext);
         foreach (var metaType in unit.Metadata)
             metaEmitter.Emit((metaType.Key, metaType.Value));

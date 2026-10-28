@@ -79,7 +79,7 @@ internal partial class ExpressionGenerator
 
         if (left.Type != right.Type && LIRGenerator.IsIntegerType(left.Type) && LIRGenerator.IsIntegerType(right.Type))
         {
-            LIRType common = IsWide(left.Type) || !IsWide(right.Type) ? left.Type : right.Type;
+            LIRType common = left.Type is LIRByteType ? right.Type : right.Type is LIRByteType ? left.Type : IsWide(left.Type) || !IsWide(right.Type) ? left.Type : right.Type;
 
             left = Generator.EmitConvert(left, common);
             right = Generator.EmitConvert(right, common);

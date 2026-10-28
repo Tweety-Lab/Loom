@@ -152,7 +152,7 @@ public class LIRGenerator
     }
 
     /// <summary> Whether <paramref name="type"/> is one of the built-in integer types. </summary>
-    public static bool IsIntegerType(LIRType type) => type is LIRIntType or LIRIntPtrType or LIRCharType;
+    public static bool IsIntegerType(LIRType type) => type is LIRByteType or LIRIntType or LIRIntPtrType or LIRCharType;
 
     /// <summary> Emits a call using the target operand's function signature. </summary>
     public LIRTempValue EmitCall(LIRValue target, params LIRValue[] arguments) => EmitCallCore(target, null, arguments);

@@ -72,7 +72,7 @@ public static class TypeConversions
 
     private static bool IsIntegerType(TypeSymbol.DefaultType type) => type switch
     {
-        TypeSymbol.DefaultType.I32 or TypeSymbol.DefaultType.I64 or TypeSymbol.DefaultType.IPtr or TypeSymbol.DefaultType.Char => true,
+        TypeSymbol.DefaultType.Byte or TypeSymbol.DefaultType.I32 or TypeSymbol.DefaultType.I64 or TypeSymbol.DefaultType.IPtr or TypeSymbol.DefaultType.Char => true,
         _ => false
     };
 }

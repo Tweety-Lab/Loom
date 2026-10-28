@@ -187,9 +187,9 @@ internal class TypeWalker : ASTWalker
             Context.ExpressionTypes[node] = returnType;
         else if (invocation.Candidates.Count == 0 && Context.ExpressionTypes.TryGetValue(node.Left, out var left)
             && Context.ExpressionTypes.TryGetValue(node.Right, out var right)
-            && left.KnownType is TypeSymbol.DefaultType.I32 or TypeSymbol.DefaultType.I64 or TypeSymbol.DefaultType.IPtr or TypeSymbol.DefaultType.Char
-            && right.KnownType is TypeSymbol.DefaultType.I32 or TypeSymbol.DefaultType.I64 or TypeSymbol.DefaultType.IPtr or TypeSymbol.DefaultType.Char)
-            Context.ExpressionTypes[node] = left.KnownType is TypeSymbol.DefaultType.I64 or TypeSymbol.DefaultType.IPtr ? left : right;
+            && left.KnownType is TypeSymbol.DefaultType.Byte or TypeSymbol.DefaultType.I32 or TypeSymbol.DefaultType.I64 or TypeSymbol.DefaultType.IPtr or TypeSymbol.DefaultType.Char
+            && right.KnownType is TypeSymbol.DefaultType.Byte or TypeSymbol.DefaultType.I32 or TypeSymbol.DefaultType.I64 or TypeSymbol.DefaultType.IPtr or TypeSymbol.DefaultType.Char)
+            Context.ExpressionTypes[node] = left.KnownType is TypeSymbol.DefaultType.I64 or TypeSymbol.DefaultType.IPtr || right.KnownType == TypeSymbol.DefaultType.Byte ? left : right;
     }
 
     [Visitor]

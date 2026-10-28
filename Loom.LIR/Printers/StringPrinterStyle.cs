@@ -102,6 +102,7 @@ internal class StringPrinterStyle : ILIRPrinterStyle
     public string PrintType(LIRType type) => type switch
     {
         LIRCharType => "char",
+        LIRByteType => "byte",
         LIRIntPtrType => "iptr",
         LIRIntType i => $"i{i.Bits}",
         LIRVoidType => "void",

@@ -27,7 +27,16 @@ internal abstract class ComparisonEmitter : IInstructionEmitter
         LLVMValueRef lhs = context.ResolveValue(instruction.Operands[0]);
         LLVMValueRef rhs = context.ResolveValue(instruction.Operands[1]);
 
-        LLVMValueRef result = context.Builder.BuildICmp(Predicate, lhs, rhs, "cmptmp");
+        var predicate = !instruction.Operands[0].Type.IsSigned ? Predicate switch
+        {
+            LLVMIntPredicate.LLVMIntSLT => LLVMIntPredicate.LLVMIntULT,
+            LLVMIntPredicate.LLVMIntSGT => LLVMIntPredicate.LLVMIntUGT,
+            LLVMIntPredicate.LLVMIntSLE => LLVMIntPredicate.LLVMIntULE,
+            LLVMIntPredicate.LLVMIntSGE => LLVMIntPredicate.LLVMIntUGE,
+            _ => Predicate
+        } : Predicate;
+
+        LLVMValueRef result = context.Builder.BuildICmp(predicate, lhs, rhs, "cmptmp");
 
         context.ValueMap[instruction.Result] = result;
     }

@@ -25,6 +25,6 @@ internal class IntCastEmitter : IInstructionEmitter
             return;
         }
 
-        context.ValueMap[instruction.Result] = context.Builder.BuildIntCast(value, targetType, "casttmp");
+        context.ValueMap[instruction.Result] = !instruction.Operands[0].Type.IsSigned ? context.Builder.BuildZExtOrBitCast(value, targetType, "casttmp") : context.Builder.BuildIntCast(value, targetType, "casttmp");
     }
 }

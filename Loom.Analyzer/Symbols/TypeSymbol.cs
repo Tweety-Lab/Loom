@@ -119,6 +119,7 @@ public class TypeSymbol : Symbol, IExportableSymbol, IGenericSymbol
     {
         Func,
         Void,
+        Byte,
         I32,
         I64,
         IPtr,

@@ -65,6 +65,7 @@ public class ASTGenerator
         {
             TypeSymbol.DefaultType.Void => LIRType.Void,
             TypeSymbol.DefaultType.Bool => LIRType.Boolean,
+            TypeSymbol.DefaultType.Byte => LIRType.Byte,
             TypeSymbol.DefaultType.I32 => LIRType.Int32,
             TypeSymbol.DefaultType.Enum => LIRType.Int32,
             TypeSymbol.DefaultType.I64 => LIRType.Int64,

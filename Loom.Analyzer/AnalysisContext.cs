@@ -80,6 +80,7 @@ public class AnalysisContext
 
         // Built in types
         rootTable.Define(new TypeSymbol("void", TypeSymbol.DefaultType.Void));
+        rootTable.Define(new TypeSymbol("byte", TypeSymbol.DefaultType.Byte) { IsValueType = true, IsExported = true });
         rootTable.Define(new TypeSymbol("i32", TypeSymbol.DefaultType.I32) { IsValueType = true, IsExported = true });
         rootTable.Define(new TypeSymbol("i64", TypeSymbol.DefaultType.I64) { IsValueType = true, IsExported = true });
         rootTable.Define(new TypeSymbol("iptr", TypeSymbol.DefaultType.IPtr) { IsValueType = true, IsExported = true });
