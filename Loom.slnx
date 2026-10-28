@@ -13,7 +13,7 @@
   <Project Path="Loom.Common/Loom.Common.csproj" />
   <Project Path="Loom.LIR/Loom.LIR.csproj" Id="4b93f918-c573-4021-8900-f2d0a11e3ad0" />
   <Project Path="Loom.Parser/Loom.Parser.csproj" />
-  <Project Path="Loom.Standard/Loom.Standard.lmproj" Type="fb8a16cb-22d3-4b29-a4cb-1c97627660dd" Id="efda9cae-3bdf-49ba-a669-e33d57d1de0b">
+  <Project Path="Loom.Standard/Loom.Standard.lmproj" Type="fb8a16cb-22d3-4b29-a4cb-1c97627660dd" Id="157655f6-8c61-4c18-890d-356f9cfd10ae">
     <BuildType Project="?" />
     <Platform Project="?" />
     <Build Project="false" />

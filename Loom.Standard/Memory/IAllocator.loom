@@ -1,18 +1,21 @@
 module Standard::Memory
 {
+	/// @brief Defines how heap memory is allocated and freed.
 	export interface IAllocator
 	{
 		/// @brief Allocates memory of the given size.
+		/// @param(size) The size of the memory to allocate.
+		/// @return A pointer to the allocated memory.
 		iptr Allocate(i64 size);
 
 		/// @brief Frees the memory at the given address.
+		/// @param(address) The address of the memory to free.
 		void Free(iptr address);
 	}
 
 	extern iptr malloc(i64 size);
 	extern void free(iptr address);
 
-	/// @brief Defines how heap memory is allocated and freed.
 	export struct DefaultAllocator : IAllocator
 	{
 		/// @inheritdoc
