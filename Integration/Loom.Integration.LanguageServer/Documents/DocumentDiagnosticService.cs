@@ -52,6 +52,7 @@ internal sealed class DocumentDiagnosticService(ParsedDocumentStore documents, D
             Version = parsed.Document.Version,
             Diagnostics = new Container<LspDiagnostic>(diagnostics.Distinct().Select(diagnostic => new LspDiagnostic
             {
+                Code = diagnostic.ID,
                 Message = diagnostic.Message,
                 Source = "Loom",
                 Severity = diagnostic.Level switch

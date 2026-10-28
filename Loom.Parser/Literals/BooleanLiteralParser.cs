@@ -24,7 +24,7 @@ public class BooleanLiteralParser : ILiteralParser<bool>
                 return true;
 
             default:
-                diagnostic = new Diagnostic(Diagnostic.DiagnosticLevel.Error, $"Expected 'true' or 'false', found '{token.Text}'.", token.Location);
+                diagnostic = new Diagnostic("LM0053", Diagnostic.DiagnosticLevel.Error, $"Expected 'true' or 'false', found '{token.Text}'.", token.Location);
                 result = false;
                 return false;
         }

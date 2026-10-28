@@ -84,7 +84,7 @@ public class TokenReader
     /// <summary> Reports <paramref name="message"/> at the current token, then aborts the calling rule. </summary>
     private void Fail(string message)
     {
-        DiagnosticContext?.Report(new Diagnostic(Diagnostic.DiagnosticLevel.Error, message), Current.Location);
+        DiagnosticContext?.Report(new Diagnostic("LM0066", Diagnostic.DiagnosticLevel.Error, message), Current.Location);
         throw new ParseFailureException(Current, message);
     }
 

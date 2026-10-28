@@ -11,8 +11,8 @@ namespace Loom.Analyzer.Analyzers;
 [LoomAnalyzer]
 public class UnresolvedOverloadAnalyzer : Analyzer
 {
-    public static Diagnostic AmbiguousOverload = new(Diagnostic.DiagnosticLevel.Error, "The call to '{0}' is ambiguous.");
-    public static Diagnostic NoMatchingOverload = new(Diagnostic.DiagnosticLevel.Error, "No overload of '{0}' accepts {1} argument(s).");
+    public static Diagnostic AmbiguousOverload = new("LM0036", Diagnostic.DiagnosticLevel.Error, "The call to '{0}' is ambiguous.");
+    public static Diagnostic NoMatchingOverload = new("LM0037", Diagnostic.DiagnosticLevel.Error, "No overload of '{0}' accepts {1} argument(s).");
 
     [Visitor]
     public void Visit(BinaryExpressionNode node)

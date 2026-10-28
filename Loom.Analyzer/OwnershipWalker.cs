@@ -19,7 +19,7 @@ internal enum OwnershipState
 /// </summary>
 internal class OwnershipWalker : ASTVisitor
 {
-    public static Diagnostic UseOfMovedValue = new(Diagnostic.DiagnosticLevel.Error, "Cannot use moved value '{0}'.");
+    public static Diagnostic UseOfMovedValue = new("LM0047", Diagnostic.DiagnosticLevel.Error, "Cannot use moved value '{0}'.");
 
     /// <summary> The owning <see cref="AnalysisContext"/>. </summary>
     public AnalysisContext Context { get; private set; }

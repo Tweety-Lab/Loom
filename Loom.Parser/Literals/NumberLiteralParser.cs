@@ -16,14 +16,14 @@ public class NumberLiteralParser : ILiteralParser<int>
 
         if (token.Type != TokenType.Number)
         {
-            diagnostic = new Diagnostic(Diagnostic.DiagnosticLevel.Error, $"Expected a number literal, found '{token.Text}'.", token.Location);
+            diagnostic = new Diagnostic("LM0061", Diagnostic.DiagnosticLevel.Error, $"Expected a number literal, found '{token.Text}'.", token.Location);
             result = 0;
             return false;
         }
 
         if (!int.TryParse(token.Text, NumberStyles.None, CultureInfo.InvariantCulture, out result))
         {
-            diagnostic = new Diagnostic(Diagnostic.DiagnosticLevel.Error, $"'{token.Text}' is not a valid integer literal.", token.Location);
+            diagnostic = new Diagnostic("LM0062", Diagnostic.DiagnosticLevel.Error, $"'{token.Text}' is not a valid integer literal.", token.Location);
             result = 0;
             return false;
         }

@@ -11,11 +11,11 @@ namespace Loom.Analyzer.Analyzers;
 [LoomAnalyzer]
 public class ArrayBoundsAnalyzer : Analyzer
 {
-    public static Diagnostic NonArrayIndex = new(Diagnostic.DiagnosticLevel.Error, "Cannot index '{0}' because it is not an array.");
-    public static Diagnostic InvalidIndexType = new(Diagnostic.DiagnosticLevel.Error, "Array indexes must be i32 values.");
-    public static Diagnostic IndexOutOfBounds = new(Diagnostic.DiagnosticLevel.Error, "Array index {0} is outside the bounds of array '{1}' of size {2}.");
-    public static Diagnostic TooManyElements = new(Diagnostic.DiagnosticLevel.Error, "Array literal with {0} elements is outside the bounds of array '{1}' of size {2}.");
-    public static Diagnostic IndexOperatorResultNotAssignable = new(Diagnostic.DiagnosticLevel.Error, "The result of operator[] cannot be assigned to.");
+    public static Diagnostic NonArrayIndex = new("LM0001", Diagnostic.DiagnosticLevel.Error, "Cannot index '{0}' because it is not an array.");
+    public static Diagnostic InvalidIndexType = new("LM0002", Diagnostic.DiagnosticLevel.Error, "Array indexes must be i32 values.");
+    public static Diagnostic IndexOutOfBounds = new("LM0003", Diagnostic.DiagnosticLevel.Error, "Array index {0} is outside the bounds of array '{1}' of size {2}.");
+    public static Diagnostic TooManyElements = new("LM0004", Diagnostic.DiagnosticLevel.Error, "Array literal with {0} elements is outside the bounds of array '{1}' of size {2}.");
+    public static Diagnostic IndexOperatorResultNotAssignable = new("LM0005", Diagnostic.DiagnosticLevel.Error, "The result of operator[] cannot be assigned to.");
 
     [Visitor]
     public void Visit(ArrayAccessExpressionNode node)
