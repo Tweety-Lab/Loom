@@ -28,8 +28,10 @@ public static class TypeConversions
         if (IsIdentical(source, target))
             return true;
 
-        if (source.KnownType is TypeSymbol.DefaultType.Class or TypeSymbol.DefaultType.Struct ||
-            target.KnownType is TypeSymbol.DefaultType.Class or TypeSymbol.DefaultType.Struct)
+        if (source.KnownType is TypeSymbol.DefaultType.Class or TypeSymbol.DefaultType.Struct && target.KnownType == TypeSymbol.DefaultType.Interface)
+            return source.AllInterfaces.Any(contract => IsIdentical(contract, target));
+
+        if (source.KnownType is TypeSymbol.DefaultType.Class or TypeSymbol.DefaultType.Struct || target.KnownType is TypeSymbol.DefaultType.Class or TypeSymbol.DefaultType.Struct)
             return false;
 
         if (target.KnownType == TypeSymbol.DefaultType.Void)
