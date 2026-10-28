@@ -8,6 +8,7 @@ module Standard::Program
     export interface IMyInterface
     {
         void Test();
+        void TestOther();
     }
 
     /// @brief Classes are reference types and are interfaced with through Loom's ownership and memory model (smart pointers)!
@@ -18,6 +19,11 @@ module Standard::Program
         public void Test()
         {
             println("Gurt");
+        }
+
+        public void TestOther()
+        {
+            println("Gurt2");
         }
     }
 
@@ -32,7 +38,8 @@ module Standard::Program
     {
         // A Unique pointer to an object can only have one owner at a time
         unique IMyInterface obj = new Object();
-        // obj.Test();
+        obj.Test();
+        obj.TestOther();
 
         // 'Slice<T>' doesn't need to use pointers because it's a value type (struct)
         // Value types use copy semantics and typically live on the stack

@@ -48,6 +48,8 @@ public readonly struct LIROpCode : IEquatable<LIROpCode>
     public static readonly LIROpCode IntToPtr = new LIROpCode("inttoptr", CodeType.Memory, true);
     public static readonly LIROpCode IntCast = new LIROpCode("intcast", CodeType.Memory, true);
     public static readonly LIROpCode MakeFatPointer = new("makefatptr", CodeType.Memory, true);
+    public static readonly LIROpCode ExtractValue = new("extractvalue", CodeType.Memory, true);
+    public static readonly LIROpCode GetVirtualMethod = new("getvirtualmethod", CodeType.Memory, true);
 
     public static readonly LIROpCode Return = new LIROpCode("return", CodeType.Control, false);
 

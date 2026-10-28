@@ -17,26 +17,23 @@ internal partial class TypeDeclarationGenerator
         foreach (var contract in type.AllInterfaces)
         {
             var slots = new List<LIRVirtualTableSlot>();
-            foreach (var inherited in contract.AllInterfaces.Prepend(contract).Distinct())
+            foreach (var required in InterfaceDispatchLayout.Members(contract))
             {
-                foreach (var required in inherited.Members)
+                if (required is MethodSymbol { Kind: MethodSymbol.MethodKind.Method, IsStatic: false, Accessibility: MemberAccessibility.Public } method)
                 {
-                    if (required is MethodSymbol { Kind: MethodSymbol.MethodKind.Method, IsStatic: false, Accessibility: MemberAccessibility.Public } method)
-                    {
-                        var implementation = members.OfType<MethodSymbol>().FirstOrDefault(candidate => InterfaceImplementationAnalyzer.Implements(candidate, method));
-                        AddSlot(method, implementation);
-                    }
+                    var implementation = members.OfType<MethodSymbol>().FirstOrDefault(candidate => InterfaceImplementationAnalyzer.Implements(candidate, method));
+                    AddSlot(method, implementation);
+                }
 
-                    else if (required is PropertySymbol { IsStatic: false, Accessibility: MemberAccessibility.Public } property)
-                    {
-                        var implementation = members.OfType<PropertySymbol>().FirstOrDefault(candidate => InterfaceImplementationAnalyzer.Implements(candidate, property));
+                else if (required is PropertySymbol { IsStatic: false, Accessibility: MemberAccessibility.Public } property)
+                {
+                    var implementation = members.OfType<PropertySymbol>().FirstOrDefault(candidate => InterfaceImplementationAnalyzer.Implements(candidate, property));
 
-                        if (property.Getter is { } getter)
-                            AddSlot(getter, implementation?.Getter);
+                    if (property.Getter is { } getter)
+                        AddSlot(getter, implementation?.Getter);
 
-                        if (property.Setter is { } setter)
-                            AddSlot(setter, implementation?.Setter);
-                    }
+                    if (property.Setter is { } setter)
+                        AddSlot(setter, implementation?.Setter);
                 }
             }
 

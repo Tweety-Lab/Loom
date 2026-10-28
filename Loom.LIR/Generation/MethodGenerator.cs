@@ -144,8 +144,11 @@ internal partial class MethodGenerator
         EmitImplicitReturn(function);
     }
 
-    public LIRValue GetMethodReference(MethodSymbol method)
+    public LIRValue GetMethodReference(MethodSymbol method, TypeSymbol? dispatchInterface = null)
     {
+        if (method.ContainingType is { KnownType: TypeSymbol.DefaultType.Interface } contract && !method.IsStatic)
+            return GetInterfaceMethodReference(method, dispatchInterface ?? contract);
+
         string name = LinkageNameResolver.LinkageName(method);
 
         if (method.IsDefinition)
