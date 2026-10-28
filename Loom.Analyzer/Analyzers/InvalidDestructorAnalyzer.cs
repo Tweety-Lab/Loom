@@ -12,10 +12,10 @@ namespace Loom.Analyzer.Analyzers;
 [LoomAnalyzer]
 public class InvalidDestructorAnalyzer : Analyzer
 {
-    public static Diagnostic InvalidParameters = new("LM0014", Diagnostic.DiagnosticLevel.Error, "Destructor '{0}' cannot declare parameters.");
-    public static Diagnostic InvalidModifiers = new("LM0015", Diagnostic.DiagnosticLevel.Error, "Destructor '{0}' cannot be static or extern.");
-    public static Diagnostic InvalidName = new("LM0016", Diagnostic.DiagnosticLevel.Error, "Destructor '{0}' must match its containing type's name '{1}'.");
-    public static Diagnostic DuplicateDestructor = new("LM0017", Diagnostic.DiagnosticLevel.Error, "Type '{0}' cannot declare multiple destructors.");
+    public static DiagnosticDescription InvalidParameters = new("LM0014", Diagnostic.DiagnosticLevel.Error, "Destructor '{0}' cannot declare parameters.");
+    public static DiagnosticDescription InvalidModifiers = new("LM0015", Diagnostic.DiagnosticLevel.Error, "Destructor '{0}' cannot be static or extern.");
+    public static DiagnosticDescription InvalidName = new("LM0016", Diagnostic.DiagnosticLevel.Error, "Destructor '{0}' must match its containing type's name '{1}'.");
+    public static DiagnosticDescription DuplicateDestructor = new("LM0017", Diagnostic.DiagnosticLevel.Error, "Type '{0}' cannot declare multiple destructors.");
 
     [Visitor]
     public void Visit(DestructorDeclarationNode node)

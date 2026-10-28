@@ -26,7 +26,7 @@ public class StringLiteralExpressionRule : ParserRule<StringLiteralNode>
             return new StringLiteralNode(value);
 
         if (diagnostic != null)
-            Parser.DiagnosticContext?.Report(diagnostic.Value);
+            Parser.DiagnosticContext?.Report(diagnostic.Value, token.Location);
 
         return new StringLiteralNode([]);
     }

@@ -29,7 +29,7 @@ public class CharacterLiteralExpressionRule : ParserRule<CharacterLiteralNode>
             return new CharacterLiteralNode(value);
 
         if (diagnostic != null)
-            Parser.DiagnosticContext?.Report(diagnostic.Value);
+            Parser.DiagnosticContext?.Report(diagnostic.Value, token.Location);
 
         return new CharacterLiteralNode(0);
     }

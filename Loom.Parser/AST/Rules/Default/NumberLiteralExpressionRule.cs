@@ -27,7 +27,7 @@ public class NumberLiteralExpressionRule : ParserRule<NumberLiteralNode>
             return new NumberLiteralNode(value);
 
         if (diagnostic != null)
-            Parser.DiagnosticContext?.Report(diagnostic.Value);
+            Parser.DiagnosticContext?.Report(diagnostic.Value, token.Location);
 
         return new NumberLiteralNode(0);
     }

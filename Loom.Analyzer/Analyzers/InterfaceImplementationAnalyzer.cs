@@ -11,7 +11,7 @@ namespace Loom.Analyzer.Analyzers;
 [LoomAnalyzer]
 public class InterfaceImplementationAnalyzer : Analyzer
 {
-    public static Diagnostic MissingImplementation = new("LM0013", Diagnostic.DiagnosticLevel.Error, "Type '{0}' does not implement interface member '{1}'.");
+    public static DiagnosticDescription MissingImplementation = new("LM0013", Diagnostic.DiagnosticLevel.Error, "Type '{0}' does not implement interface member '{1}'.");
 
     [Visitor]
     public void Visit(ClassDeclarationNode node) => Check(node);

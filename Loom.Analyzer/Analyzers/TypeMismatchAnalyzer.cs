@@ -11,9 +11,9 @@ namespace Loom.Analyzer.Analyzers;
 [LoomAnalyzer]
 public class TypeMismatchAnalyzer : Analyzer
 {
-    public static Diagnostic TypeMismatch = new("LM0032", Diagnostic.DiagnosticLevel.Error, "Cannot implicitly cast '{0}' to expected type '{1}'.");
-    public static Diagnostic UnexpectedValue = new("LM0033", Diagnostic.DiagnosticLevel.Error, "Cannot return a value from a method that returns void.");
-    public static Diagnostic MissingReturn = new("LM0034", Diagnostic.DiagnosticLevel.Error, "Method with return type '{0}' must return a value.");
+    public static DiagnosticDescription TypeMismatch = new("LM0032", Diagnostic.DiagnosticLevel.Error, "Cannot implicitly cast '{0}' to expected type '{1}'.");
+    public static DiagnosticDescription UnexpectedValue = new("LM0033", Diagnostic.DiagnosticLevel.Error, "Cannot return a value from a method that returns void.");
+    public static DiagnosticDescription MissingReturn = new("LM0034", Diagnostic.DiagnosticLevel.Error, "Method with return type '{0}' must return a value.");
 
     [Visitor]
     public void Visit(ReturnStatementNode node)

@@ -234,7 +234,7 @@ internal class DeclarationWalker : ASTVisitor
                 long value = member.Value ?? next;
                 if (value > int.MaxValue)
                 {
-                    Context.DiagnosticContext?.Report(new Diagnostic("LM0040", Diagnostic.DiagnosticLevel.Error, "Enum value exceeds the signed 32-bit range."), member.Name.Location);
+                    Context.DiagnosticContext?.Report(new DiagnosticDescription("LM0040", Diagnostic.DiagnosticLevel.Error, "Enum value exceeds the signed 32-bit range."), member.Name.Location);
                     value = 0;
                 }
                 var constant = new FieldSymbol(member.Name.Text)
@@ -249,7 +249,7 @@ internal class DeclarationWalker : ASTVisitor
                 };
                 CurrentTable.Define(constant);
                 if (symbol.Members.Any(existing => existing.Name == constant.Name))
-                    Context.DiagnosticContext?.Report(new Diagnostic("LM0041", Diagnostic.DiagnosticLevel.Error, "Duplicate enum member '{0}'."), member.Name.Location, constant.Name);
+                    Context.DiagnosticContext?.Report(new DiagnosticDescription("LM0041", Diagnostic.DiagnosticLevel.Error, "Duplicate enum member '{0}'."), member.Name.Location, constant.Name);
                 symbol.Members = [.. symbol.Members, constant];
                 Context.Bind(member, constant);
                 next = value + 1;

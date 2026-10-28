@@ -9,23 +9,16 @@ public class DiagnosticContext
     private List<Diagnostic> diagnostics = new List<Diagnostic>();
 
     /// <summary> Reports a diagnostic. </summary>
-    public void Report(Diagnostic diagnostic, params object[] args)
+    public void Report(DiagnosticDescription diagnostic, params object[] args)
     {
-        if (args.Length > 0)
-            diagnostics.Add(diagnostic with { Message = string.Format(diagnostic.Message, args) });
-        else
-            diagnostics.Add(diagnostic);
+        Report(diagnostic, null, args);
     }
 
     /// <summary> Reports a diagnostic. </summary>
-    public void Report(Diagnostic diagnostic, DiagnosticPosition? position, params object[] args)
+    public void Report(DiagnosticDescription diagnostic, DiagnosticPosition? position, params object[] args)
     {
-        var d = diagnostic with { Position = position };
-
-        if (args.Length > 0)
-            diagnostics.Add(d with { Message = string.Format(d.Message, args) });
-        else
-            diagnostics.Add(d);
+        var message = args.Length > 0 ? string.Format(diagnostic.Format, args) : diagnostic.Format;
+        diagnostics.Add(new Diagnostic(diagnostic.ID, diagnostic.Level, message, position));
     }
 
     /// <summary> Discards every diagnostic reported after <paramref name="checkpoint"/>. </summary>

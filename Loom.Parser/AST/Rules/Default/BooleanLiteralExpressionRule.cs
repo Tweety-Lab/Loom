@@ -29,7 +29,7 @@ public class BooleanLiteralExpressionRule : ParserRule<BooleanLiteralNode>
             return new BooleanLiteralNode(value);
 
         if (diagnostic != null)
-            Parser.DiagnosticContext?.Report(diagnostic.Value);
+            Parser.DiagnosticContext?.Report(diagnostic.Value, token.Location);
 
         return new BooleanLiteralNode(false);
     }

@@ -10,20 +10,20 @@ namespace Loom.Parser.Literals;
 public class NumberLiteralParser : ILiteralParser<int>
 {
     /// <inheritdoc/>
-    public bool TryParse(Token token, [NotNullWhen(true)] out int result, out Diagnostic? diagnostic)
+    public bool TryParse(Token token, [NotNullWhen(true)] out int result, out DiagnosticDescription? diagnostic)
     {
         diagnostic = null;
 
         if (token.Type != TokenType.Number)
         {
-            diagnostic = new Diagnostic("LM0061", Diagnostic.DiagnosticLevel.Error, $"Expected a number literal, found '{token.Text}'.", token.Location);
+            diagnostic = new DiagnosticDescription("LM0061", Diagnostic.DiagnosticLevel.Error, $"Expected a number literal, found '{token.Text}'.");
             result = 0;
             return false;
         }
 
         if (!int.TryParse(token.Text, NumberStyles.None, CultureInfo.InvariantCulture, out result))
         {
-            diagnostic = new Diagnostic("LM0062", Diagnostic.DiagnosticLevel.Error, $"'{token.Text}' is not a valid integer literal.", token.Location);
+            diagnostic = new DiagnosticDescription("LM0062", Diagnostic.DiagnosticLevel.Error, $"'{token.Text}' is not a valid integer literal.");
             result = 0;
             return false;
         }

@@ -9,14 +9,14 @@ namespace Loom.Parser.Literals;
 public class StringLiteralParser : ILiteralParser<int[]>
 {
     /// <inheritdoc/>
-    public bool TryParse(Token token, [NotNullWhen(true)] out int[]? result, out Diagnostic? diagnostic)
+    public bool TryParse(Token token, [NotNullWhen(true)] out int[]? result, out DiagnosticDescription? diagnostic)
     {
         result = null;
         diagnostic = null;
 
         if (token.Type != TokenType.StringLiteral)
         {
-            diagnostic = new Diagnostic("LM0063", Diagnostic.DiagnosticLevel.Error, $"Expected a string literal, found '{token.Text}'.", token.Location);
+            diagnostic = new DiagnosticDescription("LM0063", Diagnostic.DiagnosticLevel.Error, $"Expected a string literal, found '{token.Text}'.");
             return false;
         }
 
@@ -24,7 +24,7 @@ public class StringLiteralParser : ILiteralParser<int[]>
 
         if (literal.Length < 2 || literal[0] != '"' || literal[^1] != '"')
         {
-            diagnostic = new Diagnostic("LM0064", Diagnostic.DiagnosticLevel.Error, $"Unterminated string literal '{literal}'.", token.Location);
+            diagnostic = new DiagnosticDescription("LM0064", Diagnostic.DiagnosticLevel.Error, $"Unterminated string literal '{literal}'.");
             return false;
         }
 
@@ -32,7 +32,7 @@ public class StringLiteralParser : ILiteralParser<int[]>
 
         if (!TryDecode(body, out result, out var error))
         {
-            diagnostic = new Diagnostic("LM0065", Diagnostic.DiagnosticLevel.Error, error, token.Location);
+            diagnostic = new DiagnosticDescription("LM0065", Diagnostic.DiagnosticLevel.Error, error);
 
             result = null;
             return false;

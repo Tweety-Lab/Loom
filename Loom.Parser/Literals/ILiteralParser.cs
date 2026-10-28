@@ -11,5 +11,5 @@ namespace Loom.Parser.Literals;
 public interface ILiteralParser<T>
 {
     /// <summary> Tries to parse the token. </summary>
-    bool TryParse(Token token, [NotNullWhen(true)] out T? result, out Diagnostic? diagnostic);
+    bool TryParse(Token token, [NotNullWhen(true)] out T? result, out DiagnosticDescription? diagnostic);
 }

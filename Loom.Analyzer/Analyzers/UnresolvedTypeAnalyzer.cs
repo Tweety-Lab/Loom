@@ -11,7 +11,7 @@ namespace Loom.Analyzer.Analyzers;
 [LoomAnalyzer]
 public class UnresolvedTypeAnalyzer : Analyzer
 {
-    public static Diagnostic UnresolvedType = new("LM0038", Diagnostic.DiagnosticLevel.Error, "The type '{0}' could not be found.");
+    public static DiagnosticDescription UnresolvedType = new("LM0038", Diagnostic.DiagnosticLevel.Error, "The type '{0}' could not be found.");
 
     [Visitor]
     public void Visit(PropertyDeclarationNode node)

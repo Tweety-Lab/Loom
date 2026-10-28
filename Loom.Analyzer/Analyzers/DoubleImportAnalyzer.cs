@@ -10,7 +10,7 @@ namespace Loom.Analyzer.Analyzers;
 [LoomAnalyzer]
 public class DoubleImportAnalyzer : Analyzer
 {
-    public static Diagnostic DoubleImport = new("LM0006", Diagnostic.DiagnosticLevel.Warning, "The module '{0}' has already been imported.");
+    public static DiagnosticDescription DoubleImport = new("LM0006", Diagnostic.DiagnosticLevel.Warning, "The module '{0}' has already been imported.");
 
     [Visitor]
     public void Visit(ProgramNode node)

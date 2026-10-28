@@ -11,7 +11,7 @@ namespace Loom.Analyzer.Analyzers;
 [LoomAnalyzer]
 public class InvalidStatementScopeAnalyzer : Analyzer
 {
-    public static Diagnostic InvalidStatementScope = new("LM0021", Diagnostic.DiagnosticLevel.Error, "Statement cannot exist outside of a method body.");
+    public static DiagnosticDescription InvalidStatementScope = new("LM0021", Diagnostic.DiagnosticLevel.Error, "Statement cannot exist outside of a method body.");
 
     [Visitor]
     public void Visit(StatementNode node)

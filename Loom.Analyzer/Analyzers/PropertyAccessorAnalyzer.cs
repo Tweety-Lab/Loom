@@ -11,8 +11,8 @@ namespace Loom.Analyzer.Analyzers;
 [LoomAnalyzer]
 public class PropertyAccessorAnalyzer : Analyzer
 {
-    public static Diagnostic MissingGetAccessor = new("LM0025", Diagnostic.DiagnosticLevel.Error, "The property '{0}' cannot be read because it declares no 'get' accessor.");
-    public static Diagnostic MissingSetAccessor = new("LM0026", Diagnostic.DiagnosticLevel.Error, "The property '{0}' cannot be assigned because it declares no 'set' accessor.");
+    public static DiagnosticDescription MissingGetAccessor = new("LM0025", Diagnostic.DiagnosticLevel.Error, "The property '{0}' cannot be read because it declares no 'get' accessor.");
+    public static DiagnosticDescription MissingSetAccessor = new("LM0026", Diagnostic.DiagnosticLevel.Error, "The property '{0}' cannot be assigned because it declares no 'set' accessor.");
 
     [Visitor]
     public void Visit(IdentifierNameNode node) => CheckRead(node, Property(node));

@@ -91,7 +91,7 @@ public abstract class ParserRule<T> : IParserRule where T : ASTNode
                 else if (fallback != null)
                     fallback();
                 else
-                    Parser.DiagnosticContext?.Report(new Common.Diagnostics.Diagnostic("LM0052", Common.Diagnostics.Diagnostic.DiagnosticLevel.Error, $"Unexpected token: {token.Text}"), token.Location);
+                    Parser.DiagnosticContext?.Report(new Common.Diagnostics.DiagnosticDescription("LM0052", Common.Diagnostics.Diagnostic.DiagnosticLevel.Error, "Unexpected token: {0}"), token.Location, token.Text);
             }
             catch (ParseFailureException)
             {

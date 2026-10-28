@@ -9,7 +9,7 @@ namespace Loom.Parser.Literals;
 public class BooleanLiteralParser : ILiteralParser<bool>
 {
     /// <inheritdoc/>
-    public bool TryParse(Token token, [NotNullWhen(true)] out bool result, out Diagnostic? diagnostic)
+    public bool TryParse(Token token, [NotNullWhen(true)] out bool result, out DiagnosticDescription? diagnostic)
     {
         diagnostic = null;
 
@@ -24,7 +24,7 @@ public class BooleanLiteralParser : ILiteralParser<bool>
                 return true;
 
             default:
-                diagnostic = new Diagnostic("LM0053", Diagnostic.DiagnosticLevel.Error, $"Expected 'true' or 'false', found '{token.Text}'.", token.Location);
+                diagnostic = new DiagnosticDescription("LM0053", Diagnostic.DiagnosticLevel.Error, $"Expected 'true' or 'false', found '{token.Text}'.");
                 result = false;
                 return false;
         }

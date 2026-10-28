@@ -11,8 +11,8 @@ namespace Loom.Analyzer.Analyzers;
 [LoomAnalyzer]
 public class StackOnlyTypeAnalyzer : Analyzer
 {
-    public static Diagnostic FieldCannotBeStackOnlyType = new("LM0027", Diagnostic.DiagnosticLevel.Error, "Field cannot be of type '{0}' because it is a stack-only type.");
-    public static Diagnostic TypeParameterCannotBeStackOnlyType = new("LM0028", Diagnostic.DiagnosticLevel.Error, "Type parameter cannot be of type '{0}' because it is a stack-only type.");
+    public static DiagnosticDescription FieldCannotBeStackOnlyType = new("LM0027", Diagnostic.DiagnosticLevel.Error, "Field cannot be of type '{0}' because it is a stack-only type.");
+    public static DiagnosticDescription TypeParameterCannotBeStackOnlyType = new("LM0028", Diagnostic.DiagnosticLevel.Error, "Type parameter cannot be of type '{0}' because it is a stack-only type.");
 
 
     [Visitor]

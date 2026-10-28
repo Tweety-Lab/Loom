@@ -11,8 +11,8 @@ namespace Loom.Analyzer.Analyzers;
 [LoomAnalyzer]
 public class MutabilityAnalyzer : Analyzer
 {
-    public static Diagnostic CannotMutateRef = new("LM0023", Diagnostic.DiagnosticLevel.Error, "Cannot mutate borrowed parameter '{0}' because it is not marked 'mut'.");
-    public static Diagnostic CannotMutateConstant = new("LM0024", Diagnostic.DiagnosticLevel.Error, "Cannot mutate constant '{0}'.");
+    public static DiagnosticDescription CannotMutateRef = new("LM0023", Diagnostic.DiagnosticLevel.Error, "Cannot mutate borrowed parameter '{0}' because it is not marked 'mut'.");
+    public static DiagnosticDescription CannotMutateConstant = new("LM0024", Diagnostic.DiagnosticLevel.Error, "Cannot mutate constant '{0}'.");
 
     [Visitor]
     public void Visit(AssignmentStatementNode node)

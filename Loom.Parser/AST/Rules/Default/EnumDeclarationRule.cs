@@ -43,7 +43,7 @@ public class EnumDeclarationRule : TypeMemberParserRule
                 var number = Parser.Reader.Expect(TokenType.Number);
                 if (!int.TryParse(sign + number.Text, out var parsed))
                 {
-                    Parser.DiagnosticContext?.Report(new Diagnostic("LM0051", Diagnostic.DiagnosticLevel.Error, "Enum values must be signed 32-bit integers."), number.Location);
+                    Parser.DiagnosticContext?.Report(new DiagnosticDescription("LM0051", Diagnostic.DiagnosticLevel.Error, "Enum values must be signed 32-bit integers."), number.Location);
                     throw new ParseFailureException(number, "Invalid enum value.");
                 }
                 value = parsed;
