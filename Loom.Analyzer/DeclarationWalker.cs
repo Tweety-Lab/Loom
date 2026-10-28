@@ -59,13 +59,12 @@ internal class DeclarationWalker : ASTVisitor
         if (node.ReturnType.HasModifier(Parser.Tokenizer.Token.TokenType.Unique))
             symbol.ReturnPointerType = PointerType.Unique;
 
-        // TODO:
-        // Non member methods should be MemberAccessibility.None
-        if (node.HasModifier(Parser.Tokenizer.Token.TokenType.Public) ||
-            (symbol.ContainingType?.KnownType == TypeSymbol.DefaultType.Interface && !node.HasModifier(Parser.Tokenizer.Token.TokenType.Private)))
+        if (node.HasModifier(Parser.Tokenizer.Token.TokenType.Public) || (symbol.ContainingType?.KnownType == TypeSymbol.DefaultType.Interface && !node.HasModifier(Parser.Tokenizer.Token.TokenType.Private)))
             symbol.Accessibility = MemberAccessibility.Public;
-        else
+        else if (node.HasModifier(Parser.Tokenizer.Token.TokenType.Private))
             symbol.Accessibility = MemberAccessibility.Private;
+        else
+            symbol.Accessibility = MemberAccessibility.None;
 
         symbol.DeclaringNode = node;
 
@@ -147,12 +146,12 @@ internal class DeclarationWalker : ASTVisitor
         // Constructors implicitly return void
         symbol.ReturnType = CurrentTable.Lookup("void")?.OfType<TypeSymbol>().FirstOrDefault(t => t.KnownType == TypeSymbol.DefaultType.Void);
 
-        // TODO:
-        // Non member methods should be MemberAccessibility.None
         if (node.HasModifier(Parser.Tokenizer.Token.TokenType.Public))
             symbol.Accessibility = MemberAccessibility.Public;
-        else
+        else if (node.HasModifier(Parser.Tokenizer.Token.TokenType.Private))
             symbol.Accessibility = MemberAccessibility.Private;
+        else
+            symbol.Accessibility = MemberAccessibility.None;
 
         symbol.DeclaringNode = node;
 
@@ -200,12 +199,12 @@ internal class DeclarationWalker : ASTVisitor
         if (node.ReturnType.HasModifier(Parser.Tokenizer.Token.TokenType.Unique))
             symbol.ReturnPointerType = PointerType.Unique;
 
-        // TODO:
-        // Non member methods should be MemberAccessibility.None
         if (node.HasModifier(Parser.Tokenizer.Token.TokenType.Public))
             symbol.Accessibility = MemberAccessibility.Public;
-        else
+        else if (node.HasModifier(Parser.Tokenizer.Token.TokenType.Private))
             symbol.Accessibility = MemberAccessibility.Private;
+        else
+            symbol.Accessibility = MemberAccessibility.None;
 
         symbol.DeclaringNode = node;
 
