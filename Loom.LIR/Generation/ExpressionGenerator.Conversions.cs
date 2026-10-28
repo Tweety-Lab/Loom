@@ -27,18 +27,22 @@ internal partial class ExpressionGenerator
 
     private LIRValue EmitInterfaceConversion(LIRValue value, TypeSymbol source, TypeSymbol target)
     {
-        var type = (LIRFatPointerType)ASTGenerator.ConvertStorageType(target);
-        var table = new LIRMetadataReference(MetadataType.VirtualDispatch,
-            $"{source.FullyQualifiedName}::{target.FullyQualifiedName}::vtable", type.SecondPointee);
-        return Generator.EmitMakeFatPointer(value, table, type);
+        var type = (LIRArrayType)ASTGenerator.ConvertStorageType(target);
+        var table = new LIRMetadataReference(MetadataType.VirtualDispatch, $"{source.FullyQualifiedName}::{target.FullyQualifiedName}::vtable", (LIRPointerType)type.ElementType);
+        var storage = Generator.EmitAlloca(type);
+        Generator.EmitStore(value, Generator.EmitGetElement(storage, new LIRConstantIntValue(0)));
+        Generator.EmitStore(table, Generator.EmitGetElement(storage, new LIRConstantIntValue(1)));
+        return Generator.EmitLoad(storage);
     }
 
-    private LIRValue EmitArrayStorage(LIRValue value, ArrayTypeSymbol type)
+    private LIRValue EmitArrayStorage(LIRValue value, ArrayTypeSymbol type) => EmitArrayStorage(value, (LIRArrayType)ASTGenerator.ConvertType(type));
+
+    private LIRValue EmitArrayStorage(LIRValue value, LIRArrayType type)
     {
         if (value.Type is LIRPointerType { PointeeType: LIRArrayType })
             return value;
 
-        var storage = Generator.EmitAlloca(ASTGenerator.ConvertType(type));
+        var storage = Generator.EmitAlloca(type);
 
         Generator.EmitStore(value, storage);
 

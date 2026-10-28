@@ -107,7 +107,6 @@ internal class StringPrinterStyle : ILIRPrinterStyle
         LIRVoidType => "void",
         LIRBoolType => "bool",
         LIRPointerType p => $"{PrintType(p.PointeeType)}*",
-        LIRFatPointerType p => $"fatptr {{ {PrintType(p.FirstPointee)}, {PrintType(p.SecondPointee)} }}",
         LIRArrayType a => $"[{a.Size} x {PrintType(a.ElementType)}]",
         LIRTypeDeclarationType s => s.Name,
         LIRTypeParameter p => p.Name,

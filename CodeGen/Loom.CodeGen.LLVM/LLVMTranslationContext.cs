@@ -30,17 +30,6 @@ internal class LLVMTranslationContext
         if (type is LIRPointerType { PointeeType: var pointee })
             return LLVMTypeRef.CreatePointer(ResolveType(pointee), 0);
 
-        if (type is LIRFatPointerType fatPointer)
-        {
-            var aggregate = Context.GetStructType([
-                ResolveType(fatPointer.FirstPointee),
-                ResolveType(fatPointer.SecondPointee)
-            ], false);
-
-            TypeMap[type] = aggregate;
-            return aggregate;
-        }
-
         if (type is LIRArrayType { ElementType: var elementType, Size: var size })
             return LLVMTypeRef.CreateArray(ResolveType(elementType), (uint)size);
 

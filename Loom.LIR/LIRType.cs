@@ -20,7 +20,6 @@ public record LIRBoolType() : LIRType;
 public record LIRCharType() : LIRType;
 
 public record LIRPointerType(LIRType PointeeType) : LIRType;
-public record LIRFatPointerType(LIRPointerType FirstPointee, LIRPointerType SecondPointee) : LIRType;
 public record LIRArrayType(LIRType ElementType, int Size) : LIRType;
 public record LIRTypeDeclarationType(string Name, bool IsValueType) : LIRType;
 

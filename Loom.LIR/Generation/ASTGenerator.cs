@@ -72,7 +72,7 @@ public class ASTGenerator
             TypeSymbol.DefaultType.IPtr => LIRType.IntPtr,
             TypeSymbol.DefaultType.Struct => new LIRTypeDeclarationType(type.FullyQualifiedName, true),
             TypeSymbol.DefaultType.Class => new LIRTypeDeclarationType(type.FullyQualifiedName, false),
-            TypeSymbol.DefaultType.Interface => new LIRFatPointerType(new LIRPointerType(LIRType.Void), new LIRPointerType(LIRType.Void)),
+            TypeSymbol.DefaultType.Interface => new LIRArrayType(new LIRPointerType(LIRType.Void), 2),
             TypeSymbol.DefaultType.TypeParameter => new LIRTypeParameter(type.Name),
             _ => throw new Exception($"Unknown type {type.KnownType}")
         };

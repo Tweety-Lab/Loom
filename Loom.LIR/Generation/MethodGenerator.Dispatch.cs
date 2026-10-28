@@ -15,8 +15,7 @@ internal partial class MethodGenerator
         if (slot < 0)
             throw new InvalidOperationException($"Interface '{contract.FullyQualifiedName}' has no dispatch slot for '{method.FullyQualifiedName}'.");
 
-        var receiverType = (LIRFatPointerType)ASTGenerator.ConvertStorageType(contract);
-        var targetSignature = ASTGenerator.BuildFunctionType(method, receiverType.FirstPointee, typeParameters: []);
+        var targetSignature = ASTGenerator.BuildFunctionType(method, new LIRPointerType(LIRType.Void), typeParameters: []);
         return new LIRVirtualMethodReference(slot, targetSignature);
     }
 }

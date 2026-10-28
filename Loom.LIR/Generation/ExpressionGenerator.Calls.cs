@@ -1,7 +1,6 @@
 using Loom.Analyzer;
 using Loom.Analyzer.Symbols;
 using Loom.LIR.Objects;
-using Loom.LIR.OpCodes;
 using Loom.Parser.AST.Rules.Default;
 
 namespace Loom.LIR.Generation;
@@ -14,12 +13,15 @@ internal partial class ExpressionGenerator
     {
         if (target is LIRVirtualMethodReference method)
         {
-            if (self?.Type is not LIRFatPointerType receiverType)
-                throw new InvalidOperationException("An interface method requires a fat pointer receiver.");
+            var receiverType = new LIRArrayType(new LIRPointerType(LIRType.Void), 2);
+            if (self == null || (self.Type != receiverType && self.Type != new LIRPointerType(receiverType)))
+                throw new InvalidOperationException("An interface method requires a two-pointer array receiver.");
 
-            var instance = Generator.Emit(LIROpCode.ExtractValue, receiverType.FirstPointee, self, new LIRConstantIntValue(0));
-            var table = Generator.Emit(LIROpCode.ExtractValue, receiverType.SecondPointee, self, new LIRConstantIntValue(1));
-            var function = Generator.Emit(LIROpCode.GetVirtualMethod, new LIRPointerType(method.Type), table, new LIRConstantIntValue(method.Slot));
+            var storage = EmitArrayStorage(self, receiverType);
+            var instance = Generator.EmitLoad(Generator.EmitGetElement(storage, new LIRConstantIntValue(0)));
+            var table = Generator.EmitLoad(Generator.EmitGetElement(storage, new LIRConstantIntValue(1)));
+            var methods = Generator.EmitConvert(table, new LIRPointerType(new LIRPointerType(method.Type)));
+            var function = Generator.EmitLoad(Generator.EmitGetElement(methods, new LIRConstantIntValue(method.Slot)));
             return Generator.EmitCall(function, [instance, .. arguments]);
         }
 
