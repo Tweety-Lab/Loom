@@ -5,10 +5,10 @@ module Standard
 	export struct Range<T>
 	{
 		/// @brief The starting value of the range.
-		public T Start { get; }
+		public unique T Start { get; }
 
 		/// @brief The ending value of the range.
-		public T End { get; }
+		public unique T End { get; }
 
 		/// @brief Initializes a new instance of the Range class.
 		/// @param(start) The starting value of the range.

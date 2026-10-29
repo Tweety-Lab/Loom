@@ -46,7 +46,7 @@ module Standard::Samples::Syntax
 
 	export class MyGenericClass<T>
 	{
-		public T Property { get; set; }
+		public unique T Property { get; set; }
 
 		public unique T GenericMethod(T x, T y)
 		{

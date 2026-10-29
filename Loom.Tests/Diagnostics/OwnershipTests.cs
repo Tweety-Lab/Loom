@@ -406,7 +406,10 @@ module Test
     [InlineData("class Holder { private Handle Value { get; set; } }")]
     [InlineData("class Holder { public i32 Value { get; set; } }")]
     [InlineData("class Holder { public Data Value { get; set; } }")]
-    [InlineData("class Holder<T> { public T Value { get; set; } }")]
+    [InlineData("class Holder<T> { public T Value { get; set; } }", "Reference type 'T' must declare a pointer type.")]
+    [InlineData("class Holder<T> { public T End { get; } }", "Reference type 'T' must declare a pointer type.")]
+    [InlineData("class Holder<T> { public unique T Value { get; set; } }")]
+    [InlineData("class Holder<T> { public ref T Value { get; } }")]
     [InlineData("class Holder<T> { public Box<T> Value { get; set; } }", "Reference type 'Box' must declare a pointer type.")]
     [InlineData("class Holder<T> { public unique Box<T> Value { get; set; } }")]
     public void Analyze_PublicReferenceProperty_RequiresPointerType(string declaration, params string[] expectedDiagnostics)
@@ -418,6 +421,31 @@ module Test
                 struct Data { }
                 class Box<T> { }
                 {{declaration}}
+            }
+            """;
+
+        Assert.Equal(expectedDiagnostics, ParseAndAnalyze(source).DiagnosticContext.Diagnostics.Select(d => d.Message));
+    }
+
+    [Theory]
+    [InlineData("T value = default;", "Reference type 'T' must declare a pointer type.")]
+    [InlineData("Box<T> value = default;", "Reference type 'Box' must declare a pointer type.")]
+    [InlineData("unique T value = default;")]
+    [InlineData("ref T value = default;")]
+    [InlineData("unique Box<T> value = default;")]
+    [InlineData("Data<T> value = default;")]
+    [InlineData("T[2] values = default;")]
+    public void Analyze_GenericLocal_RequiresPointerTypeForReferenceTypes(string statement, params string[] expectedDiagnostics)
+    {
+        var source = $$"""
+            module Test
+            {
+                class Box<T> { }
+                struct Data<T> { }
+                class Holder<T>
+                {
+                    void Run() { {{statement}} }
+                }
             }
             """;
 

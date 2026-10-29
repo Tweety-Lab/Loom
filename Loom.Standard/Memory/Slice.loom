@@ -39,7 +39,7 @@ module Standard::Memory
 
 		/// @brief Returns a new Slice that represents a portion of the original Slice.
 		/// @param(range) The range of elements to include in the new Slice.
-        public static unique Slice<T> operator[](Slice<T> slice, Range<i32> range)
+        public static Slice<T> operator[](Slice<T> slice, Range<i32> range)
         {
 			return slice.Subslice(range.Start, range.End - range.Start);
         }

@@ -22,7 +22,7 @@ public class InvalidPointerTypeAnalyzer : Analyzer
         if (Context.GetSymbol(node).Symbol is not PropertySymbol { Accessibility: MemberAccessibility.Public, Type: { } type } property)
             return;
 
-        if (type.KnownType == TypeSymbol.DefaultType.TypeParameter || type.IsValueType || type is ArrayTypeSymbol)
+        if (type.IsValueType || type is ArrayTypeSymbol)
             return;
 
         if (property.PointerType == PointerType.None)
@@ -33,9 +33,6 @@ public class InvalidPointerTypeAnalyzer : Analyzer
     public void Visit(LocalDeclarationStatementNode node)
     {
         if (Context.GetSymbol(node).Symbol is not LocalVariableSymbol symbol || symbol.Type == null)
-            return;
-
-        if (symbol.Type.ContainsTypeParameters)
             return;
 
         if (symbol.Type.IsValueType && symbol.PointerType is not (PointerType.None or PointerType.Ref))
