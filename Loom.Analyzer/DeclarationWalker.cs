@@ -58,12 +58,9 @@ internal class DeclarationWalker : ASTVisitor
         
         symbol.ReturnPointerType = ResolvePointerType(node.ReturnType);
 
-        if (node.HasModifier(Parser.Tokenizer.Token.TokenType.Public) || (symbol.ContainingType?.KnownType == TypeSymbol.DefaultType.Interface && !node.HasModifier(Parser.Tokenizer.Token.TokenType.Private)))
+        symbol.Accessibility = ResolveAccessibility(node);
+        if (symbol.ContainingType?.KnownType == TypeSymbol.DefaultType.Interface && !node.HasModifier(Parser.Tokenizer.Token.TokenType.Private))
             symbol.Accessibility = MemberAccessibility.Public;
-        else if (node.HasModifier(Parser.Tokenizer.Token.TokenType.Private))
-            symbol.Accessibility = MemberAccessibility.Private;
-        else
-            symbol.Accessibility = MemberAccessibility.None;
 
         symbol.DeclaringNode = node;
 
@@ -142,16 +139,10 @@ internal class DeclarationWalker : ASTVisitor
         symbol.IsStatic = node.HasModifier(Parser.Tokenizer.Token.TokenType.Static);
         symbol.IsExported = node.HasModifier(Parser.Tokenizer.Token.TokenType.Export);
         symbol.IsExtern = node.HasModifier(Parser.Tokenizer.Token.TokenType.Extern);
+        symbol.Accessibility = ResolveAccessibility(node);
 
         // Constructors implicitly return void
         symbol.ReturnType = CurrentTable.Lookup("void")?.OfType<TypeSymbol>().FirstOrDefault(t => t.KnownType == TypeSymbol.DefaultType.Void);
-
-        if (node.HasModifier(Parser.Tokenizer.Token.TokenType.Public))
-            symbol.Accessibility = MemberAccessibility.Public;
-        else if (node.HasModifier(Parser.Tokenizer.Token.TokenType.Private))
-            symbol.Accessibility = MemberAccessibility.Private;
-        else
-            symbol.Accessibility = MemberAccessibility.None;
 
         symbol.DeclaringNode = node;
 
@@ -197,13 +188,7 @@ internal class DeclarationWalker : ASTVisitor
         };
 
         symbol.ReturnPointerType = ResolvePointerType(node.ReturnType);
-
-        if (node.HasModifier(Parser.Tokenizer.Token.TokenType.Public))
-            symbol.Accessibility = MemberAccessibility.Public;
-        else if (node.HasModifier(Parser.Tokenizer.Token.TokenType.Private))
-            symbol.Accessibility = MemberAccessibility.Private;
-        else
-            symbol.Accessibility = MemberAccessibility.None;
+        symbol.Accessibility = ResolveAccessibility(node);
 
         symbol.DeclaringNode = node;
 
@@ -227,7 +212,9 @@ internal class DeclarationWalker : ASTVisitor
             DeclaringNode = node,
             IsValueType = true
         };
+
         CurrentTable.Define(symbol);
+
         WithScope(node, () =>
         {
             long next = 0;
@@ -239,6 +226,7 @@ internal class DeclarationWalker : ASTVisitor
                     Context.DiagnosticContext?.Report(EnumValueOutOfRange, member.Name.Location);
                     value = 0;
                 }
+
                 var constant = new FieldSymbol(member.Name.Text)
                 {
                     Type = symbol,
@@ -249,9 +237,11 @@ internal class DeclarationWalker : ASTVisitor
                     DeclaringNode = member,
                     FullyQualifiedName = BuildQualifiedName(member.Name.Text)
                 };
+
                 CurrentTable.Define(constant);
                 if (symbol.Members.Any(existing => existing.Name == constant.Name))
                     Context.DiagnosticContext?.Report(DuplicateEnumMember, member.Name.Location, constant.Name);
+
                 symbol.Members = [.. symbol.Members, constant];
                 Context.Bind(member, constant);
                 next = value + 1;
@@ -312,11 +302,7 @@ internal class DeclarationWalker : ASTVisitor
         symbol.PointerType = ResolvePointerType(node.Variable.Type);
         symbol.ContainingType = CurrentSymbol as TypeSymbol;
         symbol.FullyQualifiedName = BuildQualifiedName(node.Variable.Name.Text);
-
-        if (node.HasModifier(Parser.Tokenizer.Token.TokenType.Public))
-            symbol.Accessibility = MemberAccessibility.Public;
-        else
-            symbol.Accessibility = MemberAccessibility.Private;
+        symbol.Accessibility = ResolveAccessibility(node);
 
         symbol.DeclaringNode = node;
         CurrentTable.Define(symbol);
@@ -337,10 +323,10 @@ internal class DeclarationWalker : ASTVisitor
         symbol.IsStatic = node.HasModifier(Parser.Tokenizer.Token.TokenType.Static);
         symbol.DeclaringNode = node;
 
-        if (node.HasModifier(Parser.Tokenizer.Token.TokenType.Public) || (symbol.ContainingType?.KnownType == TypeSymbol.DefaultType.Interface && !node.HasModifier(Parser.Tokenizer.Token.TokenType.Private)))
+        symbol.Accessibility = ResolveAccessibility(node);
+
+        if (symbol.ContainingType?.KnownType == TypeSymbol.DefaultType.Interface && !node.HasModifier(Parser.Tokenizer.Token.TokenType.Private))
             symbol.Accessibility = MemberAccessibility.Public;
-        else
-            symbol.Accessibility = MemberAccessibility.Private;
 
         symbol.FullyQualifiedName = BuildQualifiedName(node.Name.Text);
 
@@ -399,6 +385,7 @@ internal class DeclarationWalker : ASTVisitor
         {
             foreach (var parameter in method.Parameters)
                 CurrentTable.Define(parameter);
+
             VisitChildren(node);
         }, method);
     }
@@ -418,8 +405,17 @@ internal class DeclarationWalker : ASTVisitor
         VisitChildren(node);
     }
 
-    // TODO: add more stuff like this
     private static PointerType ResolvePointerType(TypeNode type) => type.HasModifier(Parser.Tokenizer.Token.TokenType.Unique) ? PointerType.Unique : PointerType.None;
+    private static MemberAccessibility ResolveAccessibility(IModifiableNode node)
+    {
+        if (node.HasModifier(Parser.Tokenizer.Token.TokenType.Public))
+            return MemberAccessibility.Public;
+
+        if (node.HasModifier(Parser.Tokenizer.Token.TokenType.Private))
+            return MemberAccessibility.Private;
+
+        return MemberAccessibility.None;
+    }
 
     /// <inheritdoc/>
     protected override void OnUnhandled(ASTNode node) => VisitChildren(node);
@@ -429,7 +425,6 @@ internal class DeclarationWalker : ASTVisitor
         var parentTable = CurrentTable;
         var previousSymbol = CurrentSymbol;
 
-        // Merged module definitions share a single scope rather than opening a new one.
         CurrentTable = scope ?? new Binder(parentTable);
         Context.Binders[node] = CurrentTable;
 
