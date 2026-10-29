@@ -73,16 +73,16 @@ public class TypeSymbol : Symbol, IExportableSymbol, IGenericSymbol
     public override TypeSymbol OriginalDefinition => (TypeSymbol)base.OriginalDefinition;
 
     /// <inheritdoc/>
-    public bool IsExported { get; set; }
+    public bool IsExported { get; internal set; }
 
     /// <summary> Whether this type uses value semantics. </summary>
-    public bool IsValueType { get; set; }
+    public bool IsValueType { get; internal set; }
 
     /// <summary> Whether this type can only exist on the stack. </summary>
-    public bool IsStackOnly { get; set; }
+    public bool IsStackOnly { get; internal set; }
 
     /// <summary> Whether this type is static. </summary>
-    public bool IsStatic { get; set; }
+    public bool IsStatic { get; internal set; }
 
     /// <summary> The semantic constructions requested for this definition, including open types. </summary>
     internal IEnumerable<ConstructedTypeSymbol> Constructions => constructions.Symbols;

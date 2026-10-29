@@ -11,7 +11,7 @@ public abstract class Symbol(string name)
     public string Name { get; } = name;
 
     /// <summary> The declaration underlying a substituted symbol. </summary>
-    protected Symbol? Definition { get; init; }
+    protected Symbol? Definition { get; }
 
     /// <summary> The symbol as originally declared in source. </summary>
     public virtual Symbol OriginalDefinition => Definition?.OriginalDefinition ?? this;
@@ -20,10 +20,10 @@ public abstract class Symbol(string name)
     public bool IsDefinition => ReferenceEquals(this, OriginalDefinition);
 
     /// <summary> The fully qualified name of this symbol, i.e. "MyModule::MyMethod". </summary>
-    public string FullyQualifiedName { get; set; } = name;
+    public string FullyQualifiedName { get; internal set; } = name;
 
     /// <summary> The <see cref="ASTNode"/> that declared this symbol. </summary>
-    public ASTNode? DeclaringNode { get; set; }
+    public ASTNode? DeclaringNode { get; internal set; }
 
     /// <summary> Initializes a substituted view of <paramref name="definition"/>. </summary>
     protected Symbol(Symbol definition) : this(definition.Name)

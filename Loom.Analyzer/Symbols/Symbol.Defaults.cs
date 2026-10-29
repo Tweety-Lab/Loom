@@ -26,7 +26,7 @@ public enum PointerType
 public interface IExportableSymbol
 {
     /// <summary> Whether this symbol is exported for use beyond it's owning module. </summary>
-    bool IsExported { get; set; }
+    bool IsExported { get; }
 }
 
 /// <summary>
@@ -35,5 +35,5 @@ public interface IExportableSymbol
 public interface IAccessibleSymbol
 {
     /// <summary> The accessibility of this symbol. </summary>
-    MemberAccessibility Accessibility { get; set; }
+    MemberAccessibility Accessibility { get; }
 }

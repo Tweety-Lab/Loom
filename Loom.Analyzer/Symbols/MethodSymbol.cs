@@ -16,11 +16,11 @@ public class MethodSymbol : MemberSymbol, IExportableSymbol, IGenericSymbol
     public virtual TypeSymbol? ReturnType { get; internal set; }
 
     /// <summary> The pointer type for the return value. </summary>
-    public PointerType ReturnPointerType { get; set; }
+    public PointerType ReturnPointerType { get; internal set; }
 
     // This is kinda clunky
     /// <summary> Whether a returned reference permits mutation. </summary>
-    public bool ReturnIsMutable { get; set; }
+    public bool ReturnIsMutable { get; internal set; }
 
     /// <inheritdoc/>
     public IReadOnlyList<TypeParameterSymbol> TypeParameters { get; internal set; } = [];
@@ -50,13 +50,13 @@ public class MethodSymbol : MemberSymbol, IExportableSymbol, IGenericSymbol
     public virtual IReadOnlyList<ParameterSymbol> Parameters { get; internal set; } = [];
 
     /// <summary> Whether this method is static. </summary>
-    public bool IsStatic { get; set; }
+    public bool IsStatic { get; internal set; }
 
     /// <summary> Whether this method is extern. </summary>
-    public bool IsExtern { get; set; }
+    public bool IsExtern { get; internal set; }
 
     /// <inheritdoc/>
-    public bool IsExported { get; set; }
+    public bool IsExported { get; internal set; }
 
     /// <summary> Initializes a method declaration. </summary>
     public MethodSymbol(string name, MethodKind kind) : base(name) => Kind = kind;

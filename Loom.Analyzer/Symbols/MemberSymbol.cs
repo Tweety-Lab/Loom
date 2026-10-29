@@ -9,7 +9,7 @@ public abstract class MemberSymbol : Symbol, IAccessibleSymbol
     public TypeSymbol? ContainingType { get; internal set; }
 
     /// <inheritdoc/>
-    public MemberAccessibility Accessibility { get; set; }
+    public MemberAccessibility Accessibility { get; internal set; }
 
     /// <summary> Initializes a member declaration. </summary>
     protected MemberSymbol(string name) : base(name) { }

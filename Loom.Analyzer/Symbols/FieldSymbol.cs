@@ -15,7 +15,7 @@ public class FieldSymbol : MemberSymbol
     public bool IsMutable { get; internal set; }
 
     /// <summary> Whether this field belongs to the type rather than an instance. </summary>
-    public bool IsStatic { get; set; }
+    public bool IsStatic { get; internal set; }
 
     /// <summary> The compile-time value, or null if not a constant. </summary>
     public int? ConstantValue { get; internal set; } // TODO: Support more constant types

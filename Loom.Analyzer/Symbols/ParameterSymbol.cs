@@ -18,7 +18,7 @@ public class ParameterSymbol : Symbol
     public bool IsBorrow => PointerType == PointerType.Ref;
 
     /// <summary> Whether this parameter is mutable. </summary>
-    public bool IsMutable { get; set; }
+    public bool IsMutable { get; internal set; }
 
     /// <summary> Initializes a parameter declaration. </summary>
     public ParameterSymbol(string name) : base(name) { }

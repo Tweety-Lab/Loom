@@ -15,7 +15,7 @@ public class PropertySymbol : MemberSymbol
     public bool IsMutable { get; internal set; }
 
     /// <summary> Whether this property is static. </summary>
-    public bool IsStatic { get; set; }
+    public bool IsStatic { get; internal set; }
 
     /// <summary> The hidden field the property's auto accessors read and write. </summary>
     public virtual FieldSymbol? BackingField { get; internal set; }
