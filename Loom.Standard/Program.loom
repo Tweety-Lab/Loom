@@ -39,7 +39,7 @@ module Standard::Program
     export i32 Main()
     {
         unique IMyInterface obj = new Object();
-        ref IMyInterface refObj = obj;
+        ref mut IMyInterface refObj = obj;
         refObj.NestedProperty = "Hello, " + "World!";
 
         obj.NestedProperty = "Hello, " + "World!";
