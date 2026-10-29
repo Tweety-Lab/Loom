@@ -98,14 +98,11 @@ internal sealed class CompletionHandler(ParsedDocumentStore documents, DocumentA
 
     private CompletionItem? BuildSymbolCompletion(Symbol symbol, bool isInstance, Range range) => symbol switch
     {
-        PropertySymbol property => BuildPropertyCompletion(property, range),
-        MethodSymbol method when method.Kind == MethodSymbol.MethodKind.Method => BuildMethodCompletion(method, range),
+        FieldSymbol { IsConstant: true, ContainingType.KnownType: TypeSymbol.DefaultType.Enum } member when !isInstance => BuildCompletion(member, CompletionItemKind.EnumMember, range),
+        PropertySymbol property => BuildCompletion(property, CompletionItemKind.Property, range),
+        MethodSymbol method when method.Kind == MethodSymbol.MethodKind.Method => BuildCompletion(method, CompletionItemKind.Method, range),
         _ => null
     };
-
-    private CompletionItem BuildPropertyCompletion(PropertySymbol property, Range range) => BuildCompletion(property, CompletionItemKind.Property, range);
-
-    private CompletionItem BuildMethodCompletion(MethodSymbol method, Range range) => BuildCompletion(method, CompletionItemKind.Method, range);
 
     private CompletionItem BuildCompletion(Symbol symbol, CompletionItemKind kind, Range range)
     {

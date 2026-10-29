@@ -1,6 +1,7 @@
 using Loom.Analyzer.Symbols;
 using Loom.Parser.AST;
 using Loom.Parser.AST.Rules.Default;
+using Newtonsoft.Json.Linq;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Loom.Integration.LanguageServer.Presentation;
@@ -33,6 +34,9 @@ internal sealed class SymbolTextBuilder(IClassifiedTextBackend backend)
                 return true;
             case PropertySymbol property:
                 builder = BuildPropertySymbolName(property);
+                return true;
+            case FieldSymbol { ContainingType: { KnownType: TypeSymbol.DefaultType.Enum } } member:
+                builder = BuildEnumFieldSymbolName(member);
                 return true;
             case ParameterSymbol parameter:
                 builder = BuildParameterSymbolName(parameter);
@@ -145,6 +149,17 @@ internal sealed class SymbolTextBuilder(IClassifiedTextBackend backend)
         }
 
         builder.Append(BuildFullyQualifiedName(symbol));
+
+        return builder;
+    }
+
+    private ClassifiedTextBuilder BuildEnumFieldSymbolName(FieldSymbol symbol)
+    {
+        ClassifiedTextBuilder builder = new ClassifiedTextBuilder(backend);
+        TypeSymbol enumType = symbol.ContainingType!;
+        int value = (int)symbol.ConstantValue!;
+
+        builder.EnumName(enumType.Name).Punctuation(".").FieldName(symbol.Name).Punctuation(" = ").Text(value.ToString(System.Globalization.CultureInfo.InvariantCulture));
 
         return builder;
     }
@@ -292,7 +307,6 @@ internal sealed class SymbolTextBuilder(IClassifiedTextBackend backend)
 
         return builder;
     }
-
     private ClassifiedTextBuilder BuildFullyQualifiedName(Symbol symbol)
     {
         ClassifiedTextBuilder builder = new ClassifiedTextBuilder(backend);
