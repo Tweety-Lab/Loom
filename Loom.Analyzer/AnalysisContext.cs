@@ -116,6 +116,17 @@ public class AnalysisContext
         foreach (var root in rootList)
             typeWalker.Dispatch(root);
 
+        AnalyzeDiagnostics(rootList);
+
+        // Resolve entry point
+        EntryPoint = roots.SelectMany(r => r.Modules).SelectMany(m => Binders[m].Symbols).OfType<MethodSymbol>().FirstOrDefault(s => string.Equals(s.Name, "main", StringComparison.OrdinalIgnoreCase));
+    }
+
+    /// <summary> Runs analyzers for roots which are already resolved. </summary>
+    public void AnalyzeDiagnostics(IEnumerable<ProgramNode> roots)
+    {
+        var rootList = roots.ToList();
+
         // Resolve Ownership flow
         var ownershipWalker = new OwnershipWalker(this);
         foreach (var root in rootList)
@@ -128,9 +139,6 @@ public class AnalysisContext
             foreach (var root in rootList)
                 root.Accept(analyzer);
         }
-
-        // Resolve entry point
-        EntryPoint = roots.SelectMany(r => r.Modules).SelectMany(m => Binders[m].Symbols).OfType<MethodSymbol>().FirstOrDefault(s => string.Equals(s.Name, "main", StringComparison.OrdinalIgnoreCase));
     }
 
     /// <summary> Gets the nearest <see cref="Binder"/> in scope for the given node. </summary>

@@ -32,11 +32,8 @@ internal sealed class DocumentDiagnosticService(ParsedDocumentStore documents, D
             var context = new DiagnosticContext();
             analysis.DiagnosticContext = context;
 
-            foreach (var analyzer in analysis.Analyzers)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                root.Accept(analyzer);
-            }
+            cancellationToken.ThrowIfCancellationRequested();
+            analysis.AnalyzeDiagnostics([root]);
 
             diagnostics.AddRange(context.Diagnostics);
         }
