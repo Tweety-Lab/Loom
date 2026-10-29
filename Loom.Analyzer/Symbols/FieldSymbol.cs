@@ -8,6 +8,9 @@ public class FieldSymbol : MemberSymbol
     /// <summary> The resolved type. </summary>
     public virtual TypeSymbol? Type { get; internal set; }
 
+    /// <summary> The ownership of the stored reference. </summary>
+    public PointerType PointerType { get; internal set; }
+
     /// <summary> Whether this field belongs to the type rather than an instance. </summary>
     public bool IsStatic { get; set; }
 
@@ -23,6 +26,7 @@ public class FieldSymbol : MemberSymbol
     protected FieldSymbol(FieldSymbol definition, TypeSymbol containingType) : base(definition, containingType)
     {
         IsStatic = definition.IsStatic;
+        PointerType = definition.PointerType;
         ConstantValue = definition.ConstantValue;
     }
 }

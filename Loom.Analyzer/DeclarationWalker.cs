@@ -56,8 +56,7 @@ internal class DeclarationWalker : ASTVisitor
         symbol.IsExported = node.HasModifier(Parser.Tokenizer.Token.TokenType.Export);
         symbol.IsExtern = node.HasModifier(Parser.Tokenizer.Token.TokenType.Extern);
         
-        if (node.ReturnType.HasModifier(Parser.Tokenizer.Token.TokenType.Unique))
-            symbol.ReturnPointerType = PointerType.Unique;
+        symbol.ReturnPointerType = ResolvePointerType(node.ReturnType);
 
         if (node.HasModifier(Parser.Tokenizer.Token.TokenType.Public) || (symbol.ContainingType?.KnownType == TypeSymbol.DefaultType.Interface && !node.HasModifier(Parser.Tokenizer.Token.TokenType.Private)))
             symbol.Accessibility = MemberAccessibility.Public;
@@ -113,6 +112,7 @@ internal class DeclarationWalker : ASTVisitor
         };
 
         paramSymbol.IsMutable = true;
+        paramSymbol.PointerType = ResolvePointerType(node.Type);
         paramSymbol.DeclaringNode = node;
         
         if (node.Type.HasModifier(Parser.Tokenizer.Token.TokenType.Ref))
@@ -196,8 +196,7 @@ internal class DeclarationWalker : ASTVisitor
             IsExtern = node.HasModifier(Parser.Tokenizer.Token.TokenType.Extern)
         };
 
-        if (node.ReturnType.HasModifier(Parser.Tokenizer.Token.TokenType.Unique))
-            symbol.ReturnPointerType = PointerType.Unique;
+        symbol.ReturnPointerType = ResolvePointerType(node.ReturnType);
 
         if (node.HasModifier(Parser.Tokenizer.Token.TokenType.Public))
             symbol.Accessibility = MemberAccessibility.Public;
@@ -310,6 +309,7 @@ internal class DeclarationWalker : ASTVisitor
     public void Visit(FieldDeclarationNode node)
     {
         var symbol = new FieldSymbol(node.Variable.Name.Text);
+        symbol.PointerType = ResolvePointerType(node.Variable.Type);
         symbol.ContainingType = CurrentSymbol as TypeSymbol;
         symbol.FullyQualifiedName = BuildQualifiedName(node.Variable.Name.Text);
 
@@ -332,6 +332,7 @@ internal class DeclarationWalker : ASTVisitor
     public void Visit(PropertyDeclarationNode node)
     {
         var symbol = new PropertySymbol(node.Name.Text);
+        symbol.PointerType = ResolvePointerType(node.Type);
         symbol.ContainingType = CurrentSymbol as TypeSymbol;
         symbol.IsStatic = node.HasModifier(Parser.Tokenizer.Token.TokenType.Static);
         symbol.DeclaringNode = node;
@@ -350,6 +351,7 @@ internal class DeclarationWalker : ASTVisitor
             {
                 Accessibility = MemberAccessibility.Private,
                 ContainingType = CurrentSymbol as TypeSymbol,
+                PointerType = symbol.PointerType,
                 DeclaringNode = node,
                 FullyQualifiedName = BuildQualifiedName(backingFieldName)
             };
@@ -367,11 +369,14 @@ internal class DeclarationWalker : ASTVisitor
             };
 
             if (accessor.AccessorType.Type == Parser.Tokenizer.Token.TokenType.Get)
+            {
+                method.ReturnPointerType = symbol.PointerType;
                 symbol.Getter = method;
+            }
             else
             {
                 symbol.Setter = method;
-                method.Parameters = [new ParameterSymbol("value") { DeclaringSymbol = method, DeclaringNode = accessor, IsMutable = true }];
+                method.Parameters = [new ParameterSymbol("value") { DeclaringSymbol = method, DeclaringNode = accessor, IsMutable = true, PointerType = symbol.PointerType }];
             }
 
             Context.Bind(accessor, method);
@@ -404,8 +409,7 @@ internal class DeclarationWalker : ASTVisitor
         var symbol = new LocalVariableSymbol(node.Variable.Name.Text);
         symbol.FullyQualifiedName = BuildQualifiedName(node.Variable.Name.Text);
 
-        if (node.Variable.Type.HasModifier(Parser.Tokenizer.Token.TokenType.Unique))
-            symbol.PointerType = PointerType.Unique;
+        symbol.PointerType = ResolvePointerType(node.Variable.Type);
 
         symbol.DeclaringNode = node;
         CurrentTable.Define(symbol);
@@ -413,6 +417,9 @@ internal class DeclarationWalker : ASTVisitor
 
         VisitChildren(node);
     }
+
+    // TODO: add more stuff like this
+    private static PointerType ResolvePointerType(TypeNode type) => type.HasModifier(Parser.Tokenizer.Token.TokenType.Unique) ? PointerType.Unique : PointerType.None;
 
     /// <inheritdoc/>
     protected override void OnUnhandled(ASTNode node) => VisitChildren(node);

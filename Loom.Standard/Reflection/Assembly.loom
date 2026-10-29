@@ -10,7 +10,7 @@ module Standard::Reflection
 		public static Assembly Current { get; }
 
 		/// @brief The name of this assembly.
-		public string Name { get; }
+		public unique string Name { get; }
 
 		/// @brief Initializes a new instance of the /ref Assembly class.
 		private Assembly(Slice<char> name)

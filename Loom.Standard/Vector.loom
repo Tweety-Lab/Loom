@@ -4,7 +4,7 @@ module Standard
 {
 	/// @brief Dynamically sized continuous storage of objects.
 	/// @tparam(T) The type of objects stored in the vector.
-	export class Vector<T>
+	export class Vector<T> : ICloneable<Vector<T>>
 	{
 		/// @brief The number of elements currently stored in the \ref Vector.
 		public i32 Count { get; } = default;
@@ -78,15 +78,33 @@ module Standard
 				Add(range[i]);
 		}
 
+		/// @inheritdoc
+		public unique Vector<T> Clone()
+		{
+			unique Vector<T> clone = new Vector<T>(Capacity);
+
+			unsafe
+			{
+				for (i32 i = 0; i < Count; i++)
+					clone.Add(Unsafe.Read<T>(pointer + i * sizeof(T)));
+			}
+
+			return clone;
+		}
+
+#region Operators
+
 		/// @brief Returns the element at the specified index.
 		/// @param(index) The index of the element to return.
 		/// @return The element at the specified index.
-        public static unique T operator[](Vector<T> slice, i32 index)
+        public static unique T operator[](ref Vector<T> vec, i32 index)
         {
             unsafe
             {
-                return Unsafe.Read<T>(slice.pointer + index * sizeof(T));
+                return Unsafe.Read<T>(vec.pointer + index * sizeof(T));
             }
         }
+
+#endregion
 	}
 }

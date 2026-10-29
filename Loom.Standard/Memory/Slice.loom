@@ -46,7 +46,7 @@ module Standard::Memory
 
 		/// @brief Adds a char slice to a char slice.
 		/// @return New string containing the result.
-		public static string operator+(Slice<char> left, Slice<char> right)
+		public static unique string operator+(Slice<char> left, Slice<char> right)
 		{
 			unique Vector<char> characters = new Vector<char>(left.Length + right.Length);
 

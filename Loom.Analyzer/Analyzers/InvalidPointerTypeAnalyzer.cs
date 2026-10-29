@@ -14,8 +14,20 @@ namespace Loom.Analyzer.Analyzers;
 public class InvalidPointerTypeAnalyzer : Analyzer
 {
     public static DiagnosticDescription ValueTypePointer = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "'{0}' pointer type cannot be applied to value type '{1}'.");
-    public static DiagnosticDescription MissingPointer = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Reference type '{0}' must be initialized with a pointer type.");
-    public static DiagnosticDescription MissingReturnPointer = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Return reference type '{0}' must have a pointer type.");
+    public static DiagnosticDescription MissingPointer = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Reference type '{0}' must declare a pointer type.");
+
+    [Visitor]
+    public void Visit(PropertyDeclarationNode node)
+    {
+        if (Context.GetSymbol(node).Symbol is not PropertySymbol { Accessibility: MemberAccessibility.Public, Type: { } type } property)
+            return;
+
+        if (type.KnownType == TypeSymbol.DefaultType.TypeParameter || type.IsValueType || type is ArrayTypeSymbol)
+            return;
+
+        if (property.PointerType == PointerType.None)
+            Context.DiagnosticContext?.Report(MissingPointer, node.Name.Location, type.Name);
+    }
 
     [Visitor]
     public void Visit(LocalDeclarationStatementNode node)
@@ -35,7 +47,12 @@ public class InvalidPointerTypeAnalyzer : Analyzer
     }
 
     [Visitor]
-    public void Visit(MethodDeclarationNode node)
+    public void Visit(MethodDeclarationNode node) => CheckReturnPointer(node);
+
+    [Visitor]
+    public void Visit(OperatorDeclarationNode node) => CheckReturnPointer(node);
+
+    private void CheckReturnPointer(ASTNode node)
     {
         if (Context.GetSymbol(node).Symbol is not MethodSymbol symbol || symbol.ReturnType == null)
             return;
@@ -44,6 +61,6 @@ public class InvalidPointerTypeAnalyzer : Analyzer
             return;
 
         if (!symbol.ReturnType.IsValueType && symbol.ReturnPointerType == PointerType.None)
-            Context.DiagnosticContext?.Report(MissingReturnPointer, node.Span.StartToken?.Location, symbol.ReturnType.Name);
+            Context.DiagnosticContext?.Report(MissingPointer, node.Span.StartToken?.Location, symbol.ReturnType.Name);
     }
 }

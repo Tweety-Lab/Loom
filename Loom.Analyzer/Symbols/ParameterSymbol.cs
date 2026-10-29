@@ -8,6 +8,9 @@ public class ParameterSymbol : Symbol
     /// <summary> The resolved type. </summary>
     public virtual TypeSymbol? Type { get; internal set; }
 
+    /// <summary> The ownership expected by an owning parameter. </summary>
+    public PointerType PointerType { get; internal set; }
+
     /// <summary> The method declaration introducing this parameter. </summary>
     public Symbol? DeclaringSymbol { get; internal init; }
 
@@ -25,6 +28,7 @@ public class ParameterSymbol : Symbol
     {
         DeclaringSymbol = definition.DeclaringSymbol;
         IsBorrow = definition.IsBorrow;
+        PointerType = definition.PointerType;
         IsMutable = definition.IsMutable;
     }
 }

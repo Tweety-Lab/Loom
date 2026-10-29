@@ -8,6 +8,9 @@ public class PropertySymbol : MemberSymbol
     /// <summary> The resolved type. </summary>
     public virtual TypeSymbol? Type { get; internal set; }
 
+    /// <summary> The ownership of the stored reference. </summary>
+    public PointerType PointerType { get; internal set; }
+
     /// <summary> Whether this property is static. </summary>
     public bool IsStatic { get; set; }
 
@@ -24,5 +27,9 @@ public class PropertySymbol : MemberSymbol
     public PropertySymbol(string name) : base(name) { }
 
     /// <summary> Initializes a substituted view of a property declaration. </summary>
-    protected PropertySymbol(PropertySymbol definition, TypeSymbol containingType) : base(definition, containingType) => IsStatic = definition.IsStatic;
+    protected PropertySymbol(PropertySymbol definition, TypeSymbol containingType) : base(definition, containingType)
+    {
+        IsStatic = definition.IsStatic;
+        PointerType = definition.PointerType;
+    }
 }

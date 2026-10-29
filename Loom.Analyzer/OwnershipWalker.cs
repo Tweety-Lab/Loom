@@ -21,11 +21,15 @@ internal enum OwnershipState
 internal class OwnershipWalker : ASTVisitor
 {
     public static DiagnosticDescription UseOfMovedValue = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Cannot use moved value '{0}'.");
+    public static DiagnosticDescription CannotMoveMember = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Cannot transfer ownership of member '{0}' because member access borrows its value.");
+    public static DiagnosticDescription CannotMoveBorrow = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Cannot transfer ownership of borrowed parameter '{0}'.");
+    public static DiagnosticDescription CannotMakeSharedUnique = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Cannot transfer a shared reference into unique ownership.");
 
     /// <summary> The owning <see cref="AnalysisContext"/>. </summary>
     public AnalysisContext Context { get; private set; }
 
     private readonly Dictionary<Symbol, OwnershipState> states = new();
+    private MethodSymbol? currentFunction;
 
     /// <summary> Initializes a new instance of the <see cref="OwnershipWalker"/> class. </summary>
     public OwnershipWalker(AnalysisContext context) => Context = context;
@@ -51,6 +55,7 @@ internal class OwnershipWalker : ASTVisitor
     private void VisitFunction(ASTNode node)
     {
         states.Clear();
+        currentFunction = Context.GetSymbol(node).As<MethodSymbol>();
         VisitChildren(node);
 
         foreach (var (place, state) in states)
@@ -61,14 +66,15 @@ internal class OwnershipWalker : ASTVisitor
     [Visitor]
     public void Visit(LocalDeclarationStatementNode node)
     {
-        if (ResolvePlace(node) is not { } local || local.PointerType != PointerType.Unique)
+        if (ResolvePlace(node) is not { } local || local.PointerType == PointerType.None)
         {
             VisitChildren(node);
             return;
         }
 
-        MoveOut(node.Variable.Initializer);
-        states[local] = OwnershipState.Owned;
+        MoveOut(node.Variable.Initializer, local.PointerType);
+        if (local.PointerType == PointerType.Unique)
+            states[local] = OwnershipState.Owned;
     }
 
     [Visitor]
@@ -77,7 +83,7 @@ internal class OwnershipWalker : ASTVisitor
     [Visitor]
     public void Visit(AssignmentStatementNode node)
     {
-        MoveOut(node.Value);
+        MoveOut(node.Value, ExpressionPointerType(node.Target));
 
         if (node.Target is IdentifierNameNode target && ResolvePlace(target) is { } place)
             states[place] = OwnershipState.Owned;
@@ -88,12 +94,27 @@ internal class OwnershipWalker : ASTVisitor
     [Visitor]
     public void Visit(ReturnStatementNode node)
     {
-        if (node.Expression != null)
-            MoveOut(node.Expression);
+        if (node.Expression == null)
+            return;
+
+        if (node.Expression is IdentifierNameNode && Context.GetSymbol(node.Expression).Symbol is ParameterSymbol { IsBorrow: true, Type: { IsValueType: false } } parameter)
+        {
+            Context.DiagnosticContext?.Report(CannotMoveBorrow, node.Expression.Span.StartToken?.Location, parameter.Name);
+            return;
+        }
+
+        MoveOut(node.Expression, currentFunction?.ReturnPointerType ?? PointerType.None);
     }
 
     [Visitor]
-    public void Visit(CallExpressionNode node) => VisitArguments(node.Arguments, Context.GetSymbol(node).As<MethodSymbol>()?.Parameters);
+    public void Visit(CallExpressionNode node)
+    {
+        UseWithoutMove(node.Callee);
+        VisitArguments(node.Arguments, Context.GetSymbol(node).As<MethodSymbol>()?.Parameters);
+    }
+
+    [Visitor]
+    public void Visit(InstanceCreationExpresssionNode node) => VisitArguments(node.Arguments, Context.GetSymbol(node).As<MethodSymbol>()?.Parameters);
 
     [Visitor]
     public void Visit(BinaryExpressionNode node)
@@ -129,12 +150,28 @@ internal class OwnershipWalker : ASTVisitor
             if (parameter is { IsBorrow: true })
                 UseWithoutMove(argument);
             else
-                MoveOut(argument);
+                MoveOut(argument, parameter?.PointerType ?? PointerType.None);
         }
     }
 
-    private void MoveOut(ExpressionNode expr)
+    private void MoveOut(ExpressionNode expr, PointerType destination = PointerType.None)
     {
+        if (ExpressionPointerType(expr) == PointerType.Shared)
+        {
+            if (destination == PointerType.Unique)
+                Context.DiagnosticContext?.Report(CannotMakeSharedUnique, expr.Span.StartToken?.Location);
+
+            UseWithoutMove(expr);
+            return;
+        }
+
+        if (BorrowedMember(expr) is { } member)
+        {
+            Context.DiagnosticContext?.Report(CannotMoveMember, expr.Span.StartToken?.Location, member.Name);
+            UseWithoutMove(expr);
+            return;
+        }
+
         if (expr is IdentifierNameNode identifier && ResolvePlace(identifier) is { } place)
         {
             if (TryGetState(identifier, out var state) && state == OwnershipState.Moved)
@@ -144,6 +181,32 @@ internal class OwnershipWalker : ASTVisitor
         }
         else
             Dispatch(expr);
+    }
+
+    private PointerType ExpressionPointerType(ExpressionNode expr) => Context.GetSymbol(expr).Symbol switch
+    {
+        PropertySymbol property => property.PointerType,
+        FieldSymbol field => field.PointerType,
+        LocalVariableSymbol local => local.PointerType,
+        ParameterSymbol parameter => parameter.PointerType,
+        MethodSymbol method when expr is CallExpressionNode => method.ReturnPointerType,
+        _ => PointerType.None
+    };
+
+    private Symbol? BorrowedMember(ExpressionNode expr)
+    {
+        if (expr is not (IdentifierNameNode or MemberAccessExpressionNode))
+            return null;
+
+        var member = Context.GetSymbol(expr).Symbol;
+        var type = member switch
+        {
+            FieldSymbol field => field.Type,
+            PropertySymbol property => property.Type,
+            _ => null
+        };
+
+        return type is { KnownType: TypeSymbol.DefaultType.Class or TypeSymbol.DefaultType.Interface } ? member : null;
     }
 
     private void UseWithoutMove(ExpressionNode expr)

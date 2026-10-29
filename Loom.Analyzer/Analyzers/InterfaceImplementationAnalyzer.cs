@@ -73,6 +73,7 @@ public class InterfaceImplementationAnalyzer : Analyzer
         return candidate.Parameters.Zip(required.Parameters).All(pair =>
             pair.First.Type is { } actual && pair.Second.Type is { } expected &&
             TypeConversions.IsIdentical(actual, substitution.Resolve(expected)) &&
+            pair.First.PointerType == pair.Second.PointerType &&
             pair.First.IsBorrow == pair.Second.IsBorrow &&
             (!pair.First.IsBorrow || pair.First.IsMutable == pair.Second.IsMutable));
     }
@@ -81,6 +82,7 @@ public class InterfaceImplementationAnalyzer : Analyzer
     public static bool Implements(PropertySymbol candidate, PropertySymbol required) =>
         candidate.Name == required.Name && candidate.Accessibility == MemberAccessibility.Public &&
         candidate.IsStatic == required.IsStatic && candidate.Type is { } type && TypeConversions.IsIdentical(type, required.Type!) &&
+        candidate.PointerType == required.PointerType &&
         (required.Getter == null || candidate.Getter is { Accessibility: MemberAccessibility.Public }) &&
         (required.Setter == null || candidate.Setter is { Accessibility: MemberAccessibility.Public });
 

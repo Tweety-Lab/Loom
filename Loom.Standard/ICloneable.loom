@@ -1,0 +1,10 @@
+module Standard
+{
+	/// @brief Type that can be cloned.
+	export interface ICloneable<T>
+	{
+		/// @brief Creates a unique copy of the object.
+		/// @return Unique copy of the object.
+		unique T Clone();
+	}
+}

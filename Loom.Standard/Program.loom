@@ -7,6 +7,8 @@ module Standard::Program
 {
     export interface IMyInterface
     {
+        unique string NestedProperty { get; set; }
+
         void Test();
         void TestOther();
     }
@@ -14,11 +16,11 @@ module Standard::Program
     /// @brief Classes are reference types and are interfaced with through Loom's ownership and memory model (smart pointers)!
     export class Object : IMyInterface
     {
-        public i32 MutableField { get; set; } = default;
+        public unique string NestedProperty { get; set; }
 
         public void Test()
         {
-            println("Gurt");
+            println(NestedProperty);
         }
 
         public void TestOther()
@@ -36,8 +38,9 @@ module Standard::Program
     /// @brief Program Entry Point.
     export i32 Main()
     {
-        // A Unique pointer to an object can only have one owner at a time
         unique IMyInterface obj = new Object();
+        obj.NestedProperty = "Hello, " + "World!";
+        
         obj.Test();
         obj.TestOther();
 
@@ -52,7 +55,7 @@ module Standard::Program
         Slice<char> rangedWindow = myString[0..3];
 		println(rangedWindow); // "Hel"
 
-        unique string name = "Project: " + Assembly.Current.Name;
+        unique string name = "Project: " + Assembly.Current.Name.Clone();
         println(name); // "Project: Loom.Standard"
 
         // Loom also allows unsafe operations inside an 'unsafe' block via the 'Standard::Memory::Unsafe' class

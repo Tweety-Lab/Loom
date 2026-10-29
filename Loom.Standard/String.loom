@@ -5,7 +5,7 @@ module Standard
 	// Its a little strange that we make string lowercase like C#, but it enforces it as a base type.
 	// Worth checking back on though.
 
-	export class string : IStringFormattable
+	export class string : IStringFormattable, ICloneable<string>
 	{
 		/// @brief The amount of characters in this string.
 		public i32 Length
@@ -45,21 +45,27 @@ module Standard
 		/// @inheritdoc
 		public unique string ToString()
 		{
-			return new string(characters);
+			return new string(characters.Clone());
+		}
+
+		/// @inheritdoc
+		public unique string Clone()
+		{
+			return new string(characters.Clone());
 		}
 
 #region Operators
 		/// @brief Gets the character at the specified index.
 		/// @param(index) The index of the element to return.
 		/// @return The character at the specified index.
-        public static char operator[](string str, i32 index)
+        public static char operator[](ref string str, i32 index)
         {
 			return str.characters[index];
         }
 
 		/// @brief Adds two strings together.
 		/// @return New string containing the result.
-		public static string operator+(string left, string right)
+		public static unique string operator+(ref string left, ref string right)
 		{
 			unique Vector<char> characters = new Vector<char>(left.characters.Count + right.characters.Count);
 			characters.AddRange(left.characters);
@@ -69,7 +75,7 @@ module Standard
 
 		/// @brief Adds a char slice to a string.
 		/// @return New string containing the result.
-		public static string operator+(Slice<char> left, string right)
+		public static unique string operator+(Slice<char> left, ref string right)
 		{
 			unique Vector<char> characters = new Vector<char>(left.Length + right.characters.Count);
 			for (i32 i = 0; i < left.Length; i++)
@@ -81,7 +87,7 @@ module Standard
 
 		/// @brief Adds a string to a char slice.
 		/// @return New string containing the result.
-		public static string operator+(string left, Slice<char> right)
+		public static unique string operator+(ref string left, Slice<char> right)
 		{
 			unique Vector<char> characters = new Vector<char>(left.characters.Count + right.Length);
 			characters.AddRange(left.characters);

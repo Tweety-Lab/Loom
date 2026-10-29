@@ -364,6 +364,66 @@ module Test
 
     private static List<string> MoveDiagnostics(string source) => ParseAndAnalyze(source).DiagnosticContext.Diagnostics.Where(d => d.Message.Contains("moved value")).Select(d => d.Message).ToList();
 
+    [Theory]
+    [InlineData("public unique Handle Get() { return Value; }", "Cannot transfer ownership of member 'Value' because member access borrows its value.")]
+    [InlineData("public unique Handle Get() { return Field; }", "Cannot transfer ownership of member 'Field' because member access borrows its value.")]
+    [InlineData("public unique Handle Get(ref Holder other) { return other.Value; }", "Cannot transfer ownership of member 'Value' because member access borrows its value.")]
+    [InlineData("public unique Handle Get(ref IHolder other) { return other.Value; }", "Cannot transfer ownership of member 'Value' because member access borrows its value.")]
+    [InlineData("public unique Handle Get(ref Handle value) { return value; }", "Cannot transfer ownership of borrowed parameter 'value'.")]
+    [InlineData("public unique Handle Get(ref mut Handle value) { return value; }", "Cannot transfer ownership of borrowed parameter 'value'.")]
+    [InlineData("public unique Handle Get() { return new Handle(); }")]
+    [InlineData("public unique Handle Get() { unique Handle value = new Handle(); return value; }")]
+    [InlineData("public i32 Get() { return Number; }")]
+    public void Analyze_PublicMethodReturn_RequiresMovableValue(string method, params string[] expectedDiagnostics)
+    {
+        var source = $$"""
+            module Test
+            {
+                class Handle { }
+                interface IHolder
+                {
+                    unique Handle Value { get; set; }
+                }
+                class Holder : IHolder
+                {
+                    public unique Handle Value { get; set; }
+                    Handle Field = default;
+                    i32 Number = 1;
+                    {{method}}
+                }
+            }
+            """;
+
+        Assert.Equal(expectedDiagnostics, ParseAndAnalyze(source).DiagnosticContext.Diagnostics.Select(d => d.Message));
+    }
+
+    [Theory]
+    [InlineData("class Holder { public Handle Value { get; set; } }", "Reference type 'Handle' must declare a pointer type.")]
+    [InlineData("interface Holder { Handle Value { get; set; } }", "Reference type 'Handle' must declare a pointer type.")]
+    [InlineData("class Holder { public static Handle Value { get; } }", "Reference type 'Handle' must declare a pointer type.")]
+    [InlineData("class Holder { public unique Handle Value { get; set; } }")]
+    [InlineData("interface Holder { unique Handle Value { get; set; } }")]
+    [InlineData("class Holder { private Handle Value { get; set; } }")]
+    [InlineData("class Holder { public i32 Value { get; set; } }")]
+    [InlineData("class Holder { public Data Value { get; set; } }")]
+    [InlineData("class Holder<T> { public T Value { get; set; } }")]
+    [InlineData("class Holder<T> { public Box<T> Value { get; set; } }", "Reference type 'Box' must declare a pointer type.")]
+    [InlineData("class Holder<T> { public unique Box<T> Value { get; set; } }")]
+    public void Analyze_PublicReferenceProperty_RequiresPointerType(string declaration, params string[] expectedDiagnostics)
+    {
+        var source = $$"""
+            module Test
+            {
+                class Handle { }
+                struct Data { }
+                class Box<T> { }
+                {{declaration}}
+            }
+            """;
+
+        Assert.Equal(expectedDiagnostics, ParseAndAnalyze(source).DiagnosticContext.Diagnostics.Select(d => d.Message));
+    }
+
     private static LocalDeclarationStatementNode UniqueLocalDeclaration(CompilationContext context)
     {
         var module = context.SyntaxTrees.First().Modules.First();
