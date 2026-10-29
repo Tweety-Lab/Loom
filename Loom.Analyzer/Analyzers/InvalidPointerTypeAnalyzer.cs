@@ -38,7 +38,7 @@ public class InvalidPointerTypeAnalyzer : Analyzer
         if (symbol.Type.ContainsTypeParameters)
             return;
 
-        if (symbol.Type.IsValueType && symbol.PointerType != PointerType.None)
+        if (symbol.Type.IsValueType && symbol.PointerType is not (PointerType.None or PointerType.Ref))
             Context.DiagnosticContext?.Report(ValueTypePointer, node.Variable.Span.StartToken?.Location, symbol.PointerType, symbol.Type.Name);
 
         if (symbol.Type is not ArrayTypeSymbol && !symbol.Type.IsValueType && symbol.PointerType == PointerType.None)

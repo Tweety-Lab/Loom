@@ -23,6 +23,7 @@ internal class OwnershipWalker : ASTVisitor
     public static DiagnosticDescription UseOfMovedValue = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Cannot use moved value '{0}'.");
     public static DiagnosticDescription CannotMoveMember = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Cannot transfer ownership of member '{0}' because member access borrows its value.");
     public static DiagnosticDescription CannotMoveBorrow = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Cannot transfer ownership of borrowed parameter '{0}'.");
+    public static DiagnosticDescription CannotMoveReference = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Cannot transfer ownership of borrowed reference '{0}'.");
     public static DiagnosticDescription CannotMakeSharedUnique = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Cannot transfer a shared reference into unique ownership.");
 
     /// <summary> The owning <see cref="AnalysisContext"/>. </summary>
@@ -97,7 +98,7 @@ internal class OwnershipWalker : ASTVisitor
         if (node.Expression == null)
             return;
 
-        if (node.Expression is IdentifierNameNode && Context.GetSymbol(node.Expression).Symbol is ParameterSymbol { IsBorrow: true, Type: { IsValueType: false } } parameter)
+        if (currentFunction?.ReturnPointerType != PointerType.Ref && node.Expression is IdentifierNameNode && Context.GetSymbol(node.Expression).Symbol is ParameterSymbol { IsBorrow: true, Type: { IsValueType: false } } parameter)
         {
             Context.DiagnosticContext?.Report(CannotMoveBorrow, node.Expression.Span.StartToken?.Location, parameter.Name);
             return;
@@ -156,6 +157,24 @@ internal class OwnershipWalker : ASTVisitor
 
     private void MoveOut(ExpressionNode expr, PointerType destination = PointerType.None)
     {
+        if (destination == PointerType.Ref)
+        {
+            UseWithoutMove(expr);
+            return;
+        }
+
+        if (ExpressionPointerType(expr) == PointerType.Ref && Context.ExpressionTypes.TryGetValue(expr, out var type) && !type.IsValueType)
+        {
+            if (destination != PointerType.None)
+            {
+                var symbol = Context.GetSymbol(expr).Symbol!;
+                var diagnostic = symbol is ParameterSymbol ? CannotMoveBorrow : CannotMoveReference;
+                Context.DiagnosticContext?.Report(diagnostic, expr.Span.StartToken?.Location, symbol.Name);
+            }
+            UseWithoutMove(expr);
+            return;
+        }
+
         if (ExpressionPointerType(expr) == PointerType.Shared)
         {
             if (destination == PointerType.Unique)

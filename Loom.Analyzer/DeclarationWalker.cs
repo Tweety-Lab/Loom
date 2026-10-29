@@ -57,6 +57,7 @@ internal class DeclarationWalker : ASTVisitor
         symbol.IsExtern = node.HasModifier(Parser.Tokenizer.Token.TokenType.Extern);
         
         symbol.ReturnPointerType = ResolvePointerType(node.ReturnType);
+        symbol.ReturnIsMutable = ResolveMutability(node.ReturnType);
 
         symbol.Accessibility = ResolveAccessibility(node);
         if (symbol.ContainingType?.KnownType == TypeSymbol.DefaultType.Interface && !node.HasModifier(Parser.Tokenizer.Token.TokenType.Private))
@@ -108,20 +109,10 @@ internal class DeclarationWalker : ASTVisitor
             DeclaringSymbol = CurrentSymbol
         };
 
-        paramSymbol.IsMutable = true;
+        paramSymbol.IsMutable = ResolveMutability(node.Type);
         paramSymbol.PointerType = ResolvePointerType(node.Type);
         paramSymbol.DeclaringNode = node;
         
-        if (node.Type.HasModifier(Parser.Tokenizer.Token.TokenType.Ref))
-        {
-            paramSymbol.IsBorrow = true;
-
-            if (node.Type.HasModifier(Parser.Tokenizer.Token.TokenType.Mut))
-                paramSymbol.IsMutable = true;
-            else
-                paramSymbol.IsMutable = false;
-        }
-
         CurrentTable.Define(paramSymbol);
         Context.Bind(node, paramSymbol);
 
@@ -188,6 +179,7 @@ internal class DeclarationWalker : ASTVisitor
         };
 
         symbol.ReturnPointerType = ResolvePointerType(node.ReturnType);
+        symbol.ReturnIsMutable = ResolveMutability(node.ReturnType);
         symbol.Accessibility = ResolveAccessibility(node);
 
         symbol.DeclaringNode = node;
@@ -300,6 +292,7 @@ internal class DeclarationWalker : ASTVisitor
     {
         var symbol = new FieldSymbol(node.Variable.Name.Text);
         symbol.PointerType = ResolvePointerType(node.Variable.Type);
+        symbol.IsMutable = ResolveMutability(node.Variable.Type);
         symbol.ContainingType = CurrentSymbol as TypeSymbol;
         symbol.FullyQualifiedName = BuildQualifiedName(node.Variable.Name.Text);
         symbol.Accessibility = ResolveAccessibility(node);
@@ -319,6 +312,7 @@ internal class DeclarationWalker : ASTVisitor
     {
         var symbol = new PropertySymbol(node.Name.Text);
         symbol.PointerType = ResolvePointerType(node.Type);
+        symbol.IsMutable = ResolveMutability(node.Type);
         symbol.ContainingType = CurrentSymbol as TypeSymbol;
         symbol.IsStatic = node.HasModifier(Parser.Tokenizer.Token.TokenType.Static);
         symbol.DeclaringNode = node;
@@ -338,6 +332,7 @@ internal class DeclarationWalker : ASTVisitor
                 Accessibility = MemberAccessibility.Private,
                 ContainingType = CurrentSymbol as TypeSymbol,
                 PointerType = symbol.PointerType,
+                IsMutable = symbol.IsMutable,
                 DeclaringNode = node,
                 FullyQualifiedName = BuildQualifiedName(backingFieldName)
             };
@@ -357,12 +352,13 @@ internal class DeclarationWalker : ASTVisitor
             if (accessor.AccessorType.Type == Parser.Tokenizer.Token.TokenType.Get)
             {
                 method.ReturnPointerType = symbol.PointerType;
+                method.ReturnIsMutable = symbol.IsMutable;
                 symbol.Getter = method;
             }
             else
             {
                 symbol.Setter = method;
-                method.Parameters = [new ParameterSymbol("value") { DeclaringSymbol = method, DeclaringNode = accessor, IsMutable = true, PointerType = symbol.PointerType }];
+                method.Parameters = [new ParameterSymbol("value") { DeclaringSymbol = method, DeclaringNode = accessor, IsMutable = symbol.IsMutable, PointerType = symbol.PointerType }];
             }
 
             Context.Bind(accessor, method);
@@ -397,6 +393,7 @@ internal class DeclarationWalker : ASTVisitor
         symbol.FullyQualifiedName = BuildQualifiedName(node.Variable.Name.Text);
 
         symbol.PointerType = ResolvePointerType(node.Variable.Type);
+        symbol.IsMutable = ResolveMutability(node.Variable.Type);
 
         symbol.DeclaringNode = node;
         CurrentTable.Define(symbol);
@@ -405,7 +402,15 @@ internal class DeclarationWalker : ASTVisitor
         VisitChildren(node);
     }
 
-    private static PointerType ResolvePointerType(TypeNode type) => type.HasModifier(Parser.Tokenizer.Token.TokenType.Unique) ? PointerType.Unique : PointerType.None;
+    /// <inheritdoc/>
+    protected override void OnUnhandled(ASTNode node) => VisitChildren(node);
+
+    private static PointerType ResolvePointerType(TypeNode type) =>
+        type.HasModifier(Parser.Tokenizer.Token.TokenType.Unique) ? PointerType.Unique :
+        type.HasModifier(Parser.Tokenizer.Token.TokenType.Ref) ? PointerType.Ref : PointerType.None;
+
+    private static bool ResolveMutability(TypeNode type) =>
+        ResolvePointerType(type) != PointerType.Ref || type.HasModifier(Parser.Tokenizer.Token.TokenType.Mut);
     private static MemberAccessibility ResolveAccessibility(IModifiableNode node)
     {
         if (node.HasModifier(Parser.Tokenizer.Token.TokenType.Public))
@@ -417,8 +422,6 @@ internal class DeclarationWalker : ASTVisitor
         return MemberAccessibility.None;
     }
 
-    /// <inheritdoc/>
-    protected override void OnUnhandled(ASTNode node) => VisitChildren(node);
 
     private void WithScope(ASTNode node, Action body, Symbol? symbol = null, Binder? scope = null)
     {

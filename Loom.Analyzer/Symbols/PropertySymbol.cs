@@ -11,6 +11,9 @@ public class PropertySymbol : MemberSymbol
     /// <summary> The ownership of the stored reference. </summary>
     public PointerType PointerType { get; internal set; }
 
+    /// <summary> Whether the referenced value can be mutated through this property. </summary>
+    public bool IsMutable { get; internal set; }
+
     /// <summary> Whether this property is static. </summary>
     public bool IsStatic { get; set; }
 
@@ -31,5 +34,6 @@ public class PropertySymbol : MemberSymbol
     {
         IsStatic = definition.IsStatic;
         PointerType = definition.PointerType;
+        IsMutable = definition.IsMutable;
     }
 }

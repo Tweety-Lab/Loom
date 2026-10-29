@@ -16,7 +16,8 @@ public enum PointerType
 
     Unique,
     Shared,
-    Weak
+    Weak,
+    Ref
 }
 
 /// <summary>

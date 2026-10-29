@@ -10,4 +10,7 @@ public class LocalVariableSymbol(string Name) : Symbol(Name)
 
     /// <summary> The pointer type. </summary>
     public PointerType PointerType { get; set; }
+
+    /// <summary> Whether the referenced value can be mutated through this local. </summary>
+    public bool IsMutable { get; set; }
 }

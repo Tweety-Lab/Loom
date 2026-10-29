@@ -9,7 +9,7 @@ public class MethodSymbol : MemberSymbol, IExportableSymbol, IGenericSymbol
 {
     private readonly SymbolConstructionCache<ConstructedMethodSymbol> constructions = new();
 
-    /// <summary> Whether this method is an ordinary method, constructor, or accessor. </summary>
+    /// <summary> The kind of this method. </summary>
     public MethodKind Kind { get; }
 
     /// <summary> The resolved return type. </summary>
@@ -17,6 +17,10 @@ public class MethodSymbol : MemberSymbol, IExportableSymbol, IGenericSymbol
 
     /// <summary> The pointer type for the return value. </summary>
     public PointerType ReturnPointerType { get; set; }
+
+    // This is kinda clunky
+    /// <summary> Whether a returned reference permits mutation. </summary>
+    public bool ReturnIsMutable { get; set; }
 
     /// <inheritdoc/>
     public IReadOnlyList<TypeParameterSymbol> TypeParameters { get; internal set; } = [];
@@ -77,6 +81,7 @@ public class MethodSymbol : MemberSymbol, IExportableSymbol, IGenericSymbol
         Kind = definition.Kind;
         TypeParameters = definition.TypeParameters;
         ReturnPointerType = definition.ReturnPointerType;
+        ReturnIsMutable = definition.ReturnIsMutable;
         IsStatic = definition.IsStatic;
         IsExtern = definition.IsExtern;
         IsExported = definition.IsExported;

@@ -8,14 +8,14 @@ public class ParameterSymbol : Symbol
     /// <summary> The resolved type. </summary>
     public virtual TypeSymbol? Type { get; internal set; }
 
-    /// <summary> The ownership expected by an owning parameter. </summary>
+    /// <summary> The ownership expected by this parameter. </summary>
     public PointerType PointerType { get; internal set; }
 
     /// <summary> The method declaration introducing this parameter. </summary>
     public Symbol? DeclaringSymbol { get; internal init; }
 
     /// <summary> Whether this parameter is a borrow. </summary>
-    public bool IsBorrow { get; set; }
+    public bool IsBorrow => PointerType == PointerType.Ref;
 
     /// <summary> Whether this parameter is mutable. </summary>
     public bool IsMutable { get; set; }
@@ -27,7 +27,6 @@ public class ParameterSymbol : Symbol
     protected ParameterSymbol(ParameterSymbol definition) : base(definition)
     {
         DeclaringSymbol = definition.DeclaringSymbol;
-        IsBorrow = definition.IsBorrow;
         PointerType = definition.PointerType;
         IsMutable = definition.IsMutable;
     }

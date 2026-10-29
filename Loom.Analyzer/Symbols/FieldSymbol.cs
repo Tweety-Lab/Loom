@@ -11,6 +11,9 @@ public class FieldSymbol : MemberSymbol
     /// <summary> The ownership of the stored reference. </summary>
     public PointerType PointerType { get; internal set; }
 
+    /// <summary> Whether the referenced value can be mutated through this field. </summary>
+    public bool IsMutable { get; internal set; }
+
     /// <summary> Whether this field belongs to the type rather than an instance. </summary>
     public bool IsStatic { get; set; }
 
@@ -27,6 +30,7 @@ public class FieldSymbol : MemberSymbol
     {
         IsStatic = definition.IsStatic;
         PointerType = definition.PointerType;
+        IsMutable = definition.IsMutable;
         ConstantValue = definition.ConstantValue;
     }
 }

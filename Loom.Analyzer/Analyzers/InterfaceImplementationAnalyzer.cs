@@ -66,6 +66,9 @@ public class InterfaceImplementationAnalyzer : Analyzer
             candidate.ReturnPointerType != required.ReturnPointerType || candidate.ReturnType == null)
             return false;
 
+        if (candidate.ReturnPointerType == PointerType.Ref && candidate.ReturnIsMutable != required.ReturnIsMutable)
+            return false;
+
         var substitution = new TypeSubstitution(required.TypeParameters.Select((parameter, index) => KeyValuePair.Create(parameter, (TypeSymbol)candidate.TypeParameters[index])));
         if (!TypeConversions.IsIdentical(candidate.ReturnType, substitution.Resolve(required.ReturnType!)))
             return false;
@@ -74,7 +77,6 @@ public class InterfaceImplementationAnalyzer : Analyzer
             pair.First.Type is { } actual && pair.Second.Type is { } expected &&
             TypeConversions.IsIdentical(actual, substitution.Resolve(expected)) &&
             pair.First.PointerType == pair.Second.PointerType &&
-            pair.First.IsBorrow == pair.Second.IsBorrow &&
             (!pair.First.IsBorrow || pair.First.IsMutable == pair.Second.IsMutable));
     }
 
@@ -83,6 +85,7 @@ public class InterfaceImplementationAnalyzer : Analyzer
         candidate.Name == required.Name && candidate.Accessibility == MemberAccessibility.Public &&
         candidate.IsStatic == required.IsStatic && candidate.Type is { } type && TypeConversions.IsIdentical(type, required.Type!) &&
         candidate.PointerType == required.PointerType &&
+        (candidate.PointerType != PointerType.Ref || candidate.IsMutable == required.IsMutable) &&
         (required.Getter == null || candidate.Getter is { Accessibility: MemberAccessibility.Public }) &&
         (required.Setter == null || candidate.Setter is { Accessibility: MemberAccessibility.Public });
 
