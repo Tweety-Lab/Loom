@@ -424,6 +424,42 @@ module Test
         Assert.Equal(expectedDiagnostics, ParseAndAnalyze(source).DiagnosticContext.Diagnostics.Select(d => d.Message));
     }
 
+    [Theory]
+    [InlineData("ref", "h.Value = 1;", true)]
+    [InlineData("ref", "h.Value++;", true)]
+    [InlineData("ref", "++h.Value;", true)]
+    [InlineData("ref", "h.Property = 1;", true)]
+    [InlineData("ref", "h.Values[0] = 1;", true)]
+    [InlineData("ref mut", "h.Value = 1;", false)]
+    [InlineData("ref mut", "h.Value++;", false)]
+    [InlineData("ref", "i32 copy = h.Value;", false)]
+    public void Analyze_BorrowedReference_RequiresMutForWrites(string modifier, string statement, bool error)
+    {
+        foreach (var local in new[] { false, true })
+        {
+            var source = $$"""
+                module Test
+                {
+                    class Handle
+                    {
+                        public i32 Value = 0;
+                        public i32 Property { get; set; }
+                        public i32[2] Values = [0, 0];
+                    }
+                    void Run({{(local ? "" : modifier + " Handle h")}})
+                    {
+                        {{(local ? "unique Handle owner = new Handle(); " + modifier + " Handle h = owner;" : "")}}
+                        {{statement}}
+                    }
+                }
+                """;
+
+            Assert.Equal(error
+                ? ["Cannot mutate borrowed reference 'h' because it is not marked 'mut'."]
+                : Array.Empty<string>(), ParseAndAnalyze(source).DiagnosticContext.Diagnostics.Select(d => d.Message));
+        }
+    }
+
     private static LocalDeclarationStatementNode UniqueLocalDeclaration(CompilationContext context)
     {
         var module = context.SyntaxTrees.First().Modules.First();

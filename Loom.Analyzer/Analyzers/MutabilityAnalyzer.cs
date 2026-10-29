@@ -12,27 +12,22 @@ namespace Loom.Analyzer.Analyzers;
 [LoomAnalyzer]
 public class MutabilityAnalyzer : Analyzer
 {
-    public static DiagnosticDescription CannotMutateRef = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Cannot mutate borrowed parameter '{0}' because it is not marked 'mut'.");
+    public static DiagnosticDescription CannotMutateReference = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Cannot mutate borrowed reference '{0}' because it is not marked 'mut'.");
     public static DiagnosticDescription CannotMutateConstant = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Cannot mutate constant '{0}'.");
 
     [Visitor]
-    public void Visit(AssignmentStatementNode node)
-    {
-        CheckConstant(node.Target);
-        if (FindBorrowedParameter(node.Target) is not { IsMutable: false } parameter)
-            return;
-
-        Context.DiagnosticContext?.Report(CannotMutateRef, node.Span.StartToken?.Location, parameter.Name);
-    }
+    public void Visit(AssignmentStatementNode node) => CheckMutation(node.Target);
 
     [Visitor]
-    public void Visit(IncrementExpressionNode node)
+    public void Visit(IncrementExpressionNode node) => CheckMutation(node.Target);
+
+    private void CheckMutation(ExpressionNode target)
     {
-        CheckConstant(node.Target);
-        if (FindBorrowedParameter(node.Target) is not { IsMutable: false } parameter)
+        CheckConstant(target);
+        if (FindImmutableReference(target) is not { } reference)
             return;
 
-        Context.DiagnosticContext?.Report(CannotMutateRef, node.Span.StartToken?.Location, parameter.Name);
+        Context.DiagnosticContext?.Report(CannotMutateReference, target.Span.StartToken?.Location, reference.Name);
     }
 
     private void CheckConstant(ExpressionNode target)
@@ -41,11 +36,21 @@ public class MutabilityAnalyzer : Analyzer
             Context.DiagnosticContext?.Report(CannotMutateConstant, target.Span.StartToken?.Location, field.Name);
     }
 
-    private ParameterSymbol? FindBorrowedParameter(ExpressionNode target) => target switch
+    private Symbol? FindImmutableReference(ExpressionNode target)
     {
-        IdentifierNameNode identifier => Context.GetSymbol(identifier).Symbol is ParameterSymbol { IsBorrow: true } parameter ? parameter : null,
-        MemberAccessExpressionNode member => FindBorrowedParameter(member.Receiver),
-        ArrayAccessExpressionNode array => FindBorrowedParameter(array.Receiver),
-        _ => null
-    };
+        var symbol = Context.GetSymbol(target).Symbol;
+        if (symbol is ParameterSymbol { IsBorrow: true, IsMutable: false }
+            or LocalVariableSymbol { PointerType: PointerType.Ref, IsMutable: false }
+            or FieldSymbol { PointerType: PointerType.Ref, IsMutable: false }
+            or PropertySymbol { PointerType: PointerType.Ref, IsMutable: false }
+            || target is CallExpressionNode && symbol is MethodSymbol { ReturnPointerType: PointerType.Ref, ReturnIsMutable: false })
+            return symbol;
+
+        return target switch
+        {
+            MemberAccessExpressionNode member => FindImmutableReference(member.Receiver),
+            ArrayAccessExpressionNode array => FindImmutableReference(array.Receiver),
+            _ => null
+        };
+    }
 }
