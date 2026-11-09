@@ -95,6 +95,21 @@ internal sealed class SemanticTokensHandler(ParsedDocumentStore documents, Docum
                         tokens.Add((token, SemanticTokenType.Comment));
                 }
 
+            if (node is ConstructorDeclarationNode constructor)
+            {
+                if (analysis.GetSymbol(constructor).As<MethodSymbol>() is { ContainingType: { } owner })
+                {
+                    if (GetTokenType(SymbolInfo.Of(owner)) is { } containingType)
+                        tokens.Add((constructor.TypeName, containingType));
+
+                    if (constructor.Name is { } constructorName)
+                        tokens.Add((constructorName, SemanticTokenType.Method));
+                }
+            }
+
+            if (node is InstanceCreationExpresssionNode { ConstructorName: { } calledName } creation && GetTokenType(analysis.GetSymbol(creation)) is { } calledType)
+                tokens.Add((calledName.Token, calledType));
+
             if (GetName(node) is not { } name || name.End <= name.Start)
                 continue;
 
@@ -135,10 +150,11 @@ internal sealed class SemanticTokensHandler(ParsedDocumentStore documents, Docum
             TypeSymbol { KnownType: TypeSymbol.DefaultType.Enum } => SemanticTokenType.Enum,
             MethodSymbol { Kind: MethodSymbol.MethodKind.Method } => SemanticTokenType.Method,
             MethodSymbol { Kind: MethodSymbol.MethodKind.Operator } => SemanticTokenType.Method,
+            MethodSymbol { Kind: MethodSymbol.MethodKind.Constructor } => SemanticTokenType.Method,
             PropertySymbol => SemanticTokenType.Property,
             ParameterSymbol => SemanticTokenType.Parameter,
             LocalVariableSymbol => SemanticTokenType.Variable,
-            null when info.Candidates.Count > 0 && info.Candidates.All(candidate => candidate is MethodSymbol { Kind: MethodSymbol.MethodKind.Method }) => SemanticTokenType.Method,
+            null when info.Candidates.Count > 0 && info.Candidates.All(candidate => candidate is MethodSymbol { Kind: MethodSymbol.MethodKind.Method or MethodSymbol.MethodKind.Constructor }) => SemanticTokenType.Method,
             _ => (SemanticTokenType?)null
         };
     }

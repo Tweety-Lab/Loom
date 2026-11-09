@@ -84,8 +84,8 @@
 
     "declarations": {
       "patterns": [
+        { "include": "#constructor-declaration" },
         {
-          "comment": "Operator declarations, including paired index and call operators. The following '(' starts the parameter list.",
           "match": "\\b(operator)\\b\\s*(\\[\\s*\\]|\\(\\s*\\)|\\+\\+|--|==|!=|<=|>=|[+\\-*/!~<>])(?=\\s*\\()",
           "captures": {
             "1": { "name": "keyword.declaration.operator.loom" },
@@ -157,6 +157,28 @@
       ]
     },
 
+    "constructor-declaration": {
+      "patterns": [
+        {
+          "match": "\\b((?:(?:public|private|export|extern|unsafe|static)\\s+)+)([A-Za-z_][A-Za-z0-9_]*)(?:\\s*(:)(?!:)\\s*([A-Za-z_][A-Za-z0-9_]*))?(?=\\s*\\()",
+          "captures": {
+            "1": { "patterns": [ { "include": "#keywords" } ] },
+            "2": { "name": "entity.name.type.loom" },
+            "3": { "name": "punctuation.separator.constructor.loom" },
+            "4": { "name": "entity.name.function.constructor.loom" }
+          }
+        },
+        {
+          "match": "(?:^|(?<=[{};]))\\s*([A-Za-z_][A-Za-z0-9_]*)(?:\\s*(:)(?!:)\\s*([A-Za-z_][A-Za-z0-9_]*))?(?=\\s*\\([^()]*\\)\\s*\\{)",
+          "captures": {
+            "1": { "name": "entity.name.type.loom" },
+            "2": { "name": "punctuation.separator.constructor.loom" },
+            "3": { "name": "entity.name.function.constructor.loom" }
+          }
+        }
+      ]
+    },
+
     "inheritance": {
       "name": "meta.inheritance.loom",
       "begin": "(?<!:):(?!:)",
@@ -180,10 +202,12 @@
     },
 
     "new-expression": {
-      "match": "\\b(new)\\b(?:\\s+([A-Za-z_][A-Za-z0-9_]*))?",
+      "match": "\\b(new)\\b(?:\\s+([A-Za-z_][A-Za-z0-9_]*)(?:\\s*(:)(?!:)\\s*([A-Za-z_][A-Za-z0-9_]*))?)?",
       "captures": {
         "1": { "name": "keyword.operator.new.loom" },
-        "2": { "name": "entity.name.type.class.loom" }
+        "2": { "name": "entity.name.type.class.loom" },
+        "3": { "name": "punctuation.separator.constructor.loom" },
+        "4": { "name": "entity.name.function.constructor.loom" }
       }
     },
 
@@ -231,7 +255,6 @@
     },
 
     "generic-arguments": {
-      "comment": "A '<' glued to a word whose contents look like a type list and which closes with '>'. Recurses for nesting, e.g. Foo<Bar<T>, U>.",
       "name": "meta.generic.loom",
       "begin": "(?<=[A-Za-z0-9_])<(?=[\\w\\s,.*<>\\[\\]]*>)",
       "beginCaptures": {
@@ -266,13 +289,11 @@
     },
 
     "generic-call": {
-      "comment": "Name<...>(  -> generic function call or declaration",
       "name": "entity.name.function.loom",
       "match": "\\b[A-Za-z_][A-Za-z0-9_]*(?=<[\\w\\s,.*<>\\[\\]]*>\\s*\\()"
     },
 
     "generic-type": {
-      "comment": "Name<...>  -> generic type usage",
       "name": "entity.name.type.loom",
       "match": "\\b[A-Za-z_][A-Za-z0-9_]*(?=<[\\w\\s,.*<>\\[\\]]*>)"
     },
@@ -283,13 +304,11 @@
     },
 
     "type-annotation": {
-      "comment": "Type followed by a name: 'Foo x', 'Foo* x', 'Foo name(' ... Keywords are matched earlier so they never reach this rule.",
       "name": "entity.name.type.loom",
       "match": "\\b[A-Za-z_][A-Za-z0-9_]*(?=\\*{0,3}\\s+(?:operator\\b|[A-Za-z_][A-Za-z0-9_]*\\s*[=;(),<\\[{]))"
     },
 
     "property": {
-      "comment": "A property name followed by an accessor list, e.g. 'i32 Length { get; }' or 'i32 Length { get { return 10; } }'.",
       "name": "variable.other.property.loom",
       "match": "\\b[A-Za-z_][A-Za-z0-9_]*(?=\\s*\\{\\s*(?:get|set)\\b)"
     },
