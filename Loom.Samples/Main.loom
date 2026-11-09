@@ -1,0 +1,8 @@
+module Samples::Main
+{
+	/// @brief Program Entry Point.
+	export i32 Main()
+	{
+		return 0;
+	}
+}
