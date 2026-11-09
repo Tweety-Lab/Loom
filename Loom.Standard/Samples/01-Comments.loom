@@ -11,7 +11,7 @@ module Standard::Samples::Comments
 		// Document comments can be applied to declarations and provide IDE integration aswell as being in the final binary, allowing them to be reflected on.
 
 		// Hovering over 'TypeExample' in a supported IDE will show the documentation for the type!
-		unique TypeExample<i32> typeExample = new TypeExample<i32>();
+		unique TypeExample<i32> obj = new TypeExample<i32>();
 	}
 
 	/// @brief 'brief' is used to document the type.

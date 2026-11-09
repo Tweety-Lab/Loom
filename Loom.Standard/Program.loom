@@ -5,34 +5,25 @@ import Standard::Reflection;
 
 module Standard::Program
 {
+    export enum PrintType
+    {
+        Print,
+        DontPrint
+    }
+
     export interface IMyInterface
     {
-        unique string NestedProperty { get; set; }
-
         void Test();
-        void TestOther();
     }
 
     /// @brief Classes are reference types and are interfaced with through Loom's ownership and memory model (smart pointers)!
     export class Object : IMyInterface
     {
-        public unique string NestedProperty { get; set; }
-
+        /// @inheritdoc
         public void Test()
         {
-            println(NestedProperty);
+            println("hello(print);");
         }
-
-        public void TestOther()
-        {
-            println("Gurt2");
-        }
-    }
-
-    export enum PrintType
-    {
-        Print,
-        DontPrint
     }
 
     /// @brief Program Entry Point.
@@ -40,12 +31,8 @@ module Standard::Program
     {
         unique IMyInterface obj = new Object();
         ref mut IMyInterface refObj = obj;
-        refObj.NestedProperty = "Hello, " + "World!";
-
-        obj.NestedProperty = "Hello, " + "World!";
         
         obj.Test();
-        obj.TestOther();
 
         // 'Slice<T>' doesn't need to use pointers because it's a value type (struct)
         // Value types use copy semantics and typically live on the stack
@@ -75,19 +62,14 @@ module Standard::Program
 
         OptionalPrint(PrintType.Print);
         
-        return Unsafe.StaticField;
+        return 0;
     }
 
-    export bool OptionalPrint(PrintType type)
+    export void OptionalPrint(PrintType type)
     {
-        if (type == PrintType.Print)
-        {
-            println("Printing!");
-            return true;
-        }
+        if (type != PrintType.Print)
+            return;
 
-        return false;
+        println("Printing!");
     }
 }
-
-

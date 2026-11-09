@@ -10,6 +10,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="CommandLineParser" Version="2.9.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Loom.Analyzer\Loom.Analyzer.csproj" />
     <ProjectReference Include="..\CodeGen\Loom.CodeGen.LLVM\Loom.CodeGen.LLVM.csproj" />
     <ProjectReference Include="..\Loom.Common\Loom.Common.csproj" />
