@@ -28,7 +28,7 @@ module Samples::Main
             println("hello(print);");
         }
 
-        public Object(i32 num) { }
+        public Object() { }
 
         public Object:FromNumber(i32 num)
         {
@@ -56,7 +56,7 @@ module Samples::Main
 		println(rangedWindow); // "Hel"
 
         unique string name = "Project: " + Assembly.Current.Name;
-        println(name); // "Project: Loom.Standard"
+        println(name); // "Project: Loom.Samples"
 
         // Loom also allows unsafe operations inside an 'unsafe' block via the 'Standard::Memory::Unsafe' class
         unsafe

@@ -6,7 +6,7 @@ module Samples::Types
 		// Structs are value types. Assignment copies their stored values.
 		Point original = new Point(3, 4);
 		Point copy = original;
-		copy.X = 10; // 'original.X'' is still 3.
+		copy.X = 10; // 'original.X' is still 3.
 
 		// Classes are reference types, used through Loom's ownership and memory model (smart pointers).
 		unique Counter counter = new Counter();

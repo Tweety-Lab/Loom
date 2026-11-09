@@ -13,7 +13,7 @@ module Samples::Syntax
 		i32 local = genericInstance.GenericMethod(1, 2);
 		i32 secondLocal = MyClassDeclaration.StaticMethod(1, 2);
 
-		i32 finalLocaal = local * secondLocal;
+		i32 finalLocal = local * secondLocal;
 	}
 
 	export class MyClassDeclaration

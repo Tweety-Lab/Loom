@@ -1,0 +1,59 @@
+import Standard;
+import Standard::IO;
+import Standard::Memory;
+
+module Samples::Strings
+{
+	/// @brief Showcases string literals, character slices, and owned strings.
+	export void StringsSample()
+	{
+		// String literals are immutable, non-owning character slices.
+		Slice<char> greeting = "Hello, Loom!";
+		println(greeting); // Hello, Loom!
+
+		// A slice exposes its length and supports zero-based indexing.
+		i32 length = greeting.Length; // 12
+		char first = greeting[0]; // 'H'
+		char last = greeting[11]; // '!'
+
+		// Escape sequences represent quotes, backslashes, tabs, and newlines.
+		Slice<char> quoted = "He said \"Hello\".";
+		Slice<char> path = "folder\\file.loom";
+		Slice<char> columns = "Name\tValue";
+		Slice<char> lines = "First line\nSecond line";
+		println(quoted);
+		println(path);
+		println(columns);
+		println(lines);
+
+		// The standard library's 'string' class owns a copy of its characters.
+		unique string owned = new string(greeting);
+		i32 ownedLength = owned.Length; // 12
+		char ownedFirst = owned[0]; // 'H'
+		println(owned);
+
+		// An empty string has length zero.
+		unique string empty = new string();
+		bool isEmpty = empty.IsEmpty; // true
+
+		// Concatenating character slices creates a new owned string.
+		unique string combined = "Hello, " + "Loom!";
+		println(combined); // Hello, Loom!
+
+		// Concatenation also accepts owned strings and borrows their contents.
+		unique string extended = owned + " Welcome!";
+		println(extended); // Hello, Loom! Welcome!
+		println(owned); // 'owned' is still usable.
+
+		// Clone creates an independent owned copy instead of moving ownership.
+		unique string cloned = owned.Clone();
+		println(cloned);
+		println(owned);
+
+		// Strings and character slices can be read one character at a time.
+		for (i32 index = 0; index < greeting.Length; index = index + 1)
+			print(greeting[index]);
+
+		print('\n');
+	}
+}
