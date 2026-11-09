@@ -16,6 +16,15 @@ module Standard
 			}
 		}
 
+		/// @brief If this string contains no characters.
+		public bool IsEmpty
+		{
+			get
+			{
+				return Length == 0;
+			}
+		}
+
 		Vector<char> characters = default;
 
 		/// @brief Initializes a new empty string.
