@@ -2,7 +2,7 @@
   "profiles": {
     "Loom.CLI": {
       "commandName": "Project",
-      "commandLineArgs": "run -p ../../../../../Loom.Standard"
+      "commandLineArgs": "run -p ../../../../../Loom.Samples"
     }
   }
 }

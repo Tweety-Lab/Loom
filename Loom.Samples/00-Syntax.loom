@@ -1,4 +1,4 @@
-module Standard::Samples::Syntax
+module Samples::Syntax
 {
 	/// @brief Showcases Loom's C-Inspired syntax.
 	export void SyntaxSample()

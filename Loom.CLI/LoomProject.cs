@@ -39,8 +39,29 @@ public sealed class LoomProject
         Name = Path.GetFileNameWithoutExtension(lmprojpath);
         CompilationContext.ProjectName = Name;
 
-        string relativePath = Path.GetDirectoryName(lmprojpath)!;
-        SourceFiles = Directory.GetFiles(relativePath, "*.loom", SearchOption.AllDirectories);
+        string projectDirectory = Path.GetDirectoryName(Path.GetFullPath(lmprojpath))!;
+        SourceFiles = Directory.GetFiles(projectDirectory, "*.loom", SearchOption.AllDirectories);
+
+        // Add standard lib source files
+        // Dumbest very temporary hack ever
+        if (Name == "Loom.Standard")
+            return;
+
+        var standardLibrary = FindStandardLibrary();
+        if (standardLibrary is not null)
+            SourceFiles = SourceFiles.Concat(Directory.GetFiles(standardLibrary, "*.loom", SearchOption.AllDirectories)).ToArray();
+    }
+
+    private static string? FindStandardLibrary()
+    {
+        for (var directory = new DirectoryInfo(AppContext.BaseDirectory); directory is not null; directory = directory.Parent)
+        {
+            var standardLibrary = Path.Combine(directory.FullName, "Loom.Standard");
+            if (Directory.Exists(standardLibrary))
+                return standardLibrary;
+        }
+
+        return null;
     }
 
     /// <summary> Builds the <see cref="LoomProject"/>. </summary>

@@ -1,4 +1,4 @@
-module Standard::Samples::Comments
+module Samples::Comments
 {
 	/// @brief Showcases Loom's document and regular comment system.
 	export void CommentSample()
