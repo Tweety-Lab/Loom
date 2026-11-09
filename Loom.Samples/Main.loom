@@ -20,6 +20,7 @@ module Samples::Main
     /// @brief Classes are reference types and are interfaced with through Loom's ownership and memory model (smart pointers)!
     export class Object : IMyInterface
     {
+        /// @inheritdoc
         public i32 Number { get; }
 
         /// @inheritdoc

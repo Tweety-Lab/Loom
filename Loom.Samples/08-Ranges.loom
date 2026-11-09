@@ -1,0 +1,51 @@
+import Standard;
+import Standard::IO;
+import Standard::Memory;
+
+module Samples::Ranges
+{
+	/// @brief Showcases range values and range indexing.
+	export void RangesSample()
+	{
+		// A range literal creates a Range<i32> with a start and an end.
+		Range<i32> interval = 2..5;
+		i32 start = interval.Start; // 2
+		i32 end = interval.End; // 5
+
+		// A range stores its endpoints; it does not create an array of values.
+		// A loop can use those endpoints to visit each value before the end.
+		i32 total = 0;
+		for (i32 value = interval.Start; value < interval.End; value = value + 1)
+			total = total + value;
+		// 'total' is 2 + 3 + 4, which is 9.
+
+		// Range literals require integer literals on both sides of '..'.
+		// Use the constructor when the endpoints come from variables.
+		i32 firstIndex = 7;
+		i32 endIndex = 11;
+		Range<i32> selected = new Range<i32>(firstIndex, endIndex);
+
+		// A character slice accepts a range as an index.
+		// The start is inclusive and the end is exclusive.
+		Slice<char> text = "Hello, Loom!";
+		Slice<char> hello = text[0..5];
+		println(hello); // Hello
+
+		// Range variables can be used as indexes too.
+		Slice<char> language = text[selected];
+		println(language); // Loom
+
+		// The resulting slice's length is End - Start.
+		i32 selectedLength = language.Length; // 4
+		char firstCharacter = language[0]; // 'L'
+		char lastCharacter = language[3]; // 'm'
+
+		// Equal endpoints select an empty slice.
+		Slice<char> empty = text[5..5];
+		i32 emptyLength = empty.Length; // 0
+
+		// An end equal to the original length includes the last character.
+		Slice<char> whole = text[0..12];
+		println(whole); // Hello, Loom!
+	}
+}
