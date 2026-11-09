@@ -4,20 +4,17 @@
   </Folder>
   <Folder Name="/Integration/">
     <Project Path="Integration/Loom.Integration.LanguageServer/Loom.Integration.LanguageServer.csproj" Id="a990c356-a569-4090-bf23-a60e0fc7772c" />
-    <Project Path="Integration/Loom.Integration.VisualStudio/Loom.Integration.VisualStudio.csproj" Id="69c9250d-87f9-4f44-81d8-ff7c5fc4a88c">
-      <Deploy />
-    </Project>
   </Folder>
   <Project Path="Loom.Analyzer/Loom.Analyzer.csproj" Id="68bd67b2-4319-4aa5-9caa-07cc9737ab1f" />
   <Project Path="Loom.CLI/Loom.CLI.csproj" Id="f6b9f11f-342e-41c6-aecc-2de9b4c78d2f" />
   <Project Path="Loom.Common/Loom.Common.csproj" />
   <Project Path="Loom.LIR/Loom.LIR.csproj" Id="4b93f918-c573-4021-8900-f2d0a11e3ad0" />
   <Project Path="Loom.Parser/Loom.Parser.csproj" />
-  <Project Path="Loom.Samples/Loom.Samples.lmproj" Type="fb8a16cb-22d3-4b29-a4cb-1c97627660dd" Id="8efec395-7a44-41d6-8040-bd2dca1a1ebc">
+  <Project Path="Loom.Samples/Loom.Samples.lmproj" Type="fb8a16cb-22d3-4b29-a4cb-1c97627660dd" Id="57c827dc-ba43-4504-9a92-1ba98954f584">
     <Platform Project="x64" />
     <Build Project="false" />
   </Project>
-  <Project Path="Loom.Standard/Loom.Standard.lmproj" Type="fb8a16cb-22d3-4b29-a4cb-1c97627660dd" Id="b324d13f-87a1-45d6-acb7-d33afe6a216e">
+  <Project Path="Loom.Standard/Loom.Standard.lmproj" Type="fb8a16cb-22d3-4b29-a4cb-1c97627660dd" Id="70a23400-0c53-4ae6-8c6b-54bcc134557c">
     <Platform Project="x64" />
     <Build Project="false" />
   </Project>

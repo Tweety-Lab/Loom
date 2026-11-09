@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/Integration/">
+    <Project Path="Integration/Loom.Integration.LanguageServer/Loom.Integration.LanguageServer.csproj" />
+    <Project Path="Integration/Loom.Integration.VisualStudio/Loom.Integration.VisualStudio.csproj" />
+  </Folder>
+</Solution>
