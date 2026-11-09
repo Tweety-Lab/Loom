@@ -20,6 +20,6 @@ internal sealed class WorkspaceFilesHandler(DocumentDiagnosticService diagnostic
     /// <inheritdoc/>
     protected override DidChangeWatchedFilesRegistrationOptions CreateRegistrationOptions(DidChangeWatchedFilesCapability capability, ClientCapabilities clientCapabilities) => new()
     {
-        Watchers = new Container<FileSystemWatcher>(new FileSystemWatcher { GlobPattern = new GlobPattern("**/*.loom") })
+        Watchers = new Container<FileSystemWatcher>(new FileSystemWatcher { GlobPattern = new GlobPattern("**/*.loom") }, new FileSystemWatcher { GlobPattern = new GlobPattern("**/*.lmproj") })
     };
 }

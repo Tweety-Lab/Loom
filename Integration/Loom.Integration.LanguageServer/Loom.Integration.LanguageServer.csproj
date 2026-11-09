@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Loom.CLI\Loom.CLI.csproj" AdditionalProperties="SelfContained=false;PublishSingleFile=false" />
     <ProjectReference Include="..\..\Loom.Parser\Loom.Parser.csproj" />
     <ProjectReference Include="..\..\Loom.Analyzer\Loom.Analyzer.csproj" />
   </ItemGroup>

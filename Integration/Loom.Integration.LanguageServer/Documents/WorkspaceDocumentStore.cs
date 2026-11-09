@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using Loom.CLI;
 using OmniSharp.Extensions.LanguageServer.Protocol;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server;
 
@@ -10,7 +11,7 @@ namespace Loom.Integration.LanguageServer.Documents;
 internal sealed class WorkspaceDocumentStore(ParsedDocumentStore documents, ILanguageServerFacade server)
 {
     // This is dumb
-    public static readonly HashSet<string> IgnoredDirectories = new(StringComparer.OrdinalIgnoreCase)
+    private static readonly HashSet<string> IgnoredDirectories = new(StringComparer.OrdinalIgnoreCase)
     {
         ".git", ".vs", "bin", "obj"
     };
@@ -23,12 +24,18 @@ internal sealed class WorkspaceDocumentStore(ParsedDocumentStore documents, ILan
         var found = new HashSet<DocumentUri>();
 
         foreach (var root in GetRoots(currentUri).Distinct(StringComparer.OrdinalIgnoreCase))
-            foreach (var path in EnumerateSources(root, cancellationToken))
+            foreach (var path in EnumerateProjects(root, cancellationToken).SelectMany(project => project.SourceFiles))
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 var uri = DocumentUri.FromFileSystemPath(path);
-                if (!found.Add(uri) || uri == currentUri || documents.TryGet(uri, out _))
+                if (!found.Add(uri) || uri == currentUri)
                     continue;
+
+                if (await documents.GetOrParseAsync(uri, cancellationToken) is { } openDocument)
+                {
+                    result.Add(openDocument);
+                    continue;
+                }
 
                 try
                 {
@@ -80,7 +87,7 @@ internal sealed class WorkspaceDocumentStore(ParsedDocumentStore documents, ILan
         return [directory];
     }
 
-    private static IEnumerable<string> EnumerateSources(string root, CancellationToken cancellationToken)
+    private static IEnumerable<LoomProject> EnumerateProjects(string root, CancellationToken cancellationToken)
     {
         var pending = new Stack<string>();
         pending.Push(root);
@@ -88,19 +95,30 @@ internal sealed class WorkspaceDocumentStore(ParsedDocumentStore documents, ILan
         while (pending.TryPop(out var directory))
         {
             cancellationToken.ThrowIfCancellationRequested();
-            string[] sources;
+            string[] projects;
             string[] children;
 
             try
             {
-                sources = Directory.GetFiles(directory, "*.loom");
+                projects = Directory.GetFiles(directory, "*.lmproj");
                 children = Directory.GetDirectories(directory);
             }
             catch (IOException) { continue; }
             catch (UnauthorizedAccessException) { continue; }
 
-            foreach (var source in sources)
-                yield return source;
+            foreach (var path in projects)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                LoomProject project;
+                try
+                {
+                    project = new LoomProject(path);
+                }
+                catch (IOException) { continue; }
+                catch (UnauthorizedAccessException) { continue; }
+
+                yield return project;
+            }
 
             foreach (var child in children)
             {
