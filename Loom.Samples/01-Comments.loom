@@ -1,7 +1,7 @@
 module Samples::Comments
 {
 	/// @brief Showcases Loom's document and regular comment system.
-	export void CommentSample()
+	export void CommentsSample()
 	{
 		// Loom supports two types of comments: Document and Regular.
 

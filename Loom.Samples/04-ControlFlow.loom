@@ -1,0 +1,51 @@
+module Samples::ControlFlow
+{
+	/// @brief Showcases conditionals and loops.
+	export void ControlFlowSample()
+	{
+		i32 score = 75;
+		i32 grade = 1;
+
+		// 'if' executes its body when the condition is true.
+		if (score >= 60)
+		{
+			grade = 2;
+		}
+
+		if (score >= 90)
+		{
+			grade = 3;
+		}
+
+		// 'while' checks its condition before each loop.
+		i32 remaining = 3;
+		i32 visits = 0;
+		while (remaining > 0)
+		{
+			visits = visits + 1;
+			remaining = remaining - 1;
+		}
+
+		// 'for' combines initialization, a condition, and an increment.
+		i32 total = 0;
+		for (i32 index = 1; index <= 5; index = index + 1)
+		{
+			total = total + index;
+		}
+		// 'total' is now 15.
+
+		i32 negative = 0 - 5;
+		i32 nonnegative = KeepNonnegative(negative); // 0
+	}
+
+	/// @brief Uses an early return to handle negative values.
+	export i32 KeepNonnegative(i32 value)
+	{
+		if (value < 0)
+		{
+			return 0;
+		}
+
+		return value;
+	}
+}

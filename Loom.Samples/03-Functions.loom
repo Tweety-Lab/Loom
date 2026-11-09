@@ -1,0 +1,47 @@
+import Standard::IO;
+import Standard::Memory;
+
+module Samples::Functions
+{
+	/// @brief Showcases functions.
+	export void FunctionsSample()
+	{
+		// Pass arguments in the same order as the declared parameters.
+		i32 sum = Add(3, 4); // 7
+
+		// A returned value can be used as an argument to another function.
+		i32 doubledSum = Double(Add(3, 4)); // 14
+
+		// Overloads share a name but accept different parameter lists.
+		i32 largerSum = Add(3, 4, 5); // 12
+
+		// A function returning 'void' performs work without returning a value.
+		PrintGreeting();
+	}
+
+	/// @brief Returns the sum of two numbers.
+	/// @param(left) The first number.
+	/// @param(right) The second number.
+	/// @return The sum of both arguments.
+	export i32 Add(i32 left, i32 right)
+	{
+		return left + right;
+	}
+
+	/// @brief Returns the sum of three numbers.
+	export i32 Add(i32 first, i32 second, i32 third)
+	{
+		return Add(first, second) + third;
+	}
+
+	/// @brief Returns twice the supplied value.
+	export i32 Double(i32 value)
+	{
+		return value * 2;
+	}
+
+	export void PrintGreeting()
+	{
+		println("Hello from a Loom function!");
+	}
+}

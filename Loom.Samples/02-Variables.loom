@@ -1,0 +1,34 @@
+module Samples::Variables
+{
+	/// @brief Showcases local variables.
+	export void VariablesSample()
+	{
+		// A local declaration specifies a type, a name, and an initial value.
+		i32 count = 10;
+		bool enabled = true;
+		char letter = 'L';
+
+		// Variables can be reassigned after they are declared.
+		count = count + 5;
+		enabled = false;
+		letter = 'M';
+
+		// Initializers can use other variables and expressions.
+		i32 doubled = count * 2;
+		bool isLarger = doubled > count;
+
+		// 'default' uses the declared type's default value.
+		i32 zero = default;
+		bool disabled = default;
+
+		// Assigning a value type copies its value.
+		i32 original = 7;
+		i32 copy = original;
+		copy = 12; // 'original' is still 7.
+
+		// Arrays include their length in the type.
+		i32[3] values = [10, 20, 30];
+		i32 first = values[0];
+		values[1] = 25;
+	}
+}

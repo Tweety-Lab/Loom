@@ -1,0 +1,74 @@
+module Samples::Types
+{
+	/// @brief Showcases structs, classes, interfaces, enums, and constructors.
+	export void TypesSample()
+	{
+		// Structs are value types. Assignment copies their stored values.
+		Point original = new Point(3, 4);
+		Point copy = original;
+		copy.X = 10; // 'original.X'' is still 3.
+
+		// Classes are reference types, used through Loom's ownership and memory model (smart pointers).
+		unique Counter counter = new Counter();
+		counter.Increment();
+		i32 value = counter.Read(); // 1
+
+		// Named constructors describe an alternative way to create an instance.
+		unique Counter preset = new Counter:FromValue(10);
+		i32 presetValue = preset.Read(); // 10
+
+		// An interface describes the members an implementing type provides.
+		unique IReadableValue readable = new Counter:FromValue(20);
+		i32 interfaceValue = readable.Read(); // 20
+
+		// Enums give names to a set of related values.
+		CounterState state = CounterState.Ready;
+		bool isReady = state == CounterState.Ready;
+	}
+
+	export struct Point
+	{
+		public i32 X { get; set; }
+		public i32 Y { get; set; }
+
+		public Point(i32 x, i32 y)
+		{
+			X = x;
+			Y = y;
+		}
+	}
+
+	export interface IReadableValue
+	{
+		i32 Read();
+	}
+
+	export class Counter : IReadableValue
+	{
+		public i32 Value { get; set; } = 0;
+
+		public Counter() { }
+
+		public Counter:FromValue(i32 value)
+		{
+			Value = value;
+		}
+
+		public void Increment()
+		{
+			Value = Value + 1;
+		}
+
+		/// @inheritdoc
+		public i32 Read()
+		{
+			return Value;
+		}
+	}
+
+	export enum CounterState
+	{
+		Ready,
+		Finished
+	}
+}
