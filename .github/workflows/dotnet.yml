@@ -26,3 +26,19 @@ jobs:
       run: dotnet build Loom.slnx --no-restore
     - name: Test
       run: dotnet test Loom.slnx --no-build --verbosity normal
+    - name: Publish CLI
+      run: >-
+        dotnet publish Loom.CLI/Loom.CLI.csproj
+        --configuration Release
+        --output artifacts/loom
+        -p:DebugType=None
+        -p:DebugSymbols=false
+
+    - name: Upload CLI
+      uses: actions/upload-artifact@v4
+      with:
+        name: Loom.CLI
+        path: |
+          artifacts/loom/**
+          !artifacts/loom/**/*.pdb
+        if-no-files-found: error
