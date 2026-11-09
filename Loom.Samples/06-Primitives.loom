@@ -1,0 +1,62 @@
+module Samples::Primitives
+{
+	/// @brief Showcases Loom's built-in primitive types.
+	export void PrimitivesSample()
+	{
+		// 'bool' holds either 'true' or 'false'. Comparisons also produce bools.
+		bool enabled = true;
+		bool disabled = false;
+		bool isGreater = 10 > 5;
+		bool isEqual = 10 == 10;
+
+		// 'byte' stores an 8-bit integer value.
+		byte small = 255;
+
+		// 'i32' and 'i64' store signed 32-bit and 64-bit integers.
+		i32 count = 42;
+		i32 negative = 0 - 42;
+		i64 large = 2000000000;
+
+		// Integer values can be converted to another integer type on assignment.
+		i64 widened = count;
+		i32 fromByte = small;
+
+		// 'char' represents a character, written in single quotes.
+		char letter = 'L';
+		char digit = '7';
+		char newline = '\n';
+		char tab = '\t';
+		char quote = '\'';
+		char backslash = '\\';
+
+		// 'iptr' is a pointer sized integer, useful for addresses and native interop.
+		iptr address = default;
+		iptr offset = 16;
+
+		// 'default' initializes primitive integers to zero and bools to false.
+		byte zeroByte = default;
+		i32 zeroInt = default;
+		i64 zeroLong = default;
+		bool falseValue = default;
+		char zeroCharacter = default;
+
+		// 'sizeof' gives a type's size in bytes.
+		i32 byteSize = sizeof(byte);
+		i32 intSize = sizeof(i32);
+		i32 longSize = sizeof(i64);
+		i32 pointerSize = sizeof(iptr);
+
+		// Primitives are value types.
+		i32 original = 5;
+		i32 copy = original;
+		copy = 9; // 'original' is still 5.
+
+		NoValue();
+	}
+
+	/// @brief 'void' means a function does not return a value.
+	export void NoValue()
+	{
+		return;
+	}
+}
