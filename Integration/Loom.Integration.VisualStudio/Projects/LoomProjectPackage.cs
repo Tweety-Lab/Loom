@@ -82,6 +82,7 @@ public sealed class LoomProjectFactory : IVsProjectFactory
             int result = Marshal.QueryInterface(unknown, ref iid, out project);
             if (ErrorHandler.Failed(result))
                 hierarchy.Close();
+
             return result;
         }
         finally { Marshal.Release(unknown); }

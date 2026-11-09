@@ -16,7 +16,7 @@ namespace Loom.Integration.VisualStudio.Projects;
 
 [ComVisible(true)]
 [ClassInterface(ClassInterfaceType.None)]
-public sealed class LoomProjectHierarchy : IVsUIHierarchy, IVsProject, IVsPersistHierarchyItem, IPersistFileFormat, IOleCommandTarget
+public sealed class LoomProjectHierarchy : IVsUIHierarchy, IVsProject, IVsPersistHierarchyItem, IPersistFileFormat, IOleCommandTarget, IVsGetCfgProvider
 {
     private sealed class Node(uint id, string path, uint parent, bool folder)
     {
@@ -35,6 +35,7 @@ public sealed class LoomProjectHierarchy : IVsUIHierarchy, IVsProject, IVsPersis
     private readonly string projectFile;
     private readonly string directory;
     private readonly OleServiceProvider packageSite;
+    private readonly LoomProjectConfigurationProvider configurations;
 
     private OleServiceProvider? site;
     private OleServiceProvider Site => site ?? packageSite;
@@ -43,6 +44,7 @@ public sealed class LoomProjectHierarchy : IVsUIHierarchy, IVsProject, IVsPersis
     private uint nextCookie = 1;
     private Guid projectId = Guid.NewGuid();
     private bool closed;
+    private bool running;
     private uint contextItem = VSConstants.VSITEMID_ROOT;
 
     public LoomProjectHierarchy(string filename, OleServiceProvider site)
@@ -51,6 +53,7 @@ public sealed class LoomProjectHierarchy : IVsUIHierarchy, IVsProject, IVsPersis
         projectFile = Path.GetFullPath(filename);
         directory = Path.GetDirectoryName(projectFile)!;
         packageSite = site ?? throw new ArgumentNullException(nameof(site));
+        configurations = new LoomProjectConfigurationProvider(projectFile, () => !closed && !running, LaunchProject);
         Refresh();
 
         watcher = new FileSystemWatcher(directory)
@@ -140,6 +143,30 @@ public sealed class LoomProjectHierarchy : IVsUIHierarchy, IVsProject, IVsPersis
     public int GetSite(out OleServiceProvider serviceProvider) { serviceProvider = Site; return VSConstants.S_OK; }
 
     /// <inheritdoc/>
+    public int GetCfgProvider(out IVsCfgProvider provider) { provider = configurations; return VSConstants.S_OK; }
+
+    private int LaunchProject()
+    {
+        ThreadHelper.ThrowIfNotOnUIThread();
+        if (closed || running)
+            return (int)OleConstants.OLECMDERR_E_DISABLED;
+
+        running = true;
+#pragma warning disable VSSDK007
+        ThreadHelper.JoinableTaskFactory.RunAsync(async () =>
+        {
+            try { await LoomProjectRunner.RunAsync(Site, this, projectFile); }
+            finally
+            {
+                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+                running = false;
+            }
+        }).FileAndForget("Loom/RunProject");
+#pragma warning restore VSSDK007
+        return VSConstants.S_OK;
+    }
+
+    /// <inheritdoc/>
     public int QueryClose(out int canClose) { canClose = 1; return VSConstants.S_OK; }
 
     /// <inheritdoc/>
@@ -185,6 +212,7 @@ public sealed class LoomProjectHierarchy : IVsUIHierarchy, IVsProject, IVsPersis
 
         switch ((__VSHPROPID)propid)
         {
+            case __VSHPROPID.VSHPROPID_ConfigurationProvider: value = configurations; break;
             case __VSHPROPID.VSHPROPID_Root: value = this; break;
             case __VSHPROPID.VSHPROPID_Caption:
             case __VSHPROPID.VSHPROPID_ProjectName: value = root ? Path.GetFileNameWithoutExtension(projectFile) : Path.GetFileName(node.Path); break;
