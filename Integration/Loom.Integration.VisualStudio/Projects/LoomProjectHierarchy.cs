@@ -284,14 +284,26 @@ public sealed class LoomProjectHierarchy : IVsUIHierarchy, IVsProject, IVsPersis
 
     /// <inheritdoc/>
     public int GetNestedHierarchy(uint itemid, ref Guid iid, out IntPtr hierarchy, out uint nestedItem)
-    { hierarchy = IntPtr.Zero; nestedItem = VSConstants.VSITEMID_NIL; return VSConstants.E_NOTIMPL; }
+    {
+        hierarchy = IntPtr.Zero;
+        nestedItem = VSConstants.VSITEMID_NIL;
+        return VSConstants.E_NOTIMPL;
+    }
 
     /// <inheritdoc/>
     public int AdviseHierarchyEvents(IVsHierarchyEvents sink, out uint cookie)
-    { cookie = nextCookie++; sinks.Add(cookie, sink); return VSConstants.S_OK; }
+    {
+        cookie = nextCookie++;
+        sinks.Add(cookie, sink);
+        return VSConstants.S_OK;
+    }
 
     /// <inheritdoc/>
-    public int UnadviseHierarchyEvents(uint cookie) { sinks.Remove(cookie); return VSConstants.S_OK; }
+    public int UnadviseHierarchyEvents(uint cookie)
+    {
+        sinks.Remove(cookie);
+        return VSConstants.S_OK;
+    }
 
     // ???
     public int Unused0() => VSConstants.E_NOTIMPL;
@@ -313,11 +325,17 @@ public sealed class LoomProjectHierarchy : IVsUIHierarchy, IVsProject, IVsPersis
 
     /// <inheritdoc/>
     public int GetMkDocument(uint itemid, out string name)
-    { ThreadHelper.ThrowIfNotOnUIThread(); return GetCanonicalName(itemid, out name); }
+    {
+        ThreadHelper.ThrowIfNotOnUIThread();
+        return GetCanonicalName(itemid, out name);
+    }
 
     /// <inheritdoc/>
     public int GetItemContext(uint itemid, out OleServiceProvider serviceProvider)
-    { ThreadHelper.ThrowIfNotOnUIThread(); return GetSite(out serviceProvider); }
+    {
+        ThreadHelper.ThrowIfNotOnUIThread();
+        return GetSite(out serviceProvider);
+    }
 
     /// <inheritdoc/>
     public int OpenItem(uint itemid, ref Guid logicalView, IntPtr existingDocData, out IVsWindowFrame frame)
@@ -393,13 +411,30 @@ public sealed class LoomProjectHierarchy : IVsUIHierarchy, IVsProject, IVsPersis
     /// <inheritdoc/>
     public int QueryStatusCommand(uint itemid, ref Guid group, uint count, OLECMD[] commands, IntPtr text)
     {
+        if (!nodes.TryGetValue(itemid, out var node))
+            return VSConstants.E_INVALIDARG;
+
+        if (group == VSConstants.GUID_VsUIHierarchyWindowCmds)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                commands[i].cmdf = commands[i].cmdID == (uint)VSConstants.VsUIHierarchyWindowCmdIds.UIHWCMDID_RightClick
+                    || commands[i].cmdID == (uint)VSConstants.VsUIHierarchyWindowCmdIds.UIHWCMDID_DoubleClick
+                    || commands[i].cmdID == (uint)VSConstants.VsUIHierarchyWindowCmdIds.UIHWCMDID_EnterKey
+                    ? (uint)(OLECMDF.OLECMDF_SUPPORTED | OLECMDF.OLECMDF_ENABLED)
+                    : 0;
+            }
+
+            return VSConstants.S_OK;
+        }
+
         if (group != VSConstants.GUID_VSStandardCommandSet97)
             return (int)OleConstants.OLECMDERR_E_UNKNOWNGROUP;
 
         for (int i = 0; i < count; i++)
         {
-            if (nodes.TryGetValue(itemid, out var node) &&
-                (commands[i].cmdID == (uint)VSConstants.VSStd97CmdID.Open && !node.Folder || commands[i].cmdID == (uint)VSConstants.VSStd97CmdID.AddExistingItem && node.Folder))
+            commands[i].cmdf = 0;
+            if (commands[i].cmdID == (uint)VSConstants.VSStd97CmdID.Open && !node.Folder || commands[i].cmdID == (uint)VSConstants.VSStd97CmdID.AddExistingItem && node.Folder)
                 commands[i].cmdf = (uint)(OLECMDF.OLECMDF_SUPPORTED | OLECMDF.OLECMDF_ENABLED);
         }
 
@@ -412,20 +447,22 @@ public sealed class LoomProjectHierarchy : IVsUIHierarchy, IVsProject, IVsPersis
         ThreadHelper.ThrowIfNotOnUIThread();
         if (group == VSConstants.GUID_VsUIHierarchyWindowCmds && command == (uint)VSConstants.VsUIHierarchyWindowCmdIds.UIHWCMDID_RightClick)
         {
+            if (!nodes.TryGetValue(itemid, out var node) || input == IntPtr.Zero)
+                return VSConstants.E_INVALIDARG;
+
             contextItem = itemid;
             using var services = new ServiceProvider(Site);
             if (services.GetService(typeof(SVsUIShell)) is not IVsUIShell shell)
                 return VSConstants.E_NOINTERFACE;
 
-            int position = (int)Marshal.GetObjectForNativeVariant(input);
+            uint position = (uint)Marshal.GetObjectForNativeVariant(input);
             var points = new[] { new POINTS { x = unchecked((short)(position & 0xffff)), y = unchecked((short)((position >> 16) & 0xffff)) } };
             Guid menu = VsMenus.guidSHLMainMenu;
-            int menuId = itemid == VSConstants.VSITEMID_ROOT ? VsMenus.IDM_VS_CTXT_PROJNODE : nodes[itemid].Folder ? VsMenus.IDM_VS_CTXT_FOLDERNODE : VsMenus.IDM_VS_CTXT_ITEMNODE;
+            int menuId = itemid == VSConstants.VSITEMID_ROOT ? VsMenus.IDM_VS_CTXT_PROJNODE : node.Folder ? VsMenus.IDM_VS_CTXT_FOLDERNODE : VsMenus.IDM_VS_CTXT_ITEMNODE;
 
-            return shell.ShowContextMenu(0, ref menu, menuId, points, this);
+            return shell.ShowContextMenu(0, ref menu, menuId, points, null);
         }
-        if (group == VSConstants.GUID_VsUIHierarchyWindowCmds && (command == (uint)VSConstants.VsUIHierarchyWindowCmdIds.UIHWCMDID_DoubleClick || command == (uint)VSConstants.VsUIHierarchyWindowCmdIds.UIHWCMDID_EnterKey)
-            || group == VSConstants.GUID_VSStandardCommandSet97 && command == (uint)VSConstants.VSStd97CmdID.Open)
+        if (group == VSConstants.GUID_VsUIHierarchyWindowCmds && (command == (uint)VSConstants.VsUIHierarchyWindowCmdIds.UIHWCMDID_DoubleClick || command == (uint)VSConstants.VsUIHierarchyWindowCmdIds.UIHWCMDID_EnterKey) || group == VSConstants.GUID_VSStandardCommandSet97 && command == (uint)VSConstants.VSStd97CmdID.Open)
         {
             if (nodes.TryGetValue(itemid, out var node) && node.Folder)
             {
@@ -456,11 +493,17 @@ public sealed class LoomProjectHierarchy : IVsUIHierarchy, IVsProject, IVsPersis
 
     /// <inheritdoc/>
     public int QueryStatus(ref Guid group, uint count, OLECMD[] commands, IntPtr text)
-    { ThreadHelper.ThrowIfNotOnUIThread(); return QueryStatusCommand(contextItem, ref group, count, commands, text); }
+    {
+        ThreadHelper.ThrowIfNotOnUIThread();
+        return QueryStatusCommand(contextItem, ref group, count, commands, text);
+    }
 
     /// <inheritdoc/>
     public int Exec(ref Guid group, uint command, uint options, IntPtr input, IntPtr output)
-    { ThreadHelper.ThrowIfNotOnUIThread(); return ExecCommand(contextItem, ref group, command, options, input, output); }
+    {
+        ThreadHelper.ThrowIfNotOnUIThread();
+        return ExecCommand(contextItem, ref group, command, options, input, output);
+    }
 
     /// <inheritdoc/>
     public int IsItemDirty(uint itemid, IntPtr docData, out int dirty)
@@ -476,9 +519,7 @@ public sealed class LoomProjectHierarchy : IVsUIHierarchy, IVsProject, IVsPersis
         if (node.Folder || docData == IntPtr.Zero)
             return VSConstants.S_OK;
 
-        return Marshal.GetObjectForIUnknown(docData) is IVsPersistDocData document
-            ? document.IsDocDataDirty(out dirty)
-            : VSConstants.E_NOINTERFACE;
+        return Marshal.GetObjectForIUnknown(docData) is IVsPersistDocData document ? document.IsDocDataDirty(out dirty) : VSConstants.E_NOINTERFACE;
     }
 
     /// <inheritdoc/>
