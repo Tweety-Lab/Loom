@@ -55,8 +55,8 @@ public class StaticTypeAnalyzer : Analyzer
     [Visitor]
     public void Visit(FieldDeclarationNode node)
     {
-        if (EnclosingStaticType(node) is { } type)
-            Context.DiagnosticContext?.Report(InstanceMemberInStaticType, node.Variable.Span.StartToken?.Location, node.Variable.Name.Text, type.Name);
+        if (EnclosingStaticType(node) is { } type && Context.GetSymbol(node).Symbol is FieldSymbol { IsStatic: false } field)
+            Context.DiagnosticContext?.Report(InstanceMemberInStaticType, node.Variable.Span.StartToken?.Location, field.Name, type.Name);
     }
 
     [Visitor]

@@ -25,7 +25,6 @@ internal partial class ExpressionGenerator
         {
             var stringAddress = EmitStringConstant(node.Value);
 
-            // A slice literal is built through the generic definition, whose declaration exists before monomorphization
             TypeSymbol layout = sliceType is ConstructedTypeSymbol instantiated ? instantiated.OriginalDefinition : sliceType;
 
             var declarationType = new LIRTypeDeclarationType(layout.FullyQualifiedName, layout.IsValueType);
@@ -63,14 +62,11 @@ internal partial class ExpressionGenerator
         throw new Exception($"Could not resolve the type of a range expression.");
     }
 
-    // Emits the constant metadata value holding the characters of a string literal, reusing an identical one when the unit already declares it
     private LIRMetadataValue EmitStringConstant(int[] characters)
     {
         var charType = (TypeSymbol)context.AnalysisContext.Binders.First().Value.Lookup("char")!.First();
 
         var elements = new List<LIRValue>(characters.Select(character => (LIRValue)new LIRConstantCharValue(character)));
-
-        // An empty literal still holds one element so that its address is valid to index
         if (elements.Count == 0)
             elements.Add(new LIRConstantCharValue(0));
 

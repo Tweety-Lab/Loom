@@ -96,7 +96,7 @@ internal partial class ExpressionGenerator
 
         foreach (var field in instanceType.Members.OfType<FieldSymbol>())
         {
-            if (field.Type == null)
+            if (field.IsStatic || field.Type == null)
                 continue;
 
             var address = EmitFieldAddress(self, instanceType, field);
@@ -105,7 +105,6 @@ internal partial class ExpressionGenerator
             Initialize(address, initializer, field.Type);
         }
 
-        // A property initializes its hidden backing field through its initializer
         foreach (var property in instanceType.Members.OfType<PropertySymbol>())
         {
             if (property.IsStatic || property.BackingField?.Type == null)

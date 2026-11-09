@@ -21,7 +21,6 @@ internal partial class StatementGenerator
 
         EndScope();
 
-        // The body may already end control flow
         if (Generator.WritingBlock.Terminator == null)
             Generator.EmitBr(continueBlock);
 

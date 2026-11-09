@@ -7,7 +7,6 @@ namespace Loom.LIR.Generation;
 
 internal partial class ExpressionGenerator
 {
-    // Resolves the property a variable-like expression reads or writes, if it is one
     private PropertySymbol? ResolveProperty(ExpressionNode node) => node switch
     {
         IdentifierNameNode identifier when !locals.ContainsKey(identifier.BaseName) && !IsParameter(identifier) => context.AnalysisContext.GetSymbol(identifier).Symbol as PropertySymbol,
@@ -21,7 +20,6 @@ internal partial class ExpressionGenerator
         return receiverType?.Members.FirstOrDefault(m => m.Name == node.Name.BaseName);
     }
 
-    // Resolves the instance a property access acts on, or null when the property is static
     private LIRValue? EmitPropertySelf(PropertySymbol property, ExpressionNode node) => property.IsStatic ? null : node switch
     {
         MemberAccessExpressionNode member => EmitAddress(member.Receiver),
@@ -38,7 +36,6 @@ internal partial class ExpressionGenerator
     {
         var value = EmitPropertyGet(property, node, EmitPropertySelf(property, node));
 
-        // A reference type is already addressed by the pointer it holds; a value type needs storage to be addressed
         if (value.Type is LIRPointerType)
             return value;
 
@@ -57,7 +54,6 @@ internal partial class ExpressionGenerator
             return;
         }
 
-        // A get-only property is assigned through its backing field on the instance it belongs to
         TypeSymbol owner = target is MemberAccessExpressionNode member && context.AnalysisContext.ExpressionTypes.TryGetValue(member.Receiver, out var receiverType) ? receiverType : ResolveOwnerType(target);
 
         Generator.EmitStore(stored, EmitFieldAddress(self!, owner, property.BackingField!));

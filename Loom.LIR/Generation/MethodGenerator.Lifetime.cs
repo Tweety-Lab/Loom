@@ -58,7 +58,9 @@ internal partial class MethodGenerator
         generator.EmitCondBr(generator.EmitCmpNe(instance, new LIRNullValue(instance.Type)), destroyBlock, continueBlock);
         generator.SwitchTo(destroyBlock);
         generator.EmitCallInstanced(GetMethodReference(destructor), instance);
+
         FreeInstance(function, instance);
+
         generator.EmitBr(continueBlock);
         generator.SwitchTo(continueBlock);
     }

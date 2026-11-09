@@ -11,6 +11,7 @@ namespace Loom.Analyzer;
 /// </summary>
 internal class DeclarationWalker : ASTVisitor
 {
+    // TODO: Move these out of here
     private static readonly DiagnosticDescription EnumValueOutOfRange = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Enum value exceeds the signed 32-bit range.");
     private static readonly DiagnosticDescription DuplicateEnumMember = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Duplicate enum member '{0}'.");
 
@@ -296,6 +297,7 @@ internal class DeclarationWalker : ASTVisitor
         symbol.ContainingType = CurrentSymbol as TypeSymbol;
         symbol.FullyQualifiedName = BuildQualifiedName(node.Variable.Name.Text);
         symbol.Accessibility = ResolveAccessibility(node);
+        symbol.IsStatic = node.HasModifier(Parser.Tokenizer.Token.TokenType.Static);
 
         symbol.DeclaringNode = node;
         CurrentTable.Define(symbol);
@@ -405,12 +407,8 @@ internal class DeclarationWalker : ASTVisitor
     /// <inheritdoc/>
     protected override void OnUnhandled(ASTNode node) => VisitChildren(node);
 
-    private static PointerType ResolvePointerType(TypeNode type) =>
-        type.HasModifier(Parser.Tokenizer.Token.TokenType.Unique) ? PointerType.Unique :
-        type.HasModifier(Parser.Tokenizer.Token.TokenType.Ref) ? PointerType.Ref : PointerType.None;
-
-    private static bool ResolveMutability(TypeNode type) =>
-        ResolvePointerType(type) != PointerType.Ref || type.HasModifier(Parser.Tokenizer.Token.TokenType.Mut);
+    private static PointerType ResolvePointerType(TypeNode type) => type.HasModifier(Parser.Tokenizer.Token.TokenType.Unique) ? PointerType.Unique : type.HasModifier(Parser.Tokenizer.Token.TokenType.Ref) ? PointerType.Ref : PointerType.None;
+    private static bool ResolveMutability(TypeNode type) => ResolvePointerType(type) != PointerType.Ref || type.HasModifier(Parser.Tokenizer.Token.TokenType.Mut);
     private static MemberAccessibility ResolveAccessibility(IModifiableNode node)
     {
         if (node.HasModifier(Parser.Tokenizer.Token.TokenType.Public))

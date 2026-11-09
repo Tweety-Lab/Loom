@@ -11,7 +11,6 @@ public static class LinkageNameResolver
         if (symbol is not MethodSymbol method)
             return symbol.FullyQualifiedName;
 
-        // Intrinsics have compiler-generated bodies and need distinct names
         if (method.IsExtern && !IIntrinsicEmitter.HasIntrinsicEmitter(method))
             return method.Name;
 

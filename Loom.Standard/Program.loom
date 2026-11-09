@@ -75,7 +75,7 @@ module Standard::Program
 
         OptionalPrint(PrintType.Print);
         
-        return vec[2];
+        return Unsafe.StaticField;
     }
 
     export bool OptionalPrint(PrintType type)

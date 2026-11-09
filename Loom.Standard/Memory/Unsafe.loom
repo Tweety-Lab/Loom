@@ -4,6 +4,8 @@ module Standard::Memory
     /// @remark This class can only be used inside of an `unsafe` block.
     export static class Unsafe
     {
+        public static i32 StaticField = 10;
+
         /// @brief The heap allocator unsafe operations use.
         public static DefaultAllocator Allocator { get; set; }
 

@@ -1,5 +1,6 @@
 using Loom.Analyzer;
 using Loom.Analyzer.Symbols;
+using Loom.LIR.Metadata;
 using Loom.LIR.Objects;
 using Loom.Parser.AST;
 using Loom.Parser.AST.Rules.Default;
@@ -39,7 +40,6 @@ internal partial class ExpressionGenerator
         };
     }
 
-    // Assignment targets refer to their storage slot; reference receivers use the pointer stored in that slot.
     private LIRValue EmitStorage(ExpressionNode node) => node switch
     {
         IdentifierNameNode identifier => EmitStorage(identifier),
@@ -48,7 +48,6 @@ internal partial class ExpressionGenerator
         _ => throw new Exception($"Unhandled storage expression: {node.GetType().Name}")
     };
 
-    // Emits a pointer to the storage of the local variable or field referenced by 'ident'
     private LIRValue EmitStorage(IdentifierNameNode ident)
     {
         if (locals.TryGetValue(ident.BaseName, out var address))
@@ -61,7 +60,6 @@ internal partial class ExpressionGenerator
         throw new Exception($"Unhandled identifier: {ident.BaseName}");
     }
 
-    // Emits a pointer to the variable referenced by 'ident', which is the pointer it holds for a reference type
     private LIRValue EmitIdentifierAddress(IdentifierNameNode ident)
     {
         if (IsParameter(ident))
@@ -76,10 +74,7 @@ internal partial class ExpressionGenerator
         return IsValueType(ident) ? storage : Generator.EmitLoad(storage);
     }
 
-    // Emits the value of the variable referenced by 'ident'
     private LIRValue EmitVariableValue(IdentifierNameNode ident) => IsParameter(ident) ? EmitParameterValue(ident.BaseName) : Generator.EmitLoad(EmitStorage(ident));
-
-    // Reading a field or array element loads its stored value, including a reference pointer.
     private LIRValue EmitVariableValue(ExpressionNode node) => Generator.EmitLoad(EmitStorage(node));
 
     private bool IsParameter(IdentifierNameNode ident) => !locals.ContainsKey(ident.BaseName) && context.AnalysisContext.GetSymbol(ident).Symbol is ParameterSymbol;
@@ -92,7 +87,6 @@ internal partial class ExpressionGenerator
         if (substitution != null)
             type = substitution.Resolve(type);
 
-        // An unsubstituted type parameter is stored like a value type; its instantiation decides the real storage
         return type is TypeParameterSymbol || type.IsValueType;
     }
 
@@ -116,13 +110,13 @@ internal partial class ExpressionGenerator
 
     private LIRValue EmitMemberStorage(MemberAccessExpressionNode node)
     {
-        var receiverType = context.AnalysisContext.ExpressionTypes.TryGetValue(node.Receiver, out var type) ? type : null;
+        var receiverType = context.AnalysisContext.ExpressionTypes.TryGetValue(node.Receiver, out var type) ? type : context.AnalysisContext.GetSymbol(node.Receiver).Symbol as TypeSymbol;
         if (receiverType == null)
             throw new Exception($"Could not resolve receiver type: {node.Receiver}");
 
         var fieldSymbol = receiverType.Members.OfType<FieldSymbol>().FirstOrDefault(m => m.Name == node.Name.BaseName) ?? throw new Exception($"Could not resolve member field: {node.Name.BaseName}");
 
-        return EmitFieldAddress(EmitAddress(node.Receiver), receiverType, fieldSymbol);
+        return fieldSymbol.IsStatic ? EmitStaticFieldAddress(receiverType, fieldSymbol) : EmitFieldAddress(EmitAddress(node.Receiver), receiverType, fieldSymbol);
     }
 
     private LIRValue EmitArrayElementAddress(ArrayAccessExpressionNode node)
@@ -131,7 +125,15 @@ internal partial class ExpressionGenerator
         return Generator.EmitGetElement(arrayAddress, EmitValue(node.Index));
     }
 
-    private LIRValue EmitBareFieldAddress(FieldSymbol symbol, ASTNode contextNode) => EmitFieldAddress(EmitSelfParameter(), ResolveOwnerType(contextNode), symbol);
+    private LIRValue EmitBareFieldAddress(FieldSymbol symbol, ASTNode contextNode) => symbol.IsStatic
+        ? EmitStaticFieldAddress(ResolveOwnerType(contextNode), symbol)
+        : EmitFieldAddress(EmitSelfParameter(), ResolveOwnerType(contextNode), symbol);
+
+    private LIRValue EmitStaticFieldAddress(TypeSymbol containingType, FieldSymbol field)
+    {
+        containingType = substitution?.Resolve(containingType) ?? containingType;
+        return new LIRMetadataReference(MetadataType.Static, $"{containingType.FullyQualifiedName}::{field.Name}", new LIRPointerType(ASTGenerator.ConvertStorageType(field.Type!, substitution)));
+    }
 
     private TypeSymbol ResolveOwnerType(ASTNode contextNode)
     {
@@ -162,7 +164,6 @@ internal partial class ExpressionGenerator
         instanceTypeSymbol = substitution?.Resolve(instanceTypeSymbol) ?? instanceTypeSymbol;
         fieldSymbol = instanceTypeSymbol.Members.OfType<FieldSymbol>().FirstOrDefault(field => field.Name == fieldSymbol.Name) ?? fieldSymbol;
 
-        // An instantiated generic type shares the layout of its definition, whose declaration exists before monomorphization
         TypeSymbol layout = instanceTypeSymbol is ConstructedTypeSymbol instantiated ? instantiated.OriginalDefinition : instanceTypeSymbol;
 
         var declarationType = new LIRTypeDeclarationType(layout.FullyQualifiedName, layout.IsValueType);
@@ -171,6 +172,7 @@ internal partial class ExpressionGenerator
         var field = declaration.Fields.FirstOrDefault(f => f.Name == fieldSymbol.Name) ?? throw new Exception($"Could not find field: {fieldSymbol.Name}");
 
         // The concrete declaration does not exist yet, so the substituted field is rebuilt from the definition's layout
+        // Silly
         if (instanceTypeSymbol is ConstructedTypeSymbol)
             field = LIRField.Declare(field.Name, field.Index, ASTGenerator.ConvertStorageType(fieldSymbol.Type!, substitution));
 

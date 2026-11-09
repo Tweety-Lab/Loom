@@ -1,6 +1,7 @@
 using Loom.Analyzer;
 using Loom.Analyzer.Symbols;
 using Loom.Common;
+using Loom.LIR.Metadata;
 using Loom.LIR.Objects;
 using Loom.Parser.AST;
 using Loom.Parser.AST.Rules.Default;
@@ -115,7 +116,6 @@ internal partial class TypeDeclarationGenerator
             }
         }
 
-        // A non-static type without a declared constructor gets an implicit constructor which initializes its fields
         if (symbol.IsStatic)
             return;
 
@@ -150,7 +150,7 @@ internal partial class TypeDeclarationGenerator
                     break;
 
                 case FieldSymbol field:
-                    declaredType.DeclareField(field.Name, ASTGenerator.ConvertStorageType(field.Type!, substitution));
+                    DeclareField(declaredType, field, substitution);
                     break;
 
                 case PropertySymbol property:
@@ -194,7 +194,6 @@ internal partial class TypeDeclarationGenerator
             }
         }
 
-        // A type without a declared constructor gets an implicit constructor which initializes its fields
         if (!symbol.IsStatic && !symbol.Members.OfType<MethodSymbol>().Any(member => member.Kind == MethodSymbol.MethodKind.Constructor))
             methodGenerator.GenerateDefaultConstructorBody((ASTNode)node, declaredType, symbol, substitution);
     }
@@ -209,7 +208,16 @@ internal partial class TypeDeclarationGenerator
             return;
         }
 
-        declaredType.DeclareField(symbol.Name, ASTGenerator.ConvertStorageType(symbol.Type!));
+        DeclareField(declaredType, symbol);
+    }
+
+    private void DeclareField(LIRTypeDeclaration declaredType, FieldSymbol symbol, TypeSubstitution? substitution = null)
+    {
+        var storageType = ASTGenerator.ConvertStorageType(symbol.Type!, substitution);
+        if (!symbol.IsStatic)
+            declaredType.DeclareField(symbol.Name, storageType);
+        else if (symbol.ContainingType?.ContainsTypeParameters != true)
+            unit.Metadata[MetadataType.Static].Add(LIRMetadataValue.Define($"{declaredType.Name}::{symbol.Name}", storageType, new LIRDefaultValue(storageType), isConstant: false));
     }
 
     private void GenerateTypeDeclarationProperty(LIRTypeDeclaration declaredType, PropertyDeclarationNode node, TypeSymbol ownerType)

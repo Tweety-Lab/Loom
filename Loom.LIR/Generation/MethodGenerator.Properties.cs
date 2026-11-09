@@ -14,6 +14,7 @@ internal partial class MethodGenerator
         if (symbol.BackingField?.Type != null)
         {
             var storageType = ASTGenerator.ConvertStorageType(symbol.BackingField.Type, substitution);
+
             if (!symbol.IsStatic)
                 owningType.DeclareField(symbol.BackingField.Name, storageType);
             else if (symbol.ContainingType?.ContainsTypeParameters != true)

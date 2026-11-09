@@ -45,6 +45,7 @@ internal static class OverloadResolver
         var candidates = AdditionOperatorCandidates(context, node);
         var call = new CallExpressionNode(node.Left, new TypeArgumentListNode([]), [node.Left, node.Right]);
         var (best, tied) = Best(context, call, candidates);
+
         return best == null || tied ? SymbolInfo.OfCandidates(candidates) : SymbolInfo.OfCandidates(candidates).Resolved(best);
     }
 
@@ -59,6 +60,7 @@ internal static class OverloadResolver
         var candidates = IndexOperatorCandidates(context, node);
         var call = new CallExpressionNode(node.Receiver, new TypeArgumentListNode([]), [node.Receiver, node.Index]);
         var (best, tied) = Best(context, call, candidates);
+
         return best == null || tied ? SymbolInfo.None : SymbolInfo.OfCandidates(candidates).Resolved(best);
     }
 
@@ -172,13 +174,10 @@ internal static class OverloadResolver
 
             if (argument == null || parameter.ContainsTypeParameters)
                 matches[index] = MatchQuality.Unknown;
-
             else if (TypeConversions.IsIdentical(parameter, argument))
                 matches[index] = MatchQuality.Exact;
-
             else if (TypeConversions.CanImplicitlyConvert(argument, parameter))
                 matches[index] = MatchQuality.Implicit;
-
             else
                 return null;
         }
@@ -190,6 +189,7 @@ internal static class OverloadResolver
     {
         if (node.TypeArguments.Count == 0 || node.TypeArguments.Count != candidate.Arity)
             return candidate;
+
         var arguments = node.TypeArguments.Select(t => context.GetSymbol(t).Symbol as TypeSymbol).ToArray();
         return arguments.Any(t => t == null) ? candidate : candidate.Construct([.. arguments!]);
     }

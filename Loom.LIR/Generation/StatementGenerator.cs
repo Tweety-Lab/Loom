@@ -35,7 +35,6 @@ internal partial class StatementGenerator
 
         foreach (var (param, value) in function.Type.Parameters.Zip(function.ParameterValues))
         {
-            // The instance pointer is consumed directly by field access; it needs no addressable slot
             if (param.Name == "self")
                 continue;
 

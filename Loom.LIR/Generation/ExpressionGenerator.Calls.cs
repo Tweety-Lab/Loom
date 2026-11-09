@@ -22,6 +22,7 @@ internal partial class ExpressionGenerator
             var table = Generator.EmitLoad(Generator.EmitGetElement(storage, new LIRConstantIntValue(1)));
             var methods = Generator.EmitConvert(table, new LIRPointerType(new LIRPointerType(method.Type)));
             var function = Generator.EmitLoad(Generator.EmitGetElement(methods, new LIRConstantIntValue(method.Slot)));
+
             return Generator.EmitCall(function, [instance, .. arguments]);
         }
 
@@ -30,8 +31,7 @@ internal partial class ExpressionGenerator
 
     private LIRValue EmitIndexOperatorCall(ArrayAccessExpressionNode node)
     {
-        var method = context.AnalysisContext.GetSymbol(node).As<MethodSymbol>()
-            ?? throw new InvalidOperationException("Could not resolve operator[].");
+        var method = context.AnalysisContext.GetSymbol(node).As<MethodSymbol>() ?? throw new InvalidOperationException("Could not resolve operator[].");
         return Generator.EmitCall(GetCallTarget(method), EmitArguments([node.Receiver, node.Index], method));
     }
 
@@ -69,7 +69,5 @@ internal partial class ExpressionGenerator
 
     private LIRValue[] EmitArguments(IReadOnlyList<ExpressionNode> arguments, MethodSymbol method) => [.. arguments.Select((argument, index) => EmitValue(argument, method.Parameters[index].Type!))];
 
-    // References preserve the substituted signature until monomorphization supplies the body.
-    private LIRValue GetCallTarget(MethodSymbol method, TypeSymbol? dispatchInterface = null) => methodGenerator.GetMethodReference(substitution?.Resolve(method) ?? method,
-        dispatchInterface == null ? null : substitution?.Resolve(dispatchInterface) ?? dispatchInterface);
+    private LIRValue GetCallTarget(MethodSymbol method, TypeSymbol? dispatchInterface = null) => methodGenerator.GetMethodReference(substitution?.Resolve(method) ?? method,dispatchInterface == null ? null : substitution?.Resolve(dispatchInterface) ?? dispatchInterface);
 }

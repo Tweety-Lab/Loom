@@ -29,7 +29,6 @@ internal partial class MethodGenerator
         LIRType? selfType = owningType != null && !symbol.IsStatic ? new LIRPointerType(owningType.Type) : null;
         var functionType = ASTGenerator.BuildFunctionType(symbol, selfType, substitution);
 
-        // Register the instance before generating its body so recursive calls resolve to it
         instance = owningType == null ? unit.DefineFunction(instanceName, functionType, !symbol.IsExtern) : symbol.IsExtern ? owningType.DeclareMethod(instanceName, functionType) : owningType.DefineMethod(instanceName, functionType);
 
         if (IIntrinsicEmitter.TryEmitIntrinsic(symbol, instance, unit))
@@ -41,13 +40,10 @@ internal partial class MethodGenerator
         return instance;
     }
 
-    // The type parameters of the generic type enclosing 'node', or null when it is not declared inside a generic type
     private IReadOnlyList<TypeParameterSymbol>? GetOwningTypeParameters(ASTNode node)
     {
         var typeNode = context.AnalysisContext.FirstAncestorOrSelf<ITypeDeclarationNode>(node);
 
-        return typeNode != null && context.AnalysisContext.GetSymbol((ASTNode)typeNode).Symbol is TypeSymbol { TypeParameters.Count: > 0 } owner
-            ? owner.TypeParameters
-            : null;
+        return typeNode != null && context.AnalysisContext.GetSymbol((ASTNode)typeNode).Symbol is TypeSymbol { TypeParameters.Count: > 0 } owner ? owner.TypeParameters : null;
     }
 }

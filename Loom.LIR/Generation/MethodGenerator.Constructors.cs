@@ -11,8 +11,6 @@ internal partial class MethodGenerator
     public void GenerateConstructorDeclaration(LIRTypeDeclaration owningType)
     {
         var selfType = new LIRPointerType(owningType.Type);
-
-        // A constructor of a generic type carries the type's parameters so that it is only emitted for its instantiations
         var functionType = new LIRFunctionType(LIRType.Void, [new LIRParameter("self", selfType)], [.. owningType.TypeParameters]);
 
         owningType.DefineMethod($"{owningType.Name}::.ctor", functionType);

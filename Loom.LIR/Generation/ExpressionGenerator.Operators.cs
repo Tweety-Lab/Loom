@@ -18,7 +18,6 @@ internal partial class ExpressionGenerator
 
         var address = EmitStorage(node.Target);
 
-        // Assigning to a whole array defaults each of its elements rather than storing a single value
         if (context.AnalysisContext.ExpressionTypes.TryGetValue(node.Target, out var targetType) && targetType is ArrayTypeSymbol)
         {
             Initialize(address, node.Value, targetType);

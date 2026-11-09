@@ -70,8 +70,7 @@ internal partial class ExpressionGenerator
         var array = EmitArrayStorage(value, arrayType);
         var elementType = vectorType.TypeArguments[0];
         var constructor = vectorType.Members.OfType<MethodSymbol>().FirstOrDefault(method => method is { Kind: MethodSymbol.MethodKind.Constructor, IsStatic: false, Parameters.Count: 0 });
-        var add = vectorType.Members.OfType<MethodSymbol>().FirstOrDefault(method => method is { Name: "Add", Kind: MethodSymbol.MethodKind.Method, IsStatic: false, Arity: 0, Parameters: [var parameter] } && parameter.Type is { } type && TypeConversions.IsIdentical(type, elementType))
-            ?? throw new InvalidOperationException($"'{vectorType.FullyQualifiedName}' must declare Add({elementType.Name}) for array conversion.");
+        var add = vectorType.Members.OfType<MethodSymbol>().FirstOrDefault(method => method is { Name: "Add", Kind: MethodSymbol.MethodKind.Method, IsStatic: false, Arity: 0, Parameters: [var parameter] } && parameter.Type is { } type && TypeConversions.IsIdentical(type, elementType)) ?? throw new InvalidOperationException($"'{vectorType.FullyQualifiedName}' must declare Add({elementType.Name}) for array conversion.");
         var vector = methodGenerator.AllocateInstance(function, new LIRPointerType(ASTGenerator.ConvertType(vectorType)));
 
         Generator.EmitCallInstanced(constructor == null ? GetDefaultConstructorTarget(vectorType) : GetCallTarget(constructor), vector);
