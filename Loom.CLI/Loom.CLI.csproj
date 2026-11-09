@@ -7,6 +7,7 @@
     <Nullable>enable</Nullable>
 	<RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == ''">$(NETCoreSdkRuntimeIdentifier)</RuntimeIdentifier>
 	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	<AssemblyName>loom</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
