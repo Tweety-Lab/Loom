@@ -1,7 +1,5 @@
-﻿using static Loom.Common.Diagnostics.DiagnosticDescription;
-using Loom.Analyzer.Symbols;
+﻿using Loom.Analyzer.Symbols;
 using Loom.Parser.AST;
-using Loom.Common.Diagnostics;
 using Loom.Parser.AST.Rules.Default;
 
 namespace Loom.Analyzer;
@@ -11,10 +9,6 @@ namespace Loom.Analyzer;
 /// </summary>
 internal class DeclarationWalker : ASTVisitor
 {
-    // TODO: Move these out of here
-    private static readonly DiagnosticDescription EnumValueOutOfRange = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Enum value exceeds the signed 32-bit range.");
-    private static readonly DiagnosticDescription DuplicateEnumMember = new($"LM{Code:D4}", Diagnostic.DiagnosticLevel.Error, "Duplicate enum member '{0}'.");
-
     /// <summary> The owning <see cref="AnalysisContext"/>. </summary>
     public AnalysisContext Context { get; private set; }
 
@@ -215,10 +209,7 @@ internal class DeclarationWalker : ASTVisitor
             {
                 long value = member.Value ?? next;
                 if (value > int.MaxValue)
-                {
-                    Context.DiagnosticContext?.Report(EnumValueOutOfRange, member.Name.Location);
                     value = 0;
-                }
 
                 var constant = new FieldSymbol(member.Name.Text)
                 {
@@ -232,9 +223,6 @@ internal class DeclarationWalker : ASTVisitor
                 };
 
                 CurrentTable.Define(constant);
-                if (symbol.Members.Any(existing => existing.Name == constant.Name))
-                    Context.DiagnosticContext?.Report(DuplicateEnumMember, member.Name.Location, constant.Name);
-
                 symbol.Members = [.. symbol.Members, constant];
                 Context.Bind(member, constant);
                 next = value + 1;
