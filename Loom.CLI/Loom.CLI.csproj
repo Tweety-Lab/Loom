@@ -8,6 +8,7 @@
 	<RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == ''">$(NETCoreSdkRuntimeIdentifier)</RuntimeIdentifier>
 	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	<AssemblyName>loom</AssemblyName>
+	<PublishSingleFile>true</PublishSingleFile>
   </PropertyGroup>
 
   <ItemGroup>
