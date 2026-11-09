@@ -22,7 +22,7 @@ internal partial class MethodGenerator
 
         if (symbol == null)
         {
-            Console.WriteLine($"Could not find symbol for {node.Name}!");
+            Console.WriteLine($"Could not find symbol for {node.TypeName}!");
             return;
         }
 
@@ -110,7 +110,7 @@ internal partial class MethodGenerator
 
         if (symbol == null)
         {
-            Console.WriteLine($"Could not find symbol for {node.Name}!");
+            Console.WriteLine($"Could not find symbol for {node.TypeName}!");
             return;
         }
 

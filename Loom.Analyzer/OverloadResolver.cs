@@ -30,6 +30,13 @@ internal enum MatchQuality
 /// </summary>
 internal static class OverloadResolver
 {
+    /// <summary> Finds overloads of the requested constructor. </summary>
+    public static IReadOnlyList<MethodSymbol> ConstructorCandidates(TypeSymbol type, InstanceCreationExpresssionNode node)
+    {
+        var name = node.ConstructorName is { } constructorName ? $".ctor.{constructorName.BaseName}" : ".ctor";
+        return type.Members.OfType<MethodSymbol>().Where(method => method.Kind == MethodSymbol.MethodKind.Constructor && method.Name == name).ToArray();
+    }
+
     /// <summary> Finds addition operators declared on either operand type. </summary>
     public static IReadOnlyList<MethodSymbol> AdditionOperatorCandidates(AnalysisContext context, BinaryExpressionNode node) =>
         [.. new[] { node.Left, node.Right }

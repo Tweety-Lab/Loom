@@ -49,6 +49,7 @@ public class EnumDeclarationRule : TypeMemberParserRule
                     Parser.DiagnosticContext?.Report(InvalidEnumValue, number.Location);
                     throw new ParseFailureException(number, "Invalid enum value.");
                 }
+
                 value = parsed;
             }
             members.Add(new EnumMemberNode(memberName, value));

@@ -65,7 +65,7 @@ internal class TypeWalker : ASTWalker
                 containingType = constructed;
             }
 
-            return ResolveArgumentType(constructorArgument, creation.Arguments, containingType.Members.OfType<MethodSymbol>().Where(method => method.Kind == MethodSymbol.MethodKind.Constructor));
+            return ResolveArgumentType(constructorArgument, creation.Arguments, OverloadResolver.ConstructorCandidates(containingType, creation));
         }
 
         var declaration = Context.FirstAncestorOrSelf<VariableDeclarationNode>(node);
@@ -262,7 +262,7 @@ internal class TypeWalker : ASTWalker
 
         Context.ExpressionTypes[node] = type;
 
-        var constructors = type.Members.OfType<MethodSymbol>().Where(m => m.Kind == MethodSymbol.MethodKind.Constructor).ToArray();
+        var constructors = OverloadResolver.ConstructorCandidates(type, node);
 
         Context.Bind(node, OverloadResolver.Resolve(Context, new CallExpressionNode(node.TypeName, new TypeArgumentListNode([]), node.Arguments), constructors));
     }

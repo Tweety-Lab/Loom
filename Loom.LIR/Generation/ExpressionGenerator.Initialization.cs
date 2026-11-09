@@ -66,7 +66,11 @@ internal partial class ExpressionGenerator
 
         var instance = destination ?? (symbol.IsValueType ? Generator.EmitAlloca(instanceType.PointeeType) : methodGenerator.AllocateInstance(function, instanceType));
 
-        var constructor = context.AnalysisContext.GetSymbol(node).As<MethodSymbol>() ?? symbol.Members.OfType<MethodSymbol>().FirstOrDefault(m => m.Kind == MethodSymbol.MethodKind.Constructor);
+        var constructor = context.AnalysisContext.GetSymbol(node).As<MethodSymbol>();
+
+        if (constructor == null && (node.ConstructorName != null || node.Arguments.Count != 0
+            || symbol.Members.OfType<MethodSymbol>().Any(method => method.Kind == MethodSymbol.MethodKind.Constructor)))
+            throw new InvalidOperationException($"Could not resolve constructor for {symbol.FullyQualifiedName}.");
 
         var target = constructor == null ? GetDefaultConstructorTarget(symbol) : GetCallTarget(constructor);
         var args = constructor == null ? node.Arguments.Select(EmitValue).ToArray() : EmitArguments(node.Arguments, constructor);

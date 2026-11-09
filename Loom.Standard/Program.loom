@@ -13,23 +13,33 @@ module Standard::Program
 
     export interface IMyInterface
     {
+        i32 Number { get; }
         void Test();
     }
 
     /// @brief Classes are reference types and are interfaced with through Loom's ownership and memory model (smart pointers)!
     export class Object : IMyInterface
     {
+        public i32 Number { get; }
+
         /// @inheritdoc
         public void Test()
         {
             println("hello(print);");
+        }
+
+        public Object(i32 num) { }
+
+        public Object:FromNumber(i32 num)
+        {
+            Number = num;
         }
     }
 
     /// @brief Program Entry Point.
     export i32 Main()
     {
-        unique IMyInterface obj = new Object();
+        unique IMyInterface obj = new Object:FromNumber(5);
         ref mut IMyInterface refObj = obj;
         
         obj.Test();
@@ -62,7 +72,7 @@ module Standard::Program
 
         OptionalPrint(PrintType.Print);
         
-        return 0;
+        return obj.Number;
     }
 
     export void OptionalPrint(PrintType type)

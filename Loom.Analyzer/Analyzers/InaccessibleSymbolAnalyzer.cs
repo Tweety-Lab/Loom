@@ -99,7 +99,7 @@ public class InaccessibleSymbolAnalyzer : Analyzer
         if (type == null)
             return;
 
-        var constructor = type.Members.OfType<MethodSymbol>().FirstOrDefault(m => m.Kind == MethodSymbol.MethodKind.Constructor);
+        var constructor = Context.GetSymbol(node).As<MethodSymbol>();
 
         if (constructor == null)
             return;

@@ -75,7 +75,7 @@ internal sealed class DefinitionHandler(ParsedDocumentStore documents, DocumentA
         var targetName = declaringNode switch
         {
             MethodDeclarationNode declaration => declaration.Name,
-            ConstructorDeclarationNode constructor => constructor.Name,
+            ConstructorDeclarationNode constructor => constructor.TypeName,
             DestructorDeclarationNode destructor => destructor.Name,
             OperatorDeclarationNode op => op.Operator,
             _ => null

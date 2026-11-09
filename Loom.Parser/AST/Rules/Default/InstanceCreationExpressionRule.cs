@@ -2,7 +2,7 @@ using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.AST.Rules.Default;
 
-public record InstanceCreationExpresssionNode(IdentifierNameNode TypeName, TypeArgumentListNode? TypeArguments, List<ExpressionNode> Arguments) : ExpressionNode
+public record InstanceCreationExpresssionNode(IdentifierNameNode TypeName, IdentifierNameNode? ConstructorName, TypeArgumentListNode? TypeArguments, List<ExpressionNode> Arguments) : ExpressionNode
 {
     /// <inheritdoc/>
     public override IEnumerable<ASTNode> Children => TypeArguments is null ? Arguments.Prepend(TypeName) : Arguments.Cast<ASTNode>().Prepend(TypeArguments).Prepend(TypeName);
@@ -18,7 +18,11 @@ public class InstanceCreationExpressionRule : ParserRule<InstanceCreationExpress
     public override InstanceCreationExpresssionNode ParseNode()
     {
         Parser.Reader.Expect(TokenType.New); // new
-        var typeName = Parser.Reader.Expect(TokenType.Identifier); // name
+        IdentifierNameNode typeName = new IdentifierNameNode(Parser.Reader.Expect(TokenType.Identifier)); // type name
+
+        IdentifierNameNode? constructorName = null;
+        if (Parser.Reader.Match(TokenType.Colon))
+            constructorName = new IdentifierNameNode(Parser.Reader.Expect(TokenType.Identifier));
 
         TypeArgumentListNode? typeArguments = null;
         if (Parser.Reader.Check(TokenType.Less))
@@ -38,7 +42,7 @@ public class InstanceCreationExpressionRule : ParserRule<InstanceCreationExpress
 
         Parser.Reader.Expect(TokenType.RParen); // )
 
-        return new InstanceCreationExpresssionNode(new IdentifierNameNode(typeName), typeArguments, args);
+        return new InstanceCreationExpresssionNode(typeName, constructorName, typeArguments, args);
     }
 }
 

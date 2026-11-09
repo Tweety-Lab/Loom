@@ -45,6 +45,26 @@ public class UnresolvedOverloadAnalyzer : Analyzer
             Context.DiagnosticContext?.Report(NoMatchingOverload, node.Span.StartToken?.Location, name, node.Arguments.Count);
     }
 
+    [Visitor]
+    public void Visit(InstanceCreationExpresssionNode node)
+    {
+        if (!Context.ExpressionTypes.TryGetValue(node, out var type) || type == null)
+            return;
+
+        var candidates = OverloadResolver.ConstructorCandidates(type, node);
+        var call = new CallExpressionNode(node.TypeName, new TypeArgumentListNode([]), node.Arguments);
+        var failure = OverloadResolver.Diagnose(Context, call, candidates);
+
+        if (candidates.Count == 0 && (node.ConstructorName != null || node.Arguments.Count != 0 || type.Members.OfType<MethodSymbol>().Any(method => method.Kind == MethodSymbol.MethodKind.Constructor)))
+            failure = OverloadFailure.NoMatchingOverload;
+
+        if (failure is not { } reason)
+            return;
+
+        var name = node.ConstructorName is { } constructorName ? $"{node.TypeName.BaseName}:{constructorName.BaseName}" : node.TypeName.BaseName;
+        Context.DiagnosticContext?.Report(reason == OverloadFailure.Ambiguous ? AmbiguousOverload : NoMatchingOverload, node.ConstructorName?.Token.Location ?? node.Span.StartToken?.Location, name, node.Arguments.Count);
+    }
+
     private static string Name(ExpressionNode callee) => callee switch
     {
         IdentifierNameNode identifier => identifier.BaseName,

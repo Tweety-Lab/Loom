@@ -3,7 +3,7 @@ using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.AST.Rules.Default;
 
-public record ConstructorDeclarationNode(Token Name, ParameterListNode Parameters, BlockNode Body, List<Token> Modifiers, DocumentCommentListNode DocumentComments) : ASTNode, IModifiableNode, IDocumentableNode
+public record ConstructorDeclarationNode(Token TypeName, Token? Name, ParameterListNode Parameters, BlockNode Body, List<Token> Modifiers, DocumentCommentListNode DocumentComments) : ASTNode, IModifiableNode, IDocumentableNode
 {
     /// <inheritdoc/>
     public DocumentCommentListNode DocumentComments { get; set; } = DocumentComments;
@@ -25,12 +25,16 @@ public class ConstructorDeclarationRule : TypeMemberParserRule
         var documentComments = RunRule<DocumentCommentListRule, DocumentCommentListNode>();
 
         var modifiers = Parser.Reader.ExpectMany(t => TokenRegistry.IsMemberModifier(t.Type));
-        var methodName = Parser.Reader.Expect(TokenType.Identifier); // name
+        var typeName = Parser.Reader.Expect(TokenType.Identifier); // type name
+
+        Token? constructorName = null;
+        if (Parser.Reader.Match(TokenType.Colon))
+            constructorName = Parser.Reader.Expect(TokenType.Identifier); // constructor name
 
         var parameters = RunRule<ParameterListRule, ParameterListNode>();
 
         BlockNode body = body = RunRule<MethodBlockRule, BlockNode>();
 
-        return new ConstructorDeclarationNode(methodName, parameters, body, modifiers, documentComments);
+        return new ConstructorDeclarationNode(typeName, constructorName, parameters, body, modifiers, documentComments);
     }
 }
