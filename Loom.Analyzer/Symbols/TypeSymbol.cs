@@ -2,7 +2,6 @@ using System.Collections.Immutable;
 
 namespace Loom.Analyzer.Symbols;
 
-/// <summary> A type definition, type parameter, array, or constructed named type. </summary>
 public class TypeSymbol : Symbol, IExportableSymbol, IGenericSymbol
 {
     private readonly SymbolConstructionCache<ConstructedTypeSymbol> constructions = new();

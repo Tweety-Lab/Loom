@@ -3,7 +3,9 @@ using static Loom.Parser.Tokenizer.Token;
 
 namespace Loom.Parser.AST.Rules.Default;
 
-/// <summary> Parses the body of a module, whose members can be structs or methods. </summary>
+/// <summary>
+/// Parses the body of a module.
+/// </summary>
 [ParserRule]
 public class ModuleBlockRule : BlockRule
 {
@@ -36,6 +38,12 @@ public class ModuleBlockRule : BlockRule
         if (Parser.Reader.Peek(offset).Type == TokenType.Attribute)
         {
             node = RunRule<AttributeDeclarationRule, ASTNode>();
+            return true;
+        }
+
+        if (Parser.Reader.Peek(offset).Type == TokenType.Extension)
+        {
+            node = RunRule<ExtensionDeclarationRule, ASTNode>();
             return true;
         }
 

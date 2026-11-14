@@ -10,11 +10,11 @@
   <Project Path="Loom.Common/Loom.Common.csproj" />
   <Project Path="Loom.LIR/Loom.LIR.csproj" Id="4b93f918-c573-4021-8900-f2d0a11e3ad0" />
   <Project Path="Loom.Parser/Loom.Parser.csproj" />
-  <Project Path="Loom.Samples/Loom.Samples.lmproj" Type="fb8a16cb-22d3-4b29-a4cb-1c97627660dd" Id="f1040196-e3ae-4142-8281-d161ed9321b7">
+  <Project Path="Loom.Samples/Loom.Samples.lmproj" Type="fb8a16cb-22d3-4b29-a4cb-1c97627660dd" Id="1e1beb03-4680-4742-9695-b5fa2d3f3382">
     <Platform Project="x64" />
     <Build Project="false" />
   </Project>
-  <Project Path="Loom.Standard/Loom.Standard.lmproj" Type="fb8a16cb-22d3-4b29-a4cb-1c97627660dd" Id="b3ee1348-2f50-4c1b-aeec-1f2fdb508a88">
+  <Project Path="Loom.Standard/Loom.Standard.lmproj" Type="fb8a16cb-22d3-4b29-a4cb-1c97627660dd" Id="df885823-befd-44a8-b549-b81dceb8c4f3">
     <Platform Project="x64" />
     <Build Project="false" />
   </Project>

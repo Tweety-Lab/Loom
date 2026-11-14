@@ -142,6 +142,7 @@ public class Token
         [Keyword("enum")] Enum,
         [Keyword("attribute")] Attribute,
         [Keyword("interface")] Interface,
+        [Keyword("extension")] Extension,
         [Keyword("operator")] Operator,
         [Keyword("import")] Import,
         [Keyword("unsafe")] Unsafe,

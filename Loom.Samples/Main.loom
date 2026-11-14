@@ -17,6 +17,14 @@ module Samples::Main
         void Test();
     }
 
+    export extension i32
+    {
+        public bool TestExtensionFunc()
+        {
+            return true;
+        }
+    }
+
     /// @brief Classes are reference types and are interfaced with through Loom's ownership and memory model (smart pointers)!
     export class Object : IMyInterface
     {
